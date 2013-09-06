@@ -1,0 +1,909 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/_larrow {
+    5 dict begin
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    gsave
+%       1 0 0 setrgbcolor
+        x y translate
+        newpath
+        0 h 4 div moveto
+        w 2 div neg 0 rlineto
+        0 h 4 div neg rlineto
+        w 2 div neg h 2 div rlineto
+        w 2 div  h 2 div rlineto
+        0 h 4 div neg rlineto
+        w 2 div 0 rlineto
+        closepath
+        stroke
+    grestore
+    end
+} bind def
+
+/_rarrow {
+    5 dict begin
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    gsave
+%       1 0 0 setrgbcolor
+        x y translate
+        newpath
+        0 h 4 div moveto
+        w 2 div 0 rlineto
+        0 h 4 div neg rlineto
+        w 2 div h 2 div rlineto
+        w 2 div neg h 2 div rlineto
+        0 h 4 div neg rlineto
+        w 2 div neg 0 rlineto
+        closepath
+        stroke
+    grestore
+    end
+} bind def
+
+
+/_dlarrow {
+    5 dict begin
+    /g      exch def
+    /y      exch def
+    /x      exch def
+    /q g 8 div def
+    gsave
+        x y translate
+        -1 -1 scale
+%       1 0 0 setrgbcolor
+
+        q 2 mul 0 moveto
+        q 4 mul q 4 mul rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 1 mul q 5 mul rlineto
+        q 5 mul neg q 1 mul neg rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 4 mul neg q 4 mul neg rlineto
+        closepath
+        stroke
+
+    grestore
+    end
+} bind def
+
+
+
+/_drarrow {
+    5 dict begin
+    /g      exch def
+    /y      exch def
+    /x      exch def
+    /q g 8 div def
+    gsave
+        x y translate
+        1 -1 scale
+%       1 0 0 setrgbcolor
+
+        q 2 mul 0 moveto
+        q 4 mul q 4 mul rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 1 mul q 5 mul rlineto
+        q 5 mul neg q 1 mul neg rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 4 mul neg q 4 mul neg rlineto
+        closepath
+        stroke
+
+    grestore
+    end
+} bind def
+
+
+/_ularrow {
+    5 dict begin
+    /g      exch def
+    /y      exch def
+    /x      exch def
+    /q g 8 div def
+    gsave
+        x y translate
+        -1 1 scale
+%       1 0 0 setrgbcolor
+
+        q 2 mul 0 moveto
+        q 4 mul q 4 mul rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 1 mul q 5 mul rlineto
+        q 5 mul neg q 1 mul neg rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 4 mul neg q 4 mul neg rlineto
+        closepath
+        stroke
+
+    grestore
+    end
+} bind def
+
+
+/_urarrow {
+    5 dict begin
+    /g      exch def
+    /y      exch def
+    /x      exch def
+    /q g 8 div def
+    gsave
+        x y translate
+%       1 0 0 setrgbcolor
+
+        q 2 mul 0 moveto
+        q 4 mul q 4 mul rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 1 mul q 5 mul rlineto
+        q 5 mul neg q 1 mul neg rlineto
+        q 1 mul q 1 mul neg rlineto
+        q 4 mul neg q 4 mul neg rlineto
+        closepath
+        stroke
+
+    grestore
+    end
+} bind def
+
+% x y w pp s _fixwidthshow -
+/_fixwidthshow {
+    10 dict begin
+    /s      exch def
+    /pp     exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      s stringwidth
+      /lh exch def
+      /lw exch def
+
+      (M) stringwidth
+      pop
+      /lh exch def
+
+      /c 0 def
+      {
+        c 32 ge {exit} if
+
+        lw w le {exit} if
+
+        currentfont 0.95 scalefont setfont
+
+        s stringwidth
+%       /lh exch def
+        pop
+        /lw exch def
+
+        /c c 1 add def
+      } loop
+
+      pp 0 eq {
+          x y moveto
+      } if
+      pp 1 eq {
+          x lw 2 div sub y moveto
+      } if
+
+      s show
+    grestore
+    end
+} def
+
+/fixwidthshow {
+    10 dict begin
+    /s      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    x y w 0 s _fixwidthshow
+    end
+} def
+
+/fixwidthcshow {
+    10 dict begin
+    /s      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    x y w 1 s _fixwidthshow
+    end
+} def
+
+/whbgfixwidthshow {
+    10 dict begin
+    /s      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    x y w 0 s _whbgfixwidthshow
+    end
+} def
+
+/whbgfixwidthcshow {
+    10 dict begin
+    /s      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    x y w 1 s _whbgfixwidthshow
+    end
+} def
+
+/_whbgfixwidthshow {
+    12 dict begin
+    /s      exch def
+    /pp     exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      s stringwidth
+      /lh exch def
+      /lw exch def
+
+      /c 0 def
+      {
+        c 10 ge {exit} if
+
+        lw w le {exit} if
+
+        currentfont 0.95 scalefont setfont
+
+        s stringwidth
+        /lh exch def
+        /lw exch def
+
+        /c c 1 add def
+      } loop
+
+      (M) stringwidth
+      pop
+      /lh exch def
+
+      /glw lw lh add def
+      /glh lh lh add def
+
+      pp 0 eq {
+          /gx x def
+      } if
+      pp 1 eq {
+          /gx x glw 2 div sub def
+      } if
+
+      gsave
+          1 setgray
+          gx y moveto
+          glw 0 rlineto
+          0 glh rlineto
+          glw neg 0 rlineto
+          0 glh neg rlineto
+%         closepath
+          clip
+          
+          0.1 setlinewidth
+          gx glh sub y moveto
+          20 {
+            glw 5 div 0 rmoveto
+            gsave
+              glh glh rlineto
+              stroke
+            grestore
+          } repeat
+      grestore
+
+      gx y moveto
+      lh 2 div lh 2 div rmoveto
+      s show
+    grestore
+    end
+} def
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+% x y w h label tangyswitch -
+/tangyswitch {
+
+    6 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    /h w def
+    gsave
+
+        x y translate
+        0 0 moveto
+        w 0 rlineto
+        0 h rlineto
+        w neg 0 rlineto
+        0 h neg rlineto
+        closepath
+        stroke
+
+        currentlinewidth 2 div setlinewidth
+
+        /g h 10 div def
+        w 2 div g 1 mul w 4 mul 10 div h 5 div _larrow
+        w 2 div g 5 mul w 4 mul 10 div h 5 div _larrow
+        w 2 div g 3 mul w 4 mul 10 div h 5 div _rarrow
+        w 2 div g 7 mul w 4 mul 10 div h 5 div _rarrow
+
+        w 2 div h 1.1 mul w label fixwidthcshow
+    grestore
+    end
+
+} bind def
+
+
+% x y w h label tangyrouter -
+/tangyrouter {
+
+    8 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    /h w def
+    /r  h  2.2 div def
+    /g  r  0.707107 mul def
+    /r0 h  2.0 div def
+    /g0 r0 0.707107 mul def
+
+    gsave
+
+        x y translate
+
+        w 2 div h 2 div h 2 div 0 360 arc
+        stroke
+
+        currentlinewidth 2 div setlinewidth
+        
+        w 2 div h 2 div g _urarrow
+        w 2 div h 2 div g _dlarrow
+        w 2 div g0 add h 2 div g0 sub g _ularrow
+        w 2 div g0 sub h 2 div g0 add g _drarrow
+
+        w 2 div h 1.1 mul w label fixwidthcshow
+    grestore
+    end
+
+} bind def
+
+% x y w h label tangylabelbox -
+/tangylabelbox {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      1.0 setgray
+      x y moveto
+      w 0 rlineto 0 h rlineto w neg 0 rlineto 0 h neg rlineto
+      closepath fill
+
+      0.0 setgray
+      x w 2 div add y h 2 div add w label fixwidthcshow
+    grestore
+    end
+} def
+
+% x y w h label tangyfile -
+/tangyfile {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y moveto
+      w 3 mul 4 div 0 rlineto w 4 div h 4 div rlineto
+      0 h 3 mul 4 div rlineto
+      w neg 0 rlineto 0 h neg rlineto
+      closepath stroke
+
+      x y moveto
+      w 3 mul 4 div 0 rmoveto
+      w 4 div h 4 div rlineto
+      w 4 div neg 0 rlineto
+      closepath fill
+
+      x w 2 div add y h 2 div add w 0.9 mul label fixwidthcshow
+    grestore
+    end
+} def
+
+% x y w h label tangybox -
+/tangybox {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y moveto
+      w 0 rlineto 0 h rlineto w neg 0 rlineto 0 h neg rlineto
+      closepath stroke
+
+      x w 2 div add y h 2 div add w 0.9 mul label fixwidthcshow
+    grestore
+    end
+} def
+
+
+% x y w h label tangyxbox -
+/tangyxbox {
+    9 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    /clw    currentlinewidth def
+
+    gsave
+      x y translate
+      0 0 moveto
+      w 0 rlineto 0 h rlineto w neg 0 rlineto 0 h neg rlineto
+      closepath stroke
+
+      gsave
+        0 0 moveto
+        w 0 rlineto 0 h rlineto w neg 0 rlineto
+        w 20 div h 4 div moveto
+        0 h 2 div rlineto
+        w 20 div 18 mul  0 rlineto
+        0 h 2 div neg rlineto
+        clip
+
+        clw setlinewidth
+
+        newpath
+        0 0 moveto
+        w h rlineto
+        0 h moveto
+        w h neg rlineto
+        stroke
+      grestore
+
+      w 2 div h 2 div w label fixwidthcshow
+    grestore
+    end
+} def
+
+
+% x y w h label tangyrbox -
+/tangyrbox {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    /r w h le { w } { h } ifelse 3 div def
+
+    gsave
+      x y translate
+      r 0 moveto
+      w 0 w r r arcto
+      w h w r sub h r arcto
+      0 h 0 h r sub r arcto
+      0 0 r 0 r arcto
+      closepath
+      stroke
+
+      w 2 div h 2 div w label fixwidthcshow
+    grestore
+    end
+} def
+
+% x y w h label tangydiamond -
+/tangydiamond {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y translate
+      w 2 div 0 moveto
+      w 2 div h 2 div rlineto
+      w 2 div neg h 2 div rlineto
+      w 2 div neg h 2 div neg rlineto
+      closepath
+      stroke
+
+      w 2 div h 2 div w 2 mul 3 div label fixwidthcshow
+    grestore
+    end
+} def
+
+/tangycircle {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      newpath x w 2 div add y h 2 div add w 2 div 0 360 arc stroke
+      x w 2 div add y h 2 div add w label fixwidthcshow
+    grestore
+    end
+} def
+
+/tangydrum {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y translate
+      gsave
+        1 0.5 scale
+        newpath 
+        0 h h 2 div add moveto
+        w 2 div h 2 div w 2 div 180 360 arc
+        w h h 2 div add lineto
+        stroke
+        newpath
+        w 2 div h h 2 div add w 2 div 0 360 arc stroke
+      grestore
+      w 2 div h 5 div w label fixwidthcshow
+    grestore
+
+    end
+} def
+
+/tangypipe {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y translate
+      gsave
+        0.5 1 scale
+        newpath 
+        w 2 div 0 moveto
+        w w 2 div add h 2 div w 2 div 270 90 arc
+        w 2 div h lineto
+        stroke
+        newpath
+        w 2 div h 2 div w 2 div 0 360 arc stroke
+      grestore
+      w 5 div h 2 div w label fixwidthcshow
+    grestore
+
+    end
+} def
+
+
+/tangywpipe {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y translate
+      gsave
+        0.25 1 scale
+        newpath 
+        w 2 div 0 moveto
+        w 3 mul w 2 div add h 2 div w 2 div 270 90 arc
+        w 2 div h lineto
+        stroke
+        newpath
+        w 2 div h 2 div w 2 div 0 360 arc stroke
+      grestore
+      w 5 mul 8 div h 2 div w 3 mul 4 div label fixwidthcshow
+    grestore
+
+    end
+} def
+
+
+
+/tangyhcdots {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    /r      h 16 div def
+%   /u      r def
+    /u      0 def
+
+    gsave
+      x y translate
+
+      gsave
+        0 setgray
+        w 4 div       h 2 div u add r 0 360 arc fill
+        w 2 div       h 2 div u add r 0 360 arc fill
+        w 3 mul 4 div h 2 div u add r 0 360 arc fill
+      grestore
+
+    grestore
+    end
+} def
+
+
+/tangyvcdots {
+    7 dict begin
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+    /r      h 16 div def
+    /u      0 def
+
+    gsave
+      x y translate
+
+      gsave
+        0 setgray
+        w 2 div u add h 4 div       r 0 360 arc fill
+        w 2 div u add h 2 div       r 0 360 arc fill
+        w 2 div u add h 3 mul 4 div r 0 360 arc fill
+      grestore
+
+    grestore
+    end
+} def
+
+/tangycloud {
+  10 dict begin
+    /label  exch def
+    /h exch def
+    /w exch def
+    /y exch def
+    /x exch def
+
+    /QX {
+        10 dict begin
+        /y3 exch def
+        /x3 exch def
+        /y2 exch def
+        /x2 exch def
+        /y1 exch def
+        /x1 exch def
+        /y0 exch def
+        /x0 exch def
+        x0 y0 moveto
+        x1 y1 x2 y2 x3 y3 curveto
+        stroke
+        end
+    } def
+
+    /Q {
+        10 dict begin
+        /y3 exch def
+        /x3 exch def
+        /y2 exch def
+        /x2 exch def
+        /y1 exch def
+        /x1 exch def
+        /y0 exch def
+        /x0 exch def
+        gsave
+            1 1 0 setrgbcolor
+            x0 y0 moveto
+            x1 y1 lineto
+            x2 y2 lineto
+            x3 y3 lineto
+            stroke
+            
+            1 0 0 setrgbcolor
+            x0 y0 0.1 0 360 arc stroke
+            1 1 0 setrgbcolor
+            x1 y1 0.1 0 360 arc stroke
+            x2 y2 0.1 0 360 arc stroke
+            0 0 1 setrgbcolor
+            x3 y3 0.1 0 360 arc stroke
+        grestore
+        x0 y0 x1 y1 x2 y2 x3 y3 QX
+        end
+    } def
+
+  gsave
+    /sh h 14 div def
+    /sw w 20 div def
+
+    x y translate
+    gsave
+    sw sh scale
+     3  5  2  3  7  1  8  2 QX
+     6  3  7  0 13  0 14  3 QX
+    12  2 13  1 18  3 17  5 QX
+    17  4 20  4 20 10 17 10 QX
+    17  9 18 11 13 13 12 12 QX
+    14 11 13 14  7 14  6 11 QX
+     8 12  7 13  2 11  3  9 QX
+     3 10  0 10  0  4  3  4 QX
+    grestore
+    w 2 div h 2 div w 0.8 mul label fixwidthcshow
+  grestore
+  end
+} def
+
+
+% sx sy ex ey sparrow -
+/sparrow {
+    20 dict begin
+    /ey exch def
+    /ex exch def
+    /sy exch def
+    /sx exch def
+    gsave
+%        sx sy moveto
+%        ex ey lineto
+%        stroke
+
+        /dx ex sx sub def
+        /dy ey sy sub def
+%       /r  dx dx mul dy dy mul add sqrt def
+        /r2 0.7 def
+        /th dy dx atan def
+
+        /an1 th 180 add 30 sub def
+        /an2 th 180 add 30 add def
+
+        gsave
+            ex ey translate
+            0 0 moveto
+%           r2 th 180 add 45 sub cos mul r2 th 180 add 45 sub sin mul lineto
+%           r2 th 180 add 45 add cos mul r2 th 180 add 45 add sin mul lineto
+            r2 an1 cos mul r2 an1 sin mul lineto
+            r2 an2 cos mul r2 an2 sin mul lineto
+            closepath
+            fill
+        grestore
+    grestore
+    end
+} def
+
+
+
+%%EOF
+
+/Xtangydrum {
+    /label  exch def
+    /h      exch def
+    /w      exch def
+    /y      exch def
+    /x      exch def
+
+    gsave
+      x y translate
+      gsave
+        1 0.5 scale
+        newpath 
+        0 h h 2 div add moveto
+        w 2 div h 2 div w 2 div 180 360 arc
+        w h h 2 div add lineto
+        stroke
+        newpath
+        w 2 div h h 2 div add w 2 div 0 360 arc stroke
+      grestore
+    grestore
+
+ false {
+    gsave
+      0.7 setgray
+      x y moveto
+      label show
+    grestore
+ } if
+
+ false {
+    gsave
+      0.7 1 0.7 setrgbcolor
+      x y translate
+      label stringwidth
+      /lh exch def
+      /lw exch def
+%     w lw sub 2 div h lh sub 2 div moveto label show
+      w lw sub 2 div h moveto label show
+    grestore
+ } if
+
+    gsave
+      x y translate
+      label stringwidth
+      /lh exch def
+      /lw exch def
+
+      /c 0 def
+      {
+        c 10 ge {exit} if
+
+        lw w le {exit} if
+
+        currentfont 0.95 scalefont setfont
+
+        label stringwidth
+        /lh exch def
+        /lw exch def
+
+        /c c 1 add def
+      } loop
+
+ false {
+      0 1 0 setrgbcolor
+      newpath
+      0 h 1.5 mul moveto
+      w 0 rlineto
+      stroke
+%     newpath
+      w neg h 1.5 mul moveto
+      (w ) show
+      w 10 string cvs show
+
+      0 0 1 setrgbcolor
+      newpath
+      0 h 1.75 mul moveto
+      lw 0 rlineto
+      stroke
+      newpath
+      w neg h 1.75 mul moveto
+      (lw ) show
+      lw 10 string cvs show
+
+
+      1 0 0 setrgbcolor
+      newpath
+      w neg h moveto
+      (c ) show
+      c 10 string cvs show
+
+      0 0 0 setrgbcolor
+ } if
+
+%     w lw sub 2 div h lh sub 2 div moveto label show
+      w lw sub 2 div h moveto label show
+    grestore
+
+} def
+
+
+
+
