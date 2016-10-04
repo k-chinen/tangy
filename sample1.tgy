@@ -1,0 +1,8 @@
+	drum "A"
+	arrow 
+	box "B"
+	arrow linetype dashed
+	circle "C" fillhatch slashed fillcolor 3
+	arrow linetype zigzag
+	ellipse "D" fillhatch crossed fillcolor 2
+	arrow linetype waved
