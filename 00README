@@ -1,1 +1,11 @@
 tangy -- picture generator
+
+compile the program.
+	% make
+
+run the program.
+	% ./a.out < sample1.tgy
+
+you will found out.eps in current directory.
+you can use this for any purpose.
+
