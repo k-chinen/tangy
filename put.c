@@ -855,6 +855,7 @@ P;
     case CMD_DMY1:      WO;     break;
     case CMD_DMY2:      WO;     break;
     case CMD_PAPER:     WO;     break;
+    case CMD_CLOUD:     WO;     break;
     case CMD_DRUM:      WO;     break;
     case CMD_BOX:       WO;     break;
     case CMD_DOTS:      WO;     u->cob.sepcurdir = dir; break;

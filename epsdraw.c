@@ -5056,6 +5056,220 @@ out:
 }
 
 int
+_cloud_shape(FILE *fp, double sx, double sy)
+{
+    fprintf(fp, "%f %f scale\n", sx, sy);
+
+    fprintf(fp, "\
+0.3 -0.4 moveto\n\
+0.45 -0.55 0.72 -0.38 0.61 -0.21 curveto\n\
+stroke\n\
+0.63 -0.23 moveto\n\
+0.75 -0.17 0.73 0.05 0.62 0.13 curveto\n\
+stroke\n\
+0.64 0.12 moveto\n\
+0.75 0.2 0.55 0.43 0.44 0.37 curveto\n\
+stroke\n\
+0.45 0.35 moveto\n\
+0.4 0.47 0.15 0.5 0.06 0.39 curveto\n\
+stroke\n\
+0.1 0.43 moveto\n\
+0 0.53 -0.2 0.5 -0.25 0.43 curveto\n\
+stroke\n\
+-0.2 0.4 moveto\n\
+-0.35 0.53 -0.57 0.37 -0.55 0.27 curveto\n\
+stroke\n\
+-0.5 0.27 moveto\n\
+-0.68 0.3 -0.8 0.02 -0.67 -0.05 curveto\n\
+stroke\n\
+-0.63 -0.01 moveto\n\
+-0.75 -0.08 -0.58 -0.38 -0.48 -0.28 curveto\n\
+stroke\n\
+-0.48 -0.27 moveto\n\
+-0.5 -0.4 -0.2 -0.5 -0.12 -0.4 curveto\n\
+stroke\n\
+-0.15 -0.41 moveto\n\
+0 -0.52 0.15 -0.53 0.33 -0.39 curveto\n\
+stroke\n\
+");
+
+    return 0;
+}
+
+int
+_cloud_clip(FILE *fp, double sx, double sy)
+{
+    fprintf(fp, "%f %f scale\n", sx, sy);
+
+    fprintf(fp, "\
+0.3 -0.4 moveto\n\
+0.3 -0.4 lineto\n\
+0.45 -0.55 0.72 -0.38 0.61 -0.21 curveto\n\
+0.63 -0.23 lineto\n\
+0.75 -0.17 0.73 0.05 0.62 0.13 curveto\n\
+0.64 0.12 lineto\n\
+0.75 0.2 0.55 0.43 0.44 0.37 curveto\n\
+0.45 0.35 lineto\n\
+0.4 0.47 0.15 0.5 0.06 0.39 curveto\n\
+0.1 0.43 lineto\n\
+0 0.53 -0.2 0.5 -0.25 0.43 curveto\n\
+-0.2 0.4 lineto\n\
+-0.35 0.53 -0.57 0.37 -0.55 0.27 curveto\n\
+-0.5 0.27 lineto\n\
+-0.68 0.3 -0.8 0.02 -0.67 -0.05 curveto\n\
+-0.63 -0.01 lineto\n\
+-0.75 -0.08 -0.58 -0.38 -0.48 -0.28 curveto\n\
+-0.48 -0.27 lineto\n\
+-0.5 -0.4 -0.2 -0.5 -0.12 -0.4 curveto\n\
+-0.15 -0.41 lineto\n\
+0 -0.52 0.15 -0.53 0.33 -0.39 curveto\n\
+closepath\n\
+");
+
+    return 0;
+}
+
+int
+epsdraw_cloud(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob* pf;
+    ob* pt;
+    int x1, y1;
+    int r;
+    double a;
+    int aw, ah;
+    double gws, ghs;
+
+    x1 = xox+xu->cx;
+    y1 = xoy+xu->cy;
+    r  = xu->vob.rad;
+    a  = ((double)xu->wd)/((double)xu->ht);
+
+    if(xu->cob.imargin>0) {
+        aw = xu->wd - xu->cob.imargin*2;
+        ah = xu->ht - xu->cob.imargin*2;
+    }
+    else {
+        aw = xu->wd;
+        ah = xu->ht;
+    }
+
+    gws = aw/1.5;
+    ghs = ah/1.0;
+    fprintf(fp, "%% gws %f ghs %f\n", gws, ghs);
+
+apply:
+
+    fprintf(fp, "%% cloud xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
+    fprintf(fp, "gsave %% for cloud\n");
+
+    if(bbox_mode) {
+PP;
+        epsdraw_bbox(fp, xu);
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "1 0 0 setrgbcolor\n");
+        fprintf(fp, "currentlinewidth 4 mul setlinewidth\n");
+        drawCRrectskel2(fp, x1, y1, xu->wd, xu->ht, 0);
+        fprintf(fp, "grestore\n");
+    }
+
+    fprintf(fp, "%% inside\n");
+    fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
+        xu->cob.outlinecolor, xu->cob.fillhatch,
+        xu->cob.hatchthick, xu->cob.hatchpitch);
+
+    fprintf(fp, "gsave %% for inside\n");
+
+    /***
+     *** CLIP and HATCH
+     ***/
+
+    if(xu->cob.fillcolor>=0) {
+        changecolor(fp, xu->cob.fillcolor);
+
+        if(xu->cob.fillhatch==HT_NONE) {
+            /* nothing */
+        }
+        else
+        if(xu->cob.fillhatch==HT_SOLID) {
+            if(xu->cob.fillcolor>=0) {
+                fprintf(fp, "  %% solid fill\n");
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d translate\n", x1, y1);
+                fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+
+                _cloud_clip(fp, gws, ghs);
+                fprintf(fp, "  fill\n");
+
+                fprintf(fp, "  grestore\n");
+
+            }
+
+        }
+        else {
+
+            fprintf(fp, "  %% clip & hatch\n");
+            fprintf(fp, "  gsave\n");
+            fprintf(fp, "    %d %d translate\n", x1, y1);
+            fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    0 setlinewidth\n");
+
+            fprintf(fp, "  0 setlinewidth %% for cloud\n");
+            _cloud_clip(fp, gws, ghs);
+                if(debug_clip) {
+                    fprintf(fp, "  stroke %% debug\n");
+                }
+                else {
+                    fprintf(fp, "  clip\n");
+                }
+
+            fprintf(fp, " %f %f scale\n", 1.0/gws, 1.0/ghs);
+
+            changecolor(fp, xu->cob.fillcolor);
+            changethick(fp, xu->cob.hatchthick);
+            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+
+
+            if(xu->cob.deco) {
+                fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
+                epsdraw_deco(fp, aw, ah,
+                    xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
+            }
+            else {
+                fprintf(fp, "%% no-deco\n");
+            }
+
+            fprintf(fp, "  grestore\n");
+        }
+    }
+
+    fprintf(fp, "grestore %% for inside\n");
+
+
+    fprintf(fp, "%% frame\n");
+    fprintf(fp, "%%     outline color %d thick %d\n",
+        xu->cob.outlinecolor, xu->cob.outlinethick);
+
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d %d translate\n", x1, y1);
+        changecolor(fp, xu->cob.outlinecolor);
+        fprintf(fp, "  %f setlinewidth %% for cloud\n", 
+            ((double)xu->cob.outlinethick)/10000.0);
+        _cloud_shape(fp, gws, ghs);
+        fprintf(fp, "grestore\n");
+
+    }
+
+    fprintf(fp, "grestore %% end of box\n");
+
+out:
+    return 0;
+}
+
+int
 epsdraw_dots(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
     int x1, y1;
@@ -5672,8 +5886,8 @@ P;
                 xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey);
 #endif
 #if 1
-			epsdraw_seglinearrow(fp, xdir, 0, 0,
-				xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey, xu, xns);
+            epsdraw_seglinearrow(fp, xdir, 0, 0,
+                xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey, xu, xns);
 #endif
         }
     }
@@ -5683,9 +5897,9 @@ P;
             fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
                 xox+sx, xoy+sy, xox+ex, xoy+ey);
 #if 0
-			epsdraw_seglinearrow(fp, xdir, xox, xoy, sx, sy, ex, ey, pb, xns);
+            epsdraw_seglinearrow(fp, xdir, xox, xoy, sx, sy, ex, ey, pb, xns);
 #endif
-			
+            
     }
     fprintf(fp, "     grestore\n");
 
@@ -5773,12 +5987,12 @@ P;
                 xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey);
 #endif
 #if 1
-			epsdraw_seglinearrow(fp, xdir, 0, 0,
+            epsdraw_seglinearrow(fp, xdir, 0, 0,
 /*
-				xox+pf->cx+pf->ox+sx, xoy+pf->cy+pf->oy+sy, xox+ex, xoy+ey, xu, xns);
+                xox+pf->cx+pf->ox+sx, xoy+pf->cy+pf->oy+sy, xox+ex, xoy+ey, xu, xns);
 */
-				xox+sx, xoy+sy, xox+pf->cx+pf->ox+ex, xoy+pf->cy+pf->oy+ey,
-				xu, xns);
+                xox+sx, xoy+sy, xox+pf->cx+pf->ox+ex, xoy+pf->cy+pf->oy+ey,
+                xu, xns);
 #endif
         }
     }
@@ -5788,9 +6002,9 @@ P;
             fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
                 xox+sx, xoy+sy, xox+ex, xoy+ey);
 #if 0
-			epsdraw_seglinearrow(fp, xdir, xox, xoy, sx, sy, ex, ey, pb, xns);
+            epsdraw_seglinearrow(fp, xdir, xox, xoy, sx, sy, ex, ey, pb, xns);
 #endif
-			
+            
     }
     fprintf(fp, "     grestore\n");
 
@@ -5821,7 +6035,7 @@ P;
     }
 
     switch(xu->cob.linkstyle) {
-	default:
+    default:
     case LS_DIRECT:
         ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
         break;
@@ -6753,6 +6967,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     changenormal(fp); /* for faill safe */
     if(u->type==CMD_PAPER) {
         epsdraw_paper(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_CLOUD) {
+        epsdraw_cloud(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_DRUM) {
         epsdraw_drum(fp, ox, oy, u, xns);

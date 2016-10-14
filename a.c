@@ -51,6 +51,7 @@ int _t_ = 0;
 #define CMD_CLINE       (44)
 #define CMD_DRUM        (50)
 #define CMD_PAPER       (51)
+#define CMD_CLOUD       (52)
 
 #define CMD_LINE        (101)
 #define CMD_ARROW       (103)
@@ -125,8 +126,9 @@ apair_t cmd_ial[] = {
     {"goto",            CMD_GOTO},
     {"box",             CMD_BOX},
     {"dots",            CMD_DOTS},
-    {"paper",           CMD_PAPER},
     {"drum",            CMD_DRUM},
+    {"paper",           CMD_PAPER},
+    {"cloud",           CMD_CLOUD},
 #if 0
     {"cylinder",        CMD_DRUM},
 #endif
