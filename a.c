@@ -541,7 +541,7 @@ double arrowsizefactor      = 0.30;
 double warrowsizefactor     = 0.60;
 double linethickfactor      = 0.02;
 double linedecothickfactor  = 0.06;
-double wlinethickfactor     = 0.25;
+double wlinethickfactor     = 0.20;
 double barrowgapfactor      = 0.25;
 
 double textheightfactor     = 0.30;

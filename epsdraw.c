@@ -2878,6 +2878,606 @@ out:
     return 0;
 }
 
+
+#define X_RLINE     (0)
+#define X_VLINE     (1)
+#define X_HLINE     (2)
+
+/*
+    line is expressed following:
+            y = k *x + u
+    this function solves its k and u.
+*/
+
+int
+lineparam(double *k, double *u, double x1, double y1, double x2, double y2)
+{
+    if(x2-x1==0) {
+        return X_VLINE;
+    }
+    if(y2-y1==0) {
+        return X_HLINE;
+    }
+
+    *k = (y2-y1)/(x2-x1);
+    *u = y2 - *k*x2;
+
+    return 0;
+}
+
+
+#define CP_CROSS        (10)
+#define CP_INCROSS      (11)
+#define CP_OUTCROSS     (12)
+#define CP_MANYCROSS    (13)
+#define CP_PARA         (20)
+
+int
+linecrosspoint(double *rcx, double *rcy,
+    int L1x1, int L1y1, int L1x2, int L1y2,
+    int L2x1, int L2y1, int L2x2, int L2y2)
+{
+    int rv;
+    int ik1, ik2;
+    double th1, th2;
+    double a, b, c, d;
+
+    rv = -1;
+
+#if 0
+    fprintf(stderr, "%s: %d %d %d %d vs %d %d %d %d\n",
+        __func__, L1x1, L1y1, L1x2, L1y2, L2x1, L2y1, L2x2, L2y2);
+#endif
+    
+#if 0
+    th1 = (int)(atan2((L1y2-L1y1),(L1x2-L1x1))/rf);
+    th2 = (int)(atan2((L2y2-L2y1),(L2x2-L2x1))/rf);
+
+    fprintf(stderr, "\t th1 %f th2 %f\n", th1, th2);
+#endif
+
+    ik1 = lineparam(&a, &b, (double)L1x1, (double)L1y1, (double)L1x2, (double)L1y2);
+    ik2 = lineparam(&c, &d, (double)L2x1, (double)L2y1, (double)L2x2, (double)L2y2);
+
+#if 0
+    fprintf(stderr, "\t ik1 %d, ik2 %d\n", ik1, ik2);
+    fprintf(stderr, "\t a %f b %f c %f d %f\n", a, b, c, d);
+#endif
+
+    if(ik1==X_RLINE && ik2==X_RLINE) {
+        goto normal;
+    }
+
+    if(ik1==X_RLINE) {
+        if(ik2==X_VLINE) {
+            *rcx = L2x1;
+            *rcy = a*L2x1+b;
+            rv = CP_CROSS;
+            goto out;
+        }
+        else
+        if(ik2==X_HLINE) {
+            *rcy = L2y1;
+            *rcx = (L2y1-b)/a;
+            rv = CP_CROSS;
+            goto out;
+        }
+    }
+    else
+    if(ik1==X_VLINE) {
+        if(ik2==X_RLINE) {
+            *rcx = L1x1;
+            *rcy = c*L1x1+d;
+            rv = CP_CROSS;
+            goto out;
+        }
+        else
+        if(ik2==X_HLINE) {
+            *rcx = L1x1;
+            *rcy = L2y1;
+            rv = CP_CROSS;
+            goto out;
+        }
+    }
+    else
+    if(ik1==X_HLINE) {
+        if(ik2==X_RLINE) {
+            *rcy = L1y1;
+            *rcx = (L1y1-d)/c;
+            rv = CP_CROSS;
+            goto out;
+        }
+        else
+        if(ik2==X_VLINE) {
+            *rcy = L1y1;
+            *rcx = L2x1;
+            rv = CP_CROSS;
+            goto out;
+        }
+    }
+
+
+    goto out;
+
+normal:
+    *rcx = (int)( (d-b)/(a-c) );
+    *rcy = a*(*rcx)+b;
+    rv = CP_CROSS;
+
+out:
+#if 0
+    fprintf(stderr, "\t rv %d, rcx %f, rcy %f\n", rv, *rcx, *rcy);
+#endif
+
+    return rv;
+}
+
+#include "qbb.c"
+
+int
+Zepsdraw_wlinearrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+    int i;
+    int x0, y0;
+    int x1, y1, x2, y2;
+    seg *s;
+    int cdir;
+
+    int ap, fh, bh;
+
+    int j;
+    seg *Lsegs, *Rsegs;
+    seg *Lpt, *Rpt;
+
+    int af1_x, af1_y, af2_x, af2_y, afc_x, afc_y;
+    int ab1_x, ab1_y, ab2_x, ab2_y, abc_x, abc_y;
+
+    int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
+
+    Lsegs = (seg*)malloc(sizeof(seg)*xu->cob.segar->use);
+    if(!Lsegs) {
+exit(9);
+    }
+    memset(Lsegs, 0, sizeof(seg)*xu->cob.segar->use);
+    Rsegs = (seg*)malloc(sizeof(seg)*xu->cob.segar->use);
+    if(!Rsegs) {
+exit(10);
+    }
+    memset(Rsegs, 0, sizeof(seg)*xu->cob.segar->use);
+
+    Lpt = (seg*)malloc(sizeof(seg)*(xu->cob.segar->use+1));
+    if(!Lpt) {
+exit(11);
+    }
+    memset(Lpt, 0, sizeof(seg)*(xu->cob.segar->use+1));
+    Rpt = (seg*)malloc(sizeof(seg)*(xu->cob.segar->use+1));
+    if(!Rpt) {
+exit(12);
+    }
+    memset(Rpt, 0, sizeof(seg)*(xu->cob.segar->use+1));
+
+
+    if(bbox_mode) {
+fprintf(fp, "gsave\n");
+changebbox(fp);
+fprintf(fp, "  %d %d translate\n", xu->glx, xu->gby);
+fprintf(fp, "  0 0 moveto %d 0 lineto %d %d lineto 0 %d lineto closepath stroke\n", xu->wd, xu->wd, xu->ht, xu->ht);
+fprintf(fp, "grestore\n");
+    }
+
+    if(!xu->cob.originalshape) {
+        x1 = xox+xu->csx;
+        y1 = xoy+xu->csy;
+        x2 = xox+xu->cex;
+        y2 = xoy+xu->cey;
+
+    fprintf(fp, " gsave %% %s\n", __func__);
+        epsdraw_segwlinearrow(fp, ydir, xox, xoy, x1, y1, x2, y2, xu, xns);
+    fprintf(fp, " grestore %% %s\n", __func__);
+        goto out;
+    }
+
+    if(xu->cob.segar && xu->cob.segar->use>0) {
+    }
+    else {
+        goto out;
+    }
+
+    fprintf(fp, " gsave %% %s\n", __func__);
+
+Echo("    segar.use %d\n", xu->cob.segar->use);
+
+        x0 = x1 = xox+xu->csx;
+        y0 = y1 = xoy+xu->csy;
+Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
+Echo("    x1,y1 %d,%d\n", x1, y1);
+
+#if 0
+    fprintf(fp, "gsave\n");
+        fprintf(fp, "currentlinewidth 5 mul setlinewidth\n");
+#endif
+
+    for(i=0;i<xu->cob.segar->use;i++) {
+        s = (seg*)xu->cob.segar->slot[i];
+        if(!s) {
+            continue;
+        }
+
+        x2 = x1+s->x1;
+        y2 = y1+s->y1;
+
+        cdir = (int)atan2(y2-y1,x2-x1);
+
+        Echo("    part seg %d: %d,%d : %d,%d - %d,%d cdir %d\n",
+            i, s->x1, s->y1, x1, y1, x2, y2, cdir);
+#if 0
+        {
+        ap = xu->cob.arrowheadpart;
+        bh = xu->cob.arrowbackheadtype;
+        fh = xu->cob.arrowforeheadtype;
+
+        if(!xu->cob.arrowevery) {
+            if(i==0) {
+                xu->cob.arrowheadpart &= ~AR_FORE;
+            }
+            else 
+            if(i==xu->cob.segar->use-1) {
+                xu->cob.arrowheadpart &= ~AR_BACK;
+            }
+            else {
+                xu->cob.arrowheadpart = 0;
+            }
+        }
+
+        epsdraw_segwlinearrow(fp, cdir, xox, xoy, x1, y1, x2, y2, xu, xns);
+
+        xu->cob.arrowheadpart       = ap;
+        xu->cob.arrowbackheadtype   = bh;
+        xu->cob.arrowforeheadtype   = fh;
+        }
+#endif
+
+
+{
+        double xdir;
+        int bx, by;
+        int dx, dy;
+        int s1x, s1y;
+        int s2x, s2y;
+        int e1x, e1y;
+        int e2x, e2y;
+        int wlt;
+
+        wlt = xu->cob.wlinethick;
+
+        xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+
+        bx = def_warrowsize*cos((xdir+180)*rf);
+        by = def_warrowsize*sin((xdir+180)*rf);
+
+        dx = wlt*cos((xdir+90)*rf);
+        dy = wlt*sin((xdir+90)*rf);
+
+        s1x = x1 + dx;
+        s1y = y1 + dy;
+        e1x = x2 + dx;
+        e1y = y2 + dy;
+
+        s2x = x1 - dx;
+        s2y = y1 - dy;
+        e2x = x2 - dx;
+        e2y = y2 - dy;
+
+        if(i==xu->cob.segar->use-1 && xu->cob.arrowheadpart & AR_FORE) {
+            e1x = x2 + bx + dx;
+            e1y = y2 + by + dy;
+            e2x = x2 + bx - dx;
+            e2y = y2 + by - dy;
+
+            af1_x = x2 + bx + dx + dx;
+            af1_y = y2 + by + dy + dy;
+            af2_x = x2 + bx - dx - dx;
+            af2_y = y2 + by - dy - dy;
+            afc_x = x2;
+            afc_y = y2;
+        }
+        if(i==0 && xu->cob.arrowheadpart & AR_BACK) {
+            bx = def_warrowsize*cos((xdir)*rf);
+            by = def_warrowsize*sin((xdir)*rf);
+
+            s1x = x1 + bx + dx;
+            s1y = y1 + by + dy;
+            s2x = x1 + bx - dx;
+            s2y = y1 + by - dy;
+
+            ab1_x = x1 + bx + dx + dx;
+            ab1_y = y1 + by + dy + dy;
+            ab2_x = x1 + bx - dx - dx;
+            ab2_y = y1 + by - dy - dy;
+            abc_x = x1;
+            abc_y = y1;
+        }
+
+#if 0
+        fprintf(fp, "1 0.7 0.7 setrgbcolor\n");
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            s1x, s1y, e1x, e1y);
+        fprintf(fp, "0.7 0.7 1 setrgbcolor\n");
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            s2x, s2y, e2x, e2y);
+#endif
+
+        Lsegs[i].x1 = s1x;
+        Lsegs[i].y1 = s1y;
+
+        Rsegs[i].x1 = s2x;
+        Rsegs[i].y1 = s2y;
+
+        Lsegs[i].x2 = e1x;
+        Lsegs[i].y2 = e1y;
+
+        Rsegs[i].x2 = e2x;
+        Rsegs[i].y2 = e2y;
+
+}
+    
+
+        x1 = x2;
+        y1 = y2;
+    }
+
+#if 0
+    fprintf(fp, "grestore\n");
+#endif
+
+#if 0
+    /* Lsegs */
+    fprintf(fp, "1 0 0 setrgbcolor\n");
+        x1 = Lsegs[0].x1;   
+        y1 = Lsegs[0].y1;   
+        x2 = Lsegs[0].x2;   
+        y2 = Lsegs[0].y2;   
+    fprintf(fp, "%d %d moveto\n", x1, y1);
+    for(i=0;i<xu->cob.segar->use;i++) {
+        x1 = Lsegs[i].x1;   
+        y1 = Lsegs[i].y1;   
+        x2 = Lsegs[i].x2;   
+        y2 = Lsegs[i].y2;   
+    
+        fprintf(fp, "%d %d lineto %d %d lineto\n",
+            x1, y1, x2, y2);
+    }
+
+#if 0
+    fprintf(fp, "stroke\n");
+
+    /* Rsegs */
+    fprintf(fp, "0 0 1 setrgbcolor\n");
+    j = xu->cob.segar->use-1;
+        x1 = Rsegs[j].x1;   
+        y1 = Rsegs[j].y1;   
+        x2 = Rsegs[j].x2;   
+        y2 = Rsegs[j].y2;   
+    fprintf(fp, "%d %d moveto\n", x2, y2);
+#endif
+    for(i=0;i<xu->cob.segar->use;i++) {
+        j = xu->cob.segar->use-1-i;
+        x1 = Rsegs[j].x1;   
+        y1 = Rsegs[j].y1;   
+        x2 = Rsegs[j].x2;   
+        y2 = Rsegs[j].y2;   
+    
+        fprintf(fp, "%d %d lineto %d %d lineto\n",
+            x2, y2, x1, y1);
+    }
+    fprintf(fp, "stroke\n");
+
+#if 0
+    fprintf(fp, "closepath fill\n");
+#endif
+
+#endif
+
+
+    /* Lsegs */
+#if 0
+    fprintf(fp, "1 0 0 setrgbcolor\n");
+        x1 = Lsegs[0].x1;   
+        y1 = Lsegs[0].y1;   
+        x2 = Lsegs[0].x2;   
+        y2 = Lsegs[0].y2;   
+    fprintf(fp, "%d %d moveto\n", x1, y1);
+#endif
+
+    Lpt[0].x1 = Lsegs[0].x1;
+    Lpt[0].y1 = Lsegs[0].y1;
+
+    for(i=0;i<xu->cob.segar->use-1;i++) {
+        int ik;
+        double qx, qy;
+
+        ik = linecrosspoint(&qx, &qy,
+            Lsegs[i].x1, Lsegs[i].y1, Lsegs[i].x2, Lsegs[i].y2,
+            Lsegs[i+1].x1, Lsegs[i+1].y1, Lsegs[i+1].x2, Lsegs[i+1].y2);
+#if 0
+        fprintf(fp, "newpath %f %f %d 0 360 arc stroke\n",
+            qx, qy, objunit/10);    
+#endif
+#if 0
+        fprintf(stderr, "cross? %d\n", ik);
+#endif
+
+        if(ik>0) {
+            Lpt[i+1].x1 = qx;
+            Lpt[i+1].y1 = qy;
+        }
+    }
+    Lpt[i+1].x1 = Lsegs[xu->cob.segar->use-1].x2;
+    Lpt[i+1].y1 = Lsegs[xu->cob.segar->use-1].y2;
+
+
+
+    /* Rsegs */
+#if 0
+    fprintf(fp, "1 0 0 setrgbcolor\n");
+        x1 = Rsegs[0].x1;   
+        y1 = Rsegs[0].y1;   
+        x2 = Rsegs[0].x2;   
+        y2 = Rsegs[0].y2;   
+    fprintf(fp, "%d %d moveto\n", x1, y1);
+#endif
+
+    Rpt[0].x1 = Rsegs[0].x1;
+    Rpt[0].y1 = Rsegs[0].y1;
+
+    for(i=0;i<xu->cob.segar->use-1;i++) {
+        int ik;
+        double qx, qy;
+
+        ik = linecrosspoint(&qx, &qy,
+            Rsegs[i].x1, Rsegs[i].y1, Rsegs[i].x2, Rsegs[i].y2,
+            Rsegs[i+1].x1, Rsegs[i+1].y1, Rsegs[i+1].x2, Rsegs[i+1].y2);
+#if 0
+        fprintf(fp, "newpath %f %f %d 0 360 arc stroke\n",
+            qx, qy, objunit/10);    
+#endif
+#if 0
+        fprintf(stderr, "cross? %d\n", ik);
+#endif
+
+        if(ik>0) {
+            Rpt[i+1].x1 = qx;
+            Rpt[i+1].y1 = qy;
+        }
+    }
+    Rpt[i+1].x1 = Rsegs[xu->cob.segar->use-1].x2;
+    Rpt[i+1].y1 = Rsegs[xu->cob.segar->use-1].y2;
+
+
+#if 0
+    for(i=0;i<=xu->cob.segar->use;i++) {
+        fprintf(stderr, "%3d: Lpt %7d %7d\n", i, Lpt[i].x1, Lpt[i].y1);
+    }
+    for(i=0;i<=xu->cob.segar->use;i++) {
+        fprintf(stderr, "%3d: Rpt %7d %7d\n", i, Rpt[i].x1, Rpt[i].y1);
+    }
+#endif
+
+ if(xu->cob.fillcolor>=0) {
+    fprintf(fp, "gsave\n");
+    changecolor(fp, xu->cob.fillcolor);
+
+    fprintf(fp, "%d %d moveto\n", Lpt[0].x1, Lpt[0].y1);
+    for(i=1;i<=xu->cob.segar->use;i++) {
+        fprintf(fp, "%d %d lineto\n", Lpt[i].x1, Lpt[i].y1);
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+        fprintf(fp, "%d %d lineto\n", af1_x, af1_y);
+        fprintf(fp, "%d %d lineto\n", afc_x, afc_y);
+        fprintf(fp, "%d %d lineto\n", af2_x, af2_y);
+    }
+    j = xu->cob.segar->use;
+    fprintf(fp, "%d %d lineto\n", Rpt[j].x1, Rpt[j].y1);
+    for(i=1;i<=xu->cob.segar->use;i++) {
+        j = xu->cob.segar->use-i;
+        fprintf(fp, "%d %d lineto\n", Rpt[j].x1, Rpt[j].y1);
+    }
+    if(xu->cob.arrowheadpart & AR_BACK) {
+        fprintf(fp, "%d %d lineto\n", ab2_x, ab2_y);
+        fprintf(fp, "%d %d lineto\n", abc_x, abc_y);
+        fprintf(fp, "%d %d lineto\n", ab1_x, ab1_y);
+        fprintf(fp, "closepath\n");
+    }
+#if 0
+    fprintf(fp, "stroke\n");
+#endif
+    fprintf(fp, "clip\n");
+
+#if 1
+ {
+    qbb_t *qbb;
+    int    ccx, ccy;
+    int    cw, ch;
+
+    qbb = qbb_new();
+#if 0
+    qbb_fprint(stderr, qbb);
+#endif
+
+    for(i=0;i<=xu->cob.segar->use;i++) {
+        qbb_mark(qbb, Lpt[i].x1, Lpt[i].y1);
+    }
+    for(i=0;i<=xu->cob.segar->use;i++) {
+        qbb_mark(qbb, Rpt[i].x1, Rpt[i].y1);
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+        qbb_mark(qbb, af1_x, af1_y);
+        qbb_mark(qbb, af2_x, af2_y);
+        qbb_mark(qbb, afc_x, afc_y);
+    }
+    if(xu->cob.arrowheadpart & AR_BACK) {
+        qbb_mark(qbb, ab1_x, ab1_y);
+        qbb_mark(qbb, ab2_x, ab2_y);
+        qbb_mark(qbb, abc_x, abc_y);
+    }
+    
+#if 0
+    qbb_fprint(stderr, qbb);
+#endif
+    qbb_getcenter(qbb, &ccx, &ccy);
+    qbb_getsize(qbb, &cw, &ch);
+
+    fprintf(fp, "%d %d translate\n", ccx, ccy);
+
+    epsdraw_hatch(fp, cw, ch, xu->cob.fillcolor, xu->cob.fillhatch);
+ }
+#endif
+
+    fprintf(fp, "grestore\n");
+  }
+
+
+ if(xu->cob.outlinecolor>=0) {
+    fprintf(fp, "gsave\n");
+    changecolor(fp, xu->cob.outlinecolor);
+    fprintf(fp, "%d %d moveto\n", Lpt[0].x1, Lpt[0].y1);
+    for(i=1;i<=xu->cob.segar->use;i++) {
+        fprintf(fp, "%d %d lineto\n", Lpt[i].x1, Lpt[i].y1);
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+        fprintf(fp, "%d %d lineto\n", af1_x, af1_y);
+        fprintf(fp, "%d %d lineto\n", afc_x, afc_y);
+        fprintf(fp, "%d %d lineto\n", af2_x, af2_y);
+    }
+    j = xu->cob.segar->use;
+    fprintf(fp, "%d %d lineto\n", Rpt[j].x1, Rpt[j].y1);
+    for(i=1;i<=xu->cob.segar->use;i++) {
+        j = xu->cob.segar->use-i;
+        fprintf(fp, "%d %d lineto\n", Rpt[j].x1, Rpt[j].y1);
+    }
+    if(xu->cob.arrowheadpart & AR_BACK) {
+        fprintf(fp, "%d %d lineto\n", ab2_x, ab2_y);
+        fprintf(fp, "%d %d lineto\n", abc_x, abc_y);
+        fprintf(fp, "%d %d lineto\n", ab1_x, ab1_y);
+        fprintf(fp, "closepath\n");
+    }
+    fprintf(fp, "stroke\n");
+ }
+
+
+    if(xu->type==CMD_CLINE) {
+#if 0
+        epsdraw_segwlinearrow(fp, ydir, xox, xoy, x0, y0, x2, y2, xu, xns);
+#endif
+    }
+
+    fprintf(fp, " grestore %% %s\n", __func__);
+
+out:
+    return 0;
+}
+
 int
 Yepsdraw_wlinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
@@ -2973,6 +3573,8 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
     fprintf(fp, " grestore %% %s\n", __func__);
+
+    Zepsdraw_wlinearrow(fp, ydir, xox, xoy, xu, xns);
 
 out:
     return 0;
@@ -3277,7 +3879,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 
     Echo("%s: aw %d ah %d hc %d hty %d\n", __func__,
         aw, ah, hc, hty);
-    fprintf(fp, "%% %s start hc %d hty %d\n", __func__, hc, hty);
+    fprintf(fp, "%% %s start aw %d ah %d hc %d hty %d\n",
+        __func__, aw, ah, hc, hty);
 
     changecolor(fp, hc);
 
@@ -6898,10 +7501,16 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Yepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_WLINE) {
+#if 0
         Yepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
+#endif
+        Zepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_WARROW) {
+#if 0
         Yepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
+#endif
+        Zepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_BARROW) {
         Yepsdraw_blinearrow(fp, *xdir, ox, oy, u, xns);
