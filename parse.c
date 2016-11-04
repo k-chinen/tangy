@@ -924,6 +924,13 @@ fflush(stdout);
     PV(nob->cob.segopar);
 #endif
 
+#if 1
+    /* XXX */
+    if(nob->type==CMD_UNIT && nob->cob.iarg1>0) {
+        objunit = nob->cob.iarg1; recalcsizeparam();
+    }
+#endif
+
     return nob;
 }
 

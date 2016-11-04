@@ -3479,108 +3479,6 @@ out:
 }
 
 int
-Yepsdraw_wlinearrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-{
-    int i;
-    int x0, y0;
-    int x1, y1, x2, y2;
-    seg *s;
-    int cdir;
-
-    int ap, fh, bh;
-
-
-    if(bbox_mode) {
-fprintf(fp, "gsave\n");
-changebbox(fp);
-fprintf(fp, "  %d %d translate\n", xu->glx, xu->gby);
-fprintf(fp, "  0 0 moveto %d 0 lineto %d %d lineto 0 %d lineto closepath stroke\n", xu->wd, xu->wd, xu->ht, xu->ht);
-fprintf(fp, "grestore\n");
-    }
-
-    if(!xu->cob.originalshape) {
-        x1 = xox+xu->csx;
-        y1 = xoy+xu->csy;
-        x2 = xox+xu->cex;
-        y2 = xoy+xu->cey;
-
-    fprintf(fp, " gsave %% %s\n", __func__);
-        epsdraw_segwlinearrow(fp, ydir, xox, xoy, x1, y1, x2, y2, xu, xns);
-    fprintf(fp, " grestore %% %s\n", __func__);
-        goto out;
-    }
-
-    if(xu->cob.segar && xu->cob.segar->use>0) {
-    }
-    else {
-        goto out;
-    }
-
-    fprintf(fp, " gsave %% %s\n", __func__);
-
-Echo("    segar.use %d\n", xu->cob.segar->use);
-
-        x0 = x1 = xox+xu->csx;
-        y0 = y1 = xoy+xu->csy;
-Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
-Echo("    x1,y1 %d,%d\n", x1, y1);
-
-    for(i=0;i<xu->cob.segar->use;i++) {
-        s = (seg*)xu->cob.segar->slot[i];
-        if(!s) {
-            continue;
-        }
-
-        x2 = x1+s->x1;
-        y2 = y1+s->y1;
-
-        cdir = (int)atan2(y2-y1,x2-x1);
-
-        Echo("    part seg %d: %d,%d : %d,%d - %d,%d cdir %d\n",
-            i, s->x1, s->y1, x1, y1, x2, y2, cdir);
-        {
-        ap = xu->cob.arrowheadpart;
-        bh = xu->cob.arrowbackheadtype;
-        fh = xu->cob.arrowforeheadtype;
-
-        if(!xu->cob.arrowevery) {
-            if(i==0) {
-                xu->cob.arrowheadpart &= ~AR_FORE;
-            }
-            else 
-            if(i==xu->cob.segar->use-1) {
-                xu->cob.arrowheadpart &= ~AR_BACK;
-            }
-            else {
-                xu->cob.arrowheadpart = 0;
-            }
-        }
-
-        epsdraw_segwlinearrow(fp, cdir, xox, xoy, x1, y1, x2, y2, xu, xns);
-
-        xu->cob.arrowheadpart       = ap;
-        xu->cob.arrowbackheadtype   = bh;
-        xu->cob.arrowforeheadtype   = fh;
-        }
-        
-        x1 = x2;
-        y1 = y2;
-    }
-
-    if(xu->type==CMD_CLINE) {
-        epsdraw_segwlinearrow(fp, ydir, xox, xoy, x0, y0, x2, y2, xu, xns);
-    }
-
-    fprintf(fp, " grestore %% %s\n", __func__);
-
-    Zepsdraw_wlinearrow(fp, ydir, xox, xoy, xu, xns);
-
-out:
-    return 0;
-}
-
-int
 Yepsdraw_blinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -5576,6 +5474,7 @@ PP;
             changethick(fp, xu->cob.hatchthick);
             epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
 
+#if 0
             if(xu->cob.deco) {
                 fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
                 epsdraw_deco(fp, aw, ah,
@@ -5584,6 +5483,7 @@ PP;
             else {
                 fprintf(fp, "%% no-deco\n");
             }
+#endif
 
 
             fprintf(fp, "  grestore\n");
@@ -5601,6 +5501,18 @@ PP;
 #endif
 
         }
+
+
+#if 1
+            if(xu->cob.deco) {
+                fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
+                epsdraw_deco(fp, aw, ah,
+                    xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
+            }
+            else {
+                fprintf(fp, "%% no-deco\n");
+            }
+#endif
 
     }
 
@@ -5642,6 +5554,18 @@ PP;
 
         fprintf(fp, "    closepath\n");
         fprintf(fp, "    stroke\n");
+
+
+#if 1
+        if(xu->cob.deco) {
+            fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
+            epsdraw_deco(fp, aw, ah,
+                xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
+        }
+        else {
+            fprintf(fp, "%% no-deco\n");
+        }
+#endif
 
         fprintf(fp, "grestore\n");
 
@@ -7501,15 +7425,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Yepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_WLINE) {
-#if 0
-        Yepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
-#endif
         Zepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_WARROW) {
-#if 0
-        Yepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
-#endif
         Zepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_BARROW) {
