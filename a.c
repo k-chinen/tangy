@@ -217,7 +217,7 @@ apair_t cmd_ial[] = {
 #define LT_DOUBLECHAINED    (5)
 #define LT_DOUBLED          (6)
 #define LT_WAVED            (7)
-#define LT_THUNDERED        (8)
+#define LT_ZIGZAG           (8)
 #define LT_CIRCLE           (9)
 #define LT_WCIRCLE          (10)
 #define LT_TRIANGLE         (11)
@@ -233,8 +233,7 @@ apair_t linetype_ial[] = {
     {"doublechained",       LT_DOUBLECHAINED},
     {"doubled",             LT_DOUBLED},
     {"waved",               LT_WAVED},
-    {"thundered",           LT_THUNDERED},
-    {"zigzag",              LT_THUNDERED},
+    {"zigzag",              LT_ZIGZAG},
     {"circle",              LT_CIRCLE},
     {"triangle",            LT_TRIANGLE},
     {"mountain",            LT_MOUNTAIN},
