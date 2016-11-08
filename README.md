@@ -13,6 +13,7 @@ through Internet.
     arrow
     circle "client"
 
-<sample0.png>
+![output of sample0 by PNG not EPS](sample0.png)
+
 Thanks.
 
