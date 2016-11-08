@@ -13,8 +13,20 @@ through Internet.
     arrow
     circle "client"
 
-<img src="sample0.png" width="80%">
-<img src="sample1.png" width="80%">
+<img src="sample0.png">
+
+You can change color, background hatching and line types.
+
+	drum "A"
+	arrow 
+	box "B"
+	arrow linetype dashed
+	circle "C" fillhatch slashed fillcolor 3
+	arrow linetype zigzag
+	ellipse "D" fillhatch crossed fillcolor 2
+	arrow linetype waved
+
+<img src="sample1.png">
 
 Thanks.
 
