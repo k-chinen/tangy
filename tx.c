@@ -1,27 +1,20 @@
-
+/*
+ * tx.c - text entry data structure and its procedures
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include "varray.h"
 
+#include "tx.h"
 
-#ifndef TXELEN  
-#define TXELEN      (32)
-#endif
+int tx_trace = 0;
 
-#define TXE_CMD         ('o')
-#define TXE_DATA        ('d')
-#define TXE_CONST       ('c')
-#define TXE_VARIABLE    ('v')
+#define Echo    if(tx_trace)printf
 
-
-typedef struct {
-    int   ct;
-    int   st;
-    char  cs[TXELEN];
-    char *vs;
-} txe;
+#define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
+#define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
 
 
 int

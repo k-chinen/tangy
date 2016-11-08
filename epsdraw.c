@@ -1,5 +1,6 @@
 
-#include "tx.c"
+#include "tx.h"
+#include "qbb.h"
 
 int epsdraftfontsize = 10;
 int epsdraftgap = 5;
@@ -3012,7 +3013,6 @@ out:
     return rv;
 }
 
-#include "qbb.c"
 
 int
 Zepsdraw_wlinearrow(FILE *fp,

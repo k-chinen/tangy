@@ -1,13 +1,22 @@
-
 /*
  * structure for bounding box
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <limits.h>
+
+#include "qbb.h"
+
+#if 0
 typedef struct {
     int qbbid;
     int cc;
     int lx, by, rx, ty;
 } qbb_t;
+#endif
 
 static int qbb_serial=0;
 
