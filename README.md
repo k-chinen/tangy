@@ -13,7 +13,8 @@ through Internet.
     arrow
     circle "client"
 
-![output of sample0 by PNG not EPS](sample0.png)
+<img src="sample0.png" width="80%">
+<img src="sample1.png" width="80%">
 
 Thanks.
 
