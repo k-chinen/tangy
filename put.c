@@ -505,8 +505,8 @@ printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
     }
  }
 
-                            x = arcx+rad*cos((ldir+an-90)*rf);
-                            y = arcy+rad*sin((ldir+an-90)*rf);
+                            x = arcx+rad*cos((ldir-90+an)*rf);
+                            y = arcy+rad*sin((ldir-90+an)*rf);
 
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("cE", x, y);
@@ -553,8 +553,8 @@ printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
  {
     int a;
     int tx, ty;
-    for(a=ldir-an;a<=ldir;a++) {
-        if(a==ldir-an||a==ldir||a%90==0) {
+    for(a=ldir+90;a>=ldir+90-an;a--) {
+        if(a==ldir+90||a==ldir+90-an||a%90==0) {
             tx = arcx+rad*cos((a)*rf);
             ty = arcy+rad*sin((a)*rf);
             printf(" a %4d ", a);
@@ -562,6 +562,13 @@ printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
         }
     }
  }
+
+                            x = arcx+rad*cos((ldir+90-an)*rf);
+                            y = arcy+rad*sin((ldir+90-an)*rf);
+
+printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
+                            MARK("cE", x, y);
+
 
 #if 0
                             r = (seg*)malloc(sizeof(seg));
