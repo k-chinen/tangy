@@ -12,3 +12,4 @@ you can use this for any purpose.
 you can change output file name.
     % ./tangy -o foo.eps < foo.tgy
 
+I tested this program always MacOS, sometime Linux.
