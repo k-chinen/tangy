@@ -13,5 +13,6 @@ through Internet.
     arrow
     circle "client"
 
+<sample0.png>
 Thanks.
 
