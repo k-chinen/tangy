@@ -2026,6 +2026,7 @@ print_usage()
     printf("option:\n");
     printf("    -h          print this message\n");
     printf("    -m          print hints for language\n");
+    printf("    -v          print version\n");
     printf("    -o file     set output file (default '%s')\n",
             outfile);
     printf("    -u unit     set unit by 0.01bp=0.01/72inch (default %d)\n",
@@ -2119,6 +2120,12 @@ print_hints()
 int
 print_version()
 {
+	printf("2.001" 
+#ifdef GITCHASH
+	" " GITCHASH
+#endif
+	"\n");
+	return 0;
 }
 
 int
