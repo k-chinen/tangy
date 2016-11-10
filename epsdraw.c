@@ -1681,6 +1681,8 @@ epsdraw_Xseglinearrow(FILE *fp,
     int x1i, y1i;
     int x2i, y2i;
 
+    Echo("%s: enter\n", __func__);
+
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 
     /*
@@ -2413,6 +2415,7 @@ Yepsdraw_linearrow(FILE *fp,
 
     int ap, fh, bh;
 
+    Echo("%s: enter\n", __func__);
 
     if(bbox_mode) {
         epsdraw_bbox(fp, xu);
@@ -2540,7 +2543,7 @@ PP;
             x2 = arcx + s->rad*cos((cdir+s->ang-90)*rf);
             y2 = arcy + s->rad*sin((cdir+s->ang-90)*rf);
             
-            fprintf(fp, " %d %d %d %d %d arc stroke %% seg-arc\n",
+            fprintf(fp, "  %d %d %d %d %d arc stroke %% seg-arc\n",
                 arcx, arcy, s->rad, cdir-90, cdir-90+s->ang);
 
 #if 1
@@ -2597,7 +2600,7 @@ fprintf(stderr, "%% a cdir %d\n", cdir);
             x2 = arcx + s->rad*cos((cdir-s->ang+90)*rf);
             y2 = arcy + s->rad*sin((cdir-s->ang+90)*rf);
             
-            fprintf(fp, " %d %d %d %d %d arcn stroke %% seg-arcn\n",
+            fprintf(fp, "  %d %d %d %d %d arcn stroke %% seg-arcn\n",
                 arcx, arcy, s->rad, cdir+90, cdir+90-s->ang);
 
 #if 1
@@ -2714,11 +2717,12 @@ Yepsdraw_clinearrow(FILE *fp,
     seg *s;
     int cdir;
     int ik;
-
     int ap, fh, bh;
 
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
 int epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist);
+
+    Echo("%s: enter\n", __func__);
 
     if(bbox_mode) {
 #if 0
@@ -2749,6 +2753,10 @@ fprintf(fp, "grestore\n");
     else {
         goto out;
     }
+
+    fprintf(stdout, "oid %d segar ", xu->oid);
+    varray_fprint(stdout, xu->cob.segar);
+
 
     fprintf(fp, " gsave %% %s\n", __func__);
 
@@ -2783,8 +2791,8 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
 /* XXX */
         if(s->ftflag & COORD_FROM) {
 P;
-        Echo("    part seg %d: ftflag %d : %d,%d\n",
-            i, s->ftflag, s->x1, s->y1);
+            Echo("    part seg %d: ftflag %d : %d,%d\n",
+                i, s->ftflag, s->x1, s->y1);
             
             /* skip */
             continue;
@@ -2804,7 +2812,7 @@ coord_done:
 
         cdir = (int)atan2(y2-y1,x2-x1);
 
-        Echo("    part seg %d: ftflag %d : %d,%d : %d,%d - %d,%d cdir %d\n",
+        Echo("    part seg %d: ftflag %d : %d,%d : %d,%d -> %d,%d cdir %d\n",
             i, s->ftflag, s->x1, s->y1, x1, y1, x2, y2, cdir);
 
 #if 0
@@ -2833,13 +2841,13 @@ coord_done:
         xu->cob.arrowforeheadtype   = fh;
         }
 #endif
-        fprintf(fp, "  %d %d lineto\n", x2, y2);
+        fprintf(fp, "  %d %d lineto %% seg %d\n", x2, y2, i);
         
         x1 = x2;
         y1 = y2;
     }
 
-    fprintf(fp, "  %d %d lineto\n", x0, y0);
+    fprintf(fp, "  %d %d lineto %% backto first point\n", x0, y0);
         if(debug_clip) {
             fprintf(fp, "  stroke\n");
         }
@@ -5365,7 +5373,7 @@ P;
 #define EPSOP_CLIP      (3)
 
 int
-_path_box(FILE *fp, int x1, int y1, int aw, int ah, int r, int op)
+_box_path(FILE *fp, int x1, int y1, int aw, int ah, int r, int op)
 {
     fprintf(fp, "    newpath\n");
 #if 0
@@ -5484,7 +5492,7 @@ PP;
                 fprintf(fp, "    closepath\n");
                 fprintf(fp, "    fill\n");
 #endif
-                _path_box(fp, x1, y1, aw, ah, r, EPSOP_FILL);
+                _box_path(fp, x1, y1, aw, ah, r, EPSOP_FILL);
 #if 0
                 fprintf(fp, "  grestore\n");
 #endif
@@ -5526,10 +5534,10 @@ PP;
             fprintf(fp, "    closepath\n");
 #endif
             if(debug_clip) {
-                _path_box(fp, x1, y1, aw, ah, r, EPSOP_STROKE);
+                _box_path(fp, x1, y1, aw, ah, r, EPSOP_STROKE);
             }
             else {
-                _path_box(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
+                _box_path(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
             }
 
 #if 0
@@ -5596,7 +5604,7 @@ PP;
         fprintf(fp, "    closepath\n");
         fprintf(fp, "    stroke\n");
 #endif
-        _path_box(fp, x1, y1, aw, ah, r, EPSOP_STROKE);
+        _box_path(fp, x1, y1, aw, ah, r, EPSOP_STROKE);
 
 #if 0
         fprintf(fp, " grestore %% frame\n");
@@ -5679,7 +5687,7 @@ PP;
             fprintf(fp, "    clip\n");
 
 #endif
-            _path_box(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
+            _box_path(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
             epsdraw_deco(fp, aw, ah,
                 xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
 #if 0
@@ -7465,15 +7473,13 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     int wd, ht;
     int g;
 
-    Echo("%s: oid %d xdir %d ox,oy %d,%d, x,y %d,%d gx,gy %d,%d\n",
-        __func__, u->oid, *xdir, ox, oy, u->x, u->y, u->gx, u->gy);
+    Echo("%s: arg xdir %d oxy %d,%d|u oid %d xy %d,%d gxy %d,%d\n",
+        __func__, *xdir, ox, oy, u->oid, u->x, u->y, u->gx, u->gy);
 
-    Echo("%s: oid %d xdir %d oxy %d,%d| xy %d,%d oxy %d,%d\n",
-        __func__, u->oid, *xdir, ox, oy, u->x, u->y, 
-        u->ox, u->oy
-        );
+    Echo("%s: arg xdir %d oxy %d,%d|u oid %d xy %d,%d oxy %d,%d\n",
+        __func__, *xdir, ox, oy, u->oid, u->x, u->y, u->ox, u->oy);
 
-    Echo("%s: oid %d | gxy %d,%d gsxy %d,%d gexy %d,%d\n",
+    Echo("%s: u oid %d gxy %d,%d gsxy %d,%d gexy %d,%d\n",
         __func__, u->oid, 
         u->gx, u->gy,
         u->gsx, u->gsy,
@@ -7690,6 +7696,8 @@ skip_portboard:
     u->drawed = 1;
 
 out:
+    Echo("%s: oid %d xdir %d ox,oy %d,%d, x,y %d,%d gx,gy %d,%d\n",
+        __func__, u->oid, *xdir, ox, oy, u->x, u->y, u->gx, u->gy);
 
     fflush(fp);
     return 0;

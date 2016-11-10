@@ -236,7 +236,9 @@ printf("%s:\n", __func__);
 
         x = y = 0;
         lx = ly = 0;
+#if 1
         MARK("a", x, y);
+#endif
 
     c = 0; /* count of putted commands w/o then */
     jc = 0;
@@ -315,30 +317,6 @@ printf("  m %d\n", m);
         if(actf) {
 flush_que:
             if(c>0) {
-#if 0
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
-                            r->coordtype = REL_COORD;
-                            r->ptype = OA_FORWARD;
-                            r->jtype = jc;
-                            r->x1 = x - lx;
-                            r->y1 = y - ly;
-                            varray_push(segar, r);
-
-#if 1
-                            ldir = atan2(y-ly, x-lx)/rf;
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
-#endif
-
-#if 0
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
-#endif
-
-                            r = NULL;
-                            c=0;
-                            jc=0;
-#endif
-
                 MARK("f", x, y);
                 FREG(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
                 ldir = atan2(y-ly, x-lx)/rf;
@@ -430,29 +408,6 @@ P;
                 E;
             }
             
-
-#if 0
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
-                            r->coordtype = ABS_COORD;
-                            r->ptype = OA_FORWARD;
-
-                            if(e->cmd==OA_FROM) {
-                                r->ftflag |= COORD_FROM;
-                                rv |= COORD_FROM;
-                            }
-                            if(e->cmd==OA_TO)   {
-                                r->ftflag |= COORD_TO;
-                                rv |= COORD_TO;
-                            }
-
-P;
-                            r->x1 = mx;
-                            r->y1 = my;
-                            varray_push(segar, r);
-#endif
-
-
 #endif
 
             break;
@@ -486,24 +441,25 @@ P;
         case OA_ARC:
 fprintf(stderr, " arc  ldir %7.2f rad %d an %d\n", ldir, rad, an);
 printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
-                            MARK("c0", x, y);
+                            MARK("cB", x, y);
                             arcx = x + rad*cos((ldir+90)*rf);
                             arcy = y + rad*sin((ldir+90)*rf);
 
-
 printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
- {
-    int a;
-    int tx, ty;
-    for(a=ldir-90;a<=ldir-90+an;a++) {
-        if(a==ldir-90||a==ldir-90+an||a%90==0) {
-            tx = arcx+rad*cos((a)*rf);
-            ty = arcy+rad*sin((a)*rf);
-            printf(" a %4d ", a);
-            MARK("c", tx, ty);
-        }
-    }
- }
+    
+                            /* mark peak points */
+                            {
+                                int a;
+                                int tx, ty;
+                                for(a=ldir-90;a<=ldir-90+an;a++) {
+                                    if(a==ldir-90||a==ldir-90+an||a%90==0) {
+                                        tx = arcx+rad*cos((a)*rf);
+                                        ty = arcy+rad*sin((a)*rf);
+                                        printf(" a %4d ", a);
+                                        MARK("cM", tx, ty);
+                                    }
+                                }
+                            }
 
                             x = arcx+rad*cos((ldir-90+an)*rf);
                             y = arcy+rad*sin((ldir-90+an)*rf);
@@ -511,19 +467,6 @@ printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("cE", x, y);
 
-
-
-#if 0
-
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
-                            r->ptype = OA_ARC;
-                            r->jtype = jc;
-                            r->coordtype = REL_COORD;
-                            r->rad = rad;
-                            r->ang = an;
-                            varray_push(segar, r);
-#endif
 
                             FREG(OA_ARC, jc, REL_COORD, 0, 0, 0, rad, an);
 
@@ -543,42 +486,32 @@ fprintf(stderr, " arcn ldir %7.2f rad %d an %d\n", ldir, rad, an);
 printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             arcx = x + rad*cos((ldir-90)*rf);
                             arcy = y + rad*sin((ldir-90)*rf);
-                            x = arcx+rad*cos((ldir+an+90)*rf);
-                            y = arcy+rad*sin((ldir+an+90)*rf);
+                            x = arcx+rad*cos((ldir+90)*rf);
+                            y = arcy+rad*sin((ldir+90)*rf);
 
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("c", x, y);
+                            MARK("cB", x, y);
 
 printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
- {
-    int a;
-    int tx, ty;
-    for(a=ldir+90;a>=ldir+90-an;a--) {
-        if(a==ldir+90||a==ldir+90-an||a%90==0) {
-            tx = arcx+rad*cos((a)*rf);
-            ty = arcy+rad*sin((a)*rf);
-            printf(" a %4d ", a);
-            MARK("c", tx, ty);
-        }
-    }
- }
+                            /* mark peak points */
+                            {
+                                int a;
+                                int tx, ty;
+                                for(a=ldir+90;a>=ldir+90-an;a--) {
+                                    if(a==ldir+90||a==ldir+90-an||a%90==0) {
+                                        tx = arcx+rad*cos((a)*rf);
+                                        ty = arcy+rad*sin((a)*rf);
+                                        printf(" a %4d ", a);
+                                        MARK("cM", tx, ty);
+                                    }
+                                }
+                            }
 
                             x = arcx+rad*cos((ldir+90-an)*rf);
                             y = arcy+rad*sin((ldir+90-an)*rf);
 
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("cE", x, y);
-
-
-#if 0
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
-                            r->coordtype = REL_COORD;
-                            r->ptype = OA_ARCN;
-                            r->rad = rad;
-                            r->ang = an;
-                            varray_push(segar, r);
-#endif
 
                             FREG(OA_ARCN, jc, REL_COORD, 0, 0, 0, rad, an);
 
@@ -605,33 +538,6 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 
         case OA_THEN:   
             /* nothing */
-
-#if 0
-            if(c>0) {
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
-                            r->coordtype = REL_COORD;
-                            r->x1 = x - lx;
-                            r->y1 = y - ly;
-                            varray_push(segar, r);
-
-#if 1
-                            ldir = atan2(y-ly, x-lx)/rf;
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
-#endif
-
-#if 0
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
-#endif
-
-                            r = NULL;
-                            lx = x;
-                            ly = y;
-                            c=0;
-                            jc= 0;
-            }
-#endif
-
                             break;
         }
 #if 0
@@ -1032,6 +938,11 @@ E;
             __func__, u, u->oid,
             u->cx, u->cy, u->csx, u->csy, u->cex, u->cey);
 #endif
+#if 1
+    printf("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+        __func__, u->oid,
+        u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
+#endif
 
     return 0;
 }
@@ -1054,6 +965,15 @@ fitobj(ob *u, int xxdir, int *x, int *y, ns *xns)
     }
 
 Echo("%s: oid %d\n", __func__, u->oid);
+
+#if 1
+    printf("%s: u %p oid %d xxdir %d *xy %d,%d *fxy --,-- xns %p\n",
+            __func__, u, u->oid, xxdir, *x, *y, xns);
+    printf("    wd %d ht %d (%d %d %d %d)\n",
+            u->wd, u->ht, u->lx, u->by, u->rx, u->ty);
+    printf("    ox,oy %d,%d\n", u->ox, u->oy);
+    printf("    jx,jy %d,%d\n", u->jx, u->jy);
+#endif
 
 
     /* normalization dir */
@@ -1189,6 +1109,8 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
     printf("  oldx,y %d,%d\n", oldx, oldy);
 #endif
 #if 1
+    printf("%s: oid %d (%d %d %d %d)\n",
+        __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
     printf("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, u->oid,
         u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);

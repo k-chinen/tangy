@@ -1138,6 +1138,9 @@ ob_gdump(ob* s)
     int r;
     printf("=== GDUMP\n");
     printf("oid: type oxy wxh xy sxy exy\n");
+//         "  1: chunk                         0,11000   30000x22000       0,-11000      0,0           0,-22000
+    printf("oid: type                          oxy           wxh           xy            sxy           exy\n");
+
     r = _ob_gdump(s, 0);
     printf("---\n");
     return r;
@@ -1429,12 +1432,13 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
     seg* s;
 
     s = (seg*)xv;
-    sprintf(dst, "<(%s(%d),%s(%d),%d,%d:%d,%d,%d,%d;%d,%d)>",
+    sprintf(dst, "<(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)>",
         rassoc(objattr_ial, s->ptype), s->ptype,
         s->jtype>0 ? "JOIN" : "-",
         s->jtype,
         s->coordtype, s->ftflag,
-        s->x1, s->y1, s->x2, s->y2, s->rad, s->ang);
+        s->x1, s->y1, s->x2, s->y2,
+        s->rad, s->ang);
 
     return 0;
 }
@@ -2007,15 +2011,15 @@ P;
 #include "picdraw.c"
 #include "epsdraw.c"
 
-int   nodraw = 0;
-char *outfile = "out.eps";
-int     canvaswd = (int)( 8.27 * 72);
+int     nodraw = 0;
+char   *outfile = "out.eps";
+int   	canvaswd = (int)( 8.27 * 72);
 int     canvasht = (int)(11.69 * 72);
 int     canvasrt = 0;
 double  canvassc = 1.0;
 
 int
-usage()
+print_usage()
 {
     printf("tangy - picture generator according to special language\n");
     printf("usage: tangy [option] [files]\n");
@@ -2024,20 +2028,21 @@ usage()
     printf("    -m          print hints for language\n");
     printf("    -o file     set output file (default '%s')\n",
             outfile);
+    printf("    -u unit     set unit by 0.01bp=0.01/72inch (default %d)\n",
+            objunit);
     printf("    -g          draw grid\n");
+    printf("    -G unit     set grid pitch in bp (default %d)\n", 
+            def_gridpitch);
     printf("    -b          draw boundingbox of objects\n");
     printf("    -i          draw object IDs\n");
     printf("    -l          print object list for debug\n");
     printf("    -c          print color list for debug\n");
-    printf("    -u unit     set unit by 0.01bp=0.01/72inch (default %d)\n",
-            objunit);
     printf("                    c.f. 1cm=28.34bp, 1inch=72bp\n");
-    printf("    -G unit     set grid pitch in bp (default %d)\n", 
-            def_gridpitch);
     printf("following itmes are reserved for future. do not use.\n");
     printf("   *-d          draft mode\n");
     printf("   *-L          draw labels\n");
     printf("   *-D          debug mode\n");
+    printf("   *-v          verbose mode\n");
     printf("\n");
     printf("   *-r          draw ruler\n");
     printf("   *-M media    set media\n");
@@ -2097,7 +2102,7 @@ print_alistmemkeys(char *pre, apair_t *ap)
 }
 
 int
-hints()
+print_hints()
 {
     printf("You may find your forget keyword...\n");
     print_alistmemkeys("object/command names:", cmd_ial);
@@ -2111,6 +2116,10 @@ hints()
     return 0;
 }
 
+int
+print_version()
+{
+}
 
 int
 main(int argc, char *argv[])
@@ -2128,16 +2137,20 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "hmvngbSdiLrtDo:u:G:M:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv, "hmVvngbSdiLrtDo:u:G:M:lcs:"))!=EOF) {
         switch(flag) {
         case 'h':
-            usage();
+            print_usage();
             exit(0);
             break;
         case 'm':
-            hints();
+            print_hints();
             exit(0);
             break;
+		case 'V':
+			print_version();
+			exit(0);
+			break;
         case 'v':
             _t_ = 1 - _t_;
             break;
