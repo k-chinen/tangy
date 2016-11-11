@@ -2,8 +2,12 @@
 #include "tx.h"
 #include "qbb.h"
 
-int epsdraftfontsize = 10;
-int epsdraftgap = 5;
+/* outside of scaling */
+int epsoutmargin        = 5;
+
+/* inside of scaling */
+int epsdraftfontsize    = 10;
+int epsdraftgap         = 5;
 
 int debug_clip = 0;
 
@@ -7816,6 +7820,7 @@ PP;
         fprintf(fp, "grestore\n");
     }
 
+#if 0
     if(xch->cob.outlinethick>0 && xch->cob.outlinecolor>=0) {
         fprintf(fp, "gsave %%  for outline\n");
         changethick(fp, xch->cob.outlinethick);
@@ -7824,6 +7829,8 @@ PP;
             xch->cob.rotateval);
         fprintf(fp, "grestore %% for outline\n");
     }
+#endif
+
 PP;
 
     if(skelton_mode) {
@@ -8239,7 +8246,6 @@ epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
 {
     int ik;
     int i;
-    int outmargin=32;
 
 P;
     Echo("%s: cwd %d cht %d crt %d csc %.3f\n",
@@ -8247,7 +8253,7 @@ P;
     Echo(" xch %d x %d\n", xch->wd, xch->ht);
     Echo("     bb g %d %d %d %d\n", xch->glx, xch->gby, xch->grx, xch->gty);
     Echo("     bb _ %d %d %d %d\n", xch->lx,  xch->by,  xch->rx,  xch->ty);
-    Echo(" outmargin %d\n", outmargin);
+    Echo(" epsoutmargin %d\n", epsoutmargin);
 
 #if 0
 int epsdraftfontsize = 10;
@@ -8259,25 +8265,25 @@ int epsdraftgap = 5;
 #if 1
 fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: %d %d %d %d\n",
-    0, 0, (int)(csc*xch->wd)+outmargin*2, (int)(csc*xch->ht)+outmargin*2);
+    0, 0, (int)(csc*xch->wd)+epsoutmargin*2, (int)(csc*xch->ht)+epsoutmargin*2);
 #endif
 
     Echo(" %d %d %d %d\n", 
-        0, 0, (int)(csc*xch->wd)+outmargin*2, (int)(csc*xch->ht)+outmargin*2);
+        0, 0, (int)(csc*xch->wd)+epsoutmargin*2, (int)(csc*xch->ht)+epsoutmargin*2);
 
 #if 0
 fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: %d %d %d %d\n",
-    0, 0, xch->wd+outmargin*2, xch->ht+outmargin*2);
+    0, 0, xch->wd+epsoutmargin*2, xch->ht+epsoutmargin*2);
 #endif
 
 #if 0
 fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: %d %d %d %d\n",
-    xch->glx-outmargin,
-    xch->gby-outmargin,
-    xch->grx+outmargin,
-    xch->gty+outmargin);
+    xch->glx-epsoutmargin,
+    xch->gby-epsoutmargin,
+    xch->grx+epsoutmargin,
+    xch->gty+epsoutmargin);
 #endif
 
     printobjlist(fp, "% ", xch);
@@ -8306,36 +8312,36 @@ fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 
 #if 0
     fprintf(fp, "%d %d translate\n",
-        -outmargin, -outmargin);
+        -epsoutmargin, -epsoutmargin);
 #endif
 #if 0
     fprintf(fp, "%d %d translate\n",
-        outmargin, outmargin);
+        epsoutmargin, epsoutmargin);
 #endif
 #if 0
     fprintf(fp, "%d %d translate\n",
-        -xch->glx+outmargin, -xch->gby+outmargin);
+        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin);
 #endif
 
 #if 0
-    fprintf(fp, "%d %d translate\n", outmargin, outmargin);
+    fprintf(fp, "%d %d translate\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
     fprintf(fp, "%d %d translate\n", -xch->glx, -xch->gby);
 #endif
 
 #if 1
-    fprintf(fp, "%d %d translate\n", outmargin, outmargin);
+    fprintf(fp, "%d %d translate\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
     fprintf(fp, "%d %d translate\n", -xch->lx, -xch->by);
 #endif
 
 #if 0
     fprintf(fp, "%d %d translate\n",
-        -xch->glx+outmargin, -xch->gby+outmargin+xch->ht);
+        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin+xch->ht);
 #endif
 #if 0
     fprintf(fp, "%d %d translate\n",
-        -xch->glx+outmargin, -xch->gby+outmargin);
+        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin);
 #endif
 
     changedraft(fp);

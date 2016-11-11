@@ -1964,23 +1964,43 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 
     xch->wd = (maxx - minx);
     xch->ht = (maxy - miny);
-
-
-#if 0
-    printf("%s: n oid %d nx,ny %d,%d\n", __func__, xch->oid, nx, ny);
-    printf("  lx,ly %d,%d\n", lx, ly);
-    printf("  wxh %dx%d\n", xch->wd, xch->ht);
-#endif
-
     zx = minx + xch->wd/2;
     zy = miny + xch->ht/2;
-
-#if 0
-    printf("  zx,zy %d,%d\n", zx, zy);
-#endif
-
     xch->ox = -zx;
     xch->oy = -zy;
+
+#if 1
+    printf("%s: n oid %d nx,ny %d,%d\n", __func__, xch->oid, nx, ny);
+    printf("  lx,ly %d,%d\n", lx, ly);
+
+    printf("  x %d..%d\n", minx, maxx);
+    printf("  y %d..%d\n", miny, maxy);
+    printf("  zx,zy %d,%d\n", zx, zy);
+    printf("  wxh %dx%d\n", xch->wd, xch->ht);
+    printf("  oxy %d,%d\n", xch->ox, xch->oy);
+#endif
+
+    xch->wd = (maxx - minx) + xch->cgimargin*2;
+    xch->ht = (maxy - miny) + xch->cgimargin*2;
+    zx = minx - xch->cgimargin + xch->wd/2;
+    zy = miny - xch->cgimargin + xch->ht/2;
+    xch->ox = -zx;
+    xch->oy = -zy;
+
+        xch->clx = minx-xch->cgimargin;
+        xch->cby = miny-xch->cgimargin;
+        xch->crx = maxx+xch->cgimargin;
+        xch->cty = maxy+xch->cgimargin;
+
+#if 1
+    printf("  gimargin %d\n", xch->cgimargin);
+    printf("  x %d..%d\n", minx, maxx);
+    printf("  y %d..%d\n", miny, maxy);
+    printf("  zx,zy %d,%d\n", zx, zy);
+    printf("  wxh %dx%d\n", xch->wd, xch->ht);
+    printf("  oxy %d,%d\n", xch->ox, xch->oy);
+#endif
+
 
 #if 1
     printf("  new ox,oy %d,%d\n", xch->ox, xch->oy);
@@ -2041,6 +2061,13 @@ out:
         __func__, xch->oid,
         xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey,
             xch->ox, xch->coy);
+#endif
+#if 1
+    printf("%s: oid %d b bb g %7d %7d %7d %7d\n",
+            __func__, xch->oid,
+            xch->glx, xch->gby, xch->grx, xch->gty);
+    printf("             bb _ %7d %7d %7d %7d\n",
+            xch->lx, xch->by, xch->rx, xch->ty);
 #endif
 
     return 0;

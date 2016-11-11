@@ -397,6 +397,7 @@ apair_t ls_ial[] = {
 #define OA_PEAKROTATE       (71)
 #define OA_RAD              (75)
 #define OA_IMARGIN          (77)
+#define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
 #define OA_DECO             (90)
 
@@ -468,6 +469,7 @@ apair_t objattr_ial[] = {
     {"depth",               OA_DEPTH},
 
     {"imargin",             OA_IMARGIN},
+    {"gimargin",            OA_GIMARGIN},
     {"peak",                OA_PEAK},
     {"peakrotate",          OA_PEAKROTATE},
     {"rotate",              OA_ROTATE},
@@ -535,6 +537,8 @@ apair_t objattr_ial[] = {
 #endif
 
 int objunit = OBJUNIT;
+
+extern int epsoutmargin;
 
 double arrowsizefactor      = 0.30;
 double warrowsizefactor     = 0.60;
@@ -649,7 +653,7 @@ struct obattr {
     int   hatchpitch;
 
     int   imargin;
-
+    int   gimargin;
 
     int   polypeak;
     int   polyrotate;
@@ -803,6 +807,9 @@ typedef struct _ob {
 #define cato    vob.ato
 #define cawith  vob.awith
 #define caat    vob.aat
+
+#define cimargin     vob.imargin
+#define cgimargin    vob.gimargin
 
 #define cnoexpand    vob.noexpand
 
@@ -2032,6 +2039,8 @@ print_usage()
             outfile);
     printf("    -u num      set unit by 0.01bp=0.01/72inch (default %d)\n",
             objunit);
+    printf("    -M num      set EPS outside margin by bp (default %d)\n",
+            epsoutmargin);
     printf("    -g          draw grid\n");
     printf("    -G num      set grid pitch in bp (default %d)\n", 
             def_gridpitch);
@@ -2048,7 +2057,6 @@ print_usage()
     printf("\n");
     printf("   *-r          draw ruler\n");
     printf("   *-R num      set grid range (how many times of pitch)\n");
-    printf("   *-M media    set media\n");
     printf("   *-s scale    set scale\n");
     printf("   *-n          no draw\n");
 
@@ -2211,7 +2219,11 @@ main(int argc, char *argv[])
         case 'R':
             def_gridrange = atoi(optarg);
             break;
+        case 'M':
+            epsoutmargin = atoi(optarg);
+            break;
 
+#if 0
         case 'M':
             if(strcasecmp(optarg, "a4")==0) {
                 /* inch x bp/inch */
@@ -2219,6 +2231,7 @@ main(int argc, char *argv[])
                 canvasht = (int)(11.69 * 72);
             }
             break;
+#endif
         case 'l':
             do_objlist++;
             break;

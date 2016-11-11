@@ -595,6 +595,7 @@ skip_number:
     ISET(OA_PEAK,           polypeak);
     ISET(OA_PEAKROTATE,     polyrotate);
     ISET(OA_IMARGIN,        imargin);
+    ISET(OA_GIMARGIN,       gimargin);
     ISET(OA_ROTATE,         rotateval);
     LADD(OA_DECO,           deco);
 
