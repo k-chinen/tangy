@@ -237,7 +237,7 @@ printf("%s:\n", __func__);
         x = y = 0;
         lx = ly = 0;
 #if 1
-        MARK("a", x, y);
+        MARK("a ", x, y);
 #endif
 
     c = 0; /* count of putted commands w/o then */
@@ -317,7 +317,7 @@ printf("  m %d\n", m);
         if(actf) {
 flush_que:
             if(c>0) {
-                MARK("f", x, y);
+                MARK("f ", x, y);
                 FREG(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
                 ldir = atan2(y-ly, x-lx)/rf;
                 lx = x;
@@ -365,7 +365,7 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
             if(ik==0) {
 P;
 #if 0
-                MARK("e", mx, my);
+                MARK("e ", mx, my);
 #endif
             }
             else {
@@ -421,7 +421,7 @@ P;
                             jc += 1;
                             c++;
                             FREG(OA_JOIN, 1, REL_COORD, 0, 0, 0, 0, 0);
-                            MARK("J", x, y);
+                            MARK("J ", x, y);
                             break;
 
         case OA_SKIP:
@@ -430,7 +430,7 @@ P;
                             y += m*sin(ldir*rf);
                             c++;
                             FREG(OA_SKIP, 1000, REL_COORD, 0, x-lx, y-ly, 0, 0);
-                            MARK("S", x, y);
+                            MARK("S ", x, y);
                             break;
     
         case OA_FORWARD:    x += m*cos(ldir*rf);
@@ -456,6 +456,15 @@ printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
                                         tx = arcx+rad*cos((a)*rf);
                                         ty = arcy+rad*sin((a)*rf);
                                         printf(" a %4d ", a);
+                                        if(a==ldir-90) {
+                                            printf(" first  ");
+                                        }
+                                        if(a==ldir-90+an) {
+                                            printf(" last   ");
+                                        }
+                                        if(a%90==0) {
+                                            printf(" middle ");
+                                        }
                                         MARK("cM", tx, ty);
                                     }
                                 }
@@ -484,15 +493,19 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
         case OA_ARCN:
 fprintf(stderr, " arcn ldir %7.2f rad %d an %d\n", ldir, rad, an);
 printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
+                            MARK("nB", x, y);
+
                             arcx = x + rad*cos((ldir-90)*rf);
                             arcy = y + rad*sin((ldir-90)*rf);
+#if 0
                             x = arcx+rad*cos((ldir+90)*rf);
                             y = arcy+rad*sin((ldir+90)*rf);
 
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("cB", x, y);
+                            MARK("nB", x, y);
+#endif
 
-printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
+printf("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
                             /* mark peak points */
                             {
                                 int a;
@@ -502,7 +515,16 @@ printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
                                         tx = arcx+rad*cos((a)*rf);
                                         ty = arcy+rad*sin((a)*rf);
                                         printf(" a %4d ", a);
-                                        MARK("cM", tx, ty);
+                                        if(a==ldir+90) {
+                                            printf(" first  ");
+                                        }
+                                        if(a==ldir+90-an) {
+                                            printf(" last   ");
+                                        }
+                                        if(a%90==0) {
+                                            printf(" middle ");
+                                        }
+                                        MARK("nM", tx, ty);
                                     }
                                 }
                             }
@@ -511,7 +533,7 @@ printf("  arcn ldir %f .. %f\n", ldir, ldir-an);
                             y = arcy+rad*sin((ldir+90-an)*rf);
 
 printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("cE", x, y);
+                            MARK("nE", x, y);
 
                             FREG(OA_ARCN, jc, REL_COORD, 0, 0, 0, rad, an);
 
@@ -544,9 +566,9 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 printf("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
         i, e->cmd, e->val, mstr, dm, m, x, y, ldir);
 #endif
-        MARK("e", x, y);
+        MARK("e ", x, y);
     }
-        MARK("z", x, y);
+        MARK("z ", x, y);
 
     if(rv & COORD_FROM) {
         *rlx = _lx + isx;
@@ -562,6 +584,9 @@ printf("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n
     }
 
 #if 1
+    printf("opar\n");
+    varray_fprint(stdout, opar);
+    printf("segar\n");
     varray_fprint(stdout, segar);
 #endif
 

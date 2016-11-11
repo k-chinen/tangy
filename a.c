@@ -584,6 +584,7 @@ int def_hatchpitch      =   5;
 int def_hatchthick      =   1;
 
 int def_gridpitch       = 10000;
+int def_gridrange       =   5;
 
 
 pallet_t *pallet = NULL;
@@ -1045,7 +1046,7 @@ _ob_dump(ob* s, int w)
 #define W for(u=0;u<w;u++) printf(" ");
 
 
-    printf("%3d:%c ", s->oid, ISCHUNK(s->type)? 'C': 'o');
+    printf("%3d:%c ", s->oid, ISCHUNK(s->type)? 'C': '_');
 
     W;
     printf("%s ", rassoc(cmd_ial, s->type));
@@ -2013,7 +2014,7 @@ P;
 
 int     nodraw = 0;
 char   *outfile = "out.eps";
-int   	canvaswd = (int)( 8.27 * 72);
+int     canvaswd = (int)( 8.27 * 72);
 int     canvasht = (int)(11.69 * 72);
 int     canvasrt = 0;
 double  canvassc = 1.0;
@@ -2029,10 +2030,10 @@ print_usage()
     printf("    -v          print version\n");
     printf("    -o file     set output file (default '%s')\n",
             outfile);
-    printf("    -u unit     set unit by 0.01bp=0.01/72inch (default %d)\n",
+    printf("    -u num      set unit by 0.01bp=0.01/72inch (default %d)\n",
             objunit);
     printf("    -g          draw grid\n");
-    printf("    -G unit     set grid pitch in bp (default %d)\n", 
+    printf("    -G num      set grid pitch in bp (default %d)\n", 
             def_gridpitch);
     printf("    -b          draw boundingbox of objects\n");
     printf("    -i          draw object IDs\n");
@@ -2046,6 +2047,7 @@ print_usage()
     printf("   *-v          verbose mode\n");
     printf("\n");
     printf("   *-r          draw ruler\n");
+    printf("   *-R num      set grid range (how many times of pitch)\n");
     printf("   *-M media    set media\n");
     printf("   *-s scale    set scale\n");
     printf("   *-n          no draw\n");
@@ -2120,12 +2122,12 @@ print_hints()
 int
 print_version()
 {
-	printf("2.001" 
+    printf("2.001" 
 #ifdef GITCHASH
-	" " GITCHASH
+    " " GITCHASH
 #endif
-	"\n");
-	return 0;
+    "\n");
+    return 0;
 }
 
 int
@@ -2144,7 +2146,7 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "hmVvngbSdiLrtDo:u:G:M:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv, "hmVvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
         switch(flag) {
         case 'h':
             print_usage();
@@ -2154,10 +2156,10 @@ main(int argc, char *argv[])
             print_hints();
             exit(0);
             break;
-		case 'V':
-			print_version();
-			exit(0);
-			break;
+        case 'V':
+            print_version();
+            exit(0);
+            break;
         case 'v':
             _t_ = 1 - _t_;
             break;
@@ -2205,6 +2207,9 @@ main(int argc, char *argv[])
             break;
         case 'G':
             def_gridpitch = atoi(optarg);
+            break;
+        case 'R':
+            def_gridrange = atoi(optarg);
             break;
 
         case 'M':

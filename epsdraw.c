@@ -187,17 +187,17 @@ drawCrect(FILE *fp, int x1, int y1, int wd, int ht)
 static int
 drawCRrect(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 {
-    fprintf(fp, "  gsave\n");
-    fprintf(fp, "    %d %d translate\n", x1, y1);
-    fprintf(fp, "    0 0 moveto %d rotate\n", ro);
-    fprintf(fp, "    newpath\n");
-    fprintf(fp, "    %d %d moveto\n",   -wd/2, -ht/2);
-    fprintf(fp, "    %d %d lineto\n",    wd/2, -ht/2);
-    fprintf(fp, "    %d %d lineto\n",    wd/2,  ht/2);
-    fprintf(fp, "    %d %d lineto\n",   -wd/2,  ht/2);
-    fprintf(fp, "    closepath\n");
-    fprintf(fp, "    stroke\n");
-    fprintf(fp, "  grestore\n");
+    fprintf(fp, "    gsave %% CRrect\n");
+    fprintf(fp, "      %d %d translate\n", x1, y1);
+    fprintf(fp, "      0 0 moveto %d rotate\n", ro);
+    fprintf(fp, "      newpath\n");
+    fprintf(fp, "      %d %d moveto\n",   -wd/2, -ht/2);
+    fprintf(fp, "      %d %d lineto\n",    wd/2, -ht/2);
+    fprintf(fp, "      %d %d lineto\n",    wd/2,  ht/2);
+    fprintf(fp, "      %d %d lineto\n",   -wd/2,  ht/2);
+    fprintf(fp, "      closepath\n");
+    fprintf(fp, "      stroke\n");
+    fprintf(fp, "    grestore\n");
 
     return 0;
 }
@@ -209,7 +209,7 @@ drawCRrectskel(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 
     q = objunit/10;
 
-    fprintf(fp, "  gsave\n");
+    fprintf(fp, "  gsave %% CRrectskel\n");
     fprintf(fp, "    %d %d translate\n", x1, y1);
     fprintf(fp, "    0 0 moveto %d rotate\n", ro);
     fprintf(fp, "    newpath\n");
@@ -247,7 +247,7 @@ drawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 
     q = objunit/10;
 
-    fprintf(fp, "  gsave\n");
+    fprintf(fp, "  gsave %% CRrectskel2\n");
     fprintf(fp, "    %d %d translate\n", x1, y1);
     fprintf(fp, "    0 0 moveto %d rotate\n", ro);
     fprintf(fp, "    newpath\n");
@@ -282,7 +282,7 @@ XdrawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 
     q = objunit/10;
 
-    fprintf(fp, "  gsave\n");
+    fprintf(fp, "  gsave %% XCRrectskel2\n");
     fprintf(fp, "    %d %d translate\n", x1, y1);
     fprintf(fp, "    0 0 moveto %d rotate\n", ro);
     fprintf(fp, "    newpath\n");
@@ -324,13 +324,13 @@ drawCrect(FILE *fp, int x1, int y1, int wd, int ht)
 static int
 drawrect(FILE *fp, int x1, int y1, int x2, int y2)
 {
-    fprintf(fp, "newpath\n");
-    fprintf(fp, "%d %d moveto\n", x1, y1);
-    fprintf(fp, "%d %d lineto\n", x1, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y1);
-    fprintf(fp, "closepath\n");
-    fprintf(fp, "stroke\n");
+    fprintf(fp, "  newpath %% rect\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d lineto\n", x1, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y1);
+    fprintf(fp, "  closepath\n");
+    fprintf(fp, "  stroke\n");
 
     return 0;
 }
@@ -338,16 +338,16 @@ drawrect(FILE *fp, int x1, int y1, int x2, int y2)
 static int
 drawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
 {
-    fprintf(fp, "newpath\n");
-    fprintf(fp, "%d %d moveto\n", x1, y1);
-    fprintf(fp, "%d %d lineto\n", x1, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y1);
-    fprintf(fp, "closepath\n");
-    fprintf(fp, "stroke\n");
-    fprintf(fp, "%d %d moveto\n", x1, y2);
-    fprintf(fp, "0 currentlinewidth 1 mul rmoveto\n");
-    fprintf(fp, "(%s) show\n", cm);
+    fprintf(fp, "  newpath %% rectcm\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d lineto\n", x1, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y1);
+    fprintf(fp, "  closepath\n");
+    fprintf(fp, "  stroke\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y2);
+    fprintf(fp, "  0 currentlinewidth 1 mul rmoveto\n");
+    fprintf(fp, "  (%s) show\n", cm);
 
     return 0;
 }
@@ -359,15 +359,15 @@ Xdrawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
     y1 -= epsdraftgap;
     x2 += epsdraftgap;
     y2 += epsdraftgap;
-    fprintf(fp, "newpath\n");
-    fprintf(fp, "%d %d moveto\n", x1, y1);
-    fprintf(fp, "%d %d lineto\n", x1, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y2);
-    fprintf(fp, "%d %d lineto\n", x2, y1);
-    fprintf(fp, "closepath\n");
-    fprintf(fp, "stroke\n");
-    fprintf(fp, "%d %d moveto\n", x1, y2+epsdraftgap);
-    fprintf(fp, "(%s) show\n", cm);
+    fprintf(fp, "  newpath %% Xrectcm\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d lineto\n", x1, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y2);
+    fprintf(fp, "  %d %d lineto\n", x2, y1);
+    fprintf(fp, "  closepath\n");
+    fprintf(fp, "  stroke\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y2+epsdraftgap);
+    fprintf(fp, "  (%s) show\n", cm);
 
     return 0;
 }
@@ -417,13 +417,13 @@ int
 epsdraw_bbox_cwh(FILE *fp, ob *xu)
 {
     fprintf(fp, "%% bbox guide with CWH\n");
-    fprintf(fp, "gsave %% for bbox of oid %d\n", xu->oid);
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changebbox(fp);
     drawCrect(fp, xu->gx, xu->gy, xu->wd, xu->ht);
     if(xu->cob.rotateval) {
         drawCRrect(fp, xu->gx, xu->gy, xu->wd, xu->ht, xu->cob.rotateval);
     }
-    fprintf(fp, "grestore %% for bbox\n");
+    fprintf(fp, "  grestore %% for bbox\n");
 
     return 0;
 }
@@ -433,13 +433,13 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 {
     fprintf(fp, "%% bbox guide with LBRT %d,%d (%d %d %d %d)\n",
             xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
-    fprintf(fp, "gsave %% for bbox of oid %d\n", xu->oid);
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changecolor(fp, 3);
-        drawCrect(fp, xox+(xu->lx+xu->rx)/2, xoy+(xu->by+xu->ty)/2,
-            xu->rx-xu->lx, xu->ty-xu->by);
+    drawCrect(fp, xox+(xu->lx+xu->rx)/2, xoy+(xu->by+xu->ty)/2,
+        xu->rx-xu->lx, xu->ty-xu->by);
     if(0*xu->cob.rotateval) {
     }
-    fprintf(fp, "grestore %% for bbox\n");
+    fprintf(fp, "  grestore %% for bbox\n");
 
     return 0;
 }
@@ -447,15 +447,15 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 int
 epsdraw_bbox_glbrt(FILE *fp, ob *xu)
 {
-    fprintf(fp, "%% bbox guide with GLBRT (%d %d %d %d)\n",
+    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
             xu->glx, xu->gby, xu->grx, xu->gty);
-    fprintf(fp, "gsave %% for bbox of oid %d\n", xu->oid);
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changecolor(fp, 5);
-        drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
-            xu->grx-xu->glx, xu->gty-xu->gby);
+    drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby);
     if(0*xu->cob.rotateval) {
     }
-    fprintf(fp, "grestore %% for bbox\n");
+    fprintf(fp, "  grestore %% for bbox\n");
 
     return 0;
 }
@@ -1681,23 +1681,14 @@ epsdraw_Xseglinearrow(FILE *fp,
     int x1i, y1i;
     int x2i, y2i;
 
-    Echo("%s: enter\n", __func__);
-
-    xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-
     /*
      *   x1,y1 x1i,y1i  x2i,y2i  x2,y2
      *     <---+--------------+---->
      */
 
-    if(draft_mode) {
-        fprintf(fp, "gsave\n");
-        changedraft(fp);
-        fprintf(fp, "  %d %d moveto\n", x1, y1);
-        fprintf(fp, "  %d %d lineto\n", x2, y2);
-        fprintf(fp, "  stroke\n");
-        fprintf(fp, "grestore\n");
-    }
+    Echo("%s: enter\n", __func__);
+
+    xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 
     fprintf(fp, "%% %s\n", __func__);
     fprintf(fp, "%%   xdir               %4d\n", xdir);
@@ -1705,6 +1696,15 @@ epsdraw_Xseglinearrow(FILE *fp,
     fprintf(fp, "%%   arrowhead-part     %4d fore-type %4d back-type %4d\n",
             xahpart, xahfore, xahback);
     fflush(fp);
+
+    if(draft_mode) {
+        fprintf(fp, "    gsave %% draft 1\n");
+        changedraft(fp);
+        fprintf(fp, "      %d %d moveto\n", x1, y1);
+        fprintf(fp, "      %d %d lineto\n", x2, y2);
+        fprintf(fp, "      stroke\n");
+        fprintf(fp, "    grestore\n");
+    }
 
 
     if(xahpart & AR_BACK) {
@@ -1742,6 +1742,7 @@ no_forehead:
 
     /*** BACK ARROW HEAD */
     if(x1i!=x1 || y1i!=y1) {
+        fprintf(fp, "%% back arrow head\n");
         fprintf(fp, "newpath\n");
         fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
             x1, y1, x1i, y1i);
@@ -1757,6 +1758,7 @@ no_forehead:
 
     /*** FORE ARROW HEAD */
     if(x2i!=x2 || y2i!=y2) {
+        fprintf(fp, "%% fore arrow head\n");
         fprintf(fp, "newpath\n");
         fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
             x2i, y2i, x2, y2);
@@ -2418,11 +2420,11 @@ Yepsdraw_linearrow(FILE *fp,
     Echo("%s: enter\n", __func__);
 
     if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
 #if 0
+        epsdraw_bbox(fp, xu);
         epsdraw_bbox_glbrt(fp, xu);
-        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
 #endif
+        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
     }
 
     if(!xu->cob.originalshape) {
@@ -5439,18 +5441,23 @@ epsdraw_box(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 apply:
 
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
+    fprintf(fp, "%%     bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
     fprintf(fp, "gsave %% for box\n");
 
     if(bbox_mode) {
 PP;
-        epsdraw_bbox(fp, xu);
-        fprintf(fp, "gsave\n");
-        fprintf(fp, "1 0 0 setrgbcolor\n");
-        fprintf(fp, "currentlinewidth 4 mul setlinewidth\n");
+#if 0
+        epsdraw_bbox_glbrt(fp, xu);
+#endif
+        epsdraw_bbox_lbrt(fp, 0, 0, xu);
+        fprintf(fp, "  gsave %% bbox skel\n");
+        fprintf(fp, "    1 0 0 setrgbcolor\n");
+        fprintf(fp, "    currentlinewidth 4 mul setlinewidth\n");
         drawCRrectskel2(fp, x1, y1, xu->wd, xu->ht, 0);
-        fprintf(fp, "grestore\n");
+        fprintf(fp, "  grestore %% bbox skel\n");
     }
 
+    fprintf(fp, " %% mainbody\n");
     fprintf(fp, "    %d %d translate\n", x1, y1);
     fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
 
@@ -7727,7 +7734,8 @@ P;
         __func__, xch->oid,
  xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey, xch->ox, xch->coy);
 
-    fprintf(fp, "%% oid %d START\n", xch->oid);
+    fprintf(fp, "%%%%%%%%%%%%\n");
+    fprintf(fp, "%% start oid %d\n", xch->oid);
 
     cha_reset(&xch->cch);
 
@@ -8236,6 +8244,10 @@ epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
 P;
     Echo("%s: cwd %d cht %d crt %d csc %.3f\n",
         __func__, cwd, cht, crt, csc);
+    Echo(" xch %d x %d\n", xch->wd, xch->ht);
+    Echo("     bb g %d %d %d %d\n", xch->glx, xch->gby, xch->grx, xch->gty);
+    Echo("     bb _ %d %d %d %d\n", xch->lx,  xch->by,  xch->rx,  xch->ty);
+    Echo(" outmargin %d\n", outmargin);
 
 #if 0
 int epsdraftfontsize = 10;
@@ -8249,6 +8261,9 @@ fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: %d %d %d %d\n",
     0, 0, (int)(csc*xch->wd)+outmargin*2, (int)(csc*xch->ht)+outmargin*2);
 #endif
+
+    Echo(" %d %d %d %d\n", 
+        0, 0, (int)(csc*xch->wd)+outmargin*2, (int)(csc*xch->ht)+outmargin*2);
 
 #if 0
 fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
@@ -8269,6 +8284,14 @@ fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 
     printdefs(fp);
 
+
+    /***
+     *** main-body
+     ***/
+    fprintf(fp, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
+    fprintf(fp, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
+    fprintf(fp, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
+    fprintf(fp, "%%%% START\n");
 
 #if 0
     if(crt>0) {
@@ -8294,13 +8317,16 @@ fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
         -xch->glx+outmargin, -xch->gby+outmargin);
 #endif
 
-#if 1
+#if 0
     fprintf(fp, "%d %d translate\n", outmargin, outmargin);
-/*
-    fprintf(fp, "0.01 0.01 scale\n");
-*/
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
     fprintf(fp, "%d %d translate\n", -xch->glx, -xch->gby);
+#endif
+
+#if 1
+    fprintf(fp, "%d %d translate\n", outmargin, outmargin);
+    fprintf(fp, "%.3f %.3f scale\n", csc, csc);
+    fprintf(fp, "%d %d translate\n", -xch->lx, -xch->by);
 #endif
 
 #if 0
@@ -8320,6 +8346,7 @@ fprintf(fp, "%d %d %d %d rect\n",
     xch->glx, xch->gby, xch->grx, xch->gty);
 #endif
 
+
     if(grid_mode) {
         /* grid */
         int x, y;
@@ -8327,32 +8354,65 @@ fprintf(fp, "%d %d %d %d rect\n",
 
         gp = def_gridpitch;
 
+#define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor\n");
+#define GGL fprintf(fp, "  0.8 0.8 0.8 setrgbcolor\n");
+
         fprintf(fp, "%%\n%% grid\n");
         fprintf(fp, "gsave\n");
-        fprintf(fp, "  0.8 0.8 0.8 setrgbcolor\n");
-        for(x=-5*gp;x<=5*gp;x+=gp) {
+        fprintf(fp, "  %d setlinewidth\n", def_linethick/4);
+        GGH;
+
+#if 1
+        for(x=-def_gridrange;x<=def_gridrange;x++) {
+            if(x%5==0) GGL;
             fprintf(fp, "  %d -%d moveto 0 %d rlineto stroke\n",
-                x, 5*gp, 10*gp);
+                x*gp, def_gridrange*gp, (2*def_gridrange)*gp);
+            if(x%5==0) GGH;
         }
-        for(y=-5*gp;y<=5*gp;y+=gp) {
+        for(y=-def_gridrange;y<=def_gridrange;y++) {
+            if(y%5==0) GGL;
             fprintf(fp, "  -%d %d moveto %d 0 rlineto stroke\n",
-                5*gp, y, 10*gp);
+                def_gridrange*gp, y*gp, (2*def_gridrange)*gp);
+            if(y%5==0) GGH;
         }
+#endif
+
+#if 0
+        for(x=-def_gridrange*gp;x<=def_gridrange*gp;x+=gp) {
+            if(x%5==0) GGL;
+            fprintf(fp, "  %d -%d moveto 0 %d rlineto stroke\n",
+                x, def_gridrange*gp, (2*def_gridrange)*gp);
+            if(x%5==0) GGH;
+        }
+        for(y=-def_gridrange*gp;y<=def_gridrange*gp;y+=gp) {
+            if(y%5==0) GGL;
+            fprintf(fp, "  -%d %d moveto %d 0 rlineto stroke\n",
+                def_gridrange*gp, y, (2*def_gridrange)*gp);
+            if(y%5==0) GGH;
+        }
+#endif
 
         changehot(fp);
+        fprintf(fp, "  %d setlinewidth\n", def_linethick);
         fprintf(fp, "  0 %d moveto 0 %d lineto stroke\n",
-            -5*gp, 5*gp);
+            -def_gridrange*gp, def_gridrange*gp);
         fprintf(fp, "  %d 0 moveto %d 0 lineto stroke\n",
-            -5*gp, 5*gp);
+            -def_gridrange*gp, def_gridrange*gp);
         fprintf(fp, "grestore\n");
     }
 
     if(bbox_mode) {
-        fprintf(fp, "%%\n%% bb\n");
+        fprintf(fp, "%%\n%% whole bb g %d %d %d %d\n",
+                        xch->glx, xch->gby, xch->grx, xch->gty);
+        fprintf(fp,     "%% whole bb _ %d %d %d %d\n",
+                        xch->lx, xch->by, xch->rx, xch->ty);
         fprintf(fp, "gsave\n");
         changeground(fp);
         fprintf(fp, "  %d setlinewidth\n", def_linedecothick);
+#if 0
         drawrectcm(fp, xch->glx, xch->gby, xch->grx, xch->gty, "whole");
+#endif
+        drawrectcm(fp, xch->lx, xch->by, xch->rx, xch->ty, "whole");
         fprintf(fp, "grestore\n");
     }
 
