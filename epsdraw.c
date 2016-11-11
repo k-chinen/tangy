@@ -8360,8 +8360,8 @@ fprintf(fp, "%d %d %d %d rect\n",
 
         gp = def_gridpitch;
 
-#define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor\n");
-#define GGL fprintf(fp, "  0.8 0.8 0.8 setrgbcolor\n");
+#define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/4);
+#define GGL fprintf(fp, "  0.6 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/2);
 
         fprintf(fp, "%%\n%% grid\n");
         fprintf(fp, "gsave\n");

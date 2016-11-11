@@ -2030,35 +2030,34 @@ int
 print_usage()
 {
     printf("tangy - picture generator according to special language\n");
-    printf("usage: tangy [option] [files]\n");
-    printf("option:\n");
-    printf("    -h          print this message\n");
-    printf("    -m          print hints for language\n");
-    printf("    -v          print version\n");
-    printf("    -o file     set output file (default '%s')\n",
+    printf("usage: tangy [option]\n");
+    printf("option:     ### bp is bigpoint = 1/72inch (c.f. 1cm=28.34bp)\n");
+    printf("    -h      print this message\n");
+    printf("    -m      print hints for language\n");
+    printf("    -v      print version\n");
+    printf("    -o file set output file (default '%s')\n",
             outfile);
-    printf("    -u num      set unit by 0.01bp=0.01/72inch (default %d)\n",
+    printf("    -u num  set unit by 0.01bp (default %d)\n",
             objunit);
-    printf("    -M num      set EPS outside margin by bp (default %d)\n",
+    printf("    -M num  set EPS outside margin by bp (default %d)\n",
             epsoutmargin);
-    printf("    -g          draw grid\n");
-    printf("    -G num      set grid pitch in bp (default %d)\n", 
+    printf("    -g      draw grid\n");
+    printf("    -G num  set grid pitch in bp (default %d)\n", 
             def_gridpitch);
-    printf("    -b          draw boundingbox of objects\n");
-    printf("    -i          draw object IDs\n");
-    printf("    -l          print object list for debug\n");
-    printf("    -c          print color list for debug\n");
-    printf("                    c.f. 1cm=28.34bp, 1inch=72bp\n");
+    printf("    -R num  set grid range (how many times of pitch)\n");
+    printf("    -b      draw boundingbox of objects\n");
+    printf("    -i      draw object IDs\n");
+    printf("    -l      print object list for debug\n");
+    printf("    -c      print color list for debug\n");
     printf("following itmes are reserved for future. do not use.\n");
-    printf("   *-d          draft mode\n");
-    printf("   *-L          draw labels\n");
-    printf("   *-D          debug mode\n");
-    printf("   *-v          verbose mode\n");
+    printf("   *-d      draft mode\n");
+    printf("   *-L      draw labels\n");
+    printf("   *-D      debug mode\n");
+    printf("   *-v      verbose mode\n");
     printf("\n");
-    printf("   *-r          draw ruler\n");
-    printf("   *-R num      set grid range (how many times of pitch)\n");
-    printf("   *-s scale    set scale\n");
-    printf("   *-n          no draw\n");
+    printf("   *-r      draw ruler\n");
+    printf("   *-s num  set scale\n");
+    printf("   *-n      no draw\n");
 
     return 0;
 }
