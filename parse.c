@@ -806,7 +806,7 @@ parseobj(char *p)
     nob->cob.outlinethick   = def_linethick;
     nob->cob.hatchpitch     = def_hatchpitch;
     nob->cob.hatchthick     = def_hatchthick;
-    nob->cob.fillcolor      = -1;
+    nob->cob.fillcolor      = 0;
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
