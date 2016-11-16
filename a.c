@@ -2002,7 +2002,7 @@ P;
     }
 #endif
 
-#if 1
+#if 0
     V(objunit);
     V(def_arrowsize);
     V(def_linethick);
@@ -2154,22 +2154,32 @@ print_param()
 #define QPV(x)  \
     printf("    %-24s %7.3f\n", #x, x);
 
-    printf("tangy parameters: actual size is solved those factors and unit-size.\n");
-    printf("        arrowsize = arrowsizefactor * objectunit\n\n");
-    QPV(arrowsizefactor);
-    QPV(warrowsizefactor);
-    QPV(linethickfactor);
-    QPV(linedecothickfactor);
-    QPV(wlinethickfactor);
-    QPV(barrowgapfactor);
-    QPV(textheightfactor);
-    QPV(textdecentfactor);
-    QPV(textbgmarginfactor);
-    QPV(hatchthickfactor);
-    QPV(hatchpitchfactor);
+    printf("tangy parameters: actual value is solved those factors and unit-size.\n");
+    printf("    c.f.  arrowsize = arrowsizefactor * objectunit\n");
+    printf("                                          %5d\n", objunit);
+    printf("\n");
 
 #undef QPV
 
+    printf("    %-24s %7s %7s\n", "name", "value", "factor");
+    printf("    ---\n");
+#define QPV(x)  \
+    printf("    %-24s %7d %7.3f\n", #x, def_ ## x, x ## factor);
+
+    QPV(arrowsize);
+    QPV(warrowsize);
+    QPV(linethick);
+    QPV(linedecothick);
+    QPV(wlinethick);
+    QPV(barrowgap);
+    QPV(textdecent);
+/*
+    QPV(textbgmargin);
+*/
+    QPV(hatchthick);
+    QPV(hatchpitch);
+
+#undef QPV
     return 0;
 }
 
@@ -2204,6 +2214,7 @@ main(int argc, char *argv[])
             exit(0);
             break;
         case 'P':
+            recalcsizeparam(); /* XXX */
             print_param();
             exit(0);
             break;

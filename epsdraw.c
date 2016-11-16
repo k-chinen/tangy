@@ -9352,7 +9352,11 @@ P;
     }
 
 #if 1
-    if(xch->cob.fillhatch>=0 && xch->cob.fillcolor>=0) {
+/*
+    (xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) 
+*/
+    if(xch->cob.outlinethick>0)
+    {
         fprintf(fp, "%% chunk itself START\n");
         fprintf(fp, 
         "%% SELF gox,goy %d,%d ox,oy %d,%d x,y %d,%d w,h %d,%d\n",
@@ -9822,6 +9826,7 @@ epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
 {
     int ik;
     int i;
+    int epswd, epsht;
 
 P;
     Echo("%s: cwd %d cht %d crt %d csc %.3f\n",
@@ -9831,36 +9836,20 @@ P;
     Echo("     bb _ %d %d %d %d\n", xch->lx,  xch->by,  xch->rx,  xch->ty);
     Echo(" epsoutmargin %d\n", epsoutmargin);
 
-#if 0
-int epsdraftfontsize = 10;
-int epsdraftgap = 5;
-#endif
     epsdraftfontsize = (int)((double)10/100*objunit);
     epsdraftgap      = (int)((double)5/100*objunit);
 
+    epswd = (int)(csc*xch->wd)+epsoutmargin*2;
+    epsht = (int)(csc*xch->ht)+epsoutmargin*2;
+
+    Echo(" %d %d %d %d\n", 0, 0, epswd, epsht);
+
 #if 1
-fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
+    fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
 %%%%BoundingBox: %d %d %d %d\n",
-    0, 0, (int)(csc*xch->wd)+epsoutmargin*2, (int)(csc*xch->ht)+epsoutmargin*2);
+        0, 0, epswd, epsht);
 #endif
 
-    Echo(" %d %d %d %d\n", 
-        0, 0, (int)(csc*xch->wd)+epsoutmargin*2, (int)(csc*xch->ht)+epsoutmargin*2);
-
-#if 0
-fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
-%%%%BoundingBox: %d %d %d %d\n",
-    0, 0, xch->wd+epsoutmargin*2, xch->ht+epsoutmargin*2);
-#endif
-
-#if 0
-fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
-%%%%BoundingBox: %d %d %d %d\n",
-    xch->glx-epsoutmargin,
-    xch->gby-epsoutmargin,
-    xch->grx+epsoutmargin,
-    xch->gty+epsoutmargin);
-#endif
 
     printobjlist(fp, "% ", xch);
 
@@ -9875,59 +9864,12 @@ fprintf(fp,  "%%!PS-Adobe-3.0 EPSF-3.0\n\
     fprintf(fp, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
     fprintf(fp, "%%%% START\n");
 
-#if 0
-    if(crt>0) {
-        fprintf(fp, "%d 0 translate\n", cht);
-        fprintf(fp, "%d rotate\n", crt);
-    }
-#endif
-
-#if 0
-    fprintf(fp, "%.3f %.3f scale\n", csc, csc);
-#endif
-
-#if 0
-    fprintf(fp, "%d %d translate\n",
-        -epsoutmargin, -epsoutmargin);
-#endif
-#if 0
-    fprintf(fp, "%d %d translate\n",
-        epsoutmargin, epsoutmargin);
-#endif
-#if 0
-    fprintf(fp, "%d %d translate\n",
-        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin);
-#endif
-
-#if 0
-    fprintf(fp, "%d %d translate\n", epsoutmargin, epsoutmargin);
-    fprintf(fp, "%.3f %.3f scale\n", csc, csc);
-    fprintf(fp, "%d %d translate\n", -xch->glx, -xch->gby);
-#endif
-
-#if 1
     fprintf(fp, "%d %d translate\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
     fprintf(fp, "%d %d translate\n", -xch->lx, -xch->by);
-#endif
-
-#if 0
-    fprintf(fp, "%d %d translate\n",
-        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin+xch->ht);
-#endif
-#if 0
-    fprintf(fp, "%d %d translate\n",
-        -xch->glx+epsoutmargin, -xch->gby+epsoutmargin);
-#endif
 
     changedraft(fp);
     fprintf(fp, "  %d setlinewidth\n", def_linethick);
-
-#if 0
-fprintf(fp, "%d %d %d %d rect\n",
-    xch->glx, xch->gby, xch->grx, xch->gty);
-#endif
-
 
     if(grid_mode) {
         /* grid */
@@ -10002,11 +9944,10 @@ P;
         ik = epsdraw_rulerframe(fp, xch, x, y);
     }
     
-
-fprintf(fp, "showpage\n");
-fprintf(fp, "%%%%EOF\n");
-fprintf(fp, "%%%% END EPS\n");
-fflush(fp);
+    fprintf(fp, "showpage\n");
+    fprintf(fp, "%%%%EOF\n");
+    fprintf(fp, "%%%% END EPS\n");
+    fflush(fp);
 
     return ik;
 }
