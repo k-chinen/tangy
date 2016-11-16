@@ -15,6 +15,7 @@
 #include "varray.h"
 #include "color.h"
 
+#include "qbb.h"
 
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))
@@ -731,6 +732,7 @@ typedef struct _ob {
 
     int  pst;
 
+
                         /***** LOGICAL *****/
     int  sx, sy;        /* start */
     int  ex, ey;        /* end */
@@ -744,6 +746,8 @@ typedef struct _ob {
 
     int  fx, fy;        /* final point, sometime be used to draw next object */
     int  jx, jy;        /* jo point, sometime be used to draw starting point */
+
+    qbb_t localbb;
 
     int  sizesolved;
     int  drawed;
@@ -759,6 +763,8 @@ typedef struct _ob {
     int  gex, gey;
     int  glx, grx;
     int  gby, gty;
+
+    qbb_t globalbb;
 
     ch  vch;
     struct obattr vob;
@@ -1477,6 +1483,9 @@ P;
     varray_entrysprintfunc(r->cob.ssar, ss_sprintf);
     varray_entrysprintfunc(r->cob.segopar, segop_sprintf);
     varray_entrysprintfunc(r->cob.segar, seg_sprintf);
+
+    qbb_reset(&r->localbb);
+    qbb_reset(&r->globalbb);
 
     return r;
 }

@@ -11,16 +11,18 @@ int epsdraftgap         = 5;
 
 int debug_clip = 0;
 
-#define PP  fprintf(fp, "%% %s:%d\n", __func__, __LINE__); fflush(fp);
+#define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
 
 /*
  * Marking
- *  	MX	cross
- *		MP	plus
- *		MC	circle
- *		MCF	circle fill
- *		MQ  square
- *		MQF square fill
+ *      MX  cross
+ *      MP  plus
+ *      MC  circle
+ *      MCF circle fill
+ *      MQ  square
+ *      MQF square fill
+ *      MT  triangle
+ *      MTF triangle fill
  */
 
 #define MX(c,x,y) \
@@ -30,7 +32,7 @@ int debug_clip = 0;
     fprintf(fp, "  newpath %d %d moveto %d %d rlineto\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40); \
     fprintf(fp, "  %d %d moveto %d %d rlineto stroke grestore\n", x-objunit/40, y+objunit/40, 2*objunit/40, -2*objunit/40); 
 #define MP(c,x,y) \
-    fprintf(fp, "%% MX %d\n", __LINE__); \
+    fprintf(fp, "%% MP %d\n", __LINE__); \
     fprintf(fp, "  gsave"); changecolor(fp, c); \
     fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "  newpath %d %d moveto %d 0 rlineto\n", x-objunit/40, y, 2*objunit/40); \
@@ -46,15 +48,34 @@ int debug_clip = 0;
     fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "  newpath %d %d %d 0 360 arc fill grestore\n", x, y, objunit/40);
 #define MQ(c,x,y) \
-    fprintf(fp, "%% MX %d\n", __LINE__); \
+    fprintf(fp, "%% MQ %d\n", __LINE__); \
     fprintf(fp, "  gsave"); changecolor(fp, c); \
     fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "  newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath stroke grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
 #define MQF(c,x,y) \
-    fprintf(fp, "%% MX %d\n", __LINE__); \
+    fprintf(fp, "%% MQF %d\n", __LINE__); \
     fprintf(fp, "  gsave"); changecolor(fp, c); \
     fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "  newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath fill grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
+#define MT(c,x,y,a) \
+    fprintf(fp, "%% MT %d\n", __LINE__); \
+    fprintf(fp, "  gsave"); changecolor(fp, c); \
+    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "  %d %d translate %d rotate\n", x, y, a); \
+    fprintf(fp, "  %d %d translate\n", -2*objunit/40, 0); \
+    fprintf(fp, "  0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
+    fprintf(fp, "  closepath stroke\n"); \
+    fprintf(fp, "  grestore\n");
+#define MTF(c,x,y,a) \
+    fprintf(fp, "%% MTF %d\n", __LINE__); \
+    fprintf(fp, "  gsave"); changecolor(fp, c); \
+    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "  %d %d translate %d rotate\n", x, y, a); \
+    fprintf(fp, "  %d %d translate\n", -2*objunit/40, 0); \
+    fprintf(fp, "  0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
+    fprintf(fp, "  closepath fill\n"); \
+    fprintf(fp, "  grestore\n");
+
 
 int
 psescape(char *dst, int dlen, char* src)
@@ -736,7 +757,10 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
     case LT_DOTTED:
     case LT_CHAINED:
     case LT_DOUBLECHAINED:
+#if 0
         sepw = def_linedecothick/4;
+#endif
+        sepw = def_linedecothick/2;
         break;
     case LT_DASHED:
         sepw = def_linedecothick;
@@ -789,10 +813,36 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
                 break;
             }
 
+#if 0
             if(j%2==0) {
                 fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
                     ux, uy, nx, ny);
             }
+#endif
+
+            if(ltype==LT_DOTTED||ltype==LT_DASHED) {
+                if(j%2==0) {
+                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                        ux, uy, nx, ny);
+                }
+            }
+            if(ltype==LT_CHAINED) {
+                if(j%7==4||j%7==6) {
+                }
+                else {
+                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                        ux, uy, nx, ny);
+                }
+            }
+            if(ltype==LT_DOUBLECHAINED) {
+                if(j%9==4||j%9==6||j%9==8) {
+                }
+                else {
+                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                        ux, uy, nx, ny);
+                }
+            }
+            
             j++;
         }
 
@@ -1755,8 +1805,12 @@ epsdraw_Xseglinearrow(FILE *fp,
             (xahback==AH_REVWIRE)) {
             goto no_backhead;
         }
+#if 0
         dx = def_arrowsize*2*cos((xdir)*rf);
         dy = def_arrowsize*2*sin((xdir)*rf);
+#endif
+        dx = def_arrowsize*cos((xdir)*rf);
+        dy = def_arrowsize*sin((xdir)*rf);
         x1i = x1 + dx;
         y1i = y1 + dy;
     }
@@ -1771,8 +1825,12 @@ no_backhead:
             (xahfore==AH_REVWIRE)) {
             goto no_forehead;
         }
+#if 0
         dx = def_arrowsize*2*cos((xdir+180)*rf);
         dy = def_arrowsize*2*sin((xdir+180)*rf);
+#endif
+        dx = def_arrowsize*cos((xdir+180)*rf);
+        dy = def_arrowsize*sin((xdir+180)*rf);
         x2i = x2 + dx;
         y2i = y2 + dy;
     }
@@ -2260,6 +2318,198 @@ out:
 #define ADIR_ARC    (1)
 #define ADIR_ARCN   (2)
 
+int
+epsdraw_segarcXSEP(FILE *fp, 
+    int ltype, int lt, int lc,
+    int arcx, int arcy, int rad, int ang1, int ang2, int adir)
+{
+    int r;
+    int x1, y1, x2, y2;
+    int fr, pr;
+    int f4;
+    int ad;
+    double a;
+    int pp;
+    double pa;
+    double na;
+    double ra;
+    double *aa;
+    int    al;
+    int    c;
+    int    i;
+
+    int nx, ny;
+    int gx, gy;
+    int hx, hy, tx, ty;
+    int oxdir;
+
+    Echo("%s: arcx,y %d,%d rad %d ang1,arg2 %d,%d adir %d\n",
+        __func__, arcx, arcy, rad, ang1, ang2, adir);
+    fprintf(fp, "%% %s: arcx,y %d,%d rad %d ang1,arg2 %d,%d adir %d\n",
+        __func__, arcx, arcy, rad, ang1, ang2, adir);
+    fprintf(fp, "%% ltype %d lt %d lc %d\n", ltype, lt, lc);
+
+    x1 = arcx + (int)((double)rad*cos(ang1*rf));
+    y1 = arcy + (int)((double)rad*sin(ang1*rf));
+    x2 = arcx + (int)((double)rad*cos(ang2*rf));
+    y2 = arcy + (int)((double)rad*sin(ang2*rf));
+
+    if(adir==ADIR_ARC) {
+        ad = ang2 - ang1;
+    }
+    else {
+        ad = ang1 - ang2;
+    }
+
+    fr = (int)((double)rad*M_PI);
+    pr = (int)((double)fr*ad/360.0);
+    f4 = (int)((double)fr/4.0);
+
+    fprintf(fp, "  %% ad %d fr %d pr %d f4 %d\n", ad, fr, pr, f4);
+
+    if(ltype==LT_DASHED) {
+        pp = def_linedecothick;
+    }
+    else 
+    if(ltype==LT_DOTTED) {
+        pp = def_linedecothick/2;
+    }
+    else {
+        pp = def_linedecothick/4;
+    }
+
+    pa = 2*M_PI*(((double)pp)/fr);
+    al = (int)(2*M_PI*(((double)fr)/pp));
+
+    fprintf(fp, "  %% pp %d pa %f al %d\n", pp, pa, al);
+    fflush(fp);
+    fflush(stdout);
+
+    aa = (double*)alloca(sizeof(double)*(al+3));
+    if(!aa) {
+        fprintf(stdout, "ERROR no-memory\n");
+        return -1;
+    }
+
+    fprintf(fp, "gsave %% arcXSEP\n");
+
+    if(adir==ADIR_ARC) {
+        oxdir = 0;
+    }
+    else {
+        oxdir = 180;
+    }
+    hx = pp*cos((oxdir)*rf);
+    hy = pp*sin((oxdir)*rf);
+    tx = pp*cos((oxdir+90)*rf);
+    ty = pp*sin((oxdir+90)*rf);
+
+    c = i = 0;
+    if(adir==ADIR_ARC) {
+        fprintf(fp, "%% a arc %f..%f by %f\n", ang1*rf, ang2*rf, pa);
+        for(a=ang1*rf; a<=ang2*rf; a+=pa) {
+            if(i>al-1) {
+                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            }
+            fprintf(fp, "%% a %f arc  set i %d/%d\n", a, i, al);
+            aa[i++] = a;
+        }
+    }
+    else {
+        fprintf(fp, "%% a arcn %f..%f by %f\n", ang1*rf, ang2*rf, pa);
+        for(a=ang1*rf; a>=ang2*rf; a-=pa) {
+            if(i>al-1) {
+                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            }
+            fprintf(fp, "%% a %f arcn set i %d/%d\n", a, i, al);
+            fflush(fp);
+            aa[i++] = a;
+        }
+    }
+    c = i;
+
+    changethick(fp, lt);
+    changecolor(fp, lc);
+
+    for(i=0;i<c;i++) {
+#if 0
+        fprintf(fp, "%% tyr use i %d\n", i);
+        fflush(fp);
+        fflush(stdout);
+#endif
+
+        if(i>al-1) {
+            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+        }
+        a = aa[i];
+        fprintf(fp, "%% a %f use i %d\n", a, i);
+
+        gx = arcx + rad*cos(a);
+        gy = arcy + rad*sin(a);
+#if 0
+        MP(1, gx, gy);
+#endif
+
+        ra = a/rf+90;
+#if 0
+        fprintf(fp, "%% ra %f\n", ra);
+#endif
+
+        if(ltype==LT_CHAINED||ltype==LT_DOUBLECHAINED) {
+            na = a + pa;
+        }
+        else {
+            na = a + pa/2;
+        }
+#if 0
+        fprintf(fp, "%% na %f\n", na);
+#endif
+
+#if 0
+        nx = gx + pp*cos(na*rf);
+        ny = gy + pp*sin(na*rf);
+#endif
+        nx = arcx + rad*cos(na);
+        ny = arcy + rad*sin(na);
+
+        switch(ltype) {
+        default:
+            break;
+        case LT_DOTTED:
+        case LT_DASHED:
+            fprintf(fp,
+                "newpath %.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                (double)gx, (double)gy, (double)nx, (double)ny);
+            break;
+        case LT_CHAINED:
+fprintf(fp, "%% i%%7 %d\n", i%7);
+            if(i%7==4||i%7==6) {
+                /*nothing*/
+            }
+            else {
+            fprintf(fp,
+                "newpath %.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                (double)gx, (double)gy, (double)nx, (double)ny);
+            }
+            break;
+        case LT_DOUBLECHAINED:
+fprintf(fp, "%% i%%9 %d\n", i%9);
+            if(i%9==4||i%9==6||i%9==8) {
+                /*nothing*/
+            }
+            else {
+            fprintf(fp,
+                "newpath %.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                (double)gx, (double)gy, (double)nx, (double)ny);
+            }
+            break;
+        }
+    }
+
+    fprintf(fp, "grestore %% arcXSEP\n");
+
+    return r;
+}
 
 int
 epsdraw_segarcXTICK(FILE *fp, 
@@ -2275,6 +2525,7 @@ epsdraw_segarcXTICK(FILE *fp,
     int pp;
     double pa;
     double na;
+    double ra;
     double *aa;
     int    al;
     int    c;
@@ -2368,56 +2619,60 @@ epsdraw_segarcXTICK(FILE *fp,
     c = i;
 
 
-        changethick(fp, lt);
-        changecolor(fp, lc);
+    changethick(fp, lt);
+    changecolor(fp, lc);
 
-        for(i=0;i<c;i++) {
+    for(i=0;i<c;i++) {
 #if 0
-            fprintf(fp, "%% tyr use i %d\n", i);
-            fflush(fp);
-            fflush(stdout);
+        fprintf(fp, "%% tyr use i %d\n", i);
+        fflush(fp);
+        fflush(stdout);
 #endif
 
-            if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
-            }
-            a = aa[i];
-            fprintf(fp, "%% a %f use i %d\n", a, i);
-
-            gx = arcx + rad*cos(a);
-            gy = arcy + rad*sin(a);
-            MP(1, gx, gy);
-
-            na = a/rf+90;
-fprintf(fp, "%% na %f\n", na);
-
-            switch(ltype) {
-            case LT_CIRCLE:
-                fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc fill\n",
-                    (double)gx, (double)gy, (double)pp/2);
-                break;
-            case LT_WCIRCLE:
-                fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc stroke\n",
-                    (double)gx, (double)gy, (double)pp/2);
-                break;
-            case LT_TRIANGLE:           
-                fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
-                    (double)gx, (double)gy, (int)na);
-                fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto %.2f %.2f lineto closepath fill\n",
-                        (double)0, (double)0, (double)-tx, (double)-ty, (double)+hx, (double)+hy, (double)+tx, (double)+ty);
-                fprintf(fp, "grestore\n");
-                break;
-
-            case LT_MOUNTAIN:
-                fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
-                    (double)gx, (double)gy, (int)na);
-                fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto stroke\n",
-                    (double)-tx, (double)-ty, (double)hx, (double)hy, (double)tx, (double)ty);
-
-                fprintf(fp, "grestore\n");
-                break;
-            }
+        if(i>al-1) {
+            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
         }
+        a = aa[i];
+        fprintf(fp, "%% a %f use i %d\n", a, i);
+
+        gx = arcx + rad*cos(a);
+        gy = arcy + rad*sin(a);
+#if 0
+        MP(1, gx, gy);
+#endif
+
+        ra = a/rf+90;
+#if 0
+        fprintf(fp, "%% ra %f\n", ra);
+#endif
+
+        switch(ltype) {
+        case LT_CIRCLE:
+            fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc fill\n",
+                (double)gx, (double)gy, (double)pp/2);
+            break;
+        case LT_WCIRCLE:
+            fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc stroke\n",
+                (double)gx, (double)gy, (double)pp/2);
+            break;
+        case LT_TRIANGLE:           
+            fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
+                (double)gx, (double)gy, (int)ra);
+            fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto %.2f %.2f lineto closepath fill\n",
+                    (double)0, (double)0, (double)-tx, (double)-ty, (double)+hx, (double)+hy, (double)+tx, (double)+ty);
+            fprintf(fp, "grestore\n");
+            break;
+
+        case LT_MOUNTAIN:
+            fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
+                (double)gx, (double)gy, (int)ra);
+            fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto stroke\n",
+                (double)-tx, (double)-ty, (double)hx, (double)hy, (double)tx, (double)ty);
+
+            fprintf(fp, "grestore\n");
+            break;
+        }
+    }
 
     fprintf(fp, "grestore %% arcXTICK\n");
 
@@ -2468,20 +2723,20 @@ epsdraw_segarcX(FILE *fp,
     fprintf(fp, "  %% ad %d fr %d pr %d f4 %d\n", ad, fr, pr, f4);
     fflush(fp);
 
-#if 1
+#if 0
     fprintf(fp, "gsave %% arcX\n");
 
     hx = arcx + (int)((double)rad/2*cos(ang2*rf));
     hy = arcy + (int)((double)rad/2*sin(ang2*rf));
 
-    MQF(4, hx, hy);
-
-    MP(4, arcx, arcy);
-    fprintf(fp, "  0 0 1 setrgbcolor\n");
 /*
-    fprintf(fp, "  currentlinewidth 4 mul setlinewidth\n");
+    MQ(4, hx, hy);
 */
 
+    MX(4, arcx, arcy);
+    fprintf(fp, "  0 0 1 setrgbcolor\n");
+    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n");
+
     if(adir==ADIR_ARC) {
         fprintf(fp, "  newpath\n");
         fprintf(fp, "  %d %d %d %d %d arc  stroke %% arcx arc\n",
@@ -2492,27 +2747,16 @@ epsdraw_segarcX(FILE *fp,
         fprintf(fp, "  %d %d %d %d %d arcn stroke %% arcx arcn\n",
             arcx, arcy, rad/2, ang1, ang2);
     }
-    fprintf(fp, "grestore %% arcX\n");
-#endif
-
-#if 0
-    fprintf(fp, "gsave %% arcX\n");
-
-    fprintf(fp, "  1 0 0 setrgbcolor\n");
-    MX(1, arcx, arcy);
-    fprintf(fp, "  currentlinewidth 4 mul setlinewidth\n");
 
     if(adir==ADIR_ARC) {
-        fprintf(fp, "  newpath\n");
-        fprintf(fp, "  %d %d %d %d %d arc  stroke %% arcx arc\n",
-            arcx, arcy, rad, ang1, ang2);
+        MTF(4, hx, hy, ang2+90);
     }
     else {
-        fprintf(fp, "  newpath\n");
-        fprintf(fp, "  %d %d %d %d %d arcn stroke %% arcx arcn\n",
-            arcx, arcy, rad, ang1, ang2);
+        MTF(4, hx, hy, ang2-90);
     }
+
     fprintf(fp, "grestore %% arcX\n");
+
 #endif
 
     switch(ltype) {
@@ -2520,28 +2764,30 @@ epsdraw_segarcX(FILE *fp,
     case LT_DASHED:
     case LT_CHAINED:
     case LT_DOUBLECHAINED:
-        rv = epsdraw_seglineSEP(fp, ltype, lt, lc, x1, y1, x2, y2);
-        break;
-    case LT_WAVED:
-    case LT_ZIGZAG:
-        rv = epsdraw_seglineTICK2(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_segarcXSEP(fp, ltype, lt, lc,
+                arcx, arcy, rad, ang1, ang2, adir);
         break;
     case LT_CIRCLE:
     case LT_WCIRCLE:
     case LT_TRIANGLE:
     case LT_MOUNTAIN:
-#if 0
-        rv = epsdraw_seglineTICK(fp, ltype, lt, lc, x1, y1, x2, y2);
-#endif
         rv = epsdraw_segarcXTICK(fp, ltype, lt, lc,
                 arcx, arcy, rad, ang1, ang2, adir);
         break;
+#if 0
+    case LT_WAVED:
+    case LT_ZIGZAG:
+        rv = epsdraw_seglineTICK2(fp, ltype, lt, lc, x1, y1, x2, y2);
+        break;
+#endif
+#if 0
     case LT_DOUBLED:
         rv = epsdraw_seglineW(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_CUTTED:
         rv = epsdraw_seglineM(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
+#endif
     case LT_SOLID:
     default:
         changethick(fp, lt);
@@ -2558,6 +2804,7 @@ epsdraw_segarcX(FILE *fp,
             fprintf(fp, "  %d %d %d %d %d arcn stroke %% arcx arcn\n",
                 arcx, arcy, rad, ang1, ang2);
         }
+        break;
     }
         
     return rv;
@@ -2979,8 +3226,10 @@ P;
                 arcx, arcy, s->rad, cdir-90, cdir-90+s->ang);
 #endif
 
+#if 0
             fprintf(fp, "  %d %d %d %d %d arc %% seg-arc\n",
                 arcx, arcy, s->rad, cdir-90, cdir-90+s->ang);
+#endif
 
 #if 1
             if(draft_mode) {
@@ -3050,8 +3299,10 @@ P;
             fprintf(fp, "  %d %d %d %d %d arcn stroke %% seg-arcn\n",
                 arcx, arcy, s->rad, cdir+90, cdir+90-s->ang);
 #endif
+#if 0
             fprintf(fp, "  %d %d %d %d %d arcn %% seg-arcn\n",
                 arcx, arcy, s->rad, cdir+90, cdir+90-s->ang);
+#endif
 
 #if 1
             if(draft_mode) {
