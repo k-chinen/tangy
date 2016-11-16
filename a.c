@@ -2043,7 +2043,8 @@ print_usage()
     printf("option:     ### bp is bigpoint = 1/72inch (c.f. 1cm=28.34bp)\n");
     printf("    -h      print this message\n");
     printf("    -m      print hints for language\n");
-    printf("    -v      print version\n");
+    printf("    -V      print version\n");
+    printf("    -P      print parameters\n");
     printf("    -o file set output file (default '%s')\n",
             outfile);
     printf("    -u num  set unit by 0.01bp (default %d)\n",
@@ -2053,7 +2054,8 @@ print_usage()
     printf("    -g      draw grid\n");
     printf("    -G num  set grid pitch in bp (default %d)\n", 
             def_gridpitch);
-    printf("    -R num  set grid range (how many times of pitch)\n");
+    printf("    -R num  set grid range; how many times of pitch (default %d)\n",
+        def_gridrange);
     printf("    -b      draw boundingbox of objects\n");
     printf("    -i      draw object IDs\n");
     printf("    -l      print object list for debug\n");
@@ -2147,6 +2149,31 @@ print_version()
 }
 
 int
+print_param()
+{
+#define QPV(x)  \
+    printf("    %-24s %7.3f\n", #x, x);
+
+    printf("tangy parameters: actual size is solved those factors and unit-size.\n");
+    printf("        arrowsize = arrowsizefactor * objectunit\n\n");
+    QPV(arrowsizefactor);
+    QPV(warrowsizefactor);
+    QPV(linethickfactor);
+    QPV(linedecothickfactor);
+    QPV(wlinethickfactor);
+    QPV(barrowgapfactor);
+    QPV(textheightfactor);
+    QPV(textdecentfactor);
+    QPV(textbgmarginfactor);
+    QPV(hatchthickfactor);
+    QPV(hatchpitchfactor);
+
+#undef QPV
+
+    return 0;
+}
+
+int
 main(int argc, char *argv[])
 {
     ob*   ch0;
@@ -2162,7 +2189,7 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "hmVvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv, "hmVPvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
         switch(flag) {
         case 'h':
             print_usage();
@@ -2174,6 +2201,10 @@ main(int argc, char *argv[])
             break;
         case 'V':
             print_version();
+            exit(0);
+            break;
+        case 'P':
+            print_param();
             exit(0);
             break;
         case 'v':

@@ -3,7 +3,7 @@
 #include "qbb.h"
 
 /* outside of scaling */
-int epsoutmargin        = 10;
+int epsoutmargin        = 16;
 
 /* inside of scaling */
 int epsdraftfontsize    = 10;
