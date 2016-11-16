@@ -3,7 +3,7 @@
 #include "qbb.h"
 
 /* outside of scaling */
-int epsoutmargin        = 5;
+int epsoutmargin        = 10;
 
 /* inside of scaling */
 int epsdraftfontsize    = 10;
@@ -2517,7 +2517,9 @@ epsdraw_segarcXTICK(FILE *fp,
     int arcx, int arcy, int rad, int ang1, int ang2, int adir)
 {
     int r;
+#if 0
     int x1, y1, x2, y2;
+#endif
     int fr, pr;
     int f4;
     int ad;
@@ -2541,10 +2543,12 @@ epsdraw_segarcXTICK(FILE *fp,
         __func__, arcx, arcy, rad, ang1, ang2, adir);
     fprintf(fp, "%% ltype %d lt %d lc %d\n", ltype, lt, lc);
 
+#if 0
     x1 = arcx + (int)((double)rad*cos(ang1*rf));
     y1 = arcy + (int)((double)rad*sin(ang1*rf));
     x2 = arcx + (int)((double)rad*cos(ang2*rf));
     y2 = arcy + (int)((double)rad*sin(ang2*rf));
+#endif
 
     if(adir==ADIR_ARC) {
         ad = ang2 - ang1;
@@ -2679,6 +2683,300 @@ epsdraw_segarcXTICK(FILE *fp,
     return r;
 }
 
+static
+int
+fitarc(FILE *fp, int x1, int y1, int x2, int y2, int ph)
+{
+    double na;
+    double ra;
+    double mx, my;
+    double d, r;
+    double px, py;
+
+    mx = ((double)x2+x1)/2;
+    my = ((double)y2+y1)/2;
+
+    d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    r = d/2;
+
+    na = atan2((y2-y1), (x2-x1))/rf;
+    if(ph==0) {
+        ra = na + 90;
+    }
+    if(ph==1) {
+        ra = na - 90;
+    }
+
+    px = mx + r*cos(ra*rf);
+    py = my + r*sin(ra*rf);
+
+#if 0
+    fprintf(fp, "gsave %d %d moveto %d %d lineto stroke grestore %% fitarc\n",
+        x1, y1, x2, y2);
+
+    fprintf(fp, "gsave %f %f moveto %f %f lineto stroke grestore %% fitarc\n",
+        mx, my, px, py);
+#endif
+
+    if(ph==0) {
+        fprintf(fp, "%f %f %f %f %f arcn %% fitarc\n",
+            mx, my, r, na - 180, na);
+    }
+    if(ph==1) {
+        fprintf(fp, "%f %f %f %f %f arc  %% fitarc\n",
+            mx, my, r, na - 180, na);
+    }
+
+    return 0;
+}
+
+int
+epsdraw_segarcXTICK2(FILE *fp, 
+    int ltype, int lt, int lc,
+    int arcx, int arcy, int rad, int ang1, int ang2, int adir)
+{
+    int r;
+#if 1
+    int x1, y1, x2, y2;
+#endif
+    int fr, pr;
+    int f4;
+    int ad;
+    double a;
+    int pp;
+    double pa;
+    double na;
+    double ra;
+    double *aa;
+    int    al;
+    int    c;
+    int    i;
+
+    int gx, gy;
+    int nx, ny;
+    int hx, hy, tx, ty;
+    int oxdir;
+
+    int px, py, qx, qy;
+    int ww;
+    int lx, ly;
+
+    Echo("%s: arcx,y %d,%d rad %d ang1,arg2 %d,%d adir %d\n",
+        __func__, arcx, arcy, rad, ang1, ang2, adir);
+    fprintf(fp, "%% %s: arcx,y %d,%d rad %d ang1,arg2 %d,%d adir %d\n",
+        __func__, arcx, arcy, rad, ang1, ang2, adir);
+    fprintf(fp, "%% ltype %d lt %d lc %d\n", ltype, lt, lc);
+
+#if 1
+    x1 = arcx + (int)((double)rad*cos(ang1*rf));
+    y1 = arcy + (int)((double)rad*sin(ang1*rf));
+    x2 = arcx + (int)((double)rad*cos(ang2*rf));
+    y2 = arcy + (int)((double)rad*sin(ang2*rf));
+#endif
+
+    if(adir==ADIR_ARC) {
+        ad = ang2 - ang1;
+    }
+    else {
+        ad = ang1 - ang2;
+    }
+
+    fr = (int)((double)rad*M_PI);
+    pr = (int)((double)fr*ad/360.0);
+    f4 = (int)((double)fr/4.0);
+
+    fprintf(fp, "  %% ad %d fr %d pr %d f4 %d\n", ad, fr, pr, f4);
+
+    ww = def_linedecothick;
+
+    pp = def_linedecothick/2;
+    pa = 2*M_PI*(((double)pp)/fr);
+    al = (int)(2*M_PI*(((double)fr)/pp));
+
+    fprintf(fp, "  %% pp %d pa %f al %d\n", pp, pa, al);
+    fflush(fp);
+    fflush(stdout);
+
+    aa = (double*)alloca(sizeof(double)*(al+3));
+    if(!aa) {
+        fprintf(stdout, "ERROR no-memory\n");
+        return -1;
+    }
+
+    fprintf(fp, "gsave %% arcXTICK2\n");
+
+#if 0
+    fprintf(fp, "gsave\n");
+    fprintf(fp, "  1 0 0 setrgbcolor\n");
+    MX(1, arcx, arcy);
+    fprintf(fp, "  currentlinewidth 4 mul setlinewidth\n");
+    fprintf(fp, "grestore\n");
+#endif
+
+    if(adir==ADIR_ARC) {
+        oxdir = 0;
+    }
+    else {
+        oxdir = 180;
+    }
+    hx = pp*cos((oxdir)*rf);
+    hy = pp*sin((oxdir)*rf);
+    tx = pp*cos((oxdir+90)*rf);
+    ty = pp*sin((oxdir+90)*rf);
+
+    c = i = 0;
+    if(adir==ADIR_ARC) {
+        fprintf(fp, "%% a arc %f..%f by %f\n", ang1*rf, ang2*rf, pa);
+        for(a=ang1*rf; a<=ang2*rf; a+=pa) {
+            if(i>al-1) {
+                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            }
+            fprintf(fp, "%% a %f arc  set i %d/%d\n", a, i, al);
+            aa[i++] = a;
+        }
+    }
+    else {
+        fprintf(fp, "%% a arcn %f..%f by %f\n", ang1*rf, ang2*rf, pa);
+        for(a=ang1*rf; a>=ang2*rf; a-=pa) {
+            if(i>al-1) {
+                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            }
+            fprintf(fp, "%% a %f arcn set i %d/%d\n", a, i, al);
+            fflush(fp);
+            aa[i++] = a;
+        }
+    }
+    c = i;
+
+
+    changethick(fp, lt);
+    changecolor(fp, lc);
+
+    lx = x1;
+    ly = y1;
+
+    fprintf(fp, " %d %d moveto\n", x1, y1);
+
+    for(i=0;i<c-1;i++) {
+#if 0
+        fprintf(fp, "%% tyr use i %d\n", i);
+        fflush(fp);
+        fflush(stdout);
+#endif
+
+        if(i>al-1) {
+            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+        }
+        a = aa[i];
+        fprintf(fp, "%% a %f use i %d\n", a, i);
+
+        gx = arcx + rad*cos(a);
+        gy = arcy + rad*sin(a);
+#if 0
+        MP(1, gx, gy);
+#endif
+
+        na = a + pa;
+#if 0
+        fprintf(fp, "%% na %f\n", na);
+#endif
+
+        nx = arcx + rad*cos(na);
+        ny = arcy + rad*sin(na);
+#if 0
+        MX(1, nx, ny);
+#endif
+
+        ra = a/rf+90;
+        px = gx + ww*cos((ra+45)*rf);
+        py = gy + ww*sin((ra+45)*rf);
+        qx = gx + ww*cos((ra-45)*rf);
+        qy = gy + ww*sin((ra-45)*rf);
+#if 0
+        fprintf(fp, "%% ra %f\n", ra);
+#endif
+
+#if 0
+        MQ(2, px, py);
+        MQ(4, qx, qy);
+#endif
+
+
+#if 0
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "newpath %d %d moveto %d %d lineto stroke\n",
+            px, py, qx, qy);
+        fprintf(fp, "grestore\n");
+#endif
+
+#if 0
+        if(i==0) {
+            fprintf(fp, " %d %d moveto\n", gx, gy);
+        }
+#endif
+
+        switch(ltype) {
+
+        case LT_ZIGZAG:
+            if(i%2==0) {
+                fprintf(fp, " %d %d lineto\n", px, py);
+            }
+            else 
+            if(i%2==1) {
+                fprintf(fp, " %d %d lineto\n", qx, qy);
+            }
+            break;
+
+        case LT_WAVED:
+            if(i%4==1) {
+                fitarc(fp, lx, ly, nx, ny, 0);
+                lx = nx;
+                ly = ny;
+            }
+            else 
+            if(i%4==3) {
+                fitarc(fp, lx, ly, nx, ny, 1);
+                lx = nx;
+                ly = ny;
+            }
+            break;
+
+#if 0
+        case LT_CIRCLE:
+            fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc fill\n",
+                (double)gx, (double)gy, (double)pp/2);
+            break;
+        case LT_WCIRCLE:
+            fprintf(fp, "newpath %.2f %.2f %.2f 0 360 arc stroke\n",
+                (double)gx, (double)gy, (double)pp/2);
+            break;
+        case LT_TRIANGLE:           
+            fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
+                (double)gx, (double)gy, (int)ra);
+            fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto %.2f %.2f lineto closepath fill\n",
+                    (double)0, (double)0, (double)-tx, (double)-ty, (double)+hx, (double)+hy, (double)+tx, (double)+ty);
+            fprintf(fp, "grestore\n");
+            break;
+
+        case LT_MOUNTAIN:
+            fprintf(fp, "gsave %f %f translate %d rotate 0 0 moveto\n",
+                (double)gx, (double)gy, (int)ra);
+            fprintf(fp, "newpath %.2f %.2f moveto %.2f %.2f lineto %.2f %.2f lineto stroke\n",
+                (double)-tx, (double)-ty, (double)hx, (double)hy, (double)tx, (double)ty);
+
+            fprintf(fp, "grestore\n");
+            break;
+#endif
+        }
+    }
+
+    fprintf(fp, " %d %d lineto\n", x2, y2);
+    fprintf(fp, "stroke\n");
+    fprintf(fp, "grestore %% arcXTICK2\n");
+
+    return r;
+}
+
 
 static int __z = 0;
 
@@ -2774,12 +3072,16 @@ epsdraw_segarcX(FILE *fp,
         rv = epsdraw_segarcXTICK(fp, ltype, lt, lc,
                 arcx, arcy, rad, ang1, ang2, adir);
         break;
-#if 0
     case LT_WAVED:
     case LT_ZIGZAG:
+#if 0
         rv = epsdraw_seglineTICK2(fp, ltype, lt, lc, x1, y1, x2, y2);
-        break;
 #endif
+#if 1
+        rv = epsdraw_segarcXTICK2(fp, ltype, lt, lc,
+                arcx, arcy, rad, ang1, ang2, adir);
+#endif
+        break;
 #if 0
     case LT_DOUBLED:
         rv = epsdraw_seglineW(fp, ltype, lt, lc, x1, y1, x2, y2);
@@ -5712,7 +6014,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         goto skip_label;
     }
 
-    fprintf(fp, "%% sstr %d,%d %dx%d\n", x, y, wd, ht);
+    fprintf(fp, "%% %s: sstr %d,%d %dx%d\n", __func__, x, y, wd, ht);
     fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
 
     n = ssar->use;
@@ -5814,6 +6116,28 @@ printf("  --- calc size\n");
 
         fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
 
+        qs[0] = '\0';
+        for(j=0;j<tq->use;j++) {
+            te = tq->slot[j];
+            if(te->ct==TXE_DATA) {
+                if(te->st==TXE_CONST) {
+                    psescape(qs, BUFSIZ, te->cs);
+                }
+                else {
+                    psescape(qs, BUFSIZ, te->vs);
+                }
+            }
+        }
+
+#if 0
+        if(!qs[0]) {
+            fprintf(fp, "%% skip  sstr drawing\n");
+            goto skip_actdrawing;
+        }
+#endif
+            fprintf(fp, "%% enter sstr drawing\n");
+
+        qs[0] = '\0';
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
             
@@ -6156,6 +6480,7 @@ P;
 
 #endif
 
+skip_actdrawing:
         fprintf(fp, "   0 %d translate\n", -py);
     }
     fprintf(fp, "grestore %% end of sstr\n");
@@ -6201,7 +6526,7 @@ epsdraw_sstrbg(FILE *fp, int x, int y, int wd, int ht, int ro,
         goto skip_label;
     }
 
-    fprintf(fp, "%% sstr %d,%d %dx%d\n", x, y, wd, ht);
+    fprintf(fp, "%% %s: sstr %d,%d %dx%d\n", __func__, x, y, wd, ht);
     fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
 
     n = ssar->use;
