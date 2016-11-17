@@ -709,6 +709,46 @@ takelastobjpos(ob *lob, int pos, int kp, int *nx, int *ny, int *dir)
     return 0;   
 }
 
+int
+OP_GDUMP(const char *pre, char *mid, ob *u)
+{
+    if(!u)
+        return -1;
+
+    printf("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
+#if 0
+    printf("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+        u->cx, u->cy, u->csx, u->csy, u->ex, u->ey,
+        u->clx, u->cby, u->crx, u->cty);
+#endif
+    printf("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+        u->cgx, u->cgy, u->cgsx, u->cgsy, u->gex, u->gey,
+        u->cglx, u->cgby, u->cgrx, u->cgty);
+    printf("\n");
+
+    return 0;
+}
+
+int
+OP_LDUMP(const char *pre, char *mid, ob *u)
+{
+    if(!u)
+        return -1;
+
+    printf("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
+    printf("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+        u->cx, u->cy, u->csx, u->csy, u->ex, u->ey,
+        u->clx, u->cby, u->crx, u->cty);
+#if 0
+    printf("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+        u->cgx, u->cgy, u->cgsx, u->cgsy, u->gex, u->gey,
+        u->cglx, u->cgby, u->cgrx, u->cgty);
+#endif
+    printf("\n");
+
+    return 0;
+}
+
 
 
 #define WO      {wd = objunit*3/2;  ht = objunit; }
@@ -854,15 +894,8 @@ printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
 
             if(u->type==CMD_CLINE) {
             }
-#if 1
                 u->ox = -(lx+rx)/2;
                 u->oy = -(ty+by)/2;
-#endif
-#if 0
-                u->jx = -(lx+rx)/2;
-                u->jy = -(ty+by)/2;
-#endif
-
             re = 1;
         }
         else {
@@ -870,7 +903,7 @@ printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
         }
         break;
     default:
-        if(ISDRAWABLE(u->type)) {
+        if(ISATOM(u->type)) {
             printf("WARNING: sorry the object(oid %d) has no size\n",
                 u->oid);
         }
@@ -906,6 +939,10 @@ printf("\toid %d u a wd %d ht %d solved? %d\n",
         u->x, u->y);
 #endif
 
+#if 1
+    OP_LDUMP(__func__, "a", u);
+#endif
+
 out:
     return re;
 }
@@ -923,20 +960,29 @@ E;
     Echo("%s: oid %d\n", __func__, u->oid);
 
 #if 1
-    printf("%s: u %p oid %d xxdir %d *xy %d,%d *fxy %d,%d xns %p\n",
+    printf("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, *fx, *fy, xns);
     printf("    wd %d ht %d (%d %d %d %d)\n",
             u->wd, u->ht, u->lx, u->by, u->rx, u->ty);
     printf("    ox,oy %d,%d\n", u->ox, u->oy);
-    printf("    jx,jy %d,%d\n", u->jx, u->jy);
+#endif
+
+#if 1
+    OP_LDUMP(__func__, "b", u);
 #endif
 
     u->csx = *x;
     u->csy = *y;
 
-    u->cx = *x - u->jx;
-    u->cy = *y - u->jy;
+    u->cx = *x - u->ox;
+    u->cy = *y - u->oy;
 
+#if 1 
+    u->clx = *x + u->clx;
+    u->cby = *y + u->cby;
+    u->crx = *x + u->crx;
+    u->cty = *y + u->cty;
+#endif
 #if 0
     u->clx = u->cx + u->clx;
     u->cby = u->cy + u->cby;
@@ -969,6 +1015,14 @@ E;
         u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
 #endif
 
+#if 1
+    OP_LDUMP(__func__, "a", u);
+#endif
+#if 1
+    printf("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
+            __func__, u, u->oid, xxdir, *x, *y, *fx, *fy, xns);
+#endif
+
     return 0;
 }
 
@@ -992,12 +1046,15 @@ fitobj(ob *u, int xxdir, int *x, int *y, ns *xns)
 Echo("%s: oid %d\n", __func__, u->oid);
 
 #if 1
-    printf("%s: u %p oid %d xxdir %d *xy %d,%d *fxy --,-- xns %p\n",
+    printf("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, xns);
     printf("    wd %d ht %d (%d %d %d %d)\n",
             u->wd, u->ht, u->lx, u->by, u->rx, u->ty);
     printf("    ox,oy %d,%d\n", u->ox, u->oy);
-    printf("    jx,jy %d,%d\n", u->jx, u->jy);
+#endif
+
+#if 1
+    OP_LDUMP(__func__, "b", u);
 #endif
 
 
@@ -1154,8 +1211,17 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
     QQXY(u->csx,u->csy);
     QQXY(u->cex,u->cey);
 
+#if 1
+    OP_LDUMP(__func__, "a", u);
+#endif
+#if 1
+    printf("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
+            __func__, u, u->oid, xxdir, *x, *y, xns);
+#endif
+
     return 0;
 }
+
 
 
 int

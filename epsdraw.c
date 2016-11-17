@@ -13,6 +13,11 @@ int debug_clip = 0;
 
 #define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
 
+#define SLW_12(fp) fprintf(fp, "    currentlinewidth 2 div setlinewidth\n");
+#define SLW_14(fp) fprintf(fp, "    currentlinewidth 4 div setlinewidth\n");
+#define SLW_21(fp) fprintf(fp, "    currentlinewidth 2 mul setlinewidth\n");
+#define SLW_41(fp) fprintf(fp, "    currentlinewidth 4 mul setlinewidth\n");
+
 /*
  * Marking
  *      MX  cross
@@ -243,7 +248,7 @@ drawCrect(FILE *fp, int x1, int y1, int wd, int ht)
 
 /* centerized rotated rect */
 static int
-drawCRrect(FILE *fp, int x1, int y1, int wd, int ht, int ro)
+drawCRrectMJ(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg, int sj)
 {
     fprintf(fp, "    gsave %% CRrect\n");
     fprintf(fp, "      %d %d translate\n", x1, y1);
@@ -255,7 +260,47 @@ drawCRrect(FILE *fp, int x1, int y1, int wd, int ht, int ro)
     fprintf(fp, "      %d %d lineto\n",   -wd/2,  ht/2);
     fprintf(fp, "      closepath\n");
     fprintf(fp, "      stroke\n");
+    if(msg && *msg) {
+        if(sj==SJ_CENTER) {
+            fprintf(fp, "      %d %d (%s) cshow\n", 0, ht*6/10, msg);
+        }
+        else
+        if(sj==SJ_RIGHT) {
+            fprintf(fp, "      %d %d (%s) rshow\n", 0, ht*6/10, msg);
+        }
+        else {
+            /* otherwise,  SJ_LEFT */
+            fprintf(fp, "      %d %d (%s) lshow\n", 0, ht*6/10, msg);
+        }
+    }
     fprintf(fp, "    grestore\n");
+
+    return 0;
+}
+static int
+drawCRrectM(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg)
+{
+    drawCRrectMJ(fp, x1, y1, wd, ht, ro, msg, SJ_CENTER);
+    return 0;
+}
+
+static int
+drawCRrect(FILE *fp, int x1, int y1, int wd, int ht, int ro)
+{
+#if 0
+    fprintf(fp, "    gsave %% CRrect\n");
+    fprintf(fp, "      %d %d translate\n", x1, y1);
+    fprintf(fp, "      0 0 moveto %d rotate\n", ro);
+    fprintf(fp, "      newpath\n");
+    fprintf(fp, "      %d %d moveto\n",   -wd/2, -ht/2);
+    fprintf(fp, "      %d %d lineto\n",    wd/2, -ht/2);
+    fprintf(fp, "      %d %d lineto\n",    wd/2,  ht/2);
+    fprintf(fp, "      %d %d lineto\n",   -wd/2,  ht/2);
+    fprintf(fp, "      closepath\n");
+    fprintf(fp, "      stroke\n");
+    fprintf(fp, "    grestore\n");
+#endif
+    drawCRrectM(fp, x1, y1, wd, ht, ro, NULL); 
 
     return 0;
 }
@@ -487,14 +532,23 @@ epsdraw_bbox_cwh(FILE *fp, ob *xu)
 }
 
 int
-epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
+epsdraw_bbox_glbrt(FILE *fp, ob *xu)
 {
-    fprintf(fp, "%% bbox guide with LBRT %d,%d (%d %d %d %d)\n",
-            xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
+    char msg[BUFSIZ];
+
+    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
+            xu->glx, xu->gby, xu->grx, xu->gty);
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
-    changecolor(fp, 3);
-    drawCrect(fp, xox+(xu->lx+xu->rx)/2, xoy+(xu->by+xu->ty)/2,
-        xu->rx-xu->lx, xu->ty-xu->by);
+    changecolor(fp, 5);
+
+#if 0
+    drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby);
+#endif
+    sprintf(msg, "oid %d", xu->oid);
+    drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_RIGHT);
+
     if(0*xu->cob.rotateval) {
     }
     fprintf(fp, "  grestore %% for bbox\n");
@@ -503,14 +557,22 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 }
 
 int
-epsdraw_bbox_glbrt(FILE *fp, ob *xu)
+epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 {
-    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
-            xu->glx, xu->gby, xu->grx, xu->gty);
+    char msg[BUFSIZ];
+
+    fprintf(fp, "%% bbox guide with LBRT %d,%d (%d %d %d %d)\n",
+            xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
-    changecolor(fp, 5);
-    drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
-        xu->grx-xu->glx, xu->gty-xu->gby);
+    changecolor(fp, 3);
+#if 0
+    drawCrect(fp, xox+(xu->lx+xu->rx)/2, xoy+(xu->by+xu->ty)/2,
+        xu->rx-xu->lx, xu->ty-xu->by);
+#endif
+    sprintf(msg, "oid %d", xu->oid);
+    drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_LEFT);
+
     if(0*xu->cob.rotateval) {
     }
     fprintf(fp, "  grestore %% for bbox\n");
@@ -3405,9 +3467,44 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
     if(bbox_mode) {
 #if 0
         epsdraw_bbox(fp, xu);
-        epsdraw_bbox_glbrt(fp, xu);
 #endif
+        printf("REMARK BEGIN oid %d\n", xu->oid);
+#if 0
+        printf("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
+            xox, xoy, xu->cx, xu->cy, xu->csx, xu->csy, xu->cox, xu->coy);
+#endif
+        printf("  xox,xoy %d,%d ox,oy %d,%d\n",
+            xox, xoy, xu->cox, xu->coy);
+        printf("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+            xu->cx, xu->cy, xu->csx, xu->csy,
+            xu->clx, xu->cby, xu->crx, xu->cty);
+        printf("g x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+            xu->cgx, xu->cgy, xu->cgsx, xu->cgsy, 
+            xu->cglx, xu->cgby, xu->cgrx, xu->cgty);
+        printf("LBRT  %6d,%-6d (%6d %6d %6d %6d)\n",
+            xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
+        printf("GLBRT               (%6d %6d %6d %6d)\n",
+            xu->glx, xu->gby, xu->grx, xu->gty);
+
+        epsdraw_bbox_glbrt(fp, xu);
+#if 0
         epsdraw_bbox_lbrt(fp, xox, xoy, xu);
+#endif
+
+        SLW_12(fp);
+        epsdraw_bbox_lbrt(fp, xox+xu->csx, xoy+xu->csy, xu);
+        SLW_21(fp);
+
+#if 0
+        if(xu->type==CMD_CLINE) {
+            epsdraw_bbox_lbrt(fp, xox+xu->cx+xu->cox, xoy+xu->cy+xu->coy, xu);
+        }
+        else {
+            epsdraw_bbox_lbrt(fp, xox+xu->csx, xoy+xu->csy, xu);
+        }
+#endif
+
+        printf("REMARK END\n");
     }
 
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
@@ -3445,8 +3542,12 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
     Echo("    segar.use %d\n", xu->cob.segar->use);
 
+#if 0
     x0 = x1 = xox+xu->csx;
     y0 = y1 = xoy+xu->csy;
+#endif
+        x0 = x1 = xox+xu->cx+xu->cox;
+        y0 = y1 = xoy+xu->cy+xu->coy;
 
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
@@ -3574,7 +3675,7 @@ P;
 
 
             cdir += s->ang;
-fprintf(stderr, "%% a cdir %d arc\n", cdir);
+fprintf(fp, "%% a cdir %d arc\n", cdir);
 
             break;
         case OA_ARCN:
@@ -3646,7 +3747,7 @@ P;
             
 
             cdir -= s->ang;
-fprintf(stderr, "%% a cdir  arcn%d\n", cdir);
+fprintf(fp, "%% a cdir  arcn%d\n", cdir);
 
             break;
 
@@ -3919,7 +4020,7 @@ PP;
             }
 
             cdir += s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
         case OA_ARCN:
@@ -3977,7 +4078,7 @@ fprintf(stderr, "%% a cdir %d\n", cdir);
             }
 
             cdir -= s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
 
@@ -4123,10 +4224,6 @@ Yepsdraw_linearrow(FILE *fp,
         x0 = x1 = xox+xu->cx+xu->cox;
         y0 = y1 = xoy+xu->cy+xu->coy;
 #endif
-#if 0
-        x0 = x1 = xox+xu->cx+xu->cjx;
-        y0 = y1 = xoy+xu->cy+xu->cjy;
-#endif
 
         Echo("CLINE\n");
         Echo("    xox,xoy %6d,%-6d\n", xox,     xoy);
@@ -4242,7 +4339,7 @@ PP;
 
 
             cdir += s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             goto next;
         }
@@ -4298,7 +4395,7 @@ fprintf(stderr, "%% a cdir %d\n", cdir);
             }
 
             cdir -= s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             goto next;
         }
@@ -5317,10 +5414,6 @@ PP;
         x0 = x1 = xox+xu->cx+xu->cox;
         y0 = y1 = xoy+xu->cy+xu->coy;
 #endif
-#if 0
-        x0 = x1 = xox+xu->cx+xu->cjx;
-        y0 = y1 = xoy+xu->cy+xu->cjy;
-#endif
 
         Echo("CLINE\n");
         Echo("    xox,xoy %6d,%-6d\n", xox,     xoy);
@@ -5396,7 +5489,7 @@ PP;
 
 
             cdir += s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             goto next;
         }
@@ -5452,7 +5545,7 @@ fprintf(stderr, "%% a cdir %d\n", cdir);
             }
 
             cdir -= s->ang;
-fprintf(stderr, "%% a cdir %d\n", cdir);
+fprintf(fp, "%% a cdir %d\n", cdir);
 
             goto next;
         }
@@ -7732,7 +7825,7 @@ P;
     if(ISCHUNK(pf->type)) {
         for(i=0;i<pf->cch.nch;i++) {
             pe = (ob*)pf->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -7806,7 +7899,7 @@ P;
         cu = ce = cd = call = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -7824,7 +7917,7 @@ P;
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -7892,7 +7985,7 @@ printf(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
         for(i=0;i<pb->cch.nch;i++) {
             g = 0;
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -8009,7 +8102,7 @@ P;
     if(ISCHUNK(pb->type)) {
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -8037,7 +8130,7 @@ P;
 
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type)) {
+            if(ISATOM(pe->type)) {
             }
             else {
                 continue;
@@ -8104,7 +8197,7 @@ P;
     if(ISCHUNK(pb->type)) {
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISDRAWABLE(pe->type) || ISCHUNK(pe->type)) {
+            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
             }
             else {
                 continue;
@@ -8205,7 +8298,7 @@ P;
     if(ISCHUNK(pf->type)) {
         for(i=0;i<pf->cch.nch;i++) {
             pe = (ob*)pf->cch.ch[i];
-            if(ISDRAWABLE(pe->type) || ISCHUNK(pe->type)) {
+            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
             }
             else {
                 continue;
@@ -9439,7 +9532,8 @@ PP;
             qqqx = u->gx - u->x;
             qqqy = u->gy - u->y;
             MC(1, qqqx+u->x, qqqy+u->y);
-            MC(2, qqqx+u->jx, qqqy+u->jy);
+            MC(2, qqqx+u->ox, qqqy+u->oy);
+            MC(3, qqqx+u->fx, qqqy+u->fy);
             MC(4, qqqx+u->sx, qqqy+u->sy);
             MC(6, qqqx+u->ex, qqqy+u->ey);
             }

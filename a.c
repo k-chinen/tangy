@@ -197,18 +197,24 @@ apair_t cmd_ial[] = {
 #define ISCHUNK(x)  ((x)==CMD_CHUNK||(x)==CMD_FORK||(x)==CMD_BRANCH)
 #define ISGLUE(x)   \
     ((x)==CMD_LINE||(x)==CMD_LINK||(x)==CMD_ARROW||\
-     (x)==CMD_WLINE||(x)==CMD_WARROW|(x)==CMD_PING||(x)==CMD_PINGPONG)
-#define ISDRAWABLE(x)   \
+     (x)==CMD_WLINE||(x)==CMD_WARROW|(x)==CMD_PING||(x)==CMD_PINGPONG|| \
+     (x)==CMD_BARROW||(x)==CMD_PLINE \
+    )
+#define ISATOM(x)   \
     ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
-     (x)==CMD_LINE||(x)==CMD_CLINE||(x)==CMD_PLINE||(x)==CMD_SEP|| \
-     (x)==CMD_ARROW||(x)==CMD_WARROW||(x)==CMD_DMY1||(x)==CMD_DMY2)
+     (x)==CMD_DOTS||(x)==CMD_CLINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
+     (x)==CMD_POLYGON|| \
+     (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
+     (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
+     (x)==CMD_LBRACE||(x)==CMD_RBRACE \
+    )
 #define HASBODY(x)  \
-    ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
-     (x)==CMD_CLINE)
+    (ISGLUE(x)||ISATOM(x)) 
 #define MAYEXPAND(x)  \
     ((x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
-     (x)==CMD_LBRACE||(x)==CMD_RBRACE)
+     (x)==CMD_LBRACE||(x)==CMD_RBRACE \
+    )
 
 
 #define LT_SOLID            (0)
@@ -734,18 +740,21 @@ typedef struct _ob {
 
 
                         /***** LOGICAL *****/
-    int  sx, sy;        /* start */
-    int  ex, ey;        /* end */
-    int  mr;            /* margin radius */
-    int  ox, oy;        /* offset */
+    int  sx, sy;        /* area start */
+    int  ex, ey;        /* area end */
+    int  ox, oy;        /* offset or pen start */
+#if 0
+    int  jx, jy;        /* pen start; jo point, sometime be used to draw starting point */
+#endif
+    int  fx, fy;        /* pen end; final point, sometime be used to draw next object */
+
     int  x, y;          /* center */
     int  lx, rx;        /* BB lx, rx left right  */
     int  ty, by;        /* BB ty, by top  bottom */
     int  rotate;        /* rotate */
     int  wd, ht;        /* width height */
 
-    int  fx, fy;        /* final point, sometime be used to draw next object */
-    int  jx, jy;        /* jo point, sometime be used to draw starting point */
+    int  mr;            /* margin radius */
 
     qbb_t localbb;
 
@@ -1220,7 +1229,7 @@ ob_adump(ob* s)
 
 
 int
-_ob_bdump(ob* s, int w)
+_ob_bldump(ob* s, int w)
 {
     int  i;
     int  u;
@@ -1235,7 +1244,45 @@ _ob_bdump(ob* s, int w)
 
     printf("%3d: ", s->oid);
     W;
-    printf("%-*s %d %d: %5d,%-5d : %5d %5d %5d %5d\n",
+    printf("%-*s %d %d: %6d,%-6d : %6d %6d %6d %6d\n",
+        rest, tm,
+        s->hasrel, s->fixed,
+        s->x, s->y, s->lx, s->by, s->rx, s->ty);
+
+#if 0
+    if(s->type==CMD_CHUNK) 
+#endif
+    if(ISCHUNK(s->type))
+    {
+        for(i=0;i<s->cch.nch;i++) {
+            if(s->cch.ch[i]) {
+                _ob_bldump((ob*)s->cch.ch[i], w+dumptabstop);
+            }
+        }
+    }
+
+    fflush(stdout);
+    return 0;
+#undef W
+}
+
+int
+_ob_bgdump(ob* s, int w)
+{
+    int  i;
+    int  u;
+    int  rest;
+    char tm[BUFSIZ];
+
+#define W for(u=0;u<w;u++) printf(" ");
+
+    strcpy(tm, rassoc(cmd_ial, s->type));
+
+    rest = dumplabel - w - dumptabstop;
+
+    printf("%3d: ", s->oid);
+    W;
+    printf("%-*s %d %d: %6d,%-6d : %6d %6d %6d %6d\n",
         rest, tm,
         s->hasrel, s->fixed,
         s->gx, s->gy, s->glx, s->gby, s->grx, s->gty);
@@ -1247,7 +1294,7 @@ _ob_bdump(ob* s, int w)
     {
         for(i=0;i<s->cch.nch;i++) {
             if(s->cch.ch[i]) {
-                _ob_bdump((ob*)s->cch.ch[i], w+dumptabstop);
+                _ob_bgdump((ob*)s->cch.ch[i], w+dumptabstop);
             }
         }
     }
@@ -1256,6 +1303,7 @@ _ob_bdump(ob* s, int w)
     return 0;
 #undef W
 }
+
 
 int
 _ob_cndump(ob* s, int w)
@@ -1299,14 +1347,27 @@ _ob_cndump(ob* s, int w)
 }
 
 int
-ob_bdump(ob* s)
+ob_bldump(ob* s)
 {
     int r;
-    printf("=== BDUMP\n");
+    printf("=== BLDUMP\n");
     printf(
-"oid: type                     r f:    gx,gy    :   glx   gby   grx   gty\n");
+"oid: type                     r f:      x,y      :   lx     by     rx     ty\n");
 
-    r = _ob_bdump(s, 0);
+    r = _ob_bldump(s, 0);
+    printf("---\n");
+    return r;
+}
+
+int
+ob_bgdump(ob* s)
+{
+    int r;
+    printf("=== BGDUMP\n");
+    printf(
+"oid: type                     r f:     gx,gy     :   glx    gby    grx    gty\n");
+
+    r = _ob_bgdump(s, 0);
     printf("---\n");
     return r;
 }
@@ -2184,6 +2245,52 @@ print_param()
 }
 
 int
+test0()
+{
+    int i;
+
+    i = 0;
+    while(cmd_ial[i].name) {
+        printf("%-16s ", cmd_ial[i].name);
+        if(ISCHUNK(cmd_ial[i].value)) {
+            printf("CHUNK ");
+        }
+        else {
+            printf("-     ");
+        }
+        if(ISATOM(cmd_ial[i].value)) {
+            printf("ATOM ");
+        }
+        else {
+            printf("-    ");
+        }
+        if(ISGLUE(cmd_ial[i].value)) {
+            printf("GLUE ");
+        }
+        else {
+            printf("-    ");
+        }
+        if(HASBODY(cmd_ial[i].value)) {
+            printf("BODY ");
+        }
+        else {
+            printf("-    ");
+        }
+        if(MAYEXPAND(cmd_ial[i].value)) {
+            printf("EXPAND ");
+        }
+        else {
+            printf("-      ");
+        }
+
+            printf("\n");
+
+        i++;
+    }
+    return 0;
+}
+
+int
 main(int argc, char *argv[])
 {
     ob*   ch0;
@@ -2199,8 +2306,11 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "hmVPvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv, "0hmVPvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
         switch(flag) {
+        case '0':
+            test0();
+            exit(0);
         case 'h':
             print_usage();
             exit(0);
@@ -2340,7 +2450,8 @@ P;
 P;
 
     ob_adump(ch0);
-    ob_bdump(ch0);
+    ob_bgdump(ch0);
+    ob_bldump(ch0);
 
 #if 0
     picdraw(ch0, 0, 0, ns0);
