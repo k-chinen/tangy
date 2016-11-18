@@ -31,55 +31,55 @@ int debug_clip = 0;
  */
 
 #define MX(c,x,y) \
-    fprintf(fp, "%% MX %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d moveto %d %d rlineto\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40); \
-    fprintf(fp, "  %d %d moveto %d %d rlineto stroke grestore\n", x-objunit/40, y+objunit/40, 2*objunit/40, -2*objunit/40); 
+    fprintf(fp, "    %% MX %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d moveto %d %d rlineto\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40); \
+    fprintf(fp, "      %d %d moveto %d %d rlineto stroke grestore\n", x-objunit/40, y+objunit/40, 2*objunit/40, -2*objunit/40); 
 #define MP(c,x,y) \
-    fprintf(fp, "%% MP %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d moveto %d 0 rlineto\n", x-objunit/40, y, 2*objunit/40); \
-    fprintf(fp, "  %d %d moveto 0 %d rlineto stroke grestore\n", x, y-objunit/40, 2*objunit/40);
+    fprintf(fp, "    %% MP %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d moveto %d 0 rlineto\n", x-objunit/40, y, 2*objunit/40); \
+    fprintf(fp, "      %d %d moveto 0 %d rlineto stroke grestore\n", x, y-objunit/40, 2*objunit/40);
 #define MC(c,x,y) \
-    fprintf(fp, "%% MC %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d %d 0 360 arc stroke grestore\n", x, y, objunit/40);
+    fprintf(fp, "    %% MC %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d %d 0 360 arc stroke grestore\n", x, y, objunit/40);
 #define MCF(c,x,y) \
-    fprintf(fp, "%% MCF %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d %d 0 360 arc fill grestore\n", x, y, objunit/40);
+    fprintf(fp, "    %% MCF %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d %d 0 360 arc fill grestore\n", x, y, objunit/40);
 #define MQ(c,x,y) \
-    fprintf(fp, "%% MQ %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath stroke grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
+    fprintf(fp, "    %% MQ %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath stroke grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
 #define MQF(c,x,y) \
-    fprintf(fp, "%% MQF %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath fill grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
+    fprintf(fp, "    %% MQF %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d moveto %d 0 rlineto 0 %d rlineto %d neg 0 rlineto closepath fill grestore\n", x-objunit/40, y-objunit/40, 2*objunit/40, 2*objunit/40, 2*objunit/40); 
 #define MT(c,x,y,a) \
-    fprintf(fp, "%% MT %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  %d %d translate %d rotate\n", x, y, a); \
-    fprintf(fp, "  %d %d translate\n", -2*objunit/40, 0); \
-    fprintf(fp, "  0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
-    fprintf(fp, "  closepath stroke\n"); \
-    fprintf(fp, "  grestore\n");
+    fprintf(fp, "    %% MT %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      %d %d translate %d rotate\n", x, y, a); \
+    fprintf(fp, "      %d %d translate\n", -2*objunit/40, 0); \
+    fprintf(fp, "      0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
+    fprintf(fp, "      closepath stroke\n"); \
+    fprintf(fp, "      grestore\n");
 #define MTF(c,x,y,a) \
-    fprintf(fp, "%% MTF %d\n", __LINE__); \
-    fprintf(fp, "  gsave"); changecolor(fp, c); \
-    fprintf(fp, "  currentlinewidth 4 div setlinewidth\n"); \
-    fprintf(fp, "  %d %d translate %d rotate\n", x, y, a); \
-    fprintf(fp, "  %d %d translate\n", -2*objunit/40, 0); \
-    fprintf(fp, "  0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
-    fprintf(fp, "  closepath fill\n"); \
-    fprintf(fp, "  grestore\n");
+    fprintf(fp, "    %% MTF %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      %d %d translate %d rotate\n", x, y, a); \
+    fprintf(fp, "      %d %d translate\n", -2*objunit/40, 0); \
+    fprintf(fp, "      0 %d moveto 0 %d lineto %d 0 lineto\n", -objunit/40, objunit/40, objunit/40*2); \
+    fprintf(fp, "      closepath fill\n"); \
+    fprintf(fp, "      grestore\n");
 
 
 int
@@ -97,8 +97,7 @@ psescape(char *dst, int dlen, char* src)
             *q++ = '\\'; *q++ = '0'; *q++ = '5'; *q++ = '0'; c+=4;
         }
         else
-        if(*p==')' && c<dlen-4) {
-            p++;
+        if(*p==')' && c<dlen-4) { p++;
             *q++ = '\\'; *q++ = '0'; *q++ = '5'; *q++ = '1'; c+=4;
         }
         else {
@@ -6015,6 +6014,61 @@ epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist)
     return 0;
 }
 
+int
+ss_strip(char *dst, int dlen, varray_t *ssar)
+{
+    int   i;
+    sstr *uu;
+    int   cc;
+    int   w;
+
+    dst[0] = '\0';
+    cc = 0;
+
+    for(i=0;i<ssar->use;i++) {
+        uu = (sstr*)ssar->slot[i];
+        if(uu && uu->ssval && *(uu->ssval) ) {
+            w = strlen(uu->ssval);
+#if 0
+printf(" %2d: %3d '%s'\n", i, w, uu->ssval);
+#endif
+            if(cc+w+1<dlen-1) {
+                if(dst[0]) {
+                    strcat(dst, "/");
+                    cc += 1;
+                }
+                else {
+                }
+                strcat(dst, uu->ssval);
+                cc += w;
+            }
+            else {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+int
+ss_dump(FILE *ofp, varray_t *ssar)
+{
+    int   i;
+    sstr *uu;
+
+    for(i=0;i<ssar->use;i++) {
+        uu = (sstr*)ssar->slot[i];
+        fprintf(ofp, "ss %2d: val '%s' opt %d\n",
+            i, uu->ssval, uu->ssopt);
+    }
+
+    return 0;
+}
+
+
+
 #define FH_NORMAL   (0)
 #define FH_LARGE    (1)
 #define FH_HUGE     (2)
@@ -6061,12 +6115,16 @@ apair_t ff_act_ial[] = {
 };
 
 
-
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         int bgshape, int qbgmargin, int fgcolor, int bgcolor,
         varray_t *ssar)
 {
+/*
+ * 2pass routine
+ *     1st - calcurate width and draw backgound round-box
+ *     2nd - draw string
+ */
 
     int   i;
     int   py;
@@ -6079,7 +6137,6 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     char  qs[BUFSIZ];
     int   bgmargin;
 
-
     varray_t *tq;
     int   j;
     txe      *te;
@@ -6089,11 +6146,12 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     int   cursize, curface;
     int   newsize, newface;
     char     *afn, *afhs;
-    int       afh;
+    int       afh, afhmax;
     int     justify;
     int     hscale;
+    char    mcontall[BUFSIZ];
+    char    mcontline[BUFSIZ];
     
-
     if(!ssar) {
         E;
         return -1;
@@ -6107,8 +6165,19 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         goto skip_label;
     }
 
-    fprintf(fp, "%% %s: sstr %d,%d %dx%d\n", __func__, x, y, wd, ht);
+#if 0
+    ss_dump(stdout, ssar);
+#endif
+    ss_strip(mcontall, BUFSIZ, ssar);
+#if 0
+    fprintf(stdout, "mcontall '%s'\n", mcontall);
+#endif
+
+    fprintf(fp, "%% %s: pos %6d,%-6d %6dx%-6d %4d fg %d bg %d %d %d ; %s\n",
+        __func__, x, y, wd, ht, ro,
+        fgcolor, bgcolor, bgshape, qbgmargin, mcontall);
     fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
+
 
     n = ssar->use;
 
@@ -6174,6 +6243,22 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 
     tq = NULL;
 
+    int lbg_h, lbg_b, lbg_t;
+
+    lbg_h = 0;
+    lbg_b = 0;
+    lbg_t = 0;
+
+    fprintf(fp, "  /sstrwar %d array def %% array for string-width\n",
+        ssar->use);
+
+
+    /*****
+     ***** 1st pass
+     *****/
+
+    fprintf(fp, "gsave %% bgdraw\n");
+
     gy = 0;
     for(i=0;i<ssar->use;i++) {
         gy -= py;
@@ -6193,25 +6278,19 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 
         fprintf(fp, "%% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
 
-        fprintf(fp, " gsave\n");
+        fprintf(fp, " gsave %% oneline\n");
 
-
-
-        /*** PASS 1 */
 printf("  --- calc size\n");
-
-
-        fprintf(fp, "  /sstrw 0 def\n");
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
         hscale    = 100;
 
-        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
-
-        qs[0] = '\0';
+        /* check content existance */
+        mcontline[0] = '\0';
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
+            qs[0] = '\0';
             if(te->ct==TXE_DATA) {
                 if(te->st==TXE_CONST) {
                     psescape(qs, BUFSIZ, te->cs);
@@ -6220,16 +6299,33 @@ printf("  --- calc size\n");
                     psescape(qs, BUFSIZ, te->vs);
                 }
             }
+            strcat(mcontline, qs);
+        }
+
+        if(!mcontline[0]) {
+            fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
+            goto skip_bgdrawing;
+        }
+        else {
+            fprintf(fp, "%% enter sstr drawing %d '%s'\n", i, mcontline);
         }
 
 #if 0
-        if(!qs[0]) {
-            fprintf(fp, "%% skip  sstr drawing\n");
-            goto skip_actdrawing;
-        }
-#endif
-            fprintf(fp, "%% enter sstr drawing\n");
+        MTF(0, -wd/4, fht, 0);
+        MTF(1, -wd/4, 0, 0);
+        MTF(4, -wd/4, -pyb, 0);
 
+        MCF(5, -wd/2, fht+bgmargin);
+        MQF(5, -wd/2, -pyb-bgmargin);
+#endif
+
+        fprintf(fp, "  %% calc size (width)\n");
+        fprintf(fp, "  /sstrw 0 def\n");
+        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+        afh = fht;
+
+        afhmax = -1;
+    
         qs[0] = '\0';
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
@@ -6293,7 +6389,7 @@ printf(" curface %d cursize %d\n", curface, cursize);
                         afh = atof(afhs)*fht;
                     }
 
-printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
+printf("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 
                     if(afn) {
                         fprintf(fp, "  %s findfont %d scalefont setfont\n",
@@ -6322,10 +6418,16 @@ printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
                 if(hscale!=100) {
                     fprintf(fp, "  grestore\n");
                 }
+#if 1
+                /* check max height when it used */
+                if(afh>afhmax) {afhmax = afh; }
+#endif
             }
 
         }
 
+        fprintf(fp, 
+            "  sstrwar %d sstrw put %% store value to reuse\n", i);
 
         if(text_mode) {
             fprintf(fp, "  %% textguide\n");
@@ -6376,40 +6478,151 @@ printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
         }
 
         if(bgcolor>=0) {
-            fprintf(fp, "%% bg\n");
-            fprintf(fp, "  gsave\n");
+            fprintf(fp, "%% bg fill\n");
+            fprintf(fp, "  gsave %% textbg\n");
             changecolor(fp, bgcolor);
 
-            if(i==0) {
-                fprintf(fp,"  %d neg %d moveto 0 %d rlineto"
-                        " sstrw %d 2 mul add 0 rlineto"
-                        " 0 %d neg rlineto closepath fill %% head-bg\n",
-                        bgmargin, py-pyb, bgmargin, bgmargin, bgmargin);
-            }
-
-                fprintf(fp, "  %d neg %d neg moveto 0 %d rlineto"
-                        " sstrw %d 2 mul add 0 rlineto"
-                        " 0 %d neg rlineto closepath fill %% body-bg\n",
-                        bgmargin, pyb, py, bgmargin, py);
-
-            if(i==ssar->use-1) {
-                fprintf(fp,"  %d neg %d neg moveto 0 %d neg rlineto"
-                        " sstrw %d 2 mul add 0 rlineto"
-                        " 0 %d rlineto closepath fill %% tail-bg\n",
-                        bgmargin, pyb, bgmargin, bgmargin, bgmargin);
-            }
-
+            fprintf(fp, "    0 %d neg sstrw %d %d mrboxfill\n",
+                pyb, pyb+afhmax, bgmargin);
 
 #if 0
-            changecolor(fp, fgcolor);
-            fprintf(fp, "  0 0 moveto 0 %d rlineto stroke\n", py);
-            fprintf(fp, "  0 0 moveto %d neg 0 rlineto stroke\n", bgmargin);
-            fprintf(fp, "  0 0 moveto sstrw %d add 0 rlineto stroke\n", bgmargin);
+            MTF(1, 0, afhmax, 0);
 #endif
+
+            fprintf(fp, "  grestore %% textbg\n");
+        }
+
+skip_bgdrawing:
+        (void)0;
+
+        fprintf(fp, " grestore %% oneline\n");
+
+        fprintf(fp, "   0 %d translate\n", -py);
+    }
+    fprintf(fp, "grestore %% bgdraw\n");
+
+
+    /*****
+     ***** 2nd pass
+     *****/
+
+    fprintf(fp, "gsave %% txtdraw\n");
+
+    gy = 0;
+    for(i=0;i<ssar->use;i++) {
+        gy -= py;
+        uu = (sstr*)ssar->slot[i];
+
+        if(tq) txe_release(tq);
+
+        tq = varray_new();
+        varray_entrysprintfunc(tq, txe_sprint);
+
+        txe_parse(tq, uu->ssval);
+
+        varray_fprint(stdout, tq);
+
+        justify = SJ_CENTER;
+        hscale = 100;
+
+        fprintf(fp, "%% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
+
+        fprintf(fp, " gsave %% oneline\n");
+
+
+printf("  --- calc size\n");
+
+        cursize = FH_NORMAL;
+        curface = FF_SERIF;
+        hscale    = 100;
+
+        /* check content existance */
+        mcontline[0] = '\0';
+        for(j=0;j<tq->use;j++) {
+            te = tq->slot[j];
+            qs[0] = '\0';
+            if(te->ct==TXE_DATA) {
+                if(te->st==TXE_CONST) {
+                    psescape(qs, BUFSIZ, te->cs);
+                }
+                else {
+                    psescape(qs, BUFSIZ, te->vs);
+                }
+            }
+            strcat(mcontline, qs);
+        }
+
+        if(!mcontline[0]) {
+            fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
+            goto skip_txtdrawing;
+        }
+        else {
+            fprintf(fp, "%% enter sstr drawing %d '%s'\n", i, mcontline);
+        }
+
+
+        fprintf(fp, "  /sstrw sstrwar %d get def %% reuse width\n", i);
+
+#if 0
+        MCF(1, -wd/2-(i+1)*wd/10, afhmax+bgmargin);
+        MCF(1, -wd/2-(i+1)*wd/10, afhmax);
+
+        MCF(5, -wd/2-(i+1)*wd/10, fht+bgmargin);
+        MCF(5, -wd/2-(i+1)*wd/10, fht);
+        MTF(0, -wd/2-(i+1)*wd/10, py, -180);
+        MTF(0, -wd/2-(i+1)*wd/10, 0, 0);
+        MCF(4, -wd/2-(i+1)*wd/10, -pyb);
+
+        MQF(4, -wd/2-(i+1)*wd/10, -pyb-bgmargin);
+#endif
+
+        if(text_mode) {
+            fprintf(fp, "  %% textguide\n");
+            fprintf(fp, "  gsave\n");
+
+#if 0
+            changetext3(fp);
+            fprintf(fp, "    %d 0 moveto\n",  -wd/2);
+            fprintf(fp, "    %d 0 rlineto\n", wd);
+            fprintf(fp, "    0  %d rlineto\n", wd/4);
+            fprintf(fp, "    stroke\n");
+#endif
+
+            changetext2(fp);
+            fprintf(fp, "    sstrw 2 div neg %d moveto\n", objunit*7/100);
+            fprintf(fp, "    0 %d rlineto\n", -objunit*7/100);
+            fprintf(fp, "    sstrw 0 rlineto\n");
+            fprintf(fp, "    0 %d rlineto\n", objunit*7/100);
+            fprintf(fp, "    stroke\n");
 
             fprintf(fp, "  grestore\n");
         }
 
+
+
+        fprintf(fp, "%% justify %d\n", justify);
+        
+        switch(justify) {
+        case SJ_LEFT:
+            fprintf(fp, "  sstrw neg 0 translate\n");
+            break;
+        case SJ_RIGHT:
+            break;
+        default:
+        case SJ_CENTER:
+            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            break;
+        case SJ_FIT:
+#if 0
+            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+#endif
+#if 0
+            fprintf(fp, "  %d 2 div neg 0 translate\n", wd);
+#endif
+            fprintf(fp, "  %d sstrw div 1 scale\n", wd);
+            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            break;
+        }
 
         /*** PASS 2 */
 
@@ -6503,79 +6716,31 @@ printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
                 }
                 if(hscale!=100) {
 P;
-                    fprintf(fp, "  gsave\n");
+                    fprintf(fp, "  gsave %% comp\n");
                     fprintf(fp, "    %.3f 1 scale\n", (double)hscale/100);
                 }
                 fprintf(fp, "    (%s) show\n", qs);
                 if(hscale!=100) {
 P;
-                    fprintf(fp, "  grestore\n");
+                    fprintf(fp, "  grestore %% comp\n");
                 }
             }
 
         }
 
-        fprintf(fp, " grestore\n");
+skip_txtdrawing:
+        (void)0;
 
+        fprintf(fp, " grestore %% oneline\n");
 
-
-
-#if 0
-        psescape(qs, BUFSIZ, uu->ssval);
-
-        if(bgcolor>=0) {
-            fprintf(fp, "  %% textbg\n");
-            fprintf(fp, "  gsave\n");
-            changecolor(fp, bgcolor);
-            fprintf(fp, "    (%s) stringwidth pop %d add 2 div neg %d moveto\n",
-                qs, bgmargin*2, gy-bgmargin);
-            fprintf(fp, "    (%s) stringwidth pop %d add dup\n",
-                qs, bgmargin*2);
-            fprintf(fp, "    0 rlineto 0 %d rlineto neg 0 rlineto\n",
-                fht+bgmargin*2);
-            fprintf(fp, "    0 %d closepath fill\n",
-                -(fht+bgmargin*2));
-            fprintf(fp, "  grestore\n");
-        }
-
-        if(text_mode) {
-            fprintf(fp, "  %% textguide\n");
-            fprintf(fp, "  gsave\n");
-            changetext2(fp);
-            fprintf(fp, "  %d %d moveto %d 0 rlineto stroke\n",
-                            -wd/2, gy, wd);
-            changetext(fp);
-            fprintf(fp, "  %d %d moveto %d 0 rlineto stroke\n",
-                            -wd/2, gy+pyb, wd);
-            fprintf(fp, "  grestore\n");
-        }
-
-        changecolor(fp, fgcolor);
-
-        if(uu->ssopt & SJ_RIGHT) {
-        /* right end on center */
-        fprintf(fp, 
-            "    (%s) dup stringwidth pop neg %d moveto show\n",
-            qs, gy+pyb);
-        }
-        else
-        if(uu->ssopt & SJ_RIGHT) {
-        /* left end on center */
-        fprintf(fp, "    %d %d moveto (%s) show\n",
-            0, gy+pyb, qs);
-        }
-        else {
-        /* centering */
-        fprintf(fp, 
-            "    (%s) dup stringwidth pop 2 div neg %d moveto show\n",
-            qs, gy+pyb);
-        }
-
-#endif
-
-skip_actdrawing:
         fprintf(fp, "   0 %d translate\n", -py);
     }
+#if 1
+    fprintf(fp, "grestore %% txtdraw\n");
+#endif
+
+
+
     fprintf(fp, "grestore %% end of sstr\n");
 
 skip_label:
@@ -9903,6 +10068,70 @@ printdefs(FILE *fp)
     grestore\n\
 } def\n\
 ");
+
+    fprintf(fp, "\
+%% margined round box\n\
+%% x y w h r mrbox -\n\
+/mrbox {\n\
+    gsave\n\
+    /r exch def /h exch def /w exch def /y exch def /x exch def\n\
+    x r sub y moveto\n\
+    x y r 180 270 arc\n\
+    w 0 rlineto\n\
+    x w add y r 270 360 arc\n\
+    0 h rlineto\n\
+    x w add y h add r 0 90 arc\n\
+    w neg 0 rlineto\n\
+    x y h add r 90 180 arc\n\
+    closepath\n\
+    stroke\n\
+    grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% margined round box\n\
+%% x y w h r mrbox -\n\
+/mrboxfill {\n\
+    gsave\n\
+    /r exch def /h exch def /w exch def /y exch def /x exch def\n\
+    x r sub y moveto\n\
+    x y r 180 270 arc\n\
+    w 0 rlineto\n\
+    x w add y r 270 360 arc\n\
+    0 h rlineto\n\
+    x w add y h add r 0 90 arc\n\
+    w neg 0 rlineto\n\
+    x y h add r 90 180 arc\n\
+    closepath\n\
+    fill\n\
+    grestore\n\
+} def\n\
+");
+
+#if 0
+    fprintf(fp, "\
+%% margined round box with mainbody box\n\
+%% x y w h r mrbox -\n\
+/mrbox {\n\
+    gsave\n\
+    /r exch def /h exch def /w exch def /y exch def /x exch def\n\
+    x r sub y moveto\n\
+    x y r 180 270 arc\n\
+    w 0 rlineto\n\
+    x w add y r 270 360 arc\n\
+    0 h rlineto\n\
+    x w add y h add r 0 90 arc\n\
+    w neg 0 rlineto\n\
+    x y h add r 90 180 arc\n\
+    closepath\n\
+    fill\n\
+    1 1 1 setrgbcolor\n\
+    x y moveto w 0 rlineto 0 h rlineto w neg 0 rlineto closepath stroke\n\
+    grestore\n\
+} def\n\
+");
+#endif
 
     return 0;
 }
