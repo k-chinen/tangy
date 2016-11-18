@@ -589,7 +589,6 @@ int def_warrowsize      =  90;
 int def_barrowgap       =  30;
 
 int def_textheight      =  30;
-int def_textdecent      =   2;
 
 int def_hatchpitch      =   5;
 int def_hatchthick      =   1;
@@ -2054,7 +2053,6 @@ P;
 
 
     def_textheight      = textheightfactor      * objunit;
-    def_textdecent      = textdecentfactor      * objunit;
     def_hatchpitch      = hatchpitchfactor      * objunit;
     def_hatchthick      = hatchthickfactor      * objunit;
 #if 1
@@ -2212,20 +2210,17 @@ print_version()
 int
 print_param()
 {
-#define QPV(x)  \
-    printf("    %-24s %7.3f\n", #x, x);
-
-    printf("tangy parameters: actual value is solved those factors and unit-size.\n");
-    printf("    c.f.  arrowsize = arrowsizefactor * objectunit\n");
-    printf("                                          %5d\n", objunit);
-    printf("\n");
-
-#undef QPV
+    printf("tangy parameters:\n");
 
     printf("    %-24s %7s %7s\n", "name", "value", "factor");
     printf("    ---\n");
+
 #define QPV(x)  \
     printf("    %-24s %7d %7.3f\n", #x, def_ ## x, x ## factor);
+#define QP(x)  \
+    printf("    %-24s %7s %7.3f\n", #x, "", x ## factor);
+
+    printf("  unit-base: current unitsize %d\n", objunit);
 
     QPV(arrowsize);
     QPV(warrowsize);
@@ -2233,14 +2228,18 @@ print_param()
     QPV(linedecothick);
     QPV(wlinethick);
     QPV(barrowgap);
-    QPV(textdecent);
-/*
-    QPV(textbgmargin);
-*/
+    QPV(textheight);
     QPV(hatchthick);
     QPV(hatchpitch);
 
+    printf("  others\n");
+
+    QP(textdecent);
+    QP(textbgmargin);
+
 #undef QPV
+#undef QP
+
     return 0;
 }
 
