@@ -417,6 +417,28 @@ P;
         case OA_UP:         y += m; c++; ldir =   90; break;
         case OA_DOWN:       y -= m; c++; ldir =  -90; break;
 
+#if 0
+        case OA_DIR:        ldir =  m; break;
+        case OA_INCDIR:     ldir += m; break;
+        case OA_DECDIR:     ldir -= m; break;
+#endif
+#if 1
+        case OA_DIR:        ldir = m;
+                            FREG(OA_DIR, jc, REL_COORD, 0, 0, 0, 0, m);
+                            break;
+
+        case OA_INCDIR:
+        case OA_LTURN:
+                            ldir += m;
+                            FREG(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, m);
+                            break;
+        case OA_DECDIR:
+        case OA_RTURN:
+                            ldir -= m;
+                            FREG(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, -m);
+                            break;
+#endif
+
         case OA_JOIN:
                             jc += 1;
                             c++;
@@ -549,14 +571,6 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
                             break;
 
     
-        case OA_DIR:        ldir = m;   break;
-
-        case OA_INCDIR:
-        case OA_LTURN:
-                            ldir += m;  break;
-        case OA_DECDIR:
-        case OA_RTURN:
-                            ldir -= m;  break;
 
         case OA_THEN:   
             /* nothing */

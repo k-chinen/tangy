@@ -3572,7 +3572,29 @@ P;
             continue;
         }
 
+printf("%s: ptype %d\n", __func__, s->ptype);
+printf("b cdir %d\n", cdir);
+
         switch(s->ptype) {
+
+#if 1
+        case OA_DIR:
+            cdir = s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+        case OA_INCDIR:
+            cdir += s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+        case OA_DECDIR:
+            cdir -= s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+#endif
+
         case OA_JOIN:
 P;
 #if 0
@@ -3816,6 +3838,8 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
 next:
         x1 = x2;
         y1 = y2;
+
+printf("a cdir %d\n", cdir);
 P;
     }
 
@@ -3930,7 +3954,28 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
             continue;
         }
 
+printf("%s: ptype %d\n", __func__, s->ptype);
+
         switch(s->ptype) {
+
+#if 1
+        case OA_DIR:
+            cdir = s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+        case OA_INCDIR:
+            cdir += s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+        case OA_DECDIR:
+            cdir -= s->ang;
+            x2 = x1;
+            y2 = y1;
+            break;
+#endif
+
         case OA_JOIN:
 PP;
 #if 0
@@ -4140,6 +4185,12 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
             xu->cob.arrowbackheadtype   = bh;
             xu->cob.arrowforeheadtype   = fh;
             break;
+
+#if 0
+        default:
+            Error("unsupported segment part <%d>\n", s->ptype);
+            break;
+#endif
         }
         
 next:
@@ -4702,13 +4753,15 @@ fprintf(stdout, "%s: enter\n", __func__);
         }
         changecolor(fp, xu->cob.fillcolor);
 #if 0
+        r = _line_path(fp, ydir, xox, xoy+objunit/4, xu, xns);
+        fprintf(fp, "  stroke\n");
 #endif
         r = _line_path(fp, ydir, xox, xoy, xu, xns);
+        fprintf(fp, "  clip\n");
 #if 0
         fprintf(fp, "  eoclip\n");
         fprintf(fp, "  stroke\n");
 #endif
-        fprintf(fp, "  clip\n");
 fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
 fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
 fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);

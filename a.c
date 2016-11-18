@@ -2199,7 +2199,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.001" 
+    printf("2.002" 
 #ifdef GITCHASH
     " " GITCHASH
 #endif
