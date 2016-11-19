@@ -140,6 +140,69 @@ Echo(" cmd  %d '%s'\n", cin, token);
 }
 
 int
+txe_extract(char *dst, int dlen, txe *te)
+{
+    dst[0] = '\0';
+    if(te->ct==TXE_DATA) {
+        if(te->st==TXE_CONST) {
+            if(strlen(te->cs)<dlen-1) {
+                strcat(dst, te->cs);
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            if(strlen(te->vs)<dlen-1) {
+                strcat(dst, te->vs);
+            }
+            else {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int
+txear_extract(char *dst, int dlen, varray_t *ar)
+{
+    int   j;
+    int   w;
+    char  qs[BUFSIZ];
+    txe  *te;
+
+    dst[0] = '\0';
+    w = 0;
+    for(j=0;j<ar->use;j++) {
+        te = ar->slot[j];
+        qs[0] = '\0';
+        if(te->ct==TXE_DATA) {
+            if(te->st==TXE_CONST) {
+#if 0
+                psescape(qs, BUFSIZ, te->cs);
+#endif
+                strcat(qs, te->cs);
+            }
+            else {
+#if 0
+                psescape(qs, BUFSIZ, te->vs);
+#endif
+                strcat(qs, te->vs);
+            }
+        }
+        strcat(dst, qs);
+        w = strlen(dst);
+    }
+
+    return 0;
+}
+
+
+
+
+int
 txe_release(varray_t *ar)
 {
     int  i;

@@ -3464,14 +3464,14 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
     cdir = ydir;
 
     if(bbox_mode) {
-#if 0
-        epsdraw_bbox(fp, xu);
-#endif
+
         printf("REMARK BEGIN oid %d\n", xu->oid);
 #if 0
         printf("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
             xox, xoy, xu->cx, xu->cy, xu->csx, xu->csy, xu->cox, xu->coy);
 #endif
+
+#if 0
         printf("  xox,xoy %d,%d ox,oy %d,%d\n",
             xox, xoy, xu->cox, xu->coy);
         printf("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
@@ -3484,6 +3484,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
             xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
         printf("GLBRT               (%6d %6d %6d %6d)\n",
             xu->glx, xu->gby, xu->grx, xu->gty);
+#endif
 
         epsdraw_bbox_glbrt(fp, xu);
 #if 0
@@ -3495,15 +3496,8 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         SLW_21(fp);
 
 #if 0
-        if(xu->type==CMD_CLINE) {
-            epsdraw_bbox_lbrt(fp, xox+xu->cx+xu->cox, xoy+xu->cy+xu->coy, xu);
-        }
-        else {
-            epsdraw_bbox_lbrt(fp, xox+xu->csx, xoy+xu->csy, xu);
-        }
-#endif
-
         printf("REMARK END\n");
+#endif
     }
 
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
@@ -3704,8 +3698,8 @@ P;
 
 #if 0
     fprintf(fp, "%%  cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
-#endif
     fprintf(stderr, "%% b cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
+#endif
 
             arcx = x1 + s->rad*cos((cdir-90)*rf);
             arcy = y1 + s->rad*sin((cdir-90)*rf);
@@ -6204,6 +6198,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     int     hscale;
     char    mcontall[BUFSIZ];
     char    mcontline[BUFSIZ];
+    char    mcpart[BUFSIZ];
+    int     mcar[BUFSIZ];
     
     if(!ssar) {
         E;
@@ -6231,6 +6227,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         fgcolor, bgcolor, bgshape, qbgmargin, mcontall);
     fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
 
+
+    memset(mcar, 0, sizeof(mcar));
 
     n = ssar->use;
 
@@ -6339,7 +6337,9 @@ printf("  --- calc size\n");
         curface = FF_SERIF;
         hscale    = 100;
 
+
         /* check content existance */
+#if 0
         mcontline[0] = '\0';
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
@@ -6354,6 +6354,8 @@ printf("  --- calc size\n");
             }
             strcat(mcontline, qs);
         }
+#endif
+        txear_extract(mcontline, BUFSIZ, tq);
 
         if(!mcontline[0]) {
             fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
@@ -6362,6 +6364,7 @@ printf("  --- calc size\n");
         else {
             fprintf(fp, "%% enter sstr drawing %d '%s'\n", i, mcontline);
         }
+        mcar[i] = strlen(mcontline);
 
 #if 0
         MTF(0, -wd/4, fht, 0);
@@ -6452,12 +6455,17 @@ printf("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
             }
             else
             if(te->ct==TXE_DATA) {
+#if 0
                 if(te->st==TXE_CONST) {
                     psescape(qs, BUFSIZ, te->cs);
                 }
                 else {
                     psescape(qs, BUFSIZ, te->vs);
                 }
+#endif
+                txe_extract(mcpart, BUFSIZ, te);
+                psescape(qs, BUFSIZ, mcpart);
+
                 if(hscale!=100) {
                     fprintf(fp, "  gsave\n");
                     fprintf(fp, "    %.3f 1 scale\n", (double)hscale/100);
@@ -6589,7 +6597,14 @@ printf("  --- calc size\n");
         curface = FF_SERIF;
         hscale    = 100;
 
+
+        if(mcar[i]<=0) {
+            fprintf(fp, "%% skip  sstr drawing %d mcar %d\n", i, mcar[i]);
+            goto skip_txtdrawing;
+        }
+
         /* check content existance */
+#if 0
         mcontline[0] = '\0';
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
@@ -6604,6 +6619,8 @@ printf("  --- calc size\n");
             }
             strcat(mcontline, qs);
         }
+#endif
+        txear_extract(mcontline, BUFSIZ, tq);
 
         if(!mcontline[0]) {
             fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
@@ -6761,12 +6778,17 @@ printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
             }
             else
             if(te->ct==TXE_DATA) {
+#if 0
                 if(te->st==TXE_CONST) {
                     psescape(qs, BUFSIZ, te->cs);
                 }
                 else {
                     psescape(qs, BUFSIZ, te->vs);
                 }
+#endif
+                txe_extract(mcpart, BUFSIZ, te);
+                psescape(qs, BUFSIZ, mcpart);
+
                 if(hscale!=100) {
 P;
                     fprintf(fp, "  gsave %% comp\n");

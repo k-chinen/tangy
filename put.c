@@ -461,7 +461,6 @@ P;
                             break;
         
         case OA_ARC:
-fprintf(stderr, " arc  ldir %7.2f rad %d an %d\n", ldir, rad, an);
 printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             MARK("cB", x, y);
                             arcx = x + rad*cos((ldir+90)*rf);
@@ -513,7 +512,6 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
                             break;
 
         case OA_ARCN:
-fprintf(stderr, " arcn ldir %7.2f rad %d an %d\n", ldir, rad, an);
 printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             MARK("nB", x, y);
 
@@ -622,7 +620,6 @@ printf("set final as last position\n");
 printf("set final as specified position\n");
     }
 
-    fprintf(stderr, "lldir %.1f ldir %.1f\n", lldir, ldir);
 
 #if 0
 printf("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);

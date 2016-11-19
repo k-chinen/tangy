@@ -24,5 +24,7 @@ int txe_sprint(char *dst, int dlen, void *rv, int dmy);
 txe *txe_new(int xnt, char *xns);
 int txe_parse(varray_t *ar, char *fs);
 int txe_release(varray_t *ar);
+int txe_extract(char *dst, int dlen, txe *te);
+int txear_extract(char *dst, int dlen, varray_t *ar);
 
 #endif/*_TX_H_*/
