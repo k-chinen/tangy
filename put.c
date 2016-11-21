@@ -627,44 +627,6 @@ printf("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);
     return rv;
 }
 
-#if 0
-int
-Xest_seg(varray_t *ar, int *rlx, int *rby, int *rrx, int *rty)
-{
-    int x, y;
-    int h, v;
-    int _lx, _by, _rx, _ty;
-    int i;
-    seg *e;
-
-printf("%s:\n", __func__);
-
-    _rx = _ty = -(INT_MAX-1);
-    _lx = _by = INT_MAX;
-
-        x = y = 0;
-        MARK("z", x, y);
-    for(i=0;i<ar->use;i++) {
-        e = (seg*)ar->slot[i];
-        h = e->x1;
-        v = e->y1;
-        x += h;
-        y += v;
-printf("    %d: h,v %d,%d x,y %d %d\n", i, h, v, x, y);
-        MARK("e", x, y);
-    }
-
-    *rlx = _lx;
-    *rby = _by;
-    *rrx = _rx;
-    *rty = _ty;
-
-printf("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);
-    return 0;
-}
-
-#endif
-
 
 #undef MARK
 
@@ -885,8 +847,6 @@ printf("SEP oid %d dir %d\n", u->oid ,dir);
 printf("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
 #endif
 
-#if 1
-#endif
             u->clx = lx;
             u->cby = by;
             u->crx = rx;
