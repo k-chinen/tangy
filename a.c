@@ -414,8 +414,10 @@ apair_t ls_ial[] = {
 #define OA_TO               (103)
 
 #define OA_FOREHEAD         (201)
-#define OA_BACKHEAD         (202)
-#define OA_BOTHHEAD         (203)
+#define OA_CENTHEAD         (202)
+#define OA_BACKHEAD         (204)
+#define OA_BOTHHEAD         (205)
+#define OA_ALLHEAD          (207)
 #define OA_ARROWEVERY       (211)
 #define OA_ARROWEDGE        (212)
 
@@ -443,6 +445,9 @@ apair_t ls_ial[] = {
 
 #define OA_KEEPDIR          (701)
 #define OA_NOEXPAND         (703)
+
+#define OA_MARKNODE         (710)
+#define OA_MARKBB           (711)
 
 #define OA_TEXTHEIGHTFACTOR     (901)
 #define OA_TEXTDECENTFACTOR     (902)
@@ -506,6 +511,7 @@ apair_t objattr_ial[] = {
     {"skip",                OA_SKIP},
 
     {"forehead",            OA_FOREHEAD},
+    {"centhead",            OA_CENTHEAD},
     {"backhead",            OA_BACKHEAD},
     {"bothhead",            OA_BOTHHEAD},
     {"arrowevery",          OA_ARROWEVERY},
@@ -520,6 +526,8 @@ apair_t objattr_ial[] = {
 
     {"keepdir",             OA_KEEPDIR},
     {"noexpand",            OA_NOEXPAND},
+    {"marknode",            OA_MARKNODE},
+    {"markbb",              OA_MARKBB},
 
     {"textheightfactor",    OA_TEXTHEIGHTFACTOR},
     {"textdecentfactor",    OA_TEXTDECENTFACTOR},
@@ -560,6 +568,7 @@ double textbgmarginfactor   = 0.20;
 
 double hatchthickfactor     = 0.01;
 double hatchpitchfactor     = 0.07;
+double marknoderadfactor    = 0.05;
 
 
 int draft_mode      = 0;
@@ -592,6 +601,7 @@ int def_textheight      =  30;
 
 int def_hatchpitch      =   5;
 int def_hatchthick      =   1;
+int def_marknoderad     =  10;
 
 int def_gridpitch       = 10000;
 int def_gridrange       =   5;
@@ -646,6 +656,7 @@ struct obattr {
 
     int   arrowheadpart;
     int   arrowforeheadtype;
+    int   arrowcentheadtype;
     int   arrowbackheadtype;
 
     int   fillcolor;
@@ -708,6 +719,9 @@ struct obattr {
     int    arrowevery;
     int    keepdir;
     int    noexpand;
+
+    int    marknode;
+    int    markbb;
 }; 
 
 typedef struct _ch {
@@ -2060,6 +2074,7 @@ P;
         def_hatchthick = 1;
     }
 #endif
+    def_marknoderad     = marknoderadfactor     * objunit;
 
 #if 0
     V(objunit);
@@ -2199,7 +2214,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.002" 
+    printf("2.003" 
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2231,6 +2246,7 @@ print_param()
     QPV(textheight);
     QPV(hatchthick);
     QPV(hatchpitch);
+    QPV(marknoderad);
 
     printf("  others\n");
 
