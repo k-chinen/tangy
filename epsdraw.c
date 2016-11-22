@@ -4400,6 +4400,7 @@ _line_patharrow(FILE *fp,
     int x1, y1, x2, y2;
     seg *s;
     int cdir;
+    int tx, ty; 
 
     int ap, fh, bh;
     int arcx, arcy;
@@ -4560,6 +4561,7 @@ PP;
             y2 = y1;
 
             break;
+
         case OA_SKIP:
 PP;
             x2 = x1+s->x1;
@@ -4574,6 +4576,7 @@ PP;
             fprintf(fp, "    %d %d lineto", x2, y2);
 
             break;
+
         case OA_ARC:
 
 #if 0
@@ -4583,7 +4586,6 @@ PP;
 
             arcx = x1 + s->rad*cos((cdir+90)*rf);
             arcy = y1 + s->rad*sin((cdir+90)*rf);
-
             x2 = arcx + s->rad*cos((cdir+s->ang-90)*rf);
             y2 = arcy + s->rad*sin((cdir+s->ang-90)*rf);
             
@@ -4592,7 +4594,6 @@ PP;
 
 #if 1
             if(draft_mode) {
-                int tx, ty; 
                 int a;
                 fprintf(fp, "     gsave\n");
                 printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
@@ -4620,16 +4621,28 @@ PP;
                 fprintf(fp, "grestore\n");
             }
 
+            if(actch) {
+                tx = arcx + s->rad*cos((cdir-90+s->ang/2)*rf);
+                ty = arcy + s->rad*sin((cdir-90+s->ang/2)*rf);
+                fprintf(fp, "gsave\n");
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir+s->ang/2,
+                        xu->cob.outlinecolor, tx, ty);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir+s->ang/2+180,
+                        xu->cob.outlinecolor, tx, ty);
+                }
+                fprintf(fp, "grestore\n");
+            }
+
             if(actfh>0) {
                 fprintf(fp, "gsave\n");
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir+s->ang,
                     xu->cob.outlinecolor, x2, y2);
-#if 0
-                epsdraw_Xarrowhead(fp,
-                    xu->cob.arrowforeheadtype, dcdir+v,
-                    xu->cob.outlinethick, (double)x2, (double)y2+objunit/2);
-#endif
                 fprintf(fp, "grestore\n");
             }
             if(actbh>0) {
@@ -4694,6 +4707,23 @@ fprintf(fp, "%% a cdir %d\n", cdir);
                 fprintf(fp, "grestore\n");
             }
 
+            if(actch) {
+                tx = arcx + s->rad*cos((cdir+90-s->ang/2)*rf);
+                ty = arcy + s->rad*sin((cdir+90-s->ang/2)*rf);
+                fprintf(fp, "gsave\n");
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-90+s->ang/2,
+                        xu->cob.outlinecolor, tx, ty);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-90+s->ang/2+180,
+                        xu->cob.outlinecolor, tx, ty);
+                }
+                fprintf(fp, "grestore\n");
+            }
+
             if(actfh>0) {
                 fprintf(fp, "gsave\n");
                 epsdraw_arrowhead(fp,
@@ -4745,6 +4775,20 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
 
             fprintf(fp, "  %d %d lineto\n", x2, y2);
 
+            if(actch) {
+                fprintf(fp, "gsave\n");
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-s->ang,
+                        xu->cob.outlinecolor, (x1+x2)/2, (y1+y2)/2);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-s->ang,
+                        xu->cob.outlinecolor, (x1+x2)/2, (y1+y2)/2);
+                }
+                fprintf(fp, "grestore\n");
+            }
             if(actfh>0) {
                 fprintf(fp, "gsave\n");
                 epsdraw_arrowhead(fp,
@@ -5191,6 +5235,21 @@ P;
                 fprintf(fp, "%% i %d count %d: trip %f\n",
                     i, count, trip);
 
+            if(actch) {
+                px = arcx + s->rad*cos((cdir+(s->ang/2)-90)*rf);
+                py = arcy + s->rad*sin((cdir+(s->ang/2)-90)*rf);
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir+(s->ang/2),
+                        xu->cob.outlinecolor, px, py);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir+(s->ang/2) + 180,
+                        xu->cob.outlinecolor, px, py);
+                }
+            }
+
             if(actfh>0) {
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir+v,
@@ -5265,6 +5324,21 @@ fprintf(fp, "%% a cdir %d arc\n", cdir);
             trip += etrip;
                 fprintf(fp, "%% i %d count %d: trip %f\n",
                     i, count, trip);
+
+            if(actch) {
+                px = arcx + s->rad*cos((cdir-(s->ang/2)+90)*rf);
+                py = arcy + s->rad*sin((cdir-(s->ang/2)+90)*rf);
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-(s->ang/2),
+                        xu->cob.outlinecolor, px, py);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir-(s->ang/2) + 180,
+                        xu->cob.outlinecolor, px, py);
+                }
+            }
 
             if(actfh>0) {
                 epsdraw_arrowhead(fp,
@@ -5353,6 +5427,20 @@ coord_done:
                 fprintf(fp, "%% i %d count %d: trip %f\n",
                     i, count, trip);
 
+            if(actch) {
+                px = x1 + (x2-x1)/2;
+                py = y1 + (y2-y1)/2;
+                if(actch>0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir,
+                        xu->cob.outlinecolor, px, py);
+                }
+                if(actch<0) {
+                    epsdraw_arrowhead(fp,
+                        xu->cob.arrowcentheadtype, cdir+180,
+                        xu->cob.outlinecolor, px, py);
+                }
+            }
             if(actfh>0) {
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir,

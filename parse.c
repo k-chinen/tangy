@@ -263,7 +263,7 @@ parse_segop(char *sin, int dt, ob *nob)
     char    vstr[BUFSIZ];
     char   *f;
     char   *m;
-    segop  *nop;
+    segop  *newop;
     char   *r;
     int     sop;
     int     top;
@@ -320,19 +320,19 @@ Warn("tmp '%s' seems not value\n", tmp);
 
     }
 
-    nop = (segop*)malloc(sizeof(segop));
-    if(!nop) {
+    newop = (segop*)malloc(sizeof(segop));
+    if(!newop) {
 E;
     }
-    memset(nop, 0, sizeof(segop));
+    memset(newop, 0, sizeof(segop));
 
-    nop->cmd = dt;
-    nop->val = strdup(vstr);
+    newop->cmd = dt;
+    newop->val = strdup(vstr);
 
 #if 0
-Echo("  push cmd %d val '%s'\n", nop->cmd, nop->val);
+Echo("  push cmd %d val '%s'\n", newop->cmd, newop->val);
 #endif
-    varray_push(nob->cob.segopar, (void*)nop);
+    varray_push(nob->cob.segopar, (void*)newop);
 
     nob->cob.originalshape++;
 
@@ -682,6 +682,18 @@ skip_number:
         }
         else {
             rob->cob.arrowbackheadtype = atoi(value);
+        }
+        uc++;
+    }
+    else if(strcasecmp(name, "centhead")==0) {
+        rob->cob.arrowheadpart |= AR_CENT;
+        p = draw_wordW(p, value, BUFSIZ);
+        x = assoc(arrowhead_ial, value);
+        if(x>=0) {
+            rob->cob.arrowcentheadtype = x;
+        }
+        else {
+            rob->cob.arrowcentheadtype = atoi(value);
         }
         uc++;
     }

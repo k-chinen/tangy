@@ -280,8 +280,10 @@ apair_t hatchtype_ial[] = {
 
 #define AR_NONE             (0)
 #define AR_FORE             (1)
-#define AR_BACK             (2)
-#define AR_BOTH             (3)
+#define AR_CENT             (2)
+#define AR_BACK             (4)
+#define AR_BOTH             (5)
+#define AR_ALL              (7)
 
 #define AH_NONE             (0)
 #define AH_NORMAL           (1)
