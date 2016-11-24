@@ -606,11 +606,12 @@ skip_number:
     OISET(OA_WIDTH,         wd);
     OISET(OA_HEIGHT,        ht);
 
-    GFSET(OA_TEXTHEIGHTFACTOR,  textheightfactor);
-    GFSET(OA_ARROWSIZEFACTOR,   arrowsizefactor);
-    GFSET(OA_LINETHICKFACTOR,   linethickfactor);
-    GFSET(OA_HATCHTHICKFACTOR,  hatchthickfactor);
-    GFSET(OA_HATCHPITCHFACTOR,  hatchpitchfactor);
+    GFSET(OA_TEXTHEIGHTFACTOR,      textheightfactor);
+    GFSET(OA_ARROWSIZEFACTOR,       arrowsizefactor);
+    GFSET(OA_LINETHICKFACTOR,       linethickfactor);
+    GFSET(OA_LINEDECOTHICKFACTOR,   linedecothickfactor);
+    GFSET(OA_HATCHTHICKFACTOR,      hatchthickfactor);
+    GFSET(OA_HATCHPITCHFACTOR,      hatchpitchfactor);
 
 #if 0
     if(strcasecmp(name, "linetype")==0)        {

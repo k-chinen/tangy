@@ -4,18 +4,6 @@ char debuglog[BUFSIZ*10]="";
 #define QLIMIT  (0.01)
 #endif
 
-seg*
-seg_new()
-{
-    seg* na;
-    na = (seg*)malloc(sizeof(seg)); 
-    if(!na) {
-        Error("%s: no memory for seg\n", __func__);
-        return NULL;
-    }
-    memset(na, 0, sizeof(seg)); 
-    return na;
-}
 
 
 /* normalize to -180..180 */
@@ -302,8 +290,8 @@ skip_m:
 
 
 #define FREG(qpt,qjt,qct,qft,qx,qy,qra,qan) \
-	r = seg_new(); \
-	if(!r) {} \
+    r = seg_new(); \
+    if(!r) {} \
     r->ptype    = qpt; \
     r->jtype    = qjt; \
     r->coordtype = qct; \
@@ -348,7 +336,7 @@ flush_que:
         case OA_TO:     
 #if 1
             if(c>0) {
-							r = seg_new();
+                            r = seg_new();
                             r->coordtype = REL_COORD;
                             r->ptype = OA_FORWARD;
                             r->x1 = x - lx;
@@ -734,6 +722,18 @@ OP_LDUMP(const char *pre, char *mid, ob *u)
     return 0;
 }
 
+int
+insboxpath(varray_t *xar, int xwd, int xht)
+{
+    fprintf(stdout, "%s: xar %p xwd %d xht %d\n", __func__, xar, xwd, xht);
+    fprintf(stdout, "b ");
+    varray_fprint(stdout, xar);
+
+
+    fprintf(stdout, "a ");
+    varray_fprint(stdout, xar);
+    return 0;
+}
 
 
 #define WO      {wd = objunit*3/2;  ht = objunit; }
@@ -815,16 +815,20 @@ P;
 
     case CMD_MOVE:      WO;     break;
 
-    case CMD_DMY1:      WO;     break;
-    case CMD_DMY2:      WO;     break;
     case CMD_PAPER:     WO;     break;
     case CMD_CLOUD:     WO;     break;
     case CMD_DRUM:      WO;     break;
+
     case CMD_BOX:       WO;     break;
-    case CMD_DOTS:      WO;     u->cob.sepcurdir = dir; break;
     case CMD_CIRCLE:    RO;     break;
     case CMD_ELLIPSE:   WO;     break;
     case CMD_POLYGON:   RO;     break;
+
+    case CMD_DMY1:      WO;     break;
+    case CMD_DMY2:      WO;     break;
+
+
+    case CMD_DOTS:      WO;     u->cob.sepcurdir = dir; break;
 
     case CMD_PING:
     case CMD_PINGPONG:  WO;     break;
@@ -896,7 +900,8 @@ printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
 apply:
 
 #if 1
-printf("\t  2 wd %d ht %d\n", wd, ht);
+printf("\t  2 u wd %d ht %d\n", u->wd, u->ht);
+printf("\t  2   wd %d ht %d\n", wd, ht);
 #endif
     if(u->wd<0) u->wd = wd;
     if(u->ht<0) u->ht = ht;
@@ -904,6 +909,14 @@ printf("\t  2 wd %d ht %d\n", wd, ht);
     u->sizesolved++;
 #if 0
 printf("obj oid %d solved\n", u->oid);
+#endif
+
+#if 0
+    switch(u->type) {
+    case CMD_DMY1:
+        insboxpath(u->cob.segar, u->wd, u->ht);
+        break;
+    }
 #endif
 
 #if 1
@@ -930,32 +943,6 @@ out:
     return re;
 }
 
-int
-try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
-{
-    seg *e;
-
-    printf("%s: enter\n", __func__);
-    printf("b use %d\n", segar->use);
-
-    if(segar->use>0) {
-        goto out;
-    }
-    e = seg_new();
-    if(!e) {
-        return -1;
-    }
-    e->ptype        = OA_FORWARD;
-    e->coordtype    = REL_COORD;
-    e->x1           = x2-x1;
-    e->y1           = y2-y1;
-    varray_push(segar, e);
-
-out:
-    printf("a use %d\n", segar->use);
-
-    return 0;
-}
 
 
 int
@@ -1017,7 +1004,7 @@ E;
 
 #if 0
     int ik;
-    ik = try_regline(u->cob.segar, u->cx, u->cy, u->cex, u->cey);
+    ik = try_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
 #endif
 
 #if 0
@@ -1204,7 +1191,7 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 
 #if 0
     int ik;
-    ik = try_regline(u->cob.segar, u->cx, u->cy, u->cex, u->cey);
+    ik = try_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
 #endif
 
 

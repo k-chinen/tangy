@@ -440,6 +440,10 @@ apair_t ls_ial[] = {
 #define OA_JOIN             (321)
 #define OA_SKIP             (322)
 
+#define OA_MOVE             (350)
+#define OA_RMOVE            (351)
+#define OA_LINE             (352)
+
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)
 
@@ -451,15 +455,16 @@ apair_t ls_ial[] = {
 #define OA_MARKNODE         (710)
 #define OA_MARKBB           (711)
 
-#define OA_TEXTHEIGHTFACTOR     (901)
-#define OA_TEXTDECENTFACTOR     (902)
-#define OA_TEXTBGMARGINFACTOR   (903)
-#define OA_ARROWSIZEFACTOR      (912)
-#define OA_WARROWSIZEFACTOR     (913)
-#define OA_LINETHICKFACTOR      (923)
-#define OA_WLINETHICKFACTOR     (924)
-#define OA_HATCHTHICKFACTOR     (931)
-#define OA_HATCHPITCHFACTOR     (932)
+#define OA_TEXTHEIGHTFACTOR         (901)
+#define OA_TEXTDECENTFACTOR         (902)
+#define OA_TEXTBGMARGINFACTOR       (903)
+#define OA_ARROWSIZEFACTOR          (912)
+#define OA_WARROWSIZEFACTOR         (913)
+#define OA_LINETHICKFACTOR          (923)
+#define OA_WLINETHICKFACTOR         (924)
+#define OA_LINEDECOTHICKFACTOR      (925)
+#define OA_HATCHTHICKFACTOR         (931)
+#define OA_HATCHPITCHFACTOR         (932)
 
 
 apair_t objattr_ial[] = {
@@ -512,6 +517,10 @@ apair_t objattr_ial[] = {
     {"join",                OA_JOIN},
     {"skip",                OA_SKIP},
 
+    {"line",                OA_LINE},
+    {"move",                OA_MOVE},
+    {"rmove",               OA_RMOVE},
+
     {"forehead",            OA_FOREHEAD},
     {"centhead",            OA_CENTHEAD},
     {"backhead",            OA_BACKHEAD},
@@ -537,6 +546,7 @@ apair_t objattr_ial[] = {
     {"arrowsizefactor",     OA_ARROWSIZEFACTOR},
     {"warrowsizefactor",    OA_WARROWSIZEFACTOR},
     {"linethickfactor",     OA_LINETHICKFACTOR},
+    {"linedecothickfactor",     OA_LINEDECOTHICKFACTOR},
     {"wlinethickfactor",    OA_WLINETHICKFACTOR},
     {"hatchthickfactor",    OA_HATCHTHICKFACTOR},
     {"hatchpitchfactor",    OA_HATCHPITCHFACTOR},
@@ -1233,7 +1243,8 @@ ob_adump(ob* s)
     int r;
     printf("=== ADUMP\n");
     printf(
-"oid:type                     ox,oy      wxh    f   gx,y     gsx,sy    gex,ey\n");
+"oid:type                         ox,oy          wxh      f     gx,y        gsx,sy         gex,ey\n");
+
 
     r = _ob_adump(s, 0);
     printf("---\n");
@@ -1523,7 +1534,7 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
     seg* s;
 
     s = (seg*)xv;
-    ik = sprintf(dst, "<(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)>",
+    ik = sprintf(dst, "(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)",
         rassoc(objattr_ial, s->ptype), s->ptype,
         s->jtype>0 ? "JOIN" : "-",
         s->jtype,
@@ -2079,7 +2090,7 @@ P;
 #endif
     def_marknoderad     = marknoderadfactor     * objunit;
 
-#if 0
+#if 1
     V(objunit);
     V(def_arrowsize);
     V(def_linethick);
@@ -2087,15 +2098,18 @@ P;
     V(def_linedecothick);
     V(def_barrowgap);
     V(def_textheight);
-    V(def_textdecent);
     V(def_hatchpitch);
     V(def_hatchthick);
+#endif
+#if 0
+    V(def_textdecent);
 #endif
 
     return 0;
 }
 
 
+#include "seg.c"
 
 #include "parse.c"
 #include "forkchk.c"

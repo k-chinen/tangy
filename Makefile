@@ -6,7 +6,8 @@ CFLAGS=-g
 all: tangy 
 tangy: a.c alist.h chas.c chs.c color.h epsdraw.c finalize.c forkchk.c \
     linkchk.c nss.c parse.c picdraw.c put.c varray.h \
-	alist.c color.c varray.c tx.o qbb.o
+	alist.c color.c varray.c seg.c \
+    tx.o qbb.o
 	cc $(CFLAGS) -o tangy -DGITCHASH='"'`git show -s --format=%H`'"' \
 	a.c tx.o qbb.o alist.c color.c varray.c -lm
 
