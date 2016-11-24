@@ -825,7 +825,8 @@ P;
     case CMD_POLYGON:   RO;     break;
 
     case CMD_DMY1:      WO;     break;
-    case CMD_DMY2:      WO;     break;
+    case CMD_DMY2:      RO;     break;
+    case CMD_DMY3:      WO;     break;
 
 
     case CMD_DOTS:      WO;     u->cob.sepcurdir = dir; break;

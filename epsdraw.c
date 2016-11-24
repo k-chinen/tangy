@@ -4781,15 +4781,21 @@ fprintf(fp, "%% a cdir %d\n", cdir);
             break;
 
         case OA_MOVE:
-            x1 = s->x1+xox;
-            y1 = s->y1+xoy;
-            fprintf(fp, "  %d %d moveto\n", x1, y1);
+            x2 = s->x1+xox;
+            y2 = s->y1+xoy;
+            fprintf(fp, "  %d %d moveto\n", x2, y2);
             break;
 
         case OA_RMOVE:
-            x1 = s->x1;
-            y1 = s->y1;
-            fprintf(fp, "  %d %d rmoveto\n", x1, y1);
+            x2 = s->x1;
+            y2 = s->y1;
+            fprintf(fp, "  %d %d rmoveto\n", x2, y2);
+            break;
+
+        case OA_RLINE:
+            x2 = s->x1;
+            y2 = s->y1;
+            fprintf(fp, "  %d %d rlineto\n", x2, y2);
             break;
 
         case OA_LINE:
@@ -4925,56 +4931,56 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
 
     case LT_TRIANGLE:
         
-        fprintf(fp, "gsave\n");
+        fprintf(fp, "  gsave\n");
 
-        fprintf(fp, "%f %f translate 0 0 moveto %f rotate\n", x, y, a);
+        fprintf(fp, "    %.2f %.2f translate 0 0 moveto %.2f rotate\n", x, y, a);
 
         r  = objunit/10;
         fx = r*0.707;
-        fprintf(fp, "%f 0 translate\n", fx);
+        fprintf(fp, "    %.2f 0 translate\n", fx);
 
         dx = r*cos(135*rf);
         dy = r*sin(135*rf);
-        fprintf(fp, "%f %f moveto ", dx, dy);
-        fprintf(fp, "0 0 lineto ");
+        fprintf(fp, "    %.2f %.2f moveto ", dx, dy);
+        fprintf(fp, "    0 0 lineto ");
 
         dx = r*cos(-135*rf);
         dy = r*sin(-135*rf);
-        fprintf(fp, "%f %f lineto closepath fill\n",
+        fprintf(fp, "    %.2f %.2f lineto closepath fill\n",
             dx, dy);
         
-        fprintf(fp, "grestore\n");
+        fprintf(fp, "  grestore\n");
         goto out;
         break;
 
     case LT_MOUNTAIN:
         
-        fprintf(fp, "gsave\n");
+        fprintf(fp, "  gsave\n");
 
-        fprintf(fp, "%f %f translate 0 0 moveto %f rotate\n", x, y, a);
+        fprintf(fp, "    %.2f %.2f translate 0 0 moveto %.2f rotate\n", x, y, a);
 
         r  = objunit/10;
         fx = r*0.707;
-        fprintf(fp, "%f 0 translate\n", fx);
+        fprintf(fp, "    %.2f 0 translate\n", fx);
 
         dx = r*cos(135*rf);
         dy = r*sin(135*rf);
-        fprintf(fp, "%f %f moveto ", dx, dy);
-        fprintf(fp, "0 0 lineto ");
+        fprintf(fp, "    %.2f %.2f moveto ", dx, dy);
+        fprintf(fp, "    0 0 lineto ");
 
         dx = r*cos(-135*rf);
         dy = r*sin(-135*rf);
-        fprintf(fp, "%f %f lineto stroke\n",
+        fprintf(fp, "    %.2f %.2f lineto stroke\n",
             dx, dy);
         
-        fprintf(fp, "grestore\n");
+        fprintf(fp, "  grestore\n");
         goto out;
         break;
 
     default:
     case LT_CIRCLE:
         r  = def_linedecothick/2;
-        fprintf(fp, "newpath %f %f %f 0 360 arc fill\n", x, y, r);
+        fprintf(fp, "  newpath %.2f %.2f %.2f 0 360 arc fill\n", x, y, r);
         goto out;
         break;
     }
@@ -4986,7 +4992,7 @@ purelinetype:
         y1 = y;
         x2 = run*cos(a*rf);
         y2 = run*sin(a*rf);
-        fprintf(fp, "%f %f moveto %f %f rlineto stroke %% symdraw\n",
+        fprintf(fp, "  %.2f %.2f moveto %.2f %.2f rlineto stroke %% symdraw\n",
             x1, y1, x2, y2);
     }
 #if 0
@@ -5003,15 +5009,15 @@ solve_pitch(int ty)
 {
     double rv;
 
-    rv = def_linedecothick; 
+    rv = def_linedecopitch; 
 
     switch(ty) {
-    case LT_DASHED:         rv = def_linedecothick;     break;
-    case LT_DOTTED:         rv = def_linedecothick/2;   break;
-    case LT_CHAINED:        rv = def_linedecothick/2;   break;
-    case LT_DOUBLECHAINED:  rv = def_linedecothick/2;   break;
+    case LT_DASHED:         rv = def_linedecopitch;     break;
+    case LT_DOTTED:         rv = def_linedecopitch/2;   break;
+    case LT_CHAINED:        rv = def_linedecopitch/2;   break;
+    case LT_DOUBLECHAINED:  rv = def_linedecopitch/2;   break;
     default:
-    case LT_CIRCLE:         rv = def_linedecothick*2;   break;
+    case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
     }
 
     printf("%s: rv %f\n", __func__, rv);
@@ -5057,7 +5063,7 @@ _line_deco2(FILE *fp,
 
     if(xu->cob.outlinetype==LT_SOLID) {
         _line_patharrow(fp, ydir, xox, xoy, xu, xns);
-        fprintf(fp, "stroke\n");
+        fprintf(fp, "  stroke\n");
         return 0;
     }
 
@@ -8543,6 +8549,47 @@ out:
     return 0;
 }
 
+int
+mkpath_box(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    if(rad==0) {
+        try_regsegmove(sar,  -wd/2, -ht/2);
+        try_regsegrline(sar,    wd,     0);
+        try_regsegrline(sar,     0,    ht);
+        try_regsegrline(sar,   -wd,     0);
+        try_regsegrline(sar,     0,   -ht);
+    }
+    else {
+        try_regsegmove(sar,     -wd/2+rad,        -ht/2);
+        try_regsegforward(sar,   wd-2*rad,            0);
+        try_regsegarc(sar,            rad,           90);
+        try_regsegforward(sar,          0,     ht-2*rad);
+        try_regsegarc(sar,            rad,           90);
+        try_regsegforward(sar,  -(wd-2*rad),          0);
+        try_regsegarc(sar,            rad,           90);
+        try_regsegforward(sar,          0,  -(ht-2*rad));
+        try_regsegarc(sar,            rad,           90);
+    }
+
+    return 0;
+}
+
+int
+mkpath_circle(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+#if 0
+    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
+    try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
+#endif
+    try_regsegmove(sar,     0, -ht/2);
+    try_regsegarc(sar,   ht/2,   360);
+
+    return 0;
+}
+
+
 
 int
 epsdraw_dmy1(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -8555,7 +8602,7 @@ epsdraw_dmy1(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     mx = xu->x+xox;
     my = xu->y+xoy;
 
-fprintf(fp, "%% dmy1\n");
+fprintf(fp, "%% %s\n", __func__);
 
 #if 0
     MTF(1, xox+xu->csx, xoy+xu->csy, 0);
@@ -8573,13 +8620,34 @@ fprintf(fp, "%% dmy1\n");
 #if 0
     try_regsegrmove(xu->cob.segar,  -xu->wd/2, -xu->ht/2);
 #endif
+
 #if 0
-    try_regsegmove(xu->cob.segar,    -xu->wd/2, -xu->ht/2);
-#endif
     try_regsegforward(xu->cob.segar,  xu->wd,       0);
     try_regsegforward(xu->cob.segar,       0,  xu->ht);
     try_regsegforward(xu->cob.segar, -xu->wd,       0);
     try_regsegforward(xu->cob.segar,       0, -xu->ht);
+#endif
+
+#if 1
+    if(xu->cob.rad==0) {
+        try_regsegmove(xu->cob.segar, -xu->wd/2, -xu->ht/2);
+        try_regsegrline(xu->cob.segar,   xu->wd,         0);
+        try_regsegrline(xu->cob.segar,        0,    xu->ht);
+        try_regsegrline(xu->cob.segar,  -xu->wd,         0);
+        try_regsegrline(xu->cob.segar,        0,   -xu->ht);
+    }
+    else {
+        try_regsegmove(xu->cob.segar, -xu->wd/2+xu->cob.rad, -xu->ht/2);
+        try_regsegforward(xu->cob.segar,   xu->wd-2*xu->cob.rad,         0);
+        try_regsegarc(xu->cob.segar,   xu->cob.rad, 90);
+        try_regsegforward(xu->cob.segar,        0,    xu->ht-2*xu->cob.rad);
+        try_regsegarc(xu->cob.segar,   xu->cob.rad, 90);
+        try_regsegforward(xu->cob.segar,  -(xu->wd-2*xu->cob.rad),         0);
+        try_regsegarc(xu->cob.segar,   xu->cob.rad, 90);
+        try_regsegforward(xu->cob.segar,        0,   -(xu->ht-2*xu->cob.rad));
+        try_regsegarc(xu->cob.segar,   xu->cob.rad, 90);
+    }
+#endif
 
     fprintf(stdout, "a ");
     varray_fprint(stdout, xu->cob.segar);
@@ -8593,18 +8661,25 @@ fprintf(fp, "%% dmy1\n");
     changecolor(fp, xu->cob.outlinecolor);
     changethick(fp, xu->cob.outlinethick);
 #endif
-    fprintf(fp, "%d %d translate 0 0 moveto %d rotate\n",
+    fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
         xu->x+xox, xu->y+xoy, xu->cob.rotateval);
+#if 0
     MX( 0,         0, 0);
+#endif
     /* XXX */
-    fprintf(fp, "%d %d translate\n", -xu->x, -xu->y);
-    fprintf(fp, "%d %d translate\n", -xu->wd/2, -xu->ht/2);
+#if 0
+    fprintf(fp, "  %d %d translate\n", -xu->x, -xu->y);
+    fprintf(fp, "  %d %d translate\n", -xu->wd/2, -xu->ht/2);
+#endif
+#if 0
     MP( 1,         0, 0);
+    MTF(0, -xu->wd/2+xu->cob.rad, -xu->ht/2, 90);
+#endif
 
 #if 0
     MX( 1,         0, 0);
     MC( 5, -xu->wd/2, -xu->ht/2);
-    MCF(5,  xu->wd/2,  xu->ht/2);
+    MCF(5, -xu->wd/2,  xu->ht/2);
     MQ( 5,  xu->wd/2,  xu->ht/2);
     MQF(5,  xu->wd/2, -xu->ht/2);
 #endif
@@ -8617,14 +8692,163 @@ fprintf(fp, "%% dmy1\n");
     fprintf(fp, "grestore\n");
 #endif
 
-    fprintf(fp, "gsave\n");
+    fprintf(fp, " gsave\n");
     ik = _line_deco2(fp, 0, 0, 0, xu, xns);
-    fprintf(fp, "grestore\n");
+    fprintf(fp, " grestore\n");
 
 #if 0
     SLW_1x(fp, 50);
 #endif
     fprintf(fp, "grestore %% dmy1\n");
+
+    return 0;
+}
+
+int
+epsdraw_dmy2(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    int ik;
+    int mx, my;
+    varray_t *saved_segar;
+    seg *e;
+
+    mx = xu->x+xox;
+    my = xu->y+xoy;
+
+fprintf(fp, "%% %s\n", __func__);
+
+    saved_segar = xu->cob.segar;
+#if 0
+    fprintf(stdout, "b ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+    
+    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
+    try_regsegarc(xu->cob.segar,   xu->wd/2, 360);
+
+#if 0
+    fprintf(stdout, "a ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+
+    fprintf(fp, "gsave %% dmy2\n");
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
+    fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
+        xu->x+xox, xu->y+xoy, xu->cob.rotateval);
+    fprintf(fp, " gsave\n");
+    ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+    fprintf(fp, " grestore\n");
+    fprintf(fp, "grestore %% dmy2\n");
+
+    return 0;
+}
+
+
+int
+epsdraw_dmy3(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    int ik;
+    int mx, my;
+    varray_t *saved_segar;
+    seg *e;
+    double a;
+
+    mx = xu->x+xox;
+    my = xu->y+xoy;
+
+fprintf(fp, "%% %s\n", __func__);
+
+    saved_segar = xu->cob.segar;
+#if 0
+    fprintf(stdout, "b ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+
+    a = ((double)xu->wd)/((double)xu->ht);
+    
+    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
+    try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
+
+#if 0
+    fprintf(stdout, "a ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+
+    fprintf(fp, "gsave %% dmy3\n");
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
+    fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
+        xu->x+xox, xu->y+xoy, xu->cob.rotateval);
+    fprintf(fp, "  %f %f scale\n", a, 1.0);
+    fprintf(fp, " gsave\n");
+    ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+    fprintf(fp, " grestore\n");
+    fprintf(fp, "grestore %% dmy3\n");
+
+    return 0;
+}
+
+int
+epsdraw_dmyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    int ik;
+    int mx, my;
+    varray_t *saved_segar;
+    seg *e;
+    double a;
+
+    mx = xu->x+xox;
+    my = xu->y+xoy;
+
+fprintf(fp, "%% %s\n", __func__);
+
+    saved_segar = xu->cob.segar;
+#if 0
+    fprintf(stdout, "b ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+
+    a = 1.0;
+    
+    switch(xu->type) {
+    case CMD_BOX:
+    case CMD_DMY1:
+        ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        break;
+    case CMD_CIRCLE:
+    case CMD_DMY2:
+        ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        break;
+    case CMD_ELLIPSE:
+    case CMD_DMY3:
+        ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        a = ((double)xu->wd)/((double)xu->ht);
+        break;
+    default:
+        fprintf(fp, "%% unknown type %d\n", xu->type);
+        break;
+    }
+#if 0
+    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
+    try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
+#endif
+
+#if 1
+    fprintf(stdout, "a ");
+    varray_fprint(stdout, xu->cob.segar);
+#endif
+
+    fprintf(fp, "gsave %% dmyX\n");
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
+    fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
+        xu->x+xox, xu->y+xoy, xu->cob.rotateval);
+    fprintf(fp, "  %f %f scale\n", a, 1.0);
+    fprintf(fp, " gsave\n");
+    ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+    fprintf(fp, " grestore\n");
+    fprintf(fp, "grestore %% dmyX\n");
 
     return 0;
 }
@@ -10481,15 +10705,23 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 #endif
     }
 
+#if 0
     if(u->type==CMD_DMY1) {
         epsdraw_dmy1(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_DMY2) {
-#if 0
-        fprintf(fp, "+   box at (%d,%d) width %d height %d rad %d \"%d\"\n",
-            ox+u->cx, oy+u->cy, u->crx-u->clx, u->cty-u->cby, wd/8, u->oid);
-#endif
+        epsdraw_dmy2(fp, ox, oy, u, xns);
     }
+    if(u->type==CMD_DMY3) {
+        epsdraw_dmy3(fp, ox, oy, u, xns);
+    }
+#endif
+    if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
+PP;
+P;
+        epsdraw_dmyX(fp, ox, oy, u, xns);
+    }
+
 
     if(u->type==CMD_FORK) {
         changedraft(fp);
@@ -10660,7 +10892,9 @@ P;
 /*
     if(xch->cob.outlinethick>0)
 */
-    if(xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) 
+    if(
+        (xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) ||
+        (xch->cob.outlinethick>0) ) 
     {
         fprintf(fp, "%% chunk itself START\n");
         fprintf(fp, 

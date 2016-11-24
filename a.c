@@ -104,6 +104,7 @@ int _t_ = 0;
 
 #define CMD_DMY1        (9001)
 #define CMD_DMY2        (9002)
+#define CMD_DMY3        (9003)
 
 #define CMD_ALIAS       (9007)
 
@@ -168,6 +169,7 @@ apair_t cmd_ial[] = {
     {"branch",          CMD_BRANCH},
     {"dmy1",            CMD_DMY1},
     {"dmy2",            CMD_DMY2},
+    {"dmy3",            CMD_DMY3},
     {"lparen",          CMD_LPAREN},
     {"rparen",          CMD_RPAREN},
     {"\"(\"",           CMD_LPAREN},
@@ -387,7 +389,8 @@ apair_t ls_ial[] = {
 #define OA_LINETYPE          (2)
 #define OA_LINETHICK         (3)
 #define OA_LINEDECOTHICK     (4)
-#define OA_WLINETHICK        (5)
+#define OA_LINEDECOPITCH     (5)
+#define OA_WLINETHICK        (6)
 
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
@@ -443,6 +446,7 @@ apair_t ls_ial[] = {
 #define OA_MOVE             (350)
 #define OA_RMOVE            (351)
 #define OA_LINE             (352)
+#define OA_RLINE            (353)
 
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)
@@ -463,6 +467,7 @@ apair_t ls_ial[] = {
 #define OA_LINETHICKFACTOR          (923)
 #define OA_WLINETHICKFACTOR         (924)
 #define OA_LINEDECOTHICKFACTOR      (925)
+#define OA_LINEDECOPITCHFACTOR      (926)
 #define OA_HATCHTHICKFACTOR         (931)
 #define OA_HATCHPITCHFACTOR         (932)
 
@@ -520,6 +525,7 @@ apair_t objattr_ial[] = {
     {"line",                OA_LINE},
     {"move",                OA_MOVE},
     {"rmove",               OA_RMOVE},
+    {"rline",               OA_RLINE},
 
     {"forehead",            OA_FOREHEAD},
     {"centhead",            OA_CENTHEAD},
@@ -547,6 +553,7 @@ apair_t objattr_ial[] = {
     {"warrowsizefactor",    OA_WARROWSIZEFACTOR},
     {"linethickfactor",     OA_LINETHICKFACTOR},
     {"linedecothickfactor",     OA_LINEDECOTHICKFACTOR},
+    {"linedecopitchfactor",     OA_LINEDECOPITCHFACTOR},
     {"wlinethickfactor",    OA_WLINETHICKFACTOR},
     {"hatchthickfactor",    OA_HATCHTHICKFACTOR},
     {"hatchpitchfactor",    OA_HATCHPITCHFACTOR},
@@ -571,6 +578,7 @@ double arrowsizefactor      = 0.30;
 double warrowsizefactor     = 0.60;
 double linethickfactor      = 0.02;
 double linedecothickfactor  = 0.06;
+double linedecopitchfactor  = 0.06;
 double wlinethickfactor     = 0.20;
 double barrowgapfactor      = 0.25;
 
@@ -603,6 +611,7 @@ int def_linethick       =   1;
 int def_arrowangle      =  30;
 int def_arrowsize       =  20;
 int def_linedecothick   =   5;
+int def_linedecopitch   =   5;
 
 int def_wlinethick      =   1;
 int def_warrowangle     =  60;
@@ -2068,6 +2077,7 @@ P;
     def_linethick       = linethickfactor       * objunit;
     def_wlinethick      = wlinethickfactor      * objunit;
     def_linedecothick   = linedecothickfactor   * objunit;
+    def_linedecopitch   = linedecopitchfactor   * objunit;
 #if 1
     if(def_linethick<=0) {
         def_linethick = 1;
@@ -2096,6 +2106,7 @@ P;
     V(def_linethick);
     V(def_wlinethick);
     V(def_linedecothick);
+    V(def_linedecopitch);
     V(def_barrowgap);
     V(def_textheight);
     V(def_hatchpitch);
@@ -2258,6 +2269,7 @@ print_param()
     QPV(warrowsize);
     QPV(linethick);
     QPV(linedecothick);
+    QPV(linedecopitch);
     QPV(wlinethick);
     QPV(barrowgap);
     QPV(textheight);

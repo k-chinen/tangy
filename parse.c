@@ -610,6 +610,7 @@ skip_number:
     GFSET(OA_ARROWSIZEFACTOR,       arrowsizefactor);
     GFSET(OA_LINETHICKFACTOR,       linethickfactor);
     GFSET(OA_LINEDECOTHICKFACTOR,   linedecothickfactor);
+    GFSET(OA_LINEDECOPITCHFACTOR,   linedecopitchfactor);
     GFSET(OA_HATCHTHICKFACTOR,      hatchthickfactor);
     GFSET(OA_HATCHPITCHFACTOR,      hatchpitchfactor);
 
