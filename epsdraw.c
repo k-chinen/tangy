@@ -774,7 +774,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
 
         break;
     case AH_NORMAL:
-    defalt:
+    default:
         r = def_arrowsize;
 
         dx =  (int)(r*cos((xdir+180+def_arrowangle/2)*rf));
@@ -988,7 +988,7 @@ epsdraw_Xarrowhead(FILE *fp, int atype, double xdir, int lc, double x, double y)
 
         break;
     case AH_NORMAL:
-    defalt:
+    default:
         r = def_arrowsize;
 
         dx =  (double)(r*cos((xdir+180+def_arrowangle/2)*rf));
@@ -1811,30 +1811,31 @@ int
 epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
     int x1, int y1, int x2, int y2)
 {
-    int r;
+    int rv;
 
+    rv = 0;
     switch(ltype) {
     case LT_DOTTED:
     case LT_DASHED:
     case LT_CHAINED:
     case LT_DOUBLECHAINED:
-        r = epsdraw_seglineSEP(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_seglineSEP(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_WAVED:
     case LT_ZIGZAG:
-        r = epsdraw_seglineTICK2(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_seglineTICK2(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_CIRCLE:
     case LT_WCIRCLE:
     case LT_TRIANGLE:
     case LT_MOUNTAIN:
-        r = epsdraw_seglineTICK(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_seglineTICK(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_DOUBLED:
-        r = epsdraw_seglineW(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_seglineW(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_CUTTED:
-        r = epsdraw_seglineM(fp, ltype, lt, lc, x1, y1, x2, y2);
+        rv = epsdraw_seglineM(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_ARROWCENTERED:
     case LT_SOLID:
@@ -1857,11 +1858,11 @@ epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
 #endif
             x3   = (x1+x2)/2;
             y3   = (y1+y2)/2;
-            r = epsdraw_Xarrowhead(fp, AH_NORMAL, xdir, lc, x3, y3);
+            rv = epsdraw_Xarrowhead(fp, AH_NORMAL, xdir, lc, x3, y3);
         }
         break;
     }
-    return r;
+    return rv;
 }
 
 int
@@ -3258,6 +3259,7 @@ epsdraw_segarcXTICK2(FILE *fp,
 
 static int __z = 0;
 
+#if 0
 int
 epsdraw_segarcX(FILE *fp, 
     int ltype, int lt, int lc,
@@ -3271,6 +3273,8 @@ epsdraw_segarcX(FILE *fp,
     int f4;
     int ad;
     int hx, hy;
+
+    rv = 0;
 
     Echo("%s: arcx,y %d,%d rad %d ang1,arg2 %d,%d adir %d\n",
         __func__, arcx, arcy, rad, ang1, ang2, adir);
@@ -3389,7 +3393,9 @@ epsdraw_segarcX(FILE *fp,
         
     return rv;
 }
+#endif
 
+#if 0
 int
 epsdraw_segarcXarrow(FILE *fp, 
     int arcx, int arcy, int rad, int ang1, int ang2, int adir,
@@ -3405,6 +3411,7 @@ epsdraw_segarcXarrow(FILE *fp,
 
     return r;
 }
+#endif
 
 
 int
@@ -3654,6 +3661,7 @@ fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
         x3, y3, x4, y4, xu, xns);
 }
 
+#if 0
 int
 _line_deco(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
@@ -4068,6 +4076,7 @@ P;
 out:
     return 0;
 }
+#endif
 
 int
 _line_path(FILE *fp,
@@ -4415,6 +4424,20 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
     __func__, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
+    if(xu->cob.segar) {
+        if(xu->cob.segar->use>0) {
+fprintf(fp, "%% %s: segar %p use %d\n",
+    __func__, xu->cob.segar, xu->cob.segar->use);
+        }
+        else {
+fprintf(fp, "%% %s: segar %p use %d\n",
+    __func__, xu->cob.segar, xu->cob.segar->use);
+        }
+    }
+    else {
+fprintf(fp, "%% %s: no segar %p use -\n",
+    __func__, xu->cob.segar);
+    }
 
     cdir = ydir;
 
@@ -4468,6 +4491,8 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
         goto out;
     }
+#if 0
+#endif
 
 
     if(xu->cob.segar && xu->cob.segar->use>0) {
@@ -4858,17 +4883,35 @@ dmy_symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
 
     case LT_CHAINED:
     case LT_DOUBLECHAINED:
-        if(ty==LT_CHAINED)          { if(c%2==0) act = 1; }
-        if(ty==LT_DOUBLECHAINED)    { if(c%2==0) act = 1; }
+        act = 1;
+        if(ty==LT_CHAINED)          { if(c%7==4||c%7==6) act = 0; }
+        if(ty==LT_DOUBLECHAINED)    { if(c%9==4||c%9==6||c%9==8) act = 0; }
 
         run = pt;
         goto purelinetype;
         break;
 
+    case LT_TRIANGLE:
+        
+        fprintf(fp, "gsave\n");
 
-    case LT_CIRCLE:
-        r  = def_linedecothick/2;
-        fprintf(fp, "newpath %f %f %f 0 360 arc fill\n", x, y, r);
+        fprintf(fp, "%f %f translate 0 0 moveto %f rotate\n", x, y, a);
+
+        r  = objunit/10;
+        fx = r*0.707;
+        fprintf(fp, "%f 0 translate\n", fx);
+
+        dx = r*cos(135*rf);
+        dy = r*sin(135*rf);
+        fprintf(fp, "%f %f moveto ", dx, dy);
+        fprintf(fp, "0 0 lineto ");
+
+        dx = r*cos(-135*rf);
+        dy = r*sin(-135*rf);
+        fprintf(fp, "%f %f lineto closepath fill\n",
+            dx, dy);
+        
+        fprintf(fp, "grestore\n");
         goto out;
         break;
 
@@ -4893,6 +4936,13 @@ dmy_symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
             dx, dy);
         
         fprintf(fp, "grestore\n");
+        goto out;
+        break;
+
+    default:
+    case LT_CIRCLE:
+        r  = def_linedecothick/2;
+        fprintf(fp, "newpath %f %f %f 0 360 arc fill\n", x, y, r);
         goto out;
         break;
     }
@@ -4924,10 +4974,12 @@ solve_pitch(int ty)
     rv = def_linedecothick; 
 
     switch(ty) {
-    case LT_DASHED:     rv = def_linedecothick;     break;
-    case LT_DOTTED:     rv = def_linedecothick/2;   break;
-    case LT_CIRCLE:     rv = def_linedecothick*2;   break;
-    case LT_MOUNTAIN:   rv = def_linedecothick*2;   break;
+    case LT_DASHED:         rv = def_linedecothick;     break;
+    case LT_DOTTED:         rv = def_linedecothick/2;   break;
+    case LT_CHAINED:        rv = def_linedecothick/2;   break;
+    case LT_DOUBLECHAINED:  rv = def_linedecothick/2;   break;
+    default:
+    case LT_CIRCLE:         rv = def_linedecothick*2;   break;
     }
 
     return rv;
@@ -4966,17 +5018,15 @@ _line_deco2(FILE *fp,
 
     int actfh, actch, actbh;
 
+    changethick(fp, xu->vob.outlinethick);
+    changecolor(fp, xu->vob.outlinecolor);
 
     if(xu->cob.outlinetype==LT_SOLID) {
-        changethick(fp, xu->vob.outlinethick);
         _line_patharrow(fp, ydir, xox, xoy, xu, xns);
         fprintf(fp, "stroke\n");
         return 0;
     }
 
-
-    gsym = LT_MOUNTAIN;
-    pitch = (double)objunit/20;
 
     gsym = xu->cob.outlinetype;
     pitch = solve_pitch(xu->cob.outlinetype);
@@ -5484,548 +5534,6 @@ out:
     return 0;
 }
 
-int
-_line_metadeco(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-{
-    int rv;
-
-#if 0
-    fprintf(fp, " gsave\n");
-
-    changecolor(fp, 0);
-    SLW_14(fp);
-    rv = _line_path(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, "stroke\n");
-    SLW_41(fp);
-
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 0
-    fprintf(fp, " gsave\n");
-    changecolor(fp, xu->cob.outlinecolor);
-    rv = _line_deco(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 1
-    fprintf(fp, " gsave\n");
-    changecolor(fp, xu->cob.outlinecolor);
-    rv = _line_deco2(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 0
-    fprintf(fp, " gsave\n");
-
-    changecolor(fp, 0);
-    SLW_14(fp);
-    rv = _line_path(fp,  ydir, xox-objunit*0, xoy+objunit*2, xu, xns);
-    fprintf(fp, "stroke\n");
-    SLW_41(fp);
-
-    changecolor(fp, xu->cob.outlinecolor);
-    rv = _line_deco2(fp, ydir, xox-objunit*0, xoy+objunit*2, xu, xns);
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 0
-    fprintf(fp, " gsave\n");
-    changecolor(fp, xu->cob.outlinecolor);
-    rv = _line_deco2(fp, ydir, xox-objunit*0, xoy+objunit*2, xu, xns);
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 0
-    fprintf(fp, " gsave\n");
-    changecolor(fp, xu->cob.outlinecolor);
-    rv = _line_deco2(fp, ydir, xox+objunit/2, xoy-objunit/2, xu, xns);
-    fprintf(fp, " grestore\n");
-#endif
-
-    return 0;
-}
-
-
-int
-Yepsdraw_linearrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-{
-    int i;
-    int x0, y0;
-    int x1, y1, x2, y2;
-    seg *s;
-    int cdir;
-
-    int ap, fh, bh;
-
-    Echo("%s: enter\n", __func__);
-
-    if(bbox_mode) {
-#if 0
-        epsdraw_bbox(fp, xu);
-        epsdraw_bbox_glbrt(fp, xu);
-#endif
-        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
-    }
-
-    if(!xu->cob.originalshape) {
-        x1 = xox+xu->csx;
-        y1 = xoy+xu->csy;
-        x2 = xox+xu->cex;
-        y2 = xoy+xu->cey;
-
-        fprintf(fp, " gsave    %% regular shape %s\n", __func__);
-        epsdraw_seglinearrow(fp, ydir, xox, xoy, x1, y1, x2, y2, xu, xns);
-        fprintf(fp, " grestore %% regular shape %s\n", __func__);
-        goto out;
-    }
-
-    if(xu->cob.segar && xu->cob.segar->use>0) {
-    }
-    else {
-        goto out;
-    }
-
-    fprintf(fp, " gsave %% %s\n", __func__);
-
-    Echo("    segar.use %d\n", xu->cob.segar->use);
-
-    x0 = x1 = xox+xu->csx;
-    y0 = y1 = xoy+xu->csy;
-
-    Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
-    Echo("    x1,y1 %d,%d\n", x1, y1);
-
-    if(xu->type==CMD_CLINE) {
-#if 1
-        x0 = x1 = xox+xu->cx+xu->cox;
-        y0 = y1 = xoy+xu->cy+xu->coy;
-#endif
-
-        Echo("CLINE\n");
-        Echo("    xox,xoy %6d,%-6d\n", xox,     xoy);
-        Echo("    cx,cy   %6d,%-6d\n", xu->cx,  xu->cy);
-        Echo("    csx,csy %6d,%-6d\n", xu->csx, xu->csy);
-        Echo("    cox,coy %6d,%-6d\n", xu->cox, xu->coy);
-        Echo("    x1,y1 %d,%d\n", x1, y1);
-
-#if 0
-        MC(0, xox+xu->cx,               xoy+xu->cy);
-        MC(1, xox+xu->csx,               xoy+xu->csy);
-        MC(4, xox+xu->cx+xu->cox,       xoy+xu->cy+xu->coy);
-#endif
-
-    }
-
-    for(i=0;i<xu->cob.segar->use;i++) {
-        s = (seg*)xu->cob.segar->slot[i];
-        if(!s) {
-            continue;
-        }
-
-        if(s->ptype==OA_JOIN) {
-PP;
-            fprintf(fp, " %d %d %d 0 360 arc fill %% join-mark\n",
-                x1, y1, xu->cob.outlinethick*2);
-            x2 = x1;
-            y2 = y1;
-
-            goto next;
-        }
-        if(s->ptype==OA_SKIP) {
-            int qbx, qby;
-            int qex, qey;
-            int qcx, qcy;
-        
-PP;
-            x2 = x1+s->x1;
-            y2 = y1+s->y1;
-
-            qcx = (x1+x2)/2;
-            qcy = (y1+y2)/2;
-
-            fprintf(fp, "  gsave ");
-#if 0
-            fprintf(fp, "  0 0.7 1.0 setrgbcolor\n");
-            fprintf(fp, "  %d setlinewidth ", xu->cob.outlinethick*4);
-            fprintf(fp, "  %d %d moveto %d %d lineto stroke ",
-                x1, y1, x2, y2);
-            fprintf(fp, "  0 0 0 setrgbcolor\n");
-            fprintf(fp, " %d %d %d 0 360 arc fill %% join-mark\n",
-                qcx, qcy, xu->cob.outlinethick*2);
-            fprintf(fp, "  %d setlinewidth ", xu->cob.outlinethick);
-#endif
-            fprintf(fp, "  %d %d moveto ", x1, y1);
-            fprintf(fp, "  %d %d %d %d %d arcn ",
-                qcx, qcy, xu->cob.outlinethick*2, ydir-180, ydir);
-            fprintf(fp, "  %d %d lineto stroke", x2, y2);
-            fprintf(fp, "  grestore %% skip-mark\n");
-
-            goto next;
-        }
-        if(s->ptype==OA_ARC) {
-            int arcx, arcy;
-
-#if 0
-    fprintf(fp, "%%  cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
-    fprintf(stderr, "%% b cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
-#endif
-
-            arcx = x1 + s->rad*cos((cdir+90)*rf);
-            arcy = y1 + s->rad*sin((cdir+90)*rf);
-
-#if 0
-    fprintf(fp, "%%  arcx %d arcy %d\n", arcx, arcy);
-#endif
-
-            x2 = arcx + s->rad*cos((cdir+s->ang-90)*rf);
-            y2 = arcy + s->rad*sin((cdir+s->ang-90)*rf);
-            
-            fprintf(fp, "  %d %d %d %d %d arc stroke %% seg-arc\n",
-                arcx, arcy, s->rad, cdir-90, cdir-90+s->ang);
-
-#if 1
-        {
-            int tx, ty; 
-            int a;
-            fprintf(fp, "gsave\n");
-            printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
-            for(a=cdir-90;a<=cdir-90+s->ang;a++) {
-                if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
-                    tx = arcx + s->rad*cos((a)*rf);
-                    ty = arcy + s->rad*sin((a)*rf);
-                    printf("  arc  %d tx,ty %d,%d\n", a, tx, ty);
-                    if(draft_mode) {
-                        MC(4, tx, ty);
-                    }
-                }
-            }
-            fprintf(fp, "grestore\n");
-        }
-#endif
-
-            if(draft_mode) {
-                fprintf(fp, "gsave\n");
-                changedraft(fp);
-                fprintf(fp, " currentlinewidth 2 div setlinewidth\n");
-                fprintf(fp,
-                    "  %d %d moveto %d %d lineto %d %d lineto stroke\n",
-                        x1, y1, arcx, arcy, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-
-
-            cdir += s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
-
-            goto next;
-        }
-        if(s->ptype==OA_ARCN) {
-            int arcx, arcy;
-
-#if 0
-    fprintf(fp, "%%  cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
-    fprintf(stderr, "%% b cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
-#endif
-
-            arcx = x1 + s->rad*cos((cdir-90)*rf);
-            arcy = y1 + s->rad*sin((cdir-90)*rf);
-
-#if 0
-    fprintf(fp, "%%  arcx %d arcy %d\n", arcx, arcy);
-#endif
-
-            x2 = arcx + s->rad*cos((cdir-s->ang+90)*rf);
-            y2 = arcy + s->rad*sin((cdir-s->ang+90)*rf);
-            
-            fprintf(fp, "  %d %d %d %d %d arcn stroke %% seg-arcn\n",
-                arcx, arcy, s->rad, cdir+90, cdir+90-s->ang);
-
-#if 1
-        {
-            int tx, ty; 
-            int a;
-            fprintf(fp, "gsave\n");
-            printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
-            for(a=cdir+90;a>=cdir+90-s->ang;a--) {
-                if(a==cdir+90||a==cdir+90-s->ang||a%90==0) {
-                    tx = arcx + s->rad*cos((a)*rf);
-                    ty = arcy + s->rad*sin((a)*rf);
-                    printf("  arc  %d tx,ty %d,%d\n", a, tx, ty);
-                    if(draft_mode) {
-                        MC(5, tx, ty);
-                    }
-                }
-            }
-            fprintf(fp, "grestore\n");
-        }
-#endif
-
-            if(draft_mode) {
-                fprintf(fp, "gsave\n");
-                changedraft(fp);
-                fprintf(fp, " currentlinewidth 2 div setlinewidth\n");
-                fprintf(fp,
-                    "  %d %d moveto %d %d lineto %d %d lineto stroke\n",
-                        x1, y1, arcx, arcy, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-
-            cdir -= s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
-
-            goto next;
-        }
-
-/* XXX */
-        if(s->ftflag & COORD_FROM) {
-P;
-            Echo("    part seg %d: ftflag %d : %d,%d\n",
-                i, s->ftflag, s->x1, s->y1);
-            
-            /* skip */
-            continue;
-        }
-        if(s->ftflag & COORD_TO) {
-P;
-            x2 = s->x1 + xox;
-            y2 = s->y1 + xoy;
-            goto coord_done;
-        }
-
-        x2 = x1+s->x1;
-        y2 = y1+s->y1;
-
-coord_done:
-
-        cdir = (int)(atan2(y2-y1,x2-x1)/rf);
-#if 0
-fprintf(stderr, "%% m atan2 %f\n", atan2(y2-y1,x2-x1)/rf);
-fprintf(stderr, "%% m cdir %d\n", cdir);
-#endif
-
-        Echo("    part seg %d: ftflag %d : %d,%d : %d,%d - %d,%d cdir %d\n",
-            i, s->ftflag, s->x1, s->y1, x1, y1, x2, y2, cdir);
-        {
-        ap = xu->cob.arrowheadpart;
-        bh = xu->cob.arrowbackheadtype;
-        fh = xu->cob.arrowforeheadtype;
-
-        if(!xu->cob.arrowevery) {
-            if(i==0) {
-                xu->cob.arrowheadpart &= ~AR_FORE;
-            }
-            else 
-            if(i==xu->cob.segar->use-1) {
-                xu->cob.arrowheadpart &= ~AR_BACK;
-            }
-            else {
-                xu->cob.arrowheadpart = 0;
-            }
-        }
-
-        epsdraw_seglinearrow(fp, cdir, xox, xoy, x1, y1, x2, y2, xu, xns);
-
-        xu->cob.arrowheadpart       = ap;
-        xu->cob.arrowbackheadtype   = bh;
-        xu->cob.arrowforeheadtype   = fh;
-        }
-        
-next:
-        x1 = x2;
-        y1 = y2;
-    }
-
-    if(xu->type==CMD_CLINE) {
-        epsdraw_seglinearrow(fp, ydir, xox, xoy, x2, y2, x0, y0, xu, xns);
-    }
-
-    fprintf(fp, " grestore %% %s\n", __func__);
-out:
-    return 0;
-}
-
-int
-Yepsdraw_clinearrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-{
-    int i;
-    int x0, y0;
-    int x1, y1, x2, y2;
-    seg *s;
-    int cdir;
-    int ik;
-    int ap, fh, bh;
-
-int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
-int epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist);
-
-    Echo("%s: enter\n", __func__);
-
-    if(bbox_mode) {
-#if 0
-fprintf(fp, "gsave\n");
-changebbox(fp);
-fprintf(fp, "  %d %d translate\n", xu->glx, xu->gby);
-fprintf(fp, "  0 0 moveto %d 0 lineto %d %d lineto 0 %d lineto closepath stroke\n", xu->wd, xu->wd, xu->ht, xu->ht);
-fprintf(fp, "grestore\n");
-#endif
-        epsdraw_bbox(fp, xu);
-    }
-
-    if(!xu->cob.originalshape) {
-        x1 = xox+xu->csx;
-        y1 = xoy+xu->csy;
-        x2 = xox+xu->cex;
-        y2 = xoy+xu->cey;
-
-    fprintf(fp, " gsave %% %s\n", __func__);
-        epsdraw_seglinearrow(fp, ydir, xox, xoy, x1, y1, x2, y2, xu, xns);
-    fprintf(fp, " grestore %% %s\n", __func__);
-        goto out;
-    }
-
-
-    if(xu->cob.segar && xu->cob.segar->use>0) {
-    }
-    else {
-        goto out;
-    }
-
-    fprintf(stdout, "oid %d segar ", xu->oid);
-    varray_fprint(stdout, xu->cob.segar);
-
-
-    fprintf(fp, " gsave %% %s\n", __func__);
-
-Echo("    segar.use %d\n", xu->cob.segar->use);
-
-        x0 = x1 = xox+xu->csx;
-        y0 = y1 = xoy+xu->csy;
-Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
-Echo("    x1,y1 %d,%d\n", x1, y1);
-
-    if(xu->type==CMD_CLINE) {
-#if 0
-        x0 = x1 = xox+xu->csx+xu->wd/2+xu->cox;
-        y0 = y1 = xoy+xu->csy+xu->ht/2+xu->coy;
-        y0 = y1 = xoy+xu->csy+xu->coy;
-#endif
-#if 1
-        x0 = x1 = xox+xu->cx+xu->cox;
-        y0 = y1 = xoy+xu->cy+xu->coy;
-#endif
-    }
-
-        fprintf(fp, "  %d %d moveto\n", x0, y0);
-
-
-    for(i=0;i<xu->cob.segar->use;i++) {
-        s = (seg*)xu->cob.segar->slot[i];
-        if(!s) {
-            continue;
-        }
-
-/* XXX */
-        if(s->ftflag & COORD_FROM) {
-P;
-            Echo("    part seg %d: ftflag %d : %d,%d\n",
-                i, s->ftflag, s->x1, s->y1);
-            
-            /* skip */
-            continue;
-        }
-        if(s->ftflag & COORD_TO) {
-P;
-            x2 = s->x1 + xox;
-            y2 = s->y1 + xoy;
-            goto coord_done;
-        }
-
-        x2 = x1+s->x1;
-        y2 = y1+s->y1;
-
-coord_done:
-
-
-        cdir = (int)atan2(y2-y1,x2-x1);
-
-        Echo("    part seg %d: ftflag %d : %d,%d : %d,%d -> %d,%d cdir %d\n",
-            i, s->ftflag, s->x1, s->y1, x1, y1, x2, y2, cdir);
-
-#if 0
-        {
-        ap = xu->cob.arrowheadpart;
-        bh = xu->cob.arrowbackheadtype;
-        fh = xu->cob.arrowforeheadtype;
-
-        if(!xu->cob.arrowevery) {
-            if(i==0) {
-                xu->cob.arrowheadpart &= ~AR_FORE;
-            }
-            else 
-            if(i==xu->cob.segar->use-1) {
-                xu->cob.arrowheadpart &= ~AR_BACK;
-            }
-            else {
-                xu->cob.arrowheadpart = 0;
-            }
-        }
-
-        epsdraw_seglinearrow(fp, cdir, xox, xoy, x1, y1, x2, y2, xu, xns);
-
-        xu->cob.arrowheadpart       = ap;
-        xu->cob.arrowbackheadtype   = bh;
-        xu->cob.arrowforeheadtype   = fh;
-        }
-#endif
-        fprintf(fp, "  %d %d lineto %% seg %d\n", x2, y2, i);
-        
-        x1 = x2;
-        y1 = y2;
-    }
-
-    fprintf(fp, "  %d %d lineto %% backto first point\n", x0, y0);
-        if(debug_clip) {
-            fprintf(fp, "  stroke\n");
-        }
-        else {
-            fprintf(fp, "  clip\n");
-        }
-
-    /* hatching function requires centerling by x,y */
-    fprintf(fp, "  gsave\n");
-    fprintf(fp, "  %d %d translate\n", xu->cgx, xu->cgy);
-    changecolor(fp, xu->cob.fillcolor);
-    changethick(fp, xu->cob.hatchthick);
-    epsdraw_hatch(fp, xu->wd, xu->ht, 
-        xu->cob.fillcolor, xu->cob.fillhatch);
-
-    if(xu->cob.deco) {
-        fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
-        epsdraw_deco(fp, xu->wd, xu->ht,
-            xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
-    }
-    else {
-        fprintf(fp, "%% no-deco\n");
-    }
-    fprintf(fp, "  grestore\n");
-
-#if 0
-    if(xu->type==CMD_CLINE) {
-        epsdraw_seglinearrow(fp, ydir, xox, xoy, x2, y2, x0, y0, xu, xns);
-    }
-#endif
-
-    fprintf(fp, " grestore %% %s\n", __func__);
-
-    ik = Yepsdraw_linearrow(fp, ydir, xox, xoy, xu, xns);
-
-out:
-    return 0;
-}
 
 int
 Zepsdraw_linearrow(FILE *fp,
@@ -6046,7 +5554,7 @@ fprintf(stdout, "%s: enter\n", __func__);
 #endif
 
     fprintf(fp, " gsave\n");
-    r = _line_metadeco(fp, ydir, xox, xoy, xu, xns);
+    r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
 #if 0
     fprintf(fp, "  stroke\n");
 #endif
@@ -6114,7 +5622,7 @@ fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
 
     fprintf(fp, " gsave\n");
     changecolor(fp, xu->cob.outlinecolor);
-    r = _line_metadeco(fp, ydir, xox, xoy, xu, xns);
+    r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
     fprintf(fp, " grestore\n");
 
 
@@ -6722,7 +6230,7 @@ out:
 }
 
 int
-Yepsdraw_blinearrow(FILE *fp,
+epsdraw_blinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
     int i;
@@ -9961,8 +9469,6 @@ out:
 int
 epsdraw_Xparen(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
-    ob* pf;
-    ob* pt;
     int x1, y1;
     int r;
     double a;
@@ -10147,7 +9653,6 @@ int
 epsdraw_Xbrace(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
     ob* pf;
-    ob* pt;
     int bx, by;
     int r;
     double a;
@@ -10350,7 +9855,6 @@ epsdraw_Xbracket(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
         ah = xu->ht;
     }
 
-apply:
 
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for box\n");
@@ -10785,20 +10289,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_GATHER) {
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
     }
-#if 0
-    if(u->type==CMD_LINK) {
-        Yepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
-    }
-    if(u->type==CMD_CLINE) {
-        Yepsdraw_clinearrow(fp, *xdir, ox, oy, u, xns);
-    }
-    if(u->type==CMD_LINE) {
-        Yepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
-    }
-    if(u->type==CMD_ARROW) {
-        Yepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
-    }
-#endif
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) || (u->type==CMD_ARROW)) {
         Zepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
     }
@@ -10812,7 +10302,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Zepsdraw_wlinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_BARROW) {
-        Yepsdraw_blinearrow(fp, *xdir, ox, oy, u, xns);
+        epsdraw_blinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_PLINE) {
         epsdraw_plinearrow(fp, *xdir, ox, oy, u, xns);
@@ -11023,9 +10513,9 @@ P;
 
 #if 1
 /*
-    (xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) 
-*/
     if(xch->cob.outlinethick>0)
+*/
+    if(xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) 
     {
         fprintf(fp, "%% chunk itself START\n");
         fprintf(fp, 
@@ -11560,7 +11050,6 @@ epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
     ob *xch, int x, int y, ns *xns)
 {
     int ik;
-    int i;
     int epswd, epsht;
 
 P;
@@ -11599,12 +11088,14 @@ P;
     fprintf(fp, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
     fprintf(fp, "%%%% START\n");
 
-    fprintf(fp, "%d %d translate\n", epsoutmargin, epsoutmargin);
+    fprintf(fp, "%d %d translate %% margin\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
-    fprintf(fp, "%d %d translate\n", -xch->lx, -xch->by);
+    fprintf(fp, "%d %d translate %% bbox\n", -xch->lx, -xch->by);
 
+#if 0
     changedraft(fp);
     fprintf(fp, "  %d setlinewidth\n", def_linethick);
+#endif
 
     if(grid_mode) {
         /* grid */

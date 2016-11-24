@@ -4,6 +4,19 @@ char debuglog[BUFSIZ*10]="";
 #define QLIMIT  (0.01)
 #endif
 
+seg*
+seg_new()
+{
+    seg* na;
+    na = (seg*)malloc(sizeof(seg)); 
+    if(!na) {
+        Error("%s: no memory for seg\n", __func__);
+        return NULL;
+    }
+    memset(na, 0, sizeof(seg)); 
+    return na;
+}
+
 
 /* normalize to -180..180 */
 int
@@ -289,8 +302,8 @@ skip_m:
 
 
 #define FREG(qpt,qjt,qct,qft,qx,qy,qra,qan) \
-    r = (seg*)malloc(sizeof(seg)); \
-    memset(r, 0, sizeof(seg)); \
+	r = seg_new(); \
+	if(!r) {} \
     r->ptype    = qpt; \
     r->jtype    = qjt; \
     r->coordtype = qct; \
@@ -335,8 +348,7 @@ flush_que:
         case OA_TO:     
 #if 1
             if(c>0) {
-                            r = (seg*)malloc(sizeof(seg));
-                            memset(r, 0, sizeof(seg));
+							r = seg_new();
                             r->coordtype = REL_COORD;
                             r->ptype = OA_FORWARD;
                             r->x1 = x - lx;
@@ -919,6 +931,34 @@ out:
 }
 
 int
+try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
+{
+    seg *e;
+
+    printf("%s: enter\n", __func__);
+    printf("b use %d\n", segar->use);
+
+    if(segar->use>0) {
+        goto out;
+    }
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_FORWARD;
+    e->coordtype    = REL_COORD;
+    e->x1           = x2-x1;
+    e->y1           = y2-y1;
+    varray_push(segar, e);
+
+out:
+    printf("a use %d\n", segar->use);
+
+    return 0;
+}
+
+
+int
 catobj(ob *u, int xxdir, int *x, int *y, int *fx, int *fy, ns *xns)
 {
     int dx, dy;
@@ -974,6 +1014,11 @@ E;
     u->cey = *y+*fy;
     *x = u->cex;
     *y = u->cey;
+
+#if 0
+    int ik;
+    ik = try_regline(u->cob.segar, u->cx, u->cy, u->cex, u->cey);
+#endif
 
 #if 0
     printf("%s: u %p oid %d x,y %d,%d sx,sy %d,%d ex,ey %d,%d\n",
@@ -1156,6 +1201,11 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 
     u->cex = *x;
     u->cey = *y;
+
+#if 0
+    int ik;
+    ik = try_regline(u->cob.segar, u->cx, u->cy, u->cex, u->cey);
+#endif
 
 
 #if 0

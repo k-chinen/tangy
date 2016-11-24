@@ -645,6 +645,7 @@ typedef struct {
     int lcolor;
     int ahpart;
     int ahftype;
+    int ahctype;
     int ahbtype;
 } seg;
 
@@ -1522,7 +1523,7 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
     seg* s;
 
     s = (seg*)xv;
-    sprintf(dst, "<(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)>",
+    ik = sprintf(dst, "<(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)>",
         rassoc(objattr_ial, s->ptype), s->ptype,
         s->jtype>0 ? "JOIN" : "-",
         s->jtype,
