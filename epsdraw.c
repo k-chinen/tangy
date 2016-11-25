@@ -7,14 +7,16 @@ int epsoutmargin        = 16;
 
 /* inside of scaling */
 int epsdraftfontsize    = 10;
-int epsdraftgap         = 5;
+int epsdraftgap         =  5;
 
 int debug_clip = 0;
 
 #define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
 
-#define SLW_1x(fp,x) fprintf(fp, "    currentlinewidth %d div setlinewidth\n", x);
-#define SLW_x1(fp,x) fprintf(fp, "    currentlinewidth %d mul setlinewidth\n", x);
+#define SLW_1x(fp,x) \
+    fprintf(fp, "    currentlinewidth %d div setlinewidth\n", x);
+#define SLW_x1(fp,x) \
+    fprintf(fp, "    currentlinewidth %d mul setlinewidth\n", x);
 #define SLW_12(fp) fprintf(fp, "    currentlinewidth 2 div setlinewidth\n");
 #define SLW_14(fp) fprintf(fp, "    currentlinewidth 4 div setlinewidth\n");
 #define SLW_21(fp) fprintf(fp, "    currentlinewidth 2 mul setlinewidth\n");
@@ -4118,6 +4120,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
     fprintf(fp, "  newpath\n");
 
+#if 0
     if(!xu->cob.originalshape) {
         x1 = xox+xu->csx;
         y1 = xoy+xu->csy;
@@ -4127,6 +4130,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         fprintf(fp, "  %d %d moveto %d %d lineto\n", x1, y1, x2, y2);
         goto out;
     }
+#endif
 
     if(xu->cob.segar && xu->cob.segar->use>0) {
     }
@@ -4140,8 +4144,12 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
     Echo("    segar.use %d\n", xu->cob.segar->use);
 
+#if 0
     x0 = x1 = xox+xu->csx;
     y0 = y1 = xoy+xu->csy;
+#endif
+        x0 = x1 = xox+xu->cx+xu->cox;
+        y0 = y1 = xoy+xu->cy+xu->coy;
 
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
@@ -4158,7 +4166,9 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
-    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d moveto %% starting-point\n", x1, y1);
+#if 0
+#endif
 
     for(i=0;i<xu->cob.segar->use;i++) {
         s = (seg*)xu->cob.segar->slot[i];
@@ -4258,7 +4268,6 @@ PP;
             }
 
             cdir += s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
 
@@ -4311,9 +4320,40 @@ fprintf(fp, "%% a cdir %d\n", cdir);
             }
 
             cdir -= s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
+
+
+
+        case OA_MOVE:
+            x2 = s->x1 + xox;
+            y2 = s->y1 + xoy;
+            fprintf(fp, "  %d %d moveto\n", x2, y2);
+            goto next;
+            break;
+
+        case OA_RMOVE:
+            x2 = s->x1 + x1;
+            y2 = s->y1 + x2;
+            fprintf(fp, "  %d %d moveto\n", x2, y2);
+            goto next;
+            break;
+
+        case OA_RLINE:
+            x2 = s->x1;
+            y2 = s->y1;
+            fprintf(fp, "  %d %d rlineto\n", x2, y2);
+            break;
+
+        case OA_LINE:
+            x1 = s->x1+xox;
+            y1 = s->y1+xoy;
+            x2 = s->x2+xox;
+            y2 = s->y2+xoy;
+            fprintf(fp, "  %d %d moveto\n", x1, y1);
+            fprintf(fp, "  %d %d lineto\n", x2, y2);
+            break;
+
 
         default:
 
@@ -4379,6 +4419,9 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
         }
         
 next:
+#if 0
+        fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
+#endif
         x1 = x2;
         y1 = y2;
     }
@@ -4691,7 +4734,6 @@ PP;
 
 
             cdir += s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
 
@@ -4776,7 +4818,6 @@ fprintf(fp, "%% a cdir %d\n", cdir);
             }
 
             cdir -= s->ang;
-fprintf(fp, "%% a cdir %d\n", cdir);
 
             break;
 
@@ -4877,6 +4918,7 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
         }
         
 next:
+fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
         x1 = x2;
         y1 = y2;
     }
@@ -4907,7 +4949,9 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
     double fx;
     int    act=0;
 
+#if 0
     fprintf(fp, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
+#endif
 
     switch(ty){ 
     case LT_DASHED:
@@ -4992,7 +5036,8 @@ purelinetype:
         y1 = y;
         x2 = run*cos(a*rf);
         y2 = run*sin(a*rf);
-        fprintf(fp, "  %.2f %.2f moveto %.2f %.2f rlineto stroke %% symdraw\n",
+        fprintf(fp,
+            "  %9.2f %9.2f moveto %9.2f %9.2f rlineto stroke %% symdraw\n",
             x1, y1, x2, y2);
     }
 #if 0
@@ -5070,8 +5115,6 @@ _line_deco2(FILE *fp,
 
     gsym = xu->cob.outlinetype;
     pitch = solve_pitch(xu->cob.outlinetype);
-
-    PP;
 
 #if 1
 fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
@@ -5180,7 +5223,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
-    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d moveto %% starting-point\n", x1, y1);
 
 #if 0
     MCF(1, x1, y1);
@@ -5288,11 +5331,14 @@ P;
             etrip = ((double)s->rad)*s->ang/rf;
             etrip = ((double)s->rad*2*M_PI)*((double)s->ang/360.0);
             nd = etrip / pitch;
+
+#if 0
             fprintf(fp, "%% etrip %f pitch %f -> nd %d\n",
                 etrip, pitch, nd);
 
                 fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
                     i, count, trip, etrip);
+#endif
 
             if(trip<=0) {
                 ui = 0.0;
@@ -5305,23 +5351,29 @@ P;
             vi = ui/(2*M_PI*s->rad)*360;
 
             ttrip = trip;
+#if 0
             fprintf(fp, "%% i %d count %d: ui %f vi %f vpitch %f arc\n",
                     i, count, ui, vi, vpitch);
+#endif
             for(v=vi;v<=(double)s->ang;v+=vpitch) {
                 px = arcx + s->rad*cos((cdir+v-90)*rf);
                 py = arcy + s->rad*sin((cdir+v-90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
 
+#if 0
                 fprintf(fp,
         "%% i %3d count %3d: ttrip %8.2f v %8.2f px,py %8.2f %8.2f arc\n",
                     i, count, ttrip, v, px, py);
+#endif
 
                 symdraw(fp, px, py, cdir+v, pitch, count, gsym);
                 count++;
             }
             trip += etrip;
+#if 0
                 fprintf(fp, "%% i %d count %d: trip %f\n",
                     i, count, trip);
+#endif
 
             if(actch) {
                 px = arcx + s->rad*cos((cdir+(s->ang/2)-90)*rf);
@@ -5356,7 +5408,6 @@ P;
 
             cdir += s->ang;
             dcdir += s->ang;
-fprintf(fp, "%% a cdir %d arc\n", cdir);
 
             break;
 
@@ -5441,20 +5492,30 @@ fprintf(fp, "%% a cdir %d arc\n", cdir);
 
             cdir -= s->ang;
             dcdir -= s->ang;
-fprintf(fp, "%% a cdir  arcn%d\n", cdir);
 
             break;
 
         case OA_MOVE:
             x2 = s->x1 + xox;
             y2 = s->y1 + xoy;
+            fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
             break;
 
         case OA_RMOVE:
             x2 = s->x1 + x1;
-            y2 = s->y1 + x2;
+            y2 = s->y1 + y1;
+            fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
+            break;
+
+        case OA_RLINE:
+            x2 = s->x1 + x1;
+            y2 = s->y1 + y1;
+#if 0
+            fprintf(fp, "  %d %d rlineto\n", x2, y2);
+#endif
+            goto coord_done;
             break;
 
         case OA_LINE:
@@ -5568,11 +5629,12 @@ next:
             marknode(xu->cob.outlinecolor, x1, y1);
         }
 
+#if 0
+        fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
+#endif
         x1 = x2;
         y1 = y2;
 
-printf("a cdir %d\n", cdir);
-P;
     }
         if(xu->cob.marknode) {
             marknode(xu->cob.outlinecolor, x1, y1);
@@ -6563,6 +6625,7 @@ PP;
         }
         
 next:
+fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
         x1 = x2;
         y1 = y2;
     }
@@ -8801,7 +8864,8 @@ epsdraw_dmyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     mx = xu->x+xox;
     my = xu->y+xoy;
 
-fprintf(fp, "%% %s\n", __func__);
+fprintf(fp, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
+fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
 
     saved_segar = xu->cob.segar;
 #if 0
@@ -8845,9 +8909,42 @@ fprintf(fp, "%% %s\n", __func__);
     fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
         xu->x+xox, xu->y+xoy, xu->cob.rotateval);
     fprintf(fp, "  %f %f scale\n", a, 1.0);
-    fprintf(fp, " gsave\n");
-    ik = _line_deco2(fp, 0, 0, 0, xu, xns);
-    fprintf(fp, " grestore\n");
+
+    MX(0, 0, 0);
+
+    if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
+        fprintf(fp, " gsave %% for clip+fill\n");
+#if 0
+        changecolor(fp, xu->cob.fillcolor);
+#endif
+        changecolor(fp, 4);
+        ik = _line_path(fp, 0, 0, 0, xu, xns);
+        fprintf(fp, "  closepath\n");
+#if 0
+        fprintf(fp, "  stroke\n");
+#endif
+        fprintf(fp, "  clip\n");
+#if 1
+        epsdraw_hatch(fp, xu->wd, xu->ht, xu->cob.fillcolor, xu->cob.fillhatch);
+#endif
+#if 0
+        fprintf(fp, " initclip\n");
+#endif
+        fprintf(fp, " grestore\n");
+    }
+    else {
+        fprintf(fp, "%% skip clip+fill\n");
+    }
+
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+        fprintf(fp, " gsave %% for drawing\n");
+        ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+        fprintf(fp, " grestore\n");
+    }
+    else {
+        fprintf(fp, "%% skip drawing\n");
+    }
+
     fprintf(fp, "grestore %% dmyX\n");
 
     return 0;
@@ -10717,8 +10814,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 #endif
     if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
-PP;
-P;
         epsdraw_dmyX(fp, ox, oy, u, xns);
     }
 
@@ -10949,8 +11044,6 @@ PP;
         fprintf(fp, "grestore %% for outline\n");
     }
 #endif
-
-PP;
 
     if(skelton_mode) {
         for(i=0;i<xch->cch.nch;i++) {

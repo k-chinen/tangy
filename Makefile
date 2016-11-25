@@ -1,7 +1,7 @@
 ### 
 ### temporary Makefile for tangy
 ###
-CFLAGS=-g
+CFLAGS=-g -O0
 
 all: tangy 
 tangy: a.c alist.h chas.c chs.c color.h epsdraw.c finalize.c forkchk.c \
