@@ -8914,22 +8914,11 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
 
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         fprintf(fp, " gsave %% for clip+fill\n");
-#if 0
         changecolor(fp, xu->cob.fillcolor);
-#endif
-        changecolor(fp, 4);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  closepath\n");
-#if 0
-        fprintf(fp, "  stroke\n");
-#endif
         fprintf(fp, "  clip\n");
-#if 1
         epsdraw_hatch(fp, xu->wd, xu->ht, xu->cob.fillcolor, xu->cob.fillhatch);
-#endif
-#if 0
-        fprintf(fp, " initclip\n");
-#endif
         fprintf(fp, " grestore\n");
     }
     else {
@@ -10802,21 +10791,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 #endif
     }
 
-#if 0
-    if(u->type==CMD_DMY1) {
-        epsdraw_dmy1(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DMY2) {
-        epsdraw_dmy2(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DMY3) {
-        epsdraw_dmy3(fp, ox, oy, u, xns);
-    }
-#endif
-    if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
-        epsdraw_dmyX(fp, ox, oy, u, xns);
-    }
-
 
     if(u->type==CMD_FORK) {
         changedraft(fp);
@@ -10844,11 +10818,18 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_DRUM) {
         epsdraw_drum(fp, ox, oy, u, xns);
     }
-    if(u->type==CMD_BOX) {
-        epsdraw_box(fp, ox, oy, u, xns);
-    }
     if(u->type==CMD_DOTS) {
         epsdraw_dots(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_POLYGON) {
+        epsdraw_polygon(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_RULER) {
+        epsdraw_ruler(fp, ox, oy, u, xns);
+    }
+#if 0
+    if(u->type==CMD_BOX) {
+        epsdraw_box(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_CIRCLE) {
         epsdraw_circle(fp, ox, oy, u, xns);
@@ -10856,11 +10837,23 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_ELLIPSE) {
         epsdraw_ellipse(fp, ox, oy, u, xns);
     }
-    if(u->type==CMD_POLYGON) {
-        epsdraw_polygon(fp, ox, oy, u, xns);
+#endif
+    if(u->type==CMD_BOX|| u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE) {
+        epsdraw_dmyX(fp, ox, oy, u, xns);
     }
-    if(u->type==CMD_RULER) {
-        epsdraw_ruler(fp, ox, oy, u, xns);
+#if 0
+    if(u->type==CMD_DMY1) {
+        epsdraw_dmy1(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_DMY2) {
+        epsdraw_dmy2(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_DMY3) {
+        epsdraw_dmy3(fp, ox, oy, u, xns);
+    }
+#endif
+    if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
+        epsdraw_dmyX(fp, ox, oy, u, xns);
     }
 
     if(u->cob.ssar) {
