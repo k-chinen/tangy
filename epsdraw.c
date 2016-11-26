@@ -594,6 +594,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
 {
     int  r;
     int  dx, dy;
+    int  r2;
 
     fprintf(fp, "%% arrowhead %d\n", atype);
     fprintf(fp, "gsave\n");
@@ -778,6 +779,84 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
       }
 
         break;
+
+    case AH_ARROW3:
+        r = def_arrowsize;
+
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "%d %d moveto\n",   x,  y);
+
+        dx =  (int)(r*cos((xdir+180+def_arrowangle/2)*rf));
+        dy =  (int)(r*sin((xdir+180+def_arrowangle/2)*rf));
+        fprintf(fp, "%d %d rlineto\n", dx, dy);
+
+        dx =  (int)(r*2/3*cos((xdir+180)*rf));
+        dy =  (int)(r*2/3*sin((xdir+180)*rf));
+        fprintf(fp, "%d %d lineto\n", x+dx, y);
+
+        dx =  (int)(r*cos((xdir+180-def_arrowangle/2)*rf));
+        dy =  (int)(r*sin((xdir+180-def_arrowangle/2)*rf));
+        fprintf(fp, "%d %d lineto\n", x+dx, y+dy);
+
+        fprintf(fp, "closepath fill\n");
+        break;
+
+    case AH_ARROW4:
+     {
+        int q;
+        int w;
+        int mx, my;
+
+        r = def_arrowsize;
+        w = r/8;
+
+        SLW_14(fp);
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "%d %d moveto\n",   x,  y);
+
+        dx =  (int)(r*2/3*cos((xdir+180+def_arrowangle)*rf));
+        dy =  (int)(r*2/3*sin((xdir+180+def_arrowangle)*rf));
+        mx = dx + w/2*cos((xdir+180+def_arrowangle-90)*rf);
+        my = dy + w/2*sin((xdir+180+def_arrowangle-90)*rf);
+#if 0
+        MX(1, x+mx, y+my);
+#endif
+        fprintf(fp, "%d %d %d %d %d arcn\n",
+            x+mx, y+my, w/2,
+            xdir+180+def_arrowangle+90,
+            xdir+180+def_arrowangle-90
+            );
+
+        q = w/sin(def_arrowangle*rf);
+        dx =  (int)(q*cos((xdir+180)*rf));
+        dy =  (int)(q*sin((xdir+180)*rf));
+#if 0
+        MP(4, x+dx, y+dy);
+#endif
+        fprintf(fp, "%d %d lineto\n",  x+dx, y+dy);
+
+        dx =  (int)(r*2/3*cos((xdir+180-def_arrowangle)*rf));
+        dy =  (int)(r*2/3*sin((xdir+180-def_arrowangle)*rf));
+        mx = dx + w/2*cos((xdir+180-def_arrowangle+90)*rf);
+        my = dy + w/2*sin((xdir+180-def_arrowangle+90)*rf);
+#if 0
+        MX(1, x+mx, y+my);
+#endif
+        fprintf(fp, "%d %d %d %d %d arcn\n",
+            x+mx, y+my, w/2,
+            xdir+180-def_arrowangle+90,
+            xdir+180-def_arrowangle-90
+            );
+
+#if 0
+        fprintf(fp, "closepath stroke\n");
+#endif
+        fprintf(fp, "closepath fill\n");
+
+    }
+
+        break;
+
     case AH_NORMAL:
     default:
         r = def_arrowsize;

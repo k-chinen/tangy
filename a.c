@@ -292,7 +292,9 @@ apair_t hatchtype_ial[] = {
 #define AH_NONE             (0)
 #define AH_NORMAL           (1)
 #define AH_WIRE             (2)
-#define AH_DOUBLE           (3)
+#define AH_ARROW3           (3)
+#define AH_ARROW4           (4)
+#define AH_DOUBLE           (9)
 #define AH_DIAMOND          (11)
 #define AH_CIRCLE           (12)
 #define AH_WDIAMOND         (13)
@@ -304,6 +306,8 @@ apair_t arrowhead_ial[] = {
     {"none",                AH_NONE},
     {"normal",              AH_NORMAL},
     {"wire",                AH_WIRE},
+    {"arrow3",              AH_ARROW3},
+    {"arrow4",              AH_ARROW4},
     {"double",              AH_DOUBLE},
     {"diamond",             AH_DIAMOND},
     {"circle",              AH_CIRCLE},
