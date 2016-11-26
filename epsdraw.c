@@ -8910,7 +8910,9 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
         xu->x+xox, xu->y+xoy, xu->cob.rotateval);
     fprintf(fp, "  %f %f scale\n", a, 1.0);
 
-    MX(0, 0, 0);
+    if(xu->cob.markbb) {
+        MX(0, 0, 0);
+    }
 
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         fprintf(fp, " gsave %% for clip+fill\n");
