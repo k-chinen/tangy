@@ -596,6 +596,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
     int  dx, dy;
 
     fprintf(fp, "%% arrowhead %d\n", atype);
+    fprintf(fp, "gsave\n");
 
     changecolor(fp, lc);
 
@@ -799,6 +800,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
         break;
 
     }
+    fprintf(fp, "grestore\n");
 
     return 0;
 }
@@ -4940,7 +4942,8 @@ out:
 }
 
 int
-symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
+symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
+    double lax, double lay, double *cax, double *cay)
 {
     double x1, y1, x2, y2;
     double run;
@@ -4948,10 +4951,16 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
     double r;
     double fx;
     int    act=0;
+    double px, py, qx, qy;
+    double ww;
+    double ax, ay;
+    double mx, my;
 
 #if 0
     fprintf(fp, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
 #endif
+
+    ww = def_linedecothick;
 
     switch(ty){ 
     case LT_DASHED:
@@ -5021,11 +5030,131 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty)
         goto out;
         break;
 
-    default:
+    case LT_DBL:
+    case LT_DBR:
+        if(ty==LT_DBL) {
+            px = x + ww*cos((a+90)*rf);
+            py = y + ww*sin((a+90)*rf);
+        }
+        else {
+            px = x + ww*cos((a-90)*rf);
+            py = y + ww*sin((a-90)*rf);
+        }
+
+        if(c==0) {
+            fprintf(fp, "  %f %f moveto\n", px, py);
+        }
+        else {
+            fprintf(fp, "  %f %f lineto\n", px, py);
+        }
+
+        *cax = px;
+        *cay = py;
+        
+        break;
+
+    case LT_WAVED:
+        px = x + ww*cos((a+45)*rf);
+        py = y + ww*sin((a+45)*rf);
+        qx = x + ww*cos((a-45)*rf);
+        qy = y + ww*sin((a-45)*rf);
+
+#if 0
+        MX(2, (int)px, (int)py);
+        MP(4, (int)qx, (int)qy);
+#endif
+
+        if(c==0) {
+        }
+        else
+        if(c%2==0) {
+            fitarc(fp, lax, lay, x, y, 0);
+        }
+        else 
+        if(c%2==1) {
+            fitarc(fp, lax, lay, x, y, 1);
+        }
+        *cax = x;
+        *cay = y;
+    break;
+
+    case LT_ZIGZAG:
+#if 0
+        mx = (lax+x)/2;
+        my = (lay+y)/2;
+
+        px = mx + ww*cos((a+90)*rf);
+        py = my + ww*sin((a+90)*rf);
+        qx = mx + ww*cos((a-90)*rf);
+        qy = my + ww*sin((a-90)*rf);
+
+#if 1
+        MCF(2, (int)px, (int)py);
+        MX(0, (int)mx, (int)my);
+        MQF(4, (int)qx, (int)qy);
+        MT(1, (int)x, (int)y, (int)a);
+        MP(3, (int)lax, (int)lay);
+#endif
+
+        if(c%2==0) {
+            ax = px; ay = py;
+        }
+        else 
+        if(c%2==1) {
+            ax = qx; ay = qy;
+        }
+#if 0
+        fprintf(fp, "  %f %f moveto %f %f lineto stroke\n", lax, lay, ax, ay);
+#endif
+        if(c==0) {
+            fprintf(fp, "  %f %f moveto\n", ax, ay);
+        }
+        fprintf(fp, "  %f %f lineto\n", ax, ay);
+        fprintf(fp, "  %f %f lineto\n", x, y);
+        *cax = x;
+        *cay = y;
+#endif
+
+
+
+#if 1
+        px = x + ww*cos((a+45)*rf);
+        py = y + ww*sin((a+45)*rf);
+        qx = x + ww*cos((a-45)*rf);
+        qy = y + ww*sin((a-45)*rf);
+
+#if 0
+        MC(2, (int)px, (int)py);
+        MQ(4, (int)qx, (int)qy);
+#endif
+
+        if(c%2==0) {
+            ax = px; ay = py;
+        }
+        else 
+        if(c%2==1) {
+            ax = qx; ay = qy;
+        }
+#if 0
+        fprintf(fp, "  %f %f moveto %f %f lineto stroke\n", lax, lay, ax, ay);
+#endif
+        if(c==0) {
+            fprintf(fp, "  %f %f moveto\n", ax, ay);
+        }
+        fprintf(fp, "  %f %f lineto\n", ax, ay);
+        *cax = ax;
+        *cay = ay;
+#endif
+
+        break;
+
     case LT_CIRCLE:
         r  = def_linedecothick/2;
         fprintf(fp, "  newpath %.2f %.2f %.2f 0 360 arc fill\n", x, y, r);
         goto out;
+        break;
+    default:
+        MX(1, (int)x, (int)y);
         break;
     }
 
@@ -5070,8 +5199,9 @@ solve_pitch(int ty)
     return rv;
 }
 
+
 int
-_line_deco2(FILE *fp,
+__line_deco2(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
 
@@ -5092,6 +5222,9 @@ _line_deco2(FILE *fp,
     seg *s;
     int cdir;
     double dcdir;
+
+    double lx, ly;
+    double cx, cy;
 
     int ap, fh, bh;
     int arcx, arcy;
@@ -5223,7 +5356,9 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
+#if 0
     fprintf(fp, "  %d %d moveto %% starting-point\n", x1, y1);
+#endif
 
 #if 0
     MCF(1, x1, y1);
@@ -5245,6 +5380,9 @@ printf("b cdir %d\n", cdir);
 #if 0
         MP(4, x1, y1);
         fprintf(fp, "%d %d moveto (%d) show\n", x1, y1, i);
+#endif
+#if 0
+        fprintf(fp, "%d %d moveto %% seg-start\n", x1, y1);
 #endif
 
         actfh = actch = actbh = 0;
@@ -5366,7 +5504,10 @@ P;
                     i, count, ttrip, v, px, py);
 #endif
 
-                symdraw(fp, px, py, cdir+v, pitch, count, gsym);
+                symdraw(fp, px, py, cdir+v, pitch, count, gsym, lx, ly, &cx, &cy);
+
+                lx = cx;
+                ly = cy;
                 count++;
             }
             trip += etrip;
@@ -5457,7 +5598,9 @@ P;
                 "%% i %3d count %3d: ttrip %8.2f v %8.2f px,py %8.2f %8.2f arcn\n",
                     i, count, ttrip, v, px, py);
 
-                symdraw(fp, px, py, cdir-v, pitch, count, gsym);
+                symdraw(fp, px, py, cdir-v, pitch, count, gsym, lx, ly, &cx, &cy);
+                lx = cx;
+                ly = cy;
                 count++;
             }
             trip += etrip;
@@ -5589,7 +5732,9 @@ coord_done:
                 "%% i %3d count %3d: ttrip %8.2f u %8.2f px,py %8.2f %8.2f line\n",
                     i, count, ttrip, u, px, py);
 
-                symdraw(fp, px, py, v, pitch, count, gsym);
+                symdraw(fp, px, py, v, pitch, count, gsym, lx, ly, &cx, &cy);
+                lx = cx;
+                ly = cy;
                 count++;
             }
                 trip += etrip;
@@ -5636,6 +5781,22 @@ next:
         y1 = y2;
 
     }
+
+    if(gsym==LT_ZIGZAG) {
+        fprintf(fp, "  stroke %% finish stroke\n");
+    }
+    if(gsym==LT_WAVED) {
+        fprintf(fp, "  stroke %% finish stroke\n");
+    }
+    if(gsym==LT_DBL || gsym==LT_DBR) {
+        fprintf(fp, "  stroke %% finish stroke\n");
+    }
+#if 0
+    if(gsym==LT_ZIGZAG||gsym==LT_WAVED) {
+        fprintf(fp, "  stroke %% finish stroke\n");
+    }
+#endif
+
         if(xu->cob.marknode) {
             marknode(xu->cob.outlinecolor, x1, y1);
         }
@@ -5657,6 +5818,28 @@ next:
 out:
     return 0;
 }
+
+int
+_line_deco2(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+    int ik;
+    int orig_ltype;
+
+    orig_ltype = xu->cob.outlinetype;
+    if(orig_ltype==LT_DOUBLED) {
+        xu->cob.outlinetype = LT_DBL;
+        ik = __line_deco2(fp, ydir, xox, xoy, xu, xns);
+        xu->cob.outlinetype = LT_DBR;
+        ik = __line_deco2(fp, ydir, xox, xoy, xu, xns);
+        xu->cob.outlinetype = orig_ltype;
+        return ik;
+    }
+    else {
+        return __line_deco2(fp, ydir, xox, xoy, xu, xns);
+    }
+}
+
 
 
 int
@@ -8910,7 +9093,7 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
         xu->x+xox, xu->y+xoy, xu->cob.rotateval);
     fprintf(fp, "  %f %f scale\n", a, 1.0);
 
-    if(xu->cob.markbb) {
+    if(xu->cob.marknode) {
         MX(0, 0, 0);
     }
 
@@ -10740,6 +10923,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 
     if(u->cob.markbb) {
+        int fht;
+        fht = def_textheight;
+        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+
         epsdraw_bbox(fp, u);
     }
 
@@ -11605,6 +11792,7 @@ P;
         fprintf(fp, "  %d 0 moveto %d 0 lineto stroke\n",
             -def_gridrange*gp, def_gridrange*gp);
         fprintf(fp, "grestore\n");
+        fprintf(fp, "%% end-grid\n");
     }
 
     if(bbox_mode) {

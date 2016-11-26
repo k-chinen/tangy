@@ -224,7 +224,6 @@ apair_t cmd_ial[] = {
 #define LT_DOTTED           (2)
 #define LT_CHAINED          (4)
 #define LT_DOUBLECHAINED    (5)
-#define LT_DOUBLED          (6)
 #define LT_WAVED            (7)
 #define LT_ZIGZAG           (8)
 #define LT_CIRCLE           (9)
@@ -233,6 +232,9 @@ apair_t cmd_ial[] = {
 #define LT_MOUNTAIN         (12)
 #define LT_CUTTED           (13)
 #define LT_ARROWCENTERED    (14)
+#define LT_DOUBLED          (100)
+#define LT_DBR              (101)
+#define LT_DBL              (102)
 
 apair_t linetype_ial[] = {
     {"solid",               LT_SOLID},
