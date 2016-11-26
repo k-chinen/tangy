@@ -4581,7 +4581,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
-    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    fprintf(fp, "  %d %d moveto %% zero-point\n", x1, y1);
 
     for(i=0;i<xu->cob.segar->use;i++) {
         s = (seg*)xu->cob.segar->slot[i];
@@ -4826,19 +4826,23 @@ PP;
         case OA_MOVE:
             x2 = s->x1+xox;
             y2 = s->y1+xoy;
-            fprintf(fp, "  %d %d moveto\n", x2, y2);
+            fprintf(fp, "  %d %d moveto %% MOVE\n", x2, y2);
             break;
 
         case OA_RMOVE:
             x2 = s->x1;
             y2 = s->y1;
-            fprintf(fp, "  %d %d rmoveto\n", x2, y2);
+            fprintf(fp, "  %d %d rmoveto %% RMOVE\n", x2, y2);
+
             break;
 
         case OA_RLINE:
-            x2 = s->x1;
-            y2 = s->y1;
+            x2 = x1+s->x1;
+            y2 = y1+s->y1;
+#if 0
             fprintf(fp, "  %d %d rlineto\n", x2, y2);
+#endif
+            goto coord_done;
             break;
 
         case OA_LINE:
@@ -4846,8 +4850,10 @@ PP;
             y1 = s->y1+xoy;
             x2 = s->x2+xox;
             y2 = s->y2+xoy;
-            fprintf(fp, "  %d %d moveto\n", x1, y1);
-            fprintf(fp, "  %d %d lineto\n", x2, y2);
+    fprintf(fp, "  %d %d moveto %d %d lineto %% LINE\n", x1, y1, x2, y2);
+
+            goto confirm_arrow;
+
             break;
 
         default:
@@ -4880,6 +4886,11 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
 #endif
 
             fprintf(fp, "  %d %d lineto\n", x2, y2);
+
+confirm_arrow:
+#if 0
+fprintf(fp, "%% arrow f %d c %d b %d\n", actfh, actch, actbh);
+#endif
 
             if(actch) {
                 fprintf(fp, "gsave\n");
@@ -4920,7 +4931,7 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
         }
         
 next:
-fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
+        fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
         x1 = x2;
         y1 = y2;
     }
