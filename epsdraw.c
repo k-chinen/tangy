@@ -10877,6 +10877,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         int dx, dy;
         int qx, qy;
         int lax, lay;
+        int fht;
 
         fprintf(fp, "      gsave\n");
 
@@ -10892,6 +10893,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         if(ik<=0) {
             goto skip_portboard;
         }
+
+        /* TEMP */
+        fht = def_textheight;
+        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n", fht);
 
         if(u->cob.portstr) {
             fprintf(fp, "      %d %d %d (%s) rrshow\n",
@@ -11383,7 +11388,7 @@ printdefs(FILE *fp)
 {
 
     fprintf(fp, "\
-%% x y s lshow -\n\
+%% x y s lshow -            left justify text show\n\
 /lshow {\n\
     /s exch def /y exch def /x exch def\n\
     x y moveto s show\n\
@@ -11391,7 +11396,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% x y s rshow -\n\
+%% x y s rshow -            right justify text show\n\
 /rshow {\n\
     /s exch def /y exch def /x exch def\n\
     x s stringwidth pop sub y moveto s show\n\
@@ -11399,7 +11404,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% x y s cshow -\n\
+%% x y s cshow -            center justify text show\n\
 /cshow {\n\
     /s exch def /y exch def /x exch def\n\
     x s stringwidth pop 2 div sub y moveto s show\n\
@@ -11407,7 +11412,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% x y r s lrshow -\n\
+%% x y r s lrshow -         left justify text show\n\
 /lrshow {\n\
     gsave\n\
     /s exch def /r exch def /y exch def /x exch def\n\
@@ -11417,7 +11422,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% x y r s rrshow -\n\
+%% x y r s rrshow -         right justify rotate text show\n\
 /rrshow {\n\
     gsave\n\
     /s exch def /r exch def /y exch def /x exch def\n\
@@ -11427,7 +11432,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% x y r s crshow -\n\
+%% x y r s crshow -         center justify rotate text show\n\
 /crshow {\n\
     gsave\n\
     /s exch def /r exch def /y exch def /x exch def\n\
@@ -11437,8 +11442,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% margined round box\n\
-%% x y w h r mrbox -\n\
+%% x y w h r mrbox -        margined round box\n\
 /mrbox {\n\
     gsave\n\
     /r exch def /h exch def /w exch def /y exch def /x exch def\n\
@@ -11457,8 +11461,7 @@ printdefs(FILE *fp)
 ");
 
     fprintf(fp, "\
-%% margined round box\n\
-%% x y w h r mrbox -\n\
+%% x y w h r mrbox -        margined round box fill\n\
 /mrboxfill {\n\
     gsave\n\
     /r exch def /h exch def /w exch def /y exch def /x exch def\n\
