@@ -592,7 +592,7 @@ double textheightfactor     = 0.30;
 double textdecentfactor     = 0.20;
 double textbgmarginfactor   = 0.20;
 
-double hatchthickfactor     = 0.01;
+double hatchthickfactor     = 0.02;
 double hatchpitchfactor     = 0.07;
 double marknoderadfactor    = 0.05;
 

@@ -6519,6 +6519,7 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
  if(xu->cob.fillcolor>=0) {
     fprintf(fp, "gsave\n");
     changecolor(fp, xu->cob.fillcolor);
+    changethick(fp, xu->cob.hatchthick);
 
     fprintf(fp, "%d %d moveto\n", Lpt[0].x1, Lpt[0].y1);
     for(i=1;i<=xu->cob.segar->use;i++) {
@@ -6593,6 +6594,7 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
  if(xu->cob.outlinecolor>=0) {
     fprintf(fp, "gsave\n");
     changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
     fprintf(fp, "%d %d moveto\n", Lpt[0].x1, Lpt[0].y1);
     for(i=1;i<=xu->cob.segar->use;i++) {
         fprintf(fp, "%d %d lineto\n", Lpt[i].x1, Lpt[i].y1);
@@ -8915,12 +8917,56 @@ int
 mkpath_circle(varray_t *sar, int wd, int ht, int rad)
 {
 P;
-#if 0
-    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
-    try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
-#endif
     try_regsegmove(sar,     0, -ht/2);
     try_regsegarc(sar,   ht/2,   360);
+
+    return 0;
+}
+
+
+int
+mkpath_ellipse(varray_t *sar, int wd, int ht, int rad)
+{
+    double r;
+    double x, y;
+    double lx, ly;
+    double a;
+    double ep = 0.01*objunit;
+P;
+#if 0
+    try_regsegmove(sar,     0, -ht/2);
+    try_regsegarc(sar,   ht/2,   360);
+#endif
+    a = ((double)wd/ht);
+fprintf(stdout, "a %9.2f\n", a);
+    r = ((double)ht)/2;
+    try_regsegmove(sar,     0, -r);
+    lx = 0;
+    ly = -r;
+    for(y=-r;y<=r;y+=ep) {
+        x = sqrt(r*r-y*y);
+#if 0
+fprintf(stderr, "u y %9.2f x %9.2f\n", y-ly, x-lx);
+#endif
+        try_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        lx = x; ly = y;
+    }
+#if 0
+    try_regsegforward(sar, 0, r);
+#endif
+    lx = 0;
+    ly = r;
+    for(y=r;y>=-r;y+=-ep) {
+        x = -sqrt(r*r-y*y);
+#if 0
+fprintf(stderr, "d y %9.2f x %9.2f\n", y-ly, x-lx);
+#endif
+        try_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        lx = x; ly = y;
+    }
+#if 0
+    try_regsegclose(sar);
+#endif
 
     return 0;
 }
@@ -9159,8 +9205,7 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
         break;
     case CMD_ELLIPSE:
     case CMD_DMY3:
-        ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        a = ((double)xu->wd)/((double)xu->ht);
+        ik = mkpath_ellipse(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         break;
     default:
         fprintf(fp, "%% unknown type %d\n", xu->type);
@@ -9190,6 +9235,7 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         fprintf(fp, " gsave %% for clip+fill\n");
         changecolor(fp, xu->cob.fillcolor);
+        changethick(fp, xu->cob.hatchthick);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  closepath\n");
         fprintf(fp, "  clip\n");
@@ -11116,11 +11162,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_ELLIPSE) {
         epsdraw_ellipse(fp, ox, oy, u, xns);
     }
-#endif
-    if(u->type==CMD_BOX|| u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE) {
-        epsdraw_dmyX(fp, ox, oy, u, xns);
-    }
-#if 0
     if(u->type==CMD_DMY1) {
         epsdraw_dmy1(fp, ox, oy, u, xns);
     }
@@ -11131,6 +11172,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         epsdraw_dmy3(fp, ox, oy, u, xns);
     }
 #endif
+    if(u->type==CMD_BOX|| u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE) {
+        epsdraw_dmyX(fp, ox, oy, u, xns);
+    }
     if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
         epsdraw_dmyX(fp, ox, oy, u, xns);
     }
@@ -11227,6 +11271,14 @@ P;
     fprintf(fp, "%% start oid %d\n", xch->oid);
 
     cha_reset(&xch->cch);
+
+    if(xch->cob.markbb) {
+        int fht;
+        fht = def_textheight;
+        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+
+        epsdraw_bbox(fp, xch);
+    }
 
     if(0*bbox_mode) {
         epsdraw_bbox(fp, xch);
