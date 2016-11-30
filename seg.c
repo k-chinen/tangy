@@ -13,12 +13,42 @@ seg_new()
 }
 
 int
+try_regsegclose(varray_t *segar)
+{
+    int  ik;
+    seg *e;
+
+#if 0
+    printf("%s:\n", __func__);
+    printf("b use %d\n", segar->use);
+#endif
+
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_CLOSE;
+    e->coordtype    = REL_COORD;
+    ik = varray_push(segar, e);
+
+out:
+#if 0
+    printf("ik %d\n", ik);
+    printf("a use %d\n", segar->use);
+#endif
+
+    return 0;
+}
+
+int
 try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
 {
     seg *e;
 
+#if 0
     printf("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
     printf("b use %d\n", segar->use);
+#endif
 
     if(segar->use>0) {
         goto out;
@@ -36,17 +66,21 @@ try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
     varray_push(segar, e);
 
 out:
-    printf("a use %d\n", segar->use);
 
     return 0;
 }
 
+
 int
 try_regsegmove(varray_t *segar, int x1, int y1)
 {
+    int  ik;
     seg *e;
 
+#if 0
     printf("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    printf("b use %d\n", segar->use);
+#endif
 
     e = seg_new();
     if(!e) {
@@ -56,9 +90,13 @@ try_regsegmove(varray_t *segar, int x1, int y1)
     e->coordtype    = REL_COORD;
     e->x1           = x1;
     e->y1           = y1;
-    varray_push(segar, e);
+    ik = varray_push(segar, e);
 
 out:
+#if 0
+    printf("ik %d\n", ik);
+    printf("a use %d\n", segar->use);
+#endif
 
     return 0;
 }
@@ -128,6 +166,7 @@ out:
 
     return 0;
 }
+
 
 
 int

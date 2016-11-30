@@ -453,6 +453,7 @@ apair_t ls_ial[] = {
 #define OA_RMOVE            (351)
 #define OA_LINE             (352)
 #define OA_RLINE            (353)
+#define OA_CLOSE            (354)
 
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)
@@ -532,6 +533,7 @@ apair_t objattr_ial[] = {
     {"move",                OA_MOVE},
     {"rmove",               OA_RMOVE},
     {"rline",               OA_RLINE},
+    {"close",               OA_CLOSE},
 
     {"forehead",            OA_FOREHEAD},
     {"centhead",            OA_CENTHEAD},
@@ -2106,7 +2108,7 @@ P;
 #endif
     def_marknoderad     = marknoderadfactor     * objunit;
 
-#if 1
+#if 0
     V(objunit);
     V(def_arrowsize);
     V(def_linethick);
@@ -2248,7 +2250,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.004"
+    printf("2.007"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2269,7 +2271,7 @@ print_param()
 #define QP(x)  \
     printf("    %-24s %7s %7.3f\n", #x, "", x ## factor);
 
-    printf("  unit-base: current unitsize %d\n", objunit);
+    printf("  unit-base: multiply by unitsize %d\n", objunit);
 
     QPV(arrowsize);
     QPV(warrowsize);
@@ -2283,7 +2285,8 @@ print_param()
     QPV(hatchpitch);
     QPV(marknoderad);
 
-    printf("  others\n");
+    printf("  text-base: multiply by text height (dynamic; normal %d)\n",
+        def_textheight);
 
     QP(textdecent);
     QP(textbgmargin);

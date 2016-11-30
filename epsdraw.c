@@ -596,7 +596,8 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
     int  dx, dy;
     int  r2;
 
-    fprintf(fp, "%% arrowhead %d\n", atype);
+    fprintf(fp, "%% arrowhead atype %d xdir %d lc %d x,y %d,%d\n",
+        atype, xdir, lc, x, y);
     fprintf(fp, "gsave\n");
 
     changecolor(fp, lc);
@@ -4406,6 +4407,13 @@ PP;
 
 
 
+        case OA_CLOSE:
+            x2 = x1;
+            y2 = y1;
+            fprintf(fp, "  closepath\n");
+            goto next;
+            break;
+
         case OA_MOVE:
             x2 = s->x1 + xox;
             y2 = s->y1 + xoy;
@@ -4902,6 +4910,14 @@ PP;
 
             break;
 
+
+        case OA_CLOSE:
+            x2 = x1;
+            y2 = y1;
+            fprintf(fp, "  closepath\n");
+            goto next;
+            break;
+
         case OA_MOVE:
             x2 = s->x1+xox;
             y2 = s->y1+xoy;
@@ -5306,6 +5322,9 @@ __line_deco2(FILE *fp,
     double px, py;
     double ttrip;
 
+    double us, ue;
+    double vs, ve;
+
     int i;
     int x0, y0;
     int x1, y1, x2, y2;
@@ -5583,10 +5602,41 @@ P;
             fprintf(fp, "%% i %d count %d: ui %f vi %f vpitch %f arc\n",
                     i, count, ui, vi, vpitch);
 #endif
+
+            us = 0;
+            if(actbh) {
+                us += def_arrowsize;
+            }
+            vs = us/(2*M_PI*s->rad)*360;
+
+            ue = 0;
+            if(actfh) {
+                ue += def_arrowsize;
+            }
+            ve = ue/(2*M_PI*s->rad)*360;
+
+printf("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
+    us, vs, ue, ve, etrip, vi, (double)s->ang);
+
+#if 0
             for(v=vi;v<=(double)s->ang;v+=vpitch) {
+                px = arcx + s->rad*9/10*cos((cdir+v-90)*rf);
+                py = arcy + s->rad*9/10*sin((cdir+v-90)*rf);
+                MP(1, (int)px, (int)py);
+            }
+
+            for(v=vi+vs;v<=(double)s->ang-ve;v+=vpitch) {
+                px = arcx + s->rad*8/10*cos((cdir+v-90)*rf);
+                py = arcy + s->rad*8/10*sin((cdir+v-90)*rf);
+                MC(4, (int)px, (int)py);
+            }
+#endif
+
+            for(v=vi+vs;v<=(double)s->ang-ve;v+=vpitch) {
                 px = arcx + s->rad*cos((cdir+v-90)*rf);
                 py = arcy + s->rad*sin((cdir+v-90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
+
 
 #if 0
                 fprintf(fp,
@@ -5595,6 +5645,7 @@ P;
 #endif
 
                 symdraw(fp, px, py, cdir+v, pitch, count, gsym, lx, ly, &cx, &cy);
+
 
                 lx = cx;
                 ly = cy;
@@ -5622,18 +5673,23 @@ P;
             }
 
             if(actfh>0) {
+#if 0
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir+v,
                     xu->cob.outlinecolor, x2, y2);
-#if 0
-                epsdraw_Xarrowhead(fp,
-                    xu->cob.arrowforeheadtype, dcdir+v,
-                    xu->cob.outlinecolor, (double)x2, (double)y2+objunit/2);
 #endif
+                epsdraw_arrowhead(fp,
+                    xu->cob.arrowforeheadtype, cdir+s->ang-ve/2,
+                    xu->cob.outlinecolor, x2, y2);
             }
             if(actbh>0) {
+#if 0
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowbackheadtype, cdir-180,
+                    xu->cob.outlinecolor, x1, y1);
+#endif
+                epsdraw_arrowhead(fp,
+                    xu->cob.arrowbackheadtype, cdir-180+vs/2,
                     xu->cob.outlinecolor, x1, y1);
             }
 
@@ -5677,9 +5733,25 @@ P;
             vi = ui/(2*M_PI*s->rad)*360;
 
             ttrip = trip;
+
+            us = 0;
+            if(actbh) {
+                us += def_arrowsize;
+            }
+            vs = us/(2*M_PI*s->rad)*360;
+
+            ue = 0;
+            if(actfh) {
+                ue += def_arrowsize;
+            }
+            ve = ue/(2*M_PI*s->rad)*360;
+
+printf("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
+    us, vs, ue, ve, etrip, vi, (double)s->ang);
+
             fprintf(fp, "%% i %d count %d: ui %f vi %f vpitch %f arcn\n",
                     i, count, ui, vi, vpitch);
-            for(v=vi;v<=(double)s->ang;v+=vpitch) {
+            for(v=vi+vs;v<=(double)s->ang-ve;v+=vpitch) {
                 px = arcx + s->rad*cos((cdir-v+90)*rf);
                 py = arcy + s->rad*sin((cdir-v+90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
@@ -5713,19 +5785,31 @@ P;
             }
 
             if(actfh>0) {
+#if 0
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, (int)(cdir-v),
+                    xu->cob.outlinecolor, x2, y2);
+#endif
+                epsdraw_arrowhead(fp,
+                    xu->cob.arrowforeheadtype, (int)(cdir-(s->ang-ve/2)),
                     xu->cob.outlinecolor, x2, y2);
             }
             if(actbh>0) {
                 epsdraw_arrowhead(fp,
-                    xu->cob.arrowbackheadtype, cdir-180,
+                    xu->cob.arrowbackheadtype, cdir-180-vs/2,
                     xu->cob.outlinecolor, x1, y1);
             }
 
             cdir -= s->ang;
             dcdir -= s->ang;
 
+            break;
+
+        case OA_CLOSE:
+            x2 = x1;
+            y2 = y1;
+            fprintf(fp, "  closepath\n");
+            goto next;
             break;
 
         case OA_MOVE:
@@ -8909,6 +8993,7 @@ P;
         try_regsegforward(sar,          0,  -(ht-2*rad));
         try_regsegarc(sar,            rad,           90);
     }
+    try_regsegclose(sar);
 
     return 0;
 }
@@ -8919,6 +9004,7 @@ mkpath_circle(varray_t *sar, int wd, int ht, int rad)
 P;
     try_regsegmove(sar,     0, -ht/2);
     try_regsegarc(sar,   ht/2,   360);
+    try_regsegclose(sar);
 
     return 0;
 }
@@ -8964,9 +9050,7 @@ fprintf(stderr, "d y %9.2f x %9.2f\n", y-ly, x-lx);
         try_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
         lx = x; ly = y;
     }
-#if 0
     try_regsegclose(sar);
-#endif
 
     return 0;
 }
