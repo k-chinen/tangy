@@ -2748,11 +2748,10 @@ epsdraw_segarcXSEP(FILE *fp,
 
     fprintf(fp, "  %% pp %d pa %f al %d\n", pp, pa, al);
     fflush(fp);
-    fflush(stdout);
 
     aa = (double*)alloca(sizeof(double)*(al+3));
     if(!aa) {
-        fprintf(stdout, "ERROR no-memory\n");
+        Error("ERROR no-memory\n");
         return -1;
     }
 
@@ -2774,7 +2773,7 @@ epsdraw_segarcXSEP(FILE *fp,
         fprintf(fp, "%% a arc %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a<=ang2*rf; a+=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error("ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arc  set i %d/%d\n", a, i, al);
             aa[i++] = a;
@@ -2784,7 +2783,7 @@ epsdraw_segarcXSEP(FILE *fp,
         fprintf(fp, "%% a arcn %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a>=ang2*rf; a-=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error("ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arcn set i %d/%d\n", a, i, al);
             fflush(fp);
@@ -2800,11 +2799,10 @@ epsdraw_segarcXSEP(FILE *fp,
 #if 0
         fprintf(fp, "%% tyr use i %d\n", i);
         fflush(fp);
-        fflush(stdout);
 #endif
 
         if(i>al-1) {
-            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            Error("ERROR overrun %d/%d\n", i, al);
         }
         a = aa[i];
         fprintf(fp, "%% a %f use i %d\n", a, i);
@@ -2934,11 +2932,10 @@ epsdraw_segarcXTICK(FILE *fp,
 
     fprintf(fp, "  %% pp %d pa %f al %d\n", pp, pa, al);
     fflush(fp);
-    fflush(stdout);
 
     aa = (double*)alloca(sizeof(double)*(al+3));
     if(!aa) {
-        fprintf(stdout, "ERROR no-memory\n");
+        Error("ERROR no-memory\n");
         return -1;
     }
 
@@ -2968,7 +2965,7 @@ epsdraw_segarcXTICK(FILE *fp,
         fprintf(fp, "%% a arc %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a<=ang2*rf; a+=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error( "ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arc  set i %d/%d\n", a, i, al);
             aa[i++] = a;
@@ -2978,7 +2975,7 @@ epsdraw_segarcXTICK(FILE *fp,
         fprintf(fp, "%% a arcn %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a>=ang2*rf; a-=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error("ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arcn set i %d/%d\n", a, i, al);
             fflush(fp);
@@ -2995,11 +2992,10 @@ epsdraw_segarcXTICK(FILE *fp,
 #if 0
         fprintf(fp, "%% tyr use i %d\n", i);
         fflush(fp);
-        fflush(stdout);
 #endif
 
         if(i>al-1) {
-            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            Error("ERROR overrun %d/%d\n", i, al);
         }
         a = aa[i];
         fprintf(fp, "%% a %f use i %d\n", a, i);
@@ -3160,11 +3156,10 @@ epsdraw_segarcXTICK2(FILE *fp,
 
     fprintf(fp, "  %% pp %d pa %f al %d\n", pp, pa, al);
     fflush(fp);
-    fflush(stdout);
 
     aa = (double*)alloca(sizeof(double)*(al+3));
     if(!aa) {
-        fprintf(stdout, "ERROR no-memory\n");
+        Error("ERROR no-memory\n");
         return -1;
     }
 
@@ -3194,7 +3189,7 @@ epsdraw_segarcXTICK2(FILE *fp,
         fprintf(fp, "%% a arc %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a<=ang2*rf; a+=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error("ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arc  set i %d/%d\n", a, i, al);
             aa[i++] = a;
@@ -3204,7 +3199,7 @@ epsdraw_segarcXTICK2(FILE *fp,
         fprintf(fp, "%% a arcn %f..%f by %f\n", ang1*rf, ang2*rf, pa);
         for(a=ang1*rf; a>=ang2*rf; a-=pa) {
             if(i>al-1) {
-                fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+                Error("ERROR overrun %d/%d\n", i, al);
             }
             fprintf(fp, "%% a %f arcn set i %d/%d\n", a, i, al);
             fflush(fp);
@@ -3226,11 +3221,10 @@ epsdraw_segarcXTICK2(FILE *fp,
 #if 0
         fprintf(fp, "%% tyr use i %d\n", i);
         fflush(fp);
-        fflush(stdout);
 #endif
 
         if(i>al-1) {
-            fprintf(stdout, "ERROR overrun %d/%d\n", i, al);
+            Error("ERROR overrun %d/%d\n", i, al);
         }
         a = aa[i];
         fprintf(fp, "%% a %f use i %d\n", a, i);
@@ -3294,13 +3288,13 @@ epsdraw_segarcXTICK2(FILE *fp,
 
         case LT_WAVED:
             if(i%4==1) {
-                fitarc(fp, lx, ly, nx, ny, 0);
+                fitarc(fp, lx, ly, nx, ny, 1);
                 lx = nx;
                 ly = ny;
             }
             else 
             if(i%4==3) {
-                fitarc(fp, lx, ly, nx, ny, 1);
+                fitarc(fp, lx, ly, nx, ny, 0);
                 lx = nx;
                 ly = ny;
             }
@@ -3766,7 +3760,7 @@ _line_deco(FILE *fp,
 
 
 #if 1
-fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
+Echo("%s: ydir %d xox %d xoy %d \n",
     __func__, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
@@ -3775,24 +3769,24 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
     if(bbox_mode) {
 
-        printf("REMARK BEGIN oid %d\n", xu->oid);
+        Echo("REMARK BEGIN oid %d\n", xu->oid);
 #if 0
-        printf("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
+        Echo("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
             xox, xoy, xu->cx, xu->cy, xu->csx, xu->csy, xu->cox, xu->coy);
 #endif
 
 #if 0
-        printf("  xox,xoy %d,%d ox,oy %d,%d\n",
+        Echo("  xox,xoy %d,%d ox,oy %d,%d\n",
             xox, xoy, xu->cox, xu->coy);
-        printf("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+        Echo("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
             xu->cx, xu->cy, xu->csx, xu->csy,
             xu->clx, xu->cby, xu->crx, xu->cty);
-        printf("g x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+        Echo("g x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
             xu->cgx, xu->cgy, xu->cgsx, xu->cgsy, 
             xu->cglx, xu->cgby, xu->cgrx, xu->cgty);
-        printf("LBRT  %6d,%-6d (%6d %6d %6d %6d)\n",
+        Echo("LBRT  %6d,%-6d (%6d %6d %6d %6d)\n",
             xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
-        printf("GLBRT               (%6d %6d %6d %6d)\n",
+        Echo("GLBRT               (%6d %6d %6d %6d)\n",
             xu->glx, xu->gby, xu->grx, xu->gty);
 #endif
 
@@ -3806,7 +3800,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         SLW_21(fp);
 
 #if 0
-        printf("REMARK END\n");
+        Echo("REMARK END\n");
 #endif
     }
 
@@ -3876,8 +3870,8 @@ P;
             continue;
         }
 
-printf("%s: ptype %d\n", __func__, s->ptype);
-printf("b cdir %d\n", cdir);
+Echo("%s: ptype %d\n", __func__, s->ptype);
+Echo("b cdir %d\n", cdir);
 
         switch(s->ptype) {
 
@@ -3962,12 +3956,12 @@ P;
                 int tx, ty; 
                 int a;
                 fprintf(fp, "     gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir-90;a<=cdir-90+s->ang;a++) {
                     if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(4, tx, ty);
                         }
@@ -4035,12 +4029,12 @@ P;
                 int tx, ty; 
                 int a;
                 fprintf(fp, "    gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir+90;a>=cdir+90-s->ang;a--) {
                     if(a==cdir+90||a==cdir+90-s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(5, tx, ty);
                         }
@@ -4141,7 +4135,7 @@ next:
         x1 = x2;
         y1 = y2;
 
-printf("a cdir %d\n", cdir);
+Echo("a cdir %d\n", cdir);
 P;
     }
 
@@ -4182,7 +4176,7 @@ _line_path(FILE *fp,
 
 
 #if 1
-fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
+Echo("%s: ydir %d xox %d xoy %d \n",
     __func__, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
@@ -4258,7 +4252,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
             continue;
         }
 
-printf("%s: ptype %d\n", __func__, s->ptype);
+Echo("%s: ptype %d\n", __func__, s->ptype);
 
         switch(s->ptype) {
 
@@ -4324,12 +4318,12 @@ PP;
                 int tx, ty; 
                 int a;
                 fprintf(fp, "     gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir-90;a<=cdir-90+s->ang;a++) {
                     if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(4, tx, ty);
                         }
@@ -4376,12 +4370,12 @@ PP;
                 int tx, ty; 
                 int a;
                 fprintf(fp, "    gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir+90;a>=cdir+90-s->ang;a--) {
                     if(a==cdir+90||a==cdir+90-s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(5, tx, ty);
                         }
@@ -4554,7 +4548,7 @@ _line_patharrow(FILE *fp,
     int actfh, actch, actbh;
 
 #if 1
-fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
+Echo("%s: ydir %d xox %d xoy %d \n",
     __func__, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
@@ -4637,7 +4631,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
         goto out;
     }
 
-#if 1
+#if 0
     varray_fprint(stdout, xu->cob.segar);
 #endif
 #if 0
@@ -4676,7 +4670,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
             continue;
         }
 
-printf("%s: ptype %d\n", __func__, s->ptype);
+Echo("%s: ptype %d\n", __func__, s->ptype);
 
 
         actfh = actch = actbh = 0;
@@ -4764,12 +4758,12 @@ PP;
             if(draft_mode) {
                 int a;
                 fprintf(fp, "     gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir-90;a<=cdir-90+s->ang;a++) {
                     if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(4, tx, ty);
                         }
@@ -4849,12 +4843,12 @@ PP;
                 int tx, ty; 
                 int a;
                 fprintf(fp, "    gsave\n");
-                printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+                Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
                 for(a=cdir+90;a>=cdir+90-s->ang;a--) {
                     if(a==cdir+90||a==cdir+90-s->ang||a%90==0) {
                         tx = arcx + s->rad*cos((a)*rf);
                         ty = arcy + s->rad*sin((a)*rf);
-                        printf("      arc  %d tx,ty %d,%d\n", a, tx, ty);
+                        Echo("      arc  %d tx,ty %d,%d\n", a, tx, ty);
                         if(draft_mode) {
                             MC(5, tx, ty);
                         }
@@ -5185,7 +5179,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     break;
 
     case LT_ZIGZAG:
-#if 0
+#if 1
         mx = (lax+x)/2;
         my = (lay+y)/2;
 
@@ -5194,7 +5188,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         qx = mx + ww*cos((a-90)*rf);
         qy = my + ww*sin((a-90)*rf);
 
-#if 1
+#if 0
         MCF(2, (int)px, (int)py);
         MX(0, (int)mx, (int)my);
         MQF(4, (int)qx, (int)qy);
@@ -5223,7 +5217,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
 
 
 
-#if 1
+#if 0
         px = x + ww*cos((a+45)*rf);
         py = y + ww*sin((a+45)*rf);
         qx = x + ww*cos((a-45)*rf);
@@ -5300,7 +5294,7 @@ solve_pitch(int ty)
     case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
     }
 
-    printf("%s: rv %f\n", __func__, rv);
+    Echo("%s: rv %f\n", __func__, rv);
 
     return rv;
 }
@@ -5359,7 +5353,7 @@ __line_deco2(FILE *fp,
     pitch = solve_pitch(xu->cob.outlinetype);
 
 #if 1
-fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
+Echo("%s: ydir %d xox %d xoy %d \n",
     __func__, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
@@ -5369,24 +5363,24 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
 
     if(bbox_mode) {
 
-        printf("REMARK BEGIN oid %d\n", xu->oid);
+        Echo("REMARK BEGIN oid %d\n", xu->oid);
 #if 0
-        printf("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
+        Echo("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
             xox, xoy, xu->cx, xu->cy, xu->csx, xu->csy, xu->cox, xu->coy);
 #endif
 
 #if 0
-        printf("  xox,xoy %d,%d ox,oy %d,%d\n",
+        Echo("  xox,xoy %d,%d ox,oy %d,%d\n",
             xox, xoy, xu->cox, xu->coy);
-        printf("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+        Echo("  x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
             xu->cx, xu->cy, xu->csx, xu->csy,
             xu->clx, xu->cby, xu->crx, xu->cty);
-        printf("g x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
+        Echo("g x,y %6d,%-6d sx,sy %6d,%-6d lbrt %6d,%6d,%6d,%6d\n",
             xu->cgx, xu->cgy, xu->cgsx, xu->cgsy, 
             xu->cglx, xu->cgby, xu->cgrx, xu->cgty);
-        printf("LBRT  %6d,%-6d (%6d %6d %6d %6d)\n",
+        Echo("LBRT  %6d,%-6d (%6d %6d %6d %6d)\n",
             xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
-        printf("GLBRT               (%6d %6d %6d %6d)\n",
+        Echo("GLBRT               (%6d %6d %6d %6d)\n",
             xu->glx, xu->gby, xu->grx, xu->gty);
 #endif
 
@@ -5400,7 +5394,7 @@ fprintf(stdout, "%s: ydir %d xox %d xoy %d \n",
         SLW_21(fp);
 
 #if 0
-        printf("REMARK END\n");
+        Echo("REMARK END\n");
 #endif
     }
 
@@ -5483,8 +5477,8 @@ P;
             continue;
         }
 
-printf("%s: ptype %d\n", __func__, s->ptype);
-printf("b cdir %d\n", cdir);
+Echo("%s: ptype %d\n", __func__, s->ptype);
+Echo("b cdir %d\n", cdir);
 
 #if 0
         MP(4, x1, y1);
@@ -5615,7 +5609,7 @@ P;
             }
             ve = ue/(2*M_PI*s->rad)*360;
 
-printf("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
+Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
     us, vs, ue, ve, etrip, vi, (double)s->ang);
 
 #if 0
@@ -5746,7 +5740,7 @@ printf("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
             }
             ve = ue/(2*M_PI*s->rad)*360;
 
-printf("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
+Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
     us, vs, ue, ve, etrip, vi, (double)s->ang);
 
             fprintf(fp, "%% i %d count %d: ui %f vi %f vpitch %f arcn\n",
@@ -5890,6 +5884,16 @@ coord_done:
                 ui = pitch  - (trip - (int)(trip/pitch)*pitch);
             }
 
+			us = 0;
+			if(actbh) {
+				us += def_arrowsize;
+			}
+			vs = 0;
+			if(actfh) {
+				ue += def_arrowsize;
+			}
+
+
             fprintf(fp, "%% i %d count %d: ui %f\n", i, count, ui);
 
             ttrip = trip;
@@ -5897,7 +5901,12 @@ coord_done:
                 "%% i %3d count %3d: ttrip %8.2f u %8.2f x1,y1 %8.2f %8.2f line*\n",
                     i, count, ttrip, -1.0, (double)x1, (double)y1);
 
-            for(u=ui;u<=etrip;u+=pitch) {
+			{
+				u=ui+us;
+                lx = x1 + (x2-x1) * u/etrip;
+                ly = y1 + (y2-y1) * u/etrip;
+			}
+            for(u=ui+us;u<=etrip-ue;u+=pitch) {
                 px = x1 + (x2-x1) * u/etrip;
                 py = y1 + (y2-y1) * u/etrip;
                 ttrip = trip + u;
@@ -6022,7 +6031,7 @@ Zepsdraw_linearrow(FILE *fp,
 {
     int r;
 #if 0
-fprintf(stdout, "%s: enter\n", __func__);
+Echo("%s: enter\n", __func__);
 #endif
 
 #if 0
@@ -6057,7 +6066,7 @@ Zepsdraw_clinearrow(FILE *fp,
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
 
 #if 0
-fprintf(stdout, "%s: enter\n", __func__);
+Echo("%s: enter\n", __func__);
 #endif
 
     fprintf(fp, " %% fill color %d hatch %d\n",
@@ -6836,12 +6845,12 @@ PP;
             int tx, ty; 
             int a;
             fprintf(fp, "gsave\n");
-            printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+            Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
             for(a=cdir-90;a<=cdir-90+s->ang;a++) {
                 if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
                     tx = arcx + s->rad*cos((a)*rf);
                     ty = arcy + s->rad*sin((a)*rf);
-                    printf("  arc  %d tx,ty %d,%d\n", a, tx, ty);
+                    Echo("  arc  %d tx,ty %d,%d\n", a, tx, ty);
                     if(draft_mode) {
                         MC(4, tx, ty);
                     }
@@ -6893,12 +6902,12 @@ fprintf(fp, "%% a cdir %d\n", cdir);
             int tx, ty; 
             int a;
             fprintf(fp, "gsave\n");
-            printf("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
+            Echo("arc  %d .. %d\n", cdir-90, cdir-90+s->ang);
             for(a=cdir-90;a<=cdir-90+s->ang;a++) {
                 if(a==cdir-90||a==cdir-90+s->ang||a%90==0) {
                     tx = arcx + s->rad*cos((a)*rf);
                     ty = arcy + s->rad*sin((a)*rf);
-                    printf("  arc  %d tx,ty %d,%d\n", a, tx, ty);
+                    Echo("  arc  %d tx,ty %d,%d\n", a, tx, ty);
                     if(draft_mode) {
                         MC(4, tx, ty);
                     }
@@ -7406,7 +7415,7 @@ ss_strip(char *dst, int dlen, varray_t *ssar)
         if(uu && uu->ssval && *(uu->ssval) ) {
             w = strlen(uu->ssval);
 #if 0
-printf(" %2d: %3d '%s'\n", i, w, uu->ssval);
+Echo(" %2d: %3d '%s'\n", i, w, uu->ssval);
 #endif
             if(cc+w+1<dlen-1) {
                 if(dst[0]) {
@@ -7548,7 +7557,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 #endif
     ss_strip(mcontall, BUFSIZ, ssar);
 #if 0
-    fprintf(stdout, "mcontall '%s'\n", mcontall);
+    Echo("mcontall '%s'\n", mcontall);
 #endif
 
     fprintf(fp, "%% %s: pos %6d,%-6d %6dx%-6d %4d fg %d bg %d %d %d ; %s\n",
@@ -7651,7 +7660,9 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 
         txe_parse(tq, uu->ssval);
 
+#if 0
         varray_fprint(stdout, tq);
+#endif
 
         justify = SJ_CENTER;
         hscale = 100;
@@ -7660,7 +7671,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 
         fprintf(fp, " gsave %% oneline\n");
 
-printf("  --- calc size\n");
+Echo("  --- calc size\n");
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
@@ -7728,10 +7739,10 @@ printf("  --- calc size\n");
                 while(*p) {
                     p = draw_word(p, token, BUFSIZ, ',');
                     if(token[0]) {
-printf("    token '%s'\n", token);
+Echo("    token '%s'\n", token);
                         if(strncasecmp(token,"scale", 5)==0) {
                             hscale = atoi(token+5);
-printf("    hscale %d\n", hscale);
+Echo("    hscale %d\n", hscale);
 
                         }
                         cc = assoc(fh_ial, token);
@@ -7757,7 +7768,7 @@ printf("    hscale %d\n", hscale);
                 if(cursize != newsize || curface != newface) 
 #endif
                 {
-printf(" newface %d newsize %d\n", newface, newsize);
+Echo(" newface %d newsize %d\n", newface, newsize);
                     if(newsize>=0) {
 P;
                         cursize = newsize;
@@ -7766,7 +7777,7 @@ P;
 P;
                         curface = newface;
                     }
-printf(" curface %d cursize %d\n", curface, cursize);
+Echo(" curface %d cursize %d\n", curface, cursize);
                     afn  = rassoc(ff_act_ial, curface);
                     afhs = rassoc(fh_act_ial, cursize);
                     afh  = fht;
@@ -7774,7 +7785,7 @@ printf(" curface %d cursize %d\n", curface, cursize);
                         afh = atof(afhs)*fht;
                     }
 
-printf("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
+Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 
                     if(afn) {
                         fprintf(fp, "  %s findfont %d scalefont setfont\n",
@@ -7910,7 +7921,9 @@ skip_bgdrawing:
 
         txe_parse(tq, uu->ssval);
 
+#if 0
         varray_fprint(stdout, tq);
+#endif
 
         justify = SJ_CENTER;
         hscale = 100;
@@ -7920,7 +7933,7 @@ skip_bgdrawing:
         fprintf(fp, " gsave %% oneline\n");
 
 
-printf("  --- calc size\n");
+Echo("  --- calc size\n");
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
@@ -8025,7 +8038,7 @@ printf("  --- calc size\n");
 
         /*** PASS 2 */
 
-printf("  --- drawing\n");
+Echo("  --- drawing\n");
         fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
         fprintf(fp, "  0 0 moveto\n");
 
@@ -8051,11 +8064,11 @@ printf("  --- drawing\n");
                     if(token[0]) {
                         if(strncasecmp(token,"scale", 5)==0) {
                             hscale = atoi(token+5);
-printf("    hscale %d\n", hscale);
+Echo("    hscale %d\n", hscale);
                         }
                         if(strncasecmp(token,"hscale", 6)==0) {
                             hscale = atoi(token+6);
-printf("    hscale %d\n", hscale);
+Echo("    hscale %d\n", hscale);
                         }
                         cc = assoc(fh_ial, token);
                         switch(cc) {
@@ -8078,7 +8091,7 @@ printf("    hscale %d\n", hscale);
                 if(cursize != newsize || curface != newface) 
 #endif
                 {
-printf(" newface %d newsize %d\n", newface, newsize);
+Echo(" newface %d newsize %d\n", newface, newsize);
                     if(newsize>=0) {
 P;
                         cursize = newsize;
@@ -8087,7 +8100,7 @@ P;
 P;
                         curface = newface;
                     }
-printf(" curface %d cursize %d\n", curface, cursize);
+Echo(" curface %d cursize %d\n", curface, cursize);
 
                     afn  = xrassoc(ff_act_ial, curface);
                     afhs = xrassoc(fh_act_ial, cursize);
@@ -8096,7 +8109,7 @@ printf(" curface %d cursize %d\n", curface, cursize);
                         afh = atof(afhs)*fht;
                     }
 
-printf("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
+Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
 
                     if(afn) {
                         fprintf(fp, "  %s findfont %d scalefont setfont\n",
@@ -9024,7 +9037,7 @@ P;
     try_regsegarc(sar,   ht/2,   360);
 #endif
     a = ((double)wd/ht);
-fprintf(stdout, "a %9.2f\n", a);
+Echo("a %9.2f\n", a);
     r = ((double)ht)/2;
     try_regsegmove(sar,     0, -r);
     lx = 0;
@@ -9080,8 +9093,10 @@ fprintf(fp, "%% %s\n", __func__);
 #endif
 
     saved_segar = xu->cob.segar;
+#if 0
     fprintf(stdout, "b ");
     varray_fprint(stdout, xu->cob.segar);
+#endif
     
 #if 0
     try_regsegrmove(xu->cob.segar,  -xu->wd/2, -xu->ht/2);
@@ -9115,8 +9130,10 @@ fprintf(fp, "%% %s\n", __func__);
     }
 #endif
 
+#if 0
     fprintf(stdout, "a ");
     varray_fprint(stdout, xu->cob.segar);
+#endif
 
     fprintf(fp, "gsave %% dmy1\n");
 #if 0
@@ -9268,7 +9285,7 @@ epsdraw_dmyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     my = xu->y+xoy;
 
 fprintf(fp, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
-fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
+Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     saved_segar = xu->cob.segar;
 #if 0
@@ -9300,7 +9317,7 @@ fprintf(stdout, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
     try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
 #endif
 
-#if 1
+#if 0
     fprintf(stdout, "a ");
     varray_fprint(stdout, xu->cob.segar);
 #endif
@@ -9854,7 +9871,7 @@ P;
             if(i<mini) mini = i;
         }
         yp = xu->ht / (call+1);
-        printf("call %d yp %d\n", call, yp);
+        Echo("call %d yp %d\n", call, yp);
 
         usi = uei = esi = eei = dsi = dei = -1;
 
@@ -9876,7 +9893,7 @@ P;
             eex = ex;
             eey = ey+xu->ht/2-(j+1)*yp;
 
-printf(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
+Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
 #if 0
             fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
                 eex, eey, jr);
@@ -9920,10 +9937,10 @@ printf(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             j++;
         }
 
-        printf("  cu %d ce %d cd %d\n", cu, ce, cd);
-        printf("  usi %d uei %d\n", usi, uei);
-        printf("  esi %d eei %d\n", esi, eei);
-        printf("  dsi %d dei %d\n", dsi, dei);
+        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
+        Echo("  usi %d uei %d\n", usi, uei);
+        Echo("  esi %d eei %d\n", esi, eei);
+        Echo("  dsi %d dei %d\n", dsi, dei);
 
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
@@ -9949,7 +9966,7 @@ printf(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             }
             else {
             }
-            printf("i %d j %d: g %d k %d\n", i, j, g, k);
+            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
 
             eex = ex;
             eey = ey+xu->ht/2-(j+1)*yp;
@@ -9979,7 +9996,7 @@ printf(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 h2 = (ex-sx) - h1;
                 v  = (eey-sy);
 
-                printf("  h1 %7d v %7d h2 %7d\n", h1, v, h2);
+                Echo("  h1 %7d v %7d h2 %7d\n", h1, v, h2);
 
                 fprintf(fp, "   %d %d moveto %d 0 rlineto"
                             " 0 %d rlineto %d 0 rlineto stroke\n",
@@ -10870,19 +10887,19 @@ epsdraw_sep(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     epsdraw_plinearrowR(fp, xu->cob.sepcurdir, xox, xoy, 1000, xu, xns);
 #endif
 
-printf("%s: oid %d xox,xoy %d,%d\n", __func__, xu->oid, xox, xoy);
-printf("    cx,cy %d,%d\n",
+Echo("%s: oid %d xox,xoy %d,%d\n", __func__, xu->oid, xox, xoy);
+Echo("    cx,cy %d,%d\n",
                     xu->cx, xu->cy);
-printf("    x1,y1 %d,%d x2,y2 %d,%d\n", 
+Echo("    x1,y1 %d,%d x2,y2 %d,%d\n", 
                     xu->cob.sepx1, xu->cob.sepy1, 
                     xu->cob.sepx2, xu->cob.sepy2);
-printf("    gx1,y1 %d,%d gx2,y2 %d,%d\n", 
+Echo("    gx1,y1 %d,%d gx2,y2 %d,%d\n", 
                     xu->cob.gsepx1, xu->cob.gsepy1, 
                     xu->cob.gsepx2, xu->cob.gsepy2);
-printf("    xox,xoy+x1,y1 %d,%d gx2,y2 %d,%d\n", 
+Echo("    xox,xoy+x1,y1 %d,%d gx2,y2 %d,%d\n", 
                     xox+xu->cob.sepx1, xoy+xu->cob.sepy1, 
                     xox+xu->cob.sepx2, xoy+xu->cob.sepy2);
-printf("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n", 
+Echo("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n", 
                     xox+xu->cob.gsepx1, xoy+xu->cob.gsepy1, 
                     xox+xu->cob.gsepx2, xoy+xu->cob.gsepy2);
 
@@ -11043,7 +11060,7 @@ XbumpBB(int gx, int gy, int gw, int gh, int cx, int cy, int cr, int *rx, int *ry
 
     ik = bumpH(gx-gw/2, gy-gh/2, gx+gw/2, gy-gh/2, cx, cy, cr, &qx, &qy);
     if(ik) {
-printf("%s: found B\n", __func__);
+Echo("%s: found B\n", __func__);
         *rx = qx;
         *ry = qy;
         rv = 1;
@@ -11051,7 +11068,7 @@ printf("%s: found B\n", __func__);
 
     ik = bumpV(gx+gw/2, gy+gh/2, gx+gw/2, gy-gh/2, cx, cy, cr, &qx, &qy);
     if(ik) {
-printf("%s: found R\n", __func__);
+Echo("%s: found R\n", __func__);
         *rx = qx;
         *ry = qy;
         rv = 2;
@@ -11059,7 +11076,7 @@ printf("%s: found R\n", __func__);
 
     ik = bumpH(gx-gw/2, gy+gh/2, gx+gw/2, gy+gh/2, cx, cy, cr, &qx, &qy);
     if(ik) {
-printf("%s: found T\n", __func__);
+Echo("%s: found T\n", __func__);
         *rx = qx;
         *ry = qy;
         rv = 3;
@@ -11067,7 +11084,7 @@ printf("%s: found T\n", __func__);
 
     ik = bumpV(gx-gw/2, gy+gh/2, gx-gw/2, gy-gh/2, cx, cy, cr, &qx, &qy);
     if(ik) {
-printf("%s: found L\n", __func__);
+Echo("%s: found L\n", __func__);
         *rx = qx;
         *ry = qy;
         rv = 4;
@@ -11728,7 +11745,7 @@ epsdrawchunk_namel(FILE *fp, ob *xch, int gox, int goy, ns *xns)
         if(!u) continue;
 
         q = _ns_find_name(xns, u, 0);
-printf(" q %p\n", q);
+Echo(" q %p\n", q);
 
         if(ISCHUNK(u->type)) {
             epsdrawchunk_namel(fp, u, gox, goy, xns);

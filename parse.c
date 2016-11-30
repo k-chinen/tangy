@@ -1532,9 +1532,10 @@ skip_specialforms:
         }
     }
     
-
+#if 0
     ob_dump(ch0);
     ns_dump(ns0);
+#endif
 
     return 0;
 }

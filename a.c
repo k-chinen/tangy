@@ -2475,11 +2475,11 @@ main(int argc, char *argv[])
 
     recalcsizeparam();
 
-P;
-
     ik = parse(stdin, ch0, ns0);
+#if 0
 P;
     ob_cndump(ch0);
+#endif
 
     ik = fkchk(ch0, ns0);
 P;
@@ -2488,8 +2488,10 @@ P;
     y = 0;
 P;
     ik = put(ch0, &x, &y, ns0);
+#if 0
 P;
     ob_gdump(ch0);
+#endif
 
 P;
     ik = linkchk(ch0, ns0);
@@ -2500,11 +2502,14 @@ P;
 
 P;
     finalize(ch0, 0, 0, ns0);
+
+#if 0
 P;
 
     ob_adump(ch0);
     ob_bgdump(ch0);
     ob_bldump(ch0);
+#endif
 
 #if 0
     picdraw(ch0, 0, 0, ns0);

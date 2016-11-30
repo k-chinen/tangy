@@ -51,7 +51,7 @@ applywith(ob *u, char *xpos, int *rx, int *ry)
         return -1;
     }
 
-printf("%s: b rx,ry %d,%d\n", __func__, *rx, *ry);
+Echo("%s: b rx,ry %d,%d\n", __func__, *rx, *ry);
     if(*xpos=='.') {
         ypos = xpos+1;
     }
@@ -75,7 +75,7 @@ printf("%s: b rx,ry %d,%d\n", __func__, *rx, *ry);
         return -1;
     }
 
-printf("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
+Echo("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
     
     return 0;
 }
@@ -84,7 +84,7 @@ printf("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
 #if 1
 
 #define MARK(m,x,y) \
-    printf("MARK %d %s x %6d, y %6d\n", __LINE__, m, x, y); \
+    Echo("MARK %d %s x %6d, y %6d\n", __LINE__, m, x, y); \
     if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
     if(y<_by)  _by = y; if(y>_ty)  _ty = y; 
 
@@ -223,7 +223,7 @@ est_seg(ns* xns, varray_t *opar, varray_t *segar,
     rv = 0;
 
 #if 0
-printf("%s:\n", __func__);
+Echo("%s:\n", __func__);
     varray_fprint(stdout, opar);
 #endif
 
@@ -306,7 +306,7 @@ skip_m:
 
 
 #if 0
-printf("  m %d\n", m);
+Echo("  m %d\n", m);
 #endif
 
         if(e->cmd==OA_ARC||e->cmd==OA_ARCN||e->cmd==OA_THEN||
@@ -345,11 +345,11 @@ flush_que:
 
 #if 1
                             ldir = atan2(y-ly, x-lx)/rf;
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
+Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
 #if 0
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
+Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
                             r = NULL;
@@ -387,7 +387,7 @@ P;
 #if 1
 P;
             if(e->cmd==OA_TO) {
-printf("mark final position %d,%d\n", mx, my);
+Echo("mark final position %d,%d\n", mx, my);
                 *rfx = mx;
                 *rfy = my;
                 isset_final++;
@@ -461,12 +461,12 @@ P;
                             break;
         
         case OA_ARC:
-printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
+Echo("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             MARK("cB", x, y);
                             arcx = x + rad*cos((ldir+90)*rf);
                             arcy = y + rad*sin((ldir+90)*rf);
 
-printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
+Echo("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
     
                             /* mark peak points */
                             {
@@ -476,15 +476,15 @@ printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
                                     if(a==ldir-90||a==ldir-90+an||a%90==0) {
                                         tx = arcx+rad*cos((a)*rf);
                                         ty = arcy+rad*sin((a)*rf);
-                                        printf(" a %4d ", a);
+                                        Echo(" a %4d ", a);
                                         if(a==ldir-90) {
-                                            printf(" first  ");
+                                            Echo(" first  ");
                                         }
                                         if(a==ldir-90+an) {
-                                            printf(" last   ");
+                                            Echo(" last   ");
                                         }
                                         if(a%90==0) {
-                                            printf(" middle ");
+                                            Echo(" middle ");
                                         }
                                         MARK("cM", tx, ty);
                                     }
@@ -494,14 +494,14 @@ printf("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
                             x = arcx+rad*cos((ldir-90+an)*rf);
                             y = arcy+rad*sin((ldir-90+an)*rf);
 
-printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
+Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("cE", x, y);
 
 
                             FREG(OA_ARC, jc, REL_COORD, 0, 0, 0, rad, an);
 
                             ldir += an;
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
+Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 
                             r = NULL;
                             lx = x;
@@ -512,7 +512,7 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
                             break;
 
         case OA_ARCN:
-printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
+Echo("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             MARK("nB", x, y);
 
                             arcx = x + rad*cos((ldir-90)*rf);
@@ -521,11 +521,11 @@ printf("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
                             x = arcx+rad*cos((ldir+90)*rf);
                             y = arcy+rad*sin((ldir+90)*rf);
 
-printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
+Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("nB", x, y);
 #endif
 
-printf("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
+Echo("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
                             /* mark peak points */
                             {
                                 int a;
@@ -534,15 +534,15 @@ printf("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
                                     if(a==ldir+90||a==ldir+90-an||a%90==0) {
                                         tx = arcx+rad*cos((a)*rf);
                                         ty = arcy+rad*sin((a)*rf);
-                                        printf(" a %4d ", a);
+                                        Echo(" a %4d ", a);
                                         if(a==ldir+90) {
-                                            printf(" first  ");
+                                            Echo(" first  ");
                                         }
                                         if(a==ldir+90-an) {
-                                            printf(" last   ");
+                                            Echo(" last   ");
                                         }
                                         if(a%90==0) {
-                                            printf(" middle ");
+                                            Echo(" middle ");
                                         }
                                         MARK("nM", tx, ty);
                                     }
@@ -552,13 +552,13 @@ printf("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
                             x = arcx+rad*cos((ldir+90-an)*rf);
                             y = arcy+rad*sin((ldir+90-an)*rf);
 
-printf("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
+Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
                             MARK("nE", x, y);
 
                             FREG(OA_ARCN, jc, REL_COORD, 0, 0, 0, rad, an);
 
                             ldir -= an;
-printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
+Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 
                             r = NULL;
                             lx = x;
@@ -575,7 +575,7 @@ printf("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
                             break;
         }
 #if 0
-printf("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
+Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
         i, e->cmd, e->val, mstr, dm, m, x, y, ldir);
 #endif
         MARK("e ", x, y);
@@ -596,33 +596,33 @@ printf("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n
     }
 
 #if 1
-    printf("opar\n");
+    Echo("opar\n");
     varray_fprint(stdout, opar);
-    printf("segar\n");
+    Echo("segar\n");
     varray_fprint(stdout, segar);
 #endif
 
 #if 0
-printf("    ldir %.2f\n", ldir);
+Echo("    ldir %.2f\n", ldir);
 #endif
     if(!kp) {
 #if 0
-printf("    *zdir %d -> %.2f\n", *zdir, ldir);
+Echo("    *zdir %d -> %.2f\n", *zdir, ldir);
 #endif
         *zdir = (int)ldir;
     }
     if(isset_final<=0) {
-printf("set final as last position\n");
+Echo("set final as last position\n");
         *rfx = lx;
         *rfy = ly;
     }
     else {
-printf("set final as specified position\n");
+Echo("set final as specified position\n");
     }
 
 
 #if 0
-printf("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);
+Echo("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 }
@@ -639,10 +639,10 @@ takelastobjpos(ob *lob, int pos, int kp, int *nx, int *ny, int *dir)
     if(!lob) {
         return -1;
     }
-    printf("%s: lob %p oid %d pos %d\n", __func__, lob, lob->oid, pos);
+    Echo("%s: lob %p oid %d pos %d\n", __func__, lob, lob->oid, pos);
 
-    printf("  lob attributes\n");
-    printf("    lx,by,rx,ty %d,%d,%d,%d\n",
+    Echo("  lob attributes\n");
+    Echo("    lx,by,rx,ty %d,%d,%d,%d\n",
         lob->lx, lob->by, lob->rx, lob->ty);
 
     switch(pos) {
@@ -678,7 +678,7 @@ takelastobjpos(ob *lob, int pos, int kp, int *nx, int *ny, int *dir)
         *ny = lob->cy;
         break;
     }
-    printf("  ret %d,%d\n", *nx, *ny);
+    Echo("  ret %d,%d\n", *nx, *ny);
     return 0;   
 }
 
@@ -688,16 +688,16 @@ OP_GDUMP(const char *pre, char *mid, ob *u)
     if(!u)
         return -1;
 
-    printf("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
+    Echo("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
 #if 0
-    printf("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+    Echo("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
         u->cx, u->cy, u->csx, u->csy, u->ex, u->ey,
         u->clx, u->cby, u->crx, u->cty);
 #endif
-    printf("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+    Echo("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
         u->cgx, u->cgy, u->cgsx, u->cgsy, u->gex, u->gey,
         u->cglx, u->cgby, u->cgrx, u->cgty);
-    printf("\n");
+    Echo("\n");
 
     return 0;
 }
@@ -708,16 +708,16 @@ OP_LDUMP(const char *pre, char *mid, ob *u)
     if(!u)
         return -1;
 
-    printf("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
-    printf("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+    Echo("%s: %s oid %d = = = = =\n", pre, mid, u->oid);
+    Echo("  L x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
         u->cx, u->cy, u->csx, u->csy, u->ex, u->ey,
         u->clx, u->cby, u->crx, u->cty);
 #if 0
-    printf("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
+    Echo("  G x,y %6d,%6d sx,sy %6d,%6d ex,ey %6d,%6d lbrt %6d,%6d,%6d,%6d\n",
         u->cgx, u->cgy, u->cgsx, u->cgsy, u->gex, u->gey,
         u->cglx, u->cgby, u->cgrx, u->cgty);
 #endif
-    printf("\n");
+    Echo("\n");
 
     return 0;
 }
@@ -752,10 +752,10 @@ putobj(ob *u, ns *xns, int *gdir)
 
 
 #if 1
-    printf("%s: oid %d\n", __func__, u->oid);
+    Echo("%s: oid %d\n", __func__, u->oid);
 #endif
 #if 1
-printf("\toid %d u b wd %d ht %d solved? %d\n",
+Echo("\toid %d u b wd %d ht %d solved? %d\n",
     u->oid, u->wd, u->ht, u->sizesolved);
 #endif
 
@@ -842,7 +842,7 @@ P;
     case CMD_PLINE:
     case CMD_SEP:     
             NO;
-printf("SEP oid %d dir %d\n", u->oid ,dir);
+Echo("SEP oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
 
@@ -861,7 +861,7 @@ printf("SEP oid %d dir %d\n", u->oid ,dir);
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
 
 #if 1
-printf("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
+Echo("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
 #endif
 
             u->clx = lx;
@@ -874,7 +874,7 @@ printf("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
             ht = ty - by;
 
 #if 1
-printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
+Echo("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
 #endif
 
             u->fx = fx;
@@ -892,7 +892,7 @@ printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
         break;
     default:
         if(ISATOM(u->type)) {
-            printf("WARNING: sorry the object(oid %d) has no size\n",
+            Echo("WARNING: sorry the object(oid %d) has no size\n",
                 u->oid);
         }
         break;
@@ -901,15 +901,15 @@ printf("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
 apply:
 
 #if 1
-printf("\t  2 u wd %d ht %d\n", u->wd, u->ht);
-printf("\t  2   wd %d ht %d\n", wd, ht);
+Echo("\t  2 u wd %d ht %d\n", u->wd, u->ht);
+Echo("\t  2   wd %d ht %d\n", wd, ht);
 #endif
     if(u->wd<0) u->wd = wd;
     if(u->ht<0) u->ht = ht;
 
     u->sizesolved++;
 #if 0
-printf("obj oid %d solved\n", u->oid);
+Echo("obj oid %d solved\n", u->oid);
 #endif
 
 #if 0
@@ -921,17 +921,17 @@ printf("obj oid %d solved\n", u->oid);
 #endif
 
 #if 1
-printf("\toid %d u a wd %d ht %d solved? %d\n",
+Echo("\toid %d u a wd %d ht %d solved? %d\n",
     u->oid, u->wd, u->ht, u->sizesolved);
 #endif
 
 #if 0
-    printf("%s: oid %d dir %d wxh %dx%d; %d %d %d %d\n",
+    Echo("%s: oid %d dir %d wxh %dx%d; %d %d %d %d\n",
         __func__, u->oid, dir, u->wd, u->ht,
         u->lx, u->by, u->rx, u->y);
 #endif
 #if 1
-    printf("%s: oid %d dir %d wxh %dx%d; xy %d,%d\n",
+    Echo("%s: oid %d dir %d wxh %dx%d; xy %d,%d\n",
         __func__, u->oid, dir, u->wd, u->ht,
         u->x, u->y);
 #endif
@@ -959,11 +959,11 @@ E;
     Echo("%s: oid %d\n", __func__, u->oid);
 
 #if 1
-    printf("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
+    Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, *fx, *fy, xns);
-    printf("    wd %d ht %d (%d %d %d %d)\n",
+    Echo("    wd %d ht %d (%d %d %d %d)\n",
             u->wd, u->ht, u->lx, u->by, u->rx, u->ty);
-    printf("    ox,oy %d,%d\n", u->ox, u->oy);
+    Echo("    ox,oy %d,%d\n", u->ox, u->oy);
 #endif
 
 #if 1
@@ -995,7 +995,7 @@ E;
     u->cty = u->cy + u->cty;
 #endif
 
-    printf("%s: oid %d (%d %d %d %d)\n",
+    Echo("%s: oid %d (%d %d %d %d)\n",
         __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
 
     u->cex = *x+*fx;
@@ -1009,12 +1009,12 @@ E;
 #endif
 
 #if 0
-    printf("%s: u %p oid %d x,y %d,%d sx,sy %d,%d ex,ey %d,%d\n",
+    Echo("%s: u %p oid %d x,y %d,%d sx,sy %d,%d ex,ey %d,%d\n",
             __func__, u, u->oid,
             u->cx, u->cy, u->csx, u->csy, u->cex, u->cey);
 #endif
 #if 1
-    printf("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, u->oid,
         u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
 #endif
@@ -1023,7 +1023,7 @@ E;
     OP_LDUMP(__func__, "a", u);
 #endif
 #if 1
-    printf("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
+    Echo("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, *fx, *fy, xns);
 #endif
 
@@ -1050,11 +1050,11 @@ fitobj(ob *u, int xxdir, int *x, int *y, ns *xns)
 Echo("%s: oid %d\n", __func__, u->oid);
 
 #if 1
-    printf("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
+    Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, xns);
-    printf("    wd %d ht %d (%d %d %d %d)\n",
+    Echo("    wd %d ht %d (%d %d %d %d)\n",
             u->wd, u->ht, u->lx, u->by, u->rx, u->ty);
-    printf("    ox,oy %d,%d\n", u->ox, u->oy);
+    Echo("    ox,oy %d,%d\n", u->ox, u->oy);
 #endif
 
 #if 1
@@ -1066,13 +1066,13 @@ Echo("%s: oid %d\n", __func__, u->oid);
     dir = (xxdir+360+180)%360-180;
 
 #if 0
-printf("xxdir %d dir %d\n", xxdir, dir);
+Echo("xxdir %d dir %d\n", xxdir, dir);
 #endif
 
 #if 0
-    printf("%s: oid %d dir %d wxh %dx%d x,y %d,%d\n",
+    Echo("%s: oid %d dir %d wxh %dx%d x,y %d,%d\n",
         __func__, u->oid, dir, u->wd, u->ht, *x, *y);
-    printf("%s: b oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: b oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, u->oid,
         u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
 #endif
@@ -1098,7 +1098,7 @@ printf("xxdir %d dir %d\n", xxdir, dir);
     th = th/rf;
 
 #if 0
-    printf("th %.3f (rad %.3f) <- %dx%d oid %d v.s. dir %d\n",
+    Echo("th %.3f (rad %.3f) <- %dx%d oid %d v.s. dir %d\n",
         th, th*rf, wd, ht, u->oid, dir);
 #endif
 
@@ -1106,7 +1106,7 @@ printf("xxdir %d dir %d\n", xxdir, dir);
     if((dir>th&&dir<180-th)|| (dir>-180+th&&dir<-th)) {
         f1 = 'H';
 #if 0
-        printf("%s: over,  fit to horizontal\n", __func__);
+        Echo("%s: over,  fit to horizontal\n", __func__);
 #endif
         qy = sin(dir*rf);
         q  = qy*qy;
@@ -1114,7 +1114,7 @@ printf("xxdir %d dir %d\n", xxdir, dir);
         if(q<QLIMIT) {
             f3 = '0';
 #if 0
-printf("qy %f q %f v.s. QLIMIT %f\n", qy, q, QLIMIT);
+Echo("qy %f q %f v.s. QLIMIT %f\n", qy, q, QLIMIT);
 #endif
             dx = 0;
         }
@@ -1138,7 +1138,7 @@ printf("qy %f q %f v.s. QLIMIT %f\n", qy, q, QLIMIT);
     else {
         f1 = 'V';
 #if 0
-        printf("%s: under, fit to vertical\n", __func__);
+        Echo("%s: under, fit to vertical\n", __func__);
 #endif
         qx = cos(dir*rf);
         q  = qx*qx;
@@ -1146,7 +1146,7 @@ printf("qy %f q %f v.s. QLIMIT %f\n", qy, q, QLIMIT);
         if(q<QLIMIT) {
             f3 = '0';
 #if 0
-printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
+Echo("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 #endif
             dy = 0;
         }
@@ -1166,10 +1166,10 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 
     }
 #if 0
-    printf("dx,dy %f,%f f %c\n", dx, dy, f);
+    Echo("dx,dy %f,%f f %c\n", dx, dy, f);
 #endif
 #if 0
-    printf("oid %-3d th %.3f dir %4d f %c%c%c q %.3f,%.3f q %.3f dx,dy %.3f,%.3f\n",
+    Echo("oid %-3d th %.3f dir %4d f %c%c%c q %.3f,%.3f q %.3f dx,dy %.3f,%.3f\n",
         u->oid, th, dir, f1, f2, f3, qx, qy, q, dx, dy);
 #endif
 
@@ -1197,22 +1197,22 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 
 
 #if 0
-    printf("  oldx,y %d,%d\n", oldx, oldy);
+    Echo("  oldx,y %d,%d\n", oldx, oldy);
 #endif
 #if 1
-    printf("%s: oid %d (%d %d %d %d)\n",
+    Echo("%s: oid %d (%d %d %d %d)\n",
         __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
-    printf("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, u->oid,
         u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
 #endif
 
 #define QQXY(vx,vy) \
     if(vx<-INT_MAX/2||vx>INT_MAX/2) { \
-        printf("ERROR oid %d ignore x %s:%d\n", u->oid, __FILE__, __LINE__); \
+        Echo("ERROR oid %d ignore x %s:%d\n", u->oid, __FILE__, __LINE__); \
     } \
     if(vy<-INT_MAX/2||vy>INT_MAX/2) { \
-        printf("ERROR oid %d ignore y %s:%d\n", u->oid, __FILE__, __LINE__); \
+        Echo("ERROR oid %d ignore y %s:%d\n", u->oid, __FILE__, __LINE__); \
     } 
 
     QQXY(u->cx,u->cy);
@@ -1224,7 +1224,7 @@ printf("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
     OP_LDUMP(__func__, "a", u);
 #endif
 #if 1
-    printf("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
+    Echo("%s: a %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
             __func__, u, u->oid, xxdir, *x, *y, xns);
 #endif
 
@@ -1258,12 +1258,12 @@ eval_dir(ob *u, int *xdir)
     if(u->type==CMD_LEFT)   { *xdir =   180; g++; }
 
 #if 0
-    printf("%s: oid %d type %d: g %d; dir %d -> %d\n",
+    Echo("%s: oid %d type %d: g %d; dir %d -> %d\n",
         __func__, u->oid, u->type, g, odir, *xdir);
 #endif
     if(g && _t_) {
 #if 0
-        printf("%s: oid %d type %d: g %d; dir %d -> %d\n",
+        Echo("%s: oid %d type %d: g %d; dir %d -> %d\n",
             __func__, u->oid, u->type, g, odir, *xdir);
 #endif
     }
@@ -1280,7 +1280,7 @@ bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     double c, d;
     double gx, gy;
 
-    printf("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
+    Echo("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
         __func__, x1, y1, x2, y2, cx, cy, cdir);
 
     r = -1;
@@ -1288,22 +1288,22 @@ bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     c = tan(cdir*rf);
     d = (double)cy - c * (double)cx;
 
-    printf("  c  %9.3f d  %9.3f\n", c, d);
+    Echo("  c  %9.3f d  %9.3f\n", c, d);
 
     gy = y1;
     gx = (y1-d)/c;
 
-    printf("  gx %9.3f gy %9.3f\n", gx, gy);
+    Echo("  gx %9.3f gy %9.3f\n", gx, gy);
 
     if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
        ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
-        printf("  bumped INSIDE\n");
+        Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
         r = 1;
     }
     else {
-        printf("  bumped outside\n");
+        Echo("  bumped outside\n");
         r = 0;
     }
 
@@ -1320,7 +1320,7 @@ bumpV(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     double c, d;
     double gx, gy;
 
-    printf("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
+    Echo("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
         __func__, x1, y1, x2, y2, cx, cy, cdir);
 
     r = -1;
@@ -1328,22 +1328,22 @@ bumpV(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     c = tan(cdir*rf);
     d = (double)cy - c * (double)cx;
 
-    printf("  c  %9.3f d  %9.3f\n", c, d);
+    Echo("  c  %9.3f d  %9.3f\n", c, d);
 
     gx = x1;
     gy = c*x1+d;
 
-    printf("  gx %9.3f gy %9.3f\n", gx, gy);
+    Echo("  gx %9.3f gy %9.3f\n", gx, gy);
 
     if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
        ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
-        printf("  bumped INSIDE\n");
+        Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
         r = 1;
     }
     else {
-        printf("  bumped outside\n");
+        Echo("  bumped outside\n");
         r = 0;
     }
 
@@ -1360,7 +1360,7 @@ bump(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     double c, d;
     double gx, gy;
 
-    printf("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
+    Echo("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
         __func__, x1, y1, x2, y2, cx, cy, cdir);
 
     r = -1;
@@ -1368,27 +1368,27 @@ bump(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     a = ((double)y2-(double)y1)/((double)x2-(double)x1);
     b = (double)y1 - a * (double)x1;
 
-    printf("  a  %9.3f b  %9.3f\n", a, b);
+    Echo("  a  %9.3f b  %9.3f\n", a, b);
 
     c = tan(cdir*rf);
     d = (double)cy - c * (double)cx;
 
-    printf("  c  %9.3f d  %9.3f\n", c, d);
+    Echo("  c  %9.3f d  %9.3f\n", c, d);
 
     gx = (d-b)/(a-c);
     gy = a*gx+b;
 
-    printf("  gx %9.3f gy %9.3f\n", gx, gy);
+    Echo("  gx %9.3f gy %9.3f\n", gx, gy);
 
     if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
        ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
-        printf("  bumped INSIDE\n");
+        Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
         r = 1;
     }
     else {
-        printf("  bumped outside\n");
+        Echo("  bumped outside\n");
         r = 0;
     }
 
@@ -1399,9 +1399,9 @@ int
 expand_paren(int bx, int by, int w, int h, int ox, int oy, ob* u)
 {
 
-printf("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
+Echo("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
         __func__, bx, by, w, h, ox, oy);
-printf("  vs oid %d cx,cy %d,%d w,h %d,%d noexpand? %d\n",
+Echo("  vs oid %d cx,cy %d,%d w,h %d,%d noexpand? %d\n",
         u->oid, u->cx, u->cy, u->cwd, u->cht, u->cnoexpand);
 
     if(u->cnoexpand) {
@@ -1423,14 +1423,14 @@ expand_sep(int bx, int by, int w, int h, int ox, int oy, ob* u)
 
 #define A   \
     if(ik) { \
-        if(c>=2) printf("ERROR too many bump point\n"); \
+        if(c>=2) Echo("ERROR too many bump point\n"); \
         mx[c] = qx-ox; my[c] = qy-oy; c++; \
     }
 
 
-printf("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
+Echo("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
         __func__, bx, by, w, h, ox, oy);
-printf("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
+Echo("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
 
     c = 0;
 
@@ -1454,13 +1454,13 @@ printf("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
             u->cx+ox, u->cy+oy, u->cob.sepcurdir+90, &qx, &qy);
     A;
 
-    printf("  c %d\n", c);
+    Echo("  c %d\n", c);
 
     u->cob.sepx1 = mx[0]; u->cob.sepy1 = my[0];
     u->cob.sepx2 = mx[1]; u->cob.sepy2 = my[1];
 
-    printf("  oid %-4d 0 mx,my %d,%d\n", u->oid, mx[0], my[0]);
-    printf("           1 mx,my %d,%d\n",         mx[1], my[1]);
+    Echo("  oid %-4d 0 mx,my %d,%d\n", u->oid, mx[0], my[0]);
+    Echo("           1 mx,my %d,%d\n",         mx[1], my[1]);
 
 #undef A
 
@@ -1505,14 +1505,14 @@ putchunk(ob *xch, int *x, int *y, ns *xns)
 P;
 #endif
 #if 0
-    printf("%s: oid %d x,y %d,%d\n", __func__, xch->oid, *x, *y);
-    printf("%s: b oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: oid %d x,y %d,%d\n", __func__, xch->oid, *x, *y);
+    Echo("%s: b oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, xch->oid,
         xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey, xch->ox, xch->coy);
 #endif
 
     if(xch->sizesolved) {
-        printf("oid %d already solved\n", xch->oid);
+        Echo("oid %d already solved\n", xch->oid);
         return 0;
     }
 
@@ -1561,10 +1561,10 @@ P;
                 int r;
                 int dx, dy;
 
-    printf("goto AT '%s'\n", u->cob.aat);
+    Echo("goto AT '%s'\n", u->cob.aat);
 
                 r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-    printf("  ns_find_objpos '%s' ret %d\n", u->cob.aat, r);
+    Echo("  ns_find_objpos '%s' ret %d\n", u->cob.aat, r);
                 if(r==0) {
                     nx = dx; ny = dy;
                 }
@@ -1577,7 +1577,7 @@ P;
             if(c>1) {
                 nx = lx;
                 ny = ly;
-printf("  oid %d back %d,%d\n", u->oid, nx, ny);
+Echo("  oid %d back %d,%d\n", u->oid, nx, ny);
                 continue;
             }
         }
@@ -1585,7 +1585,7 @@ printf("  oid %d back %d,%d\n", u->oid, nx, ny);
             if(c>1) {
                 nx = (lx+nx)/2;
                 ny = (ly+ny)/2;
-printf("  oid %d hback %d,%d\n", u->oid, nx, ny);
+Echo("  oid %d hback %d,%d\n", u->oid, nx, ny);
                 continue;
             }
         }
@@ -1594,7 +1594,7 @@ printf("  oid %d hback %d,%d\n", u->oid, nx, ny);
 
             fob = NULL;
 
-printf("u %p oid %d iarg1 %d\n", u, u->oid, u->cob.iarg1);
+Echo("u %p oid %d iarg1 %d\n", u, u->oid, u->cob.iarg1);
             if(u->cob.ato) {    
                     fob = ns_find_obj(curns, u->cob.ato);
             }
@@ -1605,7 +1605,7 @@ printf("u %p oid %d iarg1 %d\n", u, u->oid, u->cob.iarg1);
             }
 
             if(fob) {
-printf("fob %p\n", fob);
+Echo("fob %p\n", fob);
                 ik = takelastobjpos(fob, u->cob.iarg1, u->cob.keepdir,
                         &nx, &ny, &xch->cch.dir);
                 continue;
@@ -1614,18 +1614,18 @@ printf("fob %p\n", fob);
 
         if(u->type==CMD_SAVE) {
 #if 0
-printf("  oid %d b save %d,%d\n", u->oid, nx, ny);
-printf("  oid %d a save %d,%d\n", u->oid, bs.x, bs.y);
+Echo("  oid %d b save %d,%d\n", u->oid, nx, ny);
+Echo("  oid %d a save %d,%d\n", u->oid, bs.x, bs.y);
 #endif
             cha_copy(&bs, &xch->cch);
-printf("  oid %d save %d,%d\n", u->oid, bs.x, bs.y);
+Echo("  oid %d save %d,%d\n", u->oid, bs.x, bs.y);
 
             bsc++;
             continue;
         }
         if(u->type==CMD_RESTORE) {
             if(bsc<=0) {
-                printf("ERROR no saved attributes\n");
+                Echo("ERROR no saved attributes\n");
                 continue;
             }
             
@@ -1633,15 +1633,15 @@ printf("  oid %d save %d,%d\n", u->oid, bs.x, bs.y);
             nx = xch->cch.x;
             ny = xch->cch.y;
 
-printf("  oid %d restore to %d,%d\n", u->oid, nx, ny);
+Echo("  oid %d restore to %d,%d\n", u->oid, nx, ny);
             bsc--;
             continue;
         }
 
         if(u->type==CMD_PUSH) {
             chas_push(&regst, &xch->cch);
-printf("  oid %d push  %d,%d %d\n", u->oid, bs.x, bs.y, bs.dir);
-printf("  oid %d push  %d,%d %d\n", u->oid, 
+Echo("  oid %d push  %d,%d %d\n", u->oid, bs.x, bs.y, bs.dir);
+Echo("  oid %d push  %d,%d %d\n", u->oid, 
     regst.slot[regst.use-1].x,
     regst.slot[regst.use-1].y,
     regst.slot[regst.use-1].dir);
@@ -1657,7 +1657,7 @@ printf("  oid %d push  %d,%d %d\n", u->oid,
             nx = tmp.x;
             ny = tmp.y;
 
-printf("  oid %d pop   %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
+Echo("  oid %d pop   %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
             continue;
         }
         if(u->type==CMD_AGAIN) {
@@ -1669,7 +1669,7 @@ printf("  oid %d pop   %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
             nx = tmp.x;
             ny = tmp.y;
 
-printf("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
+Echo("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
             continue;
         }
 
@@ -1706,32 +1706,32 @@ printf("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
         }
 
 #if 0
-printf("  last pos %d,%d dir %d\n", lx, ly, ldir);
+Echo("  last pos %d,%d dir %d\n", lx, ly, ldir);
 #endif
 
         if(ISCHUNK(u->type)) {
 #if 0
-printf("chunk oid %d -> chunk oid %d start\n", xch->oid, u->oid);
+Echo("chunk oid %d -> chunk oid %d start\n", xch->oid, u->oid);
 #endif
             ik = putchunk(u, &nx, &ny, curns);
 #if 0
-printf("chunk oid %d -> chunk oid %d ; ik %d\n", xch->oid, u->oid, ik);
+Echo("chunk oid %d -> chunk oid %d ; ik %d\n", xch->oid, u->oid, ik);
 #endif
 
         }
         else {
 #if 0
-printf("chunk oid %d -> obj oid %d\n", xch->oid, u->oid);
+Echo("chunk oid %d -> obj oid %d\n", xch->oid, u->oid);
 #endif
             ik = putobj(u, curns, &xch->cch.dir);
 #if 1
-printf("chunk oid %d -> obj oid %d ; ik %d\n", xch->oid, u->oid, ik);
+Echo("chunk oid %d -> obj oid %d ; ik %d\n", xch->oid, u->oid, ik);
 #endif
 
         }
 
 #if 0
-printf("  fx,fy %d,%d dir %d; ik %d\n",
+Echo("  fx,fy %d,%d dir %d; ik %d\n",
     u->fx, u->fy, xch->cch.dir, ik);
 #endif
 
@@ -1753,10 +1753,10 @@ printf("  fx,fy %d,%d dir %d; ik %d\n",
             int r;
             int dx, dy;
 
-printf("found FROM '%s'\n", u->cob.afrom);
+Echo("found FROM '%s'\n", u->cob.afrom);
 
             r = ns_find_objpos(curns, u->cob.afrom, &dx, &dy);
-printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
+Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
                 adjrewind++;
@@ -1773,10 +1773,10 @@ printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
             int r;
             int dx, dy;
 
-printf("found TO '%s'\n", u->cob.ato);
+Echo("found TO '%s'\n", u->cob.ato);
 
             r = ns_find_objpos(curns, u->cob.ato, &qx, &qy);
-printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
+Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
             if(r==0) {
                 qx = dx; qy = dy;
                 hasqxy++;
@@ -1795,10 +1795,10 @@ printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
             int r;
             int dx, dy;
 
-printf("found AT '%s'\n", u->cob.aat);
+Echo("found AT '%s'\n", u->cob.aat);
 
             r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
+Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
                 adjrewind++;
@@ -1814,11 +1814,11 @@ printf("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
             int r;
             int dx, dy;
 
-printf("found WITH '%s'\n", u->cob.awith);
+Echo("found WITH '%s'\n", u->cob.awith);
 
             dx = nx; dy = ny;
             r = applywith(u, u->cob.awith, &dx, &dy);
-printf("  applywith '%s' ret %d; %d,%d\n", u->cob.awith, r, dx, dy);
+Echo("  applywith '%s' ret %d; %d,%d\n", u->cob.awith, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
                 adjrewind++;
@@ -1836,7 +1836,7 @@ printf("  applywith '%s' ret %d; %d,%d\n", u->cob.awith, r, dx, dy);
             dx = nx; dy = ny;
             r = rewindcenter(u, xch->cch.dir, &dx, &dy);
 
-printf("  rewindcenter dir %d ret %d; %d,%d\n", xch->cch.dir, r, dx, dy);
+Echo("  rewindcenter dir %d ret %d; %d,%d\n", xch->cch.dir, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
                 u->pst += 1000;
@@ -1865,7 +1865,7 @@ skip_at_with:
             hasfrom = find_from(u, &isx, &isy);
 
             if(hasfrom==1) {
-                printf("oid %d hasfrom %d\n", u->oid, hasfrom);
+                Echo("oid %d hasfrom %d\n", u->oid, hasfrom);
                 u->pst += 10000;
                 nx = isx;
                 ny = isy;
@@ -1881,7 +1881,7 @@ P;
             int gfx, gfy;
 
 #if 0
-printf("  pointjoint %d to lfx,lfy %d,%d ldir %d\n",
+Echo("  pointjoint %d to lfx,lfy %d,%d ldir %d\n",
     pointjoint, lfx, lfy, ldir);
 #endif
 
@@ -1904,7 +1904,7 @@ P;
     }
 
 #if 0
-printf("\tnx,ny = %d,%d\n", nx, ny);
+Echo("\tnx,ny = %d,%d\n", nx, ny);
 #endif
 
         if(uniqpoint) {
@@ -1921,7 +1921,7 @@ printf("\tnx,ny = %d,%d\n", nx, ny);
 #endif
 
 #if 0
-printf("  oid %d move %d,%d to %d,%d\n", u->oid, oldx, oldy, nx, ny);
+Echo("  oid %d move %d,%d to %d,%d\n", u->oid, oldx, oldy, nx, ny);
 #endif
     }
 
@@ -1931,14 +1931,14 @@ printf("  oid %d move %d,%d to %d,%d\n", u->oid, oldx, oldy, nx, ny);
 #endif
 
 #if 0
-    printf("%s: m oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: m oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, xch->oid,
         xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey, xch->ox, xch->coy);
 #endif
 
 #if 0
-printf("BB\n");
-printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
+Echo("BB\n");
+Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 #endif
 
     if(xch->cch.nch>0) {
@@ -1946,10 +1946,10 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 #if 0
         for(i=0;i<xch->cch.nch;i++) {
             u = (ob*)xch->cch.ch[i];
-            printf("%4d: oid %d: %5d %5d -> %5d %5d\n",
+            Echo("%4d: oid %d: %5d %5d -> %5d %5d\n",
                 i, u->oid, u->sx, u->sy, u->ex, u->ey);
         }
-            printf("here: oid %d: %5d %5d -> %5d %5d\n",
+            Echo("here: oid %d: %5d %5d -> %5d %5d\n",
                 xch->oid, xch->sx, xch->sy, xch->ex, xch->ey);
 #endif
 
@@ -1959,15 +1959,15 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         miny = INT_MAX;
 
 #if 1
-        printf("\t           : oid %d\n", xch->oid);
-        printf("\t # : oid: i:     x     y    ox    oy :    lx    by    rx    ty\n");
+        Echo("\t           : oid %d\n", xch->oid);
+        Echo("\t # : oid: i:     x     y    ox    oy :    lx    by    rx    ty\n");
 
 #endif
         v = 0;
         for(i=0;i<xch->cch.nch;i++) {
             u = (ob*)xch->cch.ch[i];
 #if 1
-            printf("\t%3d: %3d: %d: %5d %5d %5d %5d : %5d %5d %5d %5d\n",
+            Echo("\t%3d: %3d: %d: %5d %5d %5d %5d : %5d %5d %5d %5d\n",
                 i, u->oid, u->ignore, 
                 u->cx, u->cy,
                 u->cox, u->coy,
@@ -1975,7 +1975,7 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 #endif
             if(u->ignore) {
 #if 0
-    printf("oid %d ignored\n", u->oid);
+    Echo("oid %d ignored\n", u->oid);
 #endif
                 continue;
             }
@@ -1991,7 +1991,7 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 
             if(u->type==CMD_LINE||u->type==CMD_CLINE) {
             }
-                printf("OUT oid %-3d (%6d %6d %6d %6d) %6d x %-6d ; %6d x %-6d\n",
+                Echo("OUT oid %-3d (%6d %6d %6d %6d) %6d x %-6d ; %6d x %-6d\n",
                     u->oid,
                     u->clx, u->cby, u->crx, u->cty,
                     u->crx-u->clx, u->cty-u->cby,
@@ -2011,7 +2011,7 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         }
 
 #if 1
-        printf(
+        Echo(
         "\tsemi       : %5s %5s %5s %5s : %5d %5d %5d %5d (%d/%d)\n",
             "", "", 
             "", "",
@@ -2045,14 +2045,14 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     xch->oy = -zy;
 
 #if 1
-    printf("%s: n oid %d nx,ny %d,%d\n", __func__, xch->oid, nx, ny);
-    printf("  lx,ly %d,%d\n", lx, ly);
+    Echo("%s: n oid %d nx,ny %d,%d\n", __func__, xch->oid, nx, ny);
+    Echo("  lx,ly %d,%d\n", lx, ly);
 
-    printf("  x %d..%d\n", minx, maxx);
-    printf("  y %d..%d\n", miny, maxy);
-    printf("  zx,zy %d,%d\n", zx, zy);
-    printf("  wxh %dx%d\n", xch->wd, xch->ht);
-    printf("  oxy %d,%d\n", xch->ox, xch->oy);
+    Echo("  x %d..%d\n", minx, maxx);
+    Echo("  y %d..%d\n", miny, maxy);
+    Echo("  zx,zy %d,%d\n", zx, zy);
+    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
+    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
 #endif
 
     xch->wd = (maxx - minx) + xch->cgimargin*2;
@@ -2068,19 +2068,19 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         xch->cty = maxy+xch->cgimargin;
 
 #if 1
-    printf("  gimargin %d\n", xch->cgimargin);
-    printf("  x %d..%d\n", minx, maxx);
-    printf("  y %d..%d\n", miny, maxy);
-    printf("  zx,zy %d,%d\n", zx, zy);
-    printf("  wxh %dx%d\n", xch->wd, xch->ht);
-    printf("  oxy %d,%d\n", xch->ox, xch->oy);
+    Echo("  gimargin %d\n", xch->cgimargin);
+    Echo("  x %d..%d\n", minx, maxx);
+    Echo("  y %d..%d\n", miny, maxy);
+    Echo("  zx,zy %d,%d\n", zx, zy);
+    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
+    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
 #endif
 
 
 #if 1
-    printf("  new ox,oy %d,%d\n", xch->ox, xch->oy);
+    Echo("  new ox,oy %d,%d\n", xch->ox, xch->oy);
 
-    printf("\ttotal %3d  : %5d %5d %5d %5d : %5d %5d %5d %5d (%d/%d) w,h %d,%d\n",
+    Echo("\ttotal %3d  : %5d %5d %5d %5d : %5d %5d %5d %5d (%d/%d) w,h %d,%d\n",
         xch->oid,
         xch->x, xch->y, xch->ox, xch->oy,
         xch->lx, xch->by, xch->rx, xch->ty, v, c, xch->wd, xch->ht);
@@ -2090,7 +2090,7 @@ printf("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     xch->sizesolved++;
 
 #if 0
-printf("chunk oid %d solved\n", xch->oid);
+Echo("chunk oid %d solved\n", xch->oid);
 
 #endif
 
@@ -2109,7 +2109,7 @@ printf("chunk oid %d solved\n", xch->oid);
         }
         switch(u->type) {
         case CMD_SEP:
-            printf("SEP oid %d %3d: oid %d xy %d,%d curdir %d\n",
+            Echo("SEP oid %d %3d: oid %d xy %d,%d curdir %d\n",
                 xch->oid, i, u->oid, u->cx, u->cy, u->cob.sepcurdir);
 
             ik = expand_sep(xch->cx, xch->cy, xch->cwd, xch->cht,
@@ -2120,7 +2120,7 @@ printf("chunk oid %d solved\n", xch->oid);
         case CMD_RBRACKET:
         case CMD_LBRACE:
         case CMD_RBRACE:
-            printf("PAREN oid %d %3d: oid %d xy %d,%d curdir %d\n",
+            Echo("PAREN oid %d %3d: oid %d xy %d,%d curdir %d\n",
                 xch->oid, i, u->oid, u->cx, u->cy, u->cob.sepcurdir);
 
             ik = expand_paren(xch->cx, xch->cy, xch->cwd, xch->cht,
@@ -2132,16 +2132,16 @@ printf("chunk oid %d solved\n", xch->oid);
 out:
 
 #if 1
-    printf("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+    Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, xch->oid,
         xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey,
             xch->ox, xch->coy);
 #endif
 #if 1
-    printf("%s: oid %d b bb g %7d %7d %7d %7d\n",
+    Echo("%s: oid %d b bb g %7d %7d %7d %7d\n",
             __func__, xch->oid,
             xch->glx, xch->gby, xch->grx, xch->gty);
-    printf("             bb _ %7d %7d %7d %7d\n",
+    Echo("             bb _ %7d %7d %7d %7d\n",
             xch->lx, xch->by, xch->rx, xch->ty);
 #endif
 

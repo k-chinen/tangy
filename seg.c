@@ -19,8 +19,8 @@ try_regsegclose(varray_t *segar)
     seg *e;
 
 #if 0
-    printf("%s:\n", __func__);
-    printf("b use %d\n", segar->use);
+    Echo("%s:\n", __func__);
+    Echo("b use %d\n", segar->use);
 #endif
 
     e = seg_new();
@@ -33,8 +33,8 @@ try_regsegclose(varray_t *segar)
 
 out:
 #if 0
-    printf("ik %d\n", ik);
-    printf("a use %d\n", segar->use);
+    Echo("ik %d\n", ik);
+    Echo("a use %d\n", segar->use);
 #endif
 
     return 0;
@@ -46,8 +46,8 @@ try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
     seg *e;
 
 #if 0
-    printf("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
-    printf("b use %d\n", segar->use);
+    Echo("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
+    Echo("b use %d\n", segar->use);
 #endif
 
     if(segar->use>0) {
@@ -78,8 +78,8 @@ try_regsegmove(varray_t *segar, int x1, int y1)
     seg *e;
 
 #if 0
-    printf("%s: x1,y1 %d,%d\n", __func__, x1, y1);
-    printf("b use %d\n", segar->use);
+    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    Echo("b use %d\n", segar->use);
 #endif
 
     e = seg_new();
@@ -94,8 +94,8 @@ try_regsegmove(varray_t *segar, int x1, int y1)
 
 out:
 #if 0
-    printf("ik %d\n", ik);
-    printf("a use %d\n", segar->use);
+    Echo("ik %d\n", ik);
+    Echo("a use %d\n", segar->use);
 #endif
 
     return 0;
@@ -106,7 +106,7 @@ try_regsegrmove(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
-    printf("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
 
     e = seg_new();
     if(!e) {
@@ -128,7 +128,7 @@ try_regsegrline(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
-    printf("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
 
     e = seg_new();
     if(!e) {
@@ -150,7 +150,7 @@ try_regsegforward(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
-    printf("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
 
     e = seg_new();
     if(!e) {
@@ -174,7 +174,7 @@ try_regsegarc(varray_t *segar, int rad, int ang)
 {
     seg *e;
 
-    printf("%s: rad,ang %d,%d\n", __func__, rad, ang);
+    Echo("%s: rad,ang %d,%d\n", __func__, rad, ang);
 
     e = seg_new();
     if(!e) {
