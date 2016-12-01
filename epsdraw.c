@@ -864,6 +864,26 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
 
         break;
 
+    case AH_WNORMAL:
+        r = def_arrowsize;
+
+        dx =  (int)(r*cos((xdir+180+def_arrowangle/2)*rf));
+        dy =  (int)(r*sin((xdir+180+def_arrowangle/2)*rf));
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "%d %d moveto\n",   x,  y);
+        fprintf(fp, "%d %d rlineto\n", dx, dy);
+
+        dx =  (int)(r*cos((xdir+180-def_arrowangle/2)*rf));
+        dy =  (int)(r*sin((xdir+180-def_arrowangle/2)*rf));
+#if 0
+        fprintf(fp, "%d %d moveto\n",   x,  y);
+        fprintf(fp, "%d %d rlineto\n", dx, dy);
+#endif
+        fprintf(fp, "%d %d lineto\n", x+dx, y+dy);
+        fprintf(fp, "closepath stroke\n");
+
+        break;
+
     case AH_NORMAL:
     default:
         r = def_arrowsize;
@@ -2087,6 +2107,7 @@ epsdraw_segwline(FILE *fp,
 {
     int r;
 
+#if 0
     switch(ltype) {
     case LT_DOTTED:
     case LT_DASHED:
@@ -2126,6 +2147,9 @@ epsdraw_segwline(FILE *fp,
 
         break;
     }
+#endif
+        r = epsdraw_segwline_orig(fp, wlt, ltype, lt, lc, x1, y1, x2, y2);
+
     return r;
 }
 
@@ -2244,6 +2268,8 @@ no_forehead:
 out:
     return 0;
 }
+
+
 
 int
 epsdraw_Xsegwlinearrow(FILE *fp,
@@ -2399,6 +2425,7 @@ out:
 }
 
 
+
 int
 epsdraw_segwlinearrow(FILE *fp,
     int ydir, int xox, int xoy, 
@@ -2530,6 +2557,7 @@ out:
 
 
 
+#if 0
 int
 epsdraw_Xlinearrow(FILE *fp,
     int ydir, int xox, int xoy, 
@@ -2685,10 +2713,60 @@ no_forehead:
 out:
     return 0;
 }
+#endif
+
+static
+int
+fitarc(FILE *fp, int x1, int y1, int x2, int y2, int ph)
+{
+    double na;
+    double ra;
+    double mx, my;
+    double d, r;
+    double px, py;
+
+    mx = ((double)x2+x1)/2;
+    my = ((double)y2+y1)/2;
+
+    d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    r = d/2;
+
+    na = atan2((y2-y1), (x2-x1))/rf;
+    if(ph==0) {
+        ra = na + 90;
+    }
+    if(ph==1) {
+        ra = na - 90;
+    }
+
+    px = mx + r*cos(ra*rf);
+    py = my + r*sin(ra*rf);
+
+#if 0
+    fprintf(fp, "gsave %d %d moveto %d %d lineto stroke grestore %% fitarc\n",
+        x1, y1, x2, y2);
+
+    fprintf(fp, "gsave %f %f moveto %f %f lineto stroke grestore %% fitarc\n",
+        mx, my, px, py);
+#endif
+
+    if(ph==0) {
+        fprintf(fp, "%f %f %f %f %f arcn %% fitarc\n",
+            mx, my, r, na - 180, na);
+    }
+    if(ph==1) {
+        fprintf(fp, "%f %f %f %f %f arc  %% fitarc\n",
+            mx, my, r, na - 180, na);
+    }
+
+    return 0;
+}
+
 
 #define ADIR_ARC    (1)
 #define ADIR_ARCN   (2)
 
+#if 0
 int
 epsdraw_segarcXSEP(FILE *fp, 
     int ltype, int lt, int lc,
@@ -3050,53 +3128,6 @@ epsdraw_segarcXTICK(FILE *fp,
     return r;
 }
 
-static
-int
-fitarc(FILE *fp, int x1, int y1, int x2, int y2, int ph)
-{
-    double na;
-    double ra;
-    double mx, my;
-    double d, r;
-    double px, py;
-
-    mx = ((double)x2+x1)/2;
-    my = ((double)y2+y1)/2;
-
-    d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-    r = d/2;
-
-    na = atan2((y2-y1), (x2-x1))/rf;
-    if(ph==0) {
-        ra = na + 90;
-    }
-    if(ph==1) {
-        ra = na - 90;
-    }
-
-    px = mx + r*cos(ra*rf);
-    py = my + r*sin(ra*rf);
-
-#if 0
-    fprintf(fp, "gsave %d %d moveto %d %d lineto stroke grestore %% fitarc\n",
-        x1, y1, x2, y2);
-
-    fprintf(fp, "gsave %f %f moveto %f %f lineto stroke grestore %% fitarc\n",
-        mx, my, px, py);
-#endif
-
-    if(ph==0) {
-        fprintf(fp, "%f %f %f %f %f arcn %% fitarc\n",
-            mx, my, r, na - 180, na);
-    }
-    if(ph==1) {
-        fprintf(fp, "%f %f %f %f %f arc  %% fitarc\n",
-            mx, my, r, na - 180, na);
-    }
-
-    return 0;
-}
-
 int
 epsdraw_segarcXTICK2(FILE *fp, 
     int ltype, int lt, int lc,
@@ -3341,6 +3372,7 @@ epsdraw_segarcXTICK2(FILE *fp,
 
     return r;
 }
+#endif
 
 
 static int __z = 0;
@@ -4645,7 +4677,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     double ax, ay;
     double mx, my;
 
-#if 0
+#if 1
     fprintf(fp, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
 #endif
 
@@ -4808,7 +4840,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         *cay = y;
 #endif
 
-#if 1
+#if 0
         px = x + ww*cos((a+45)*rf);
         py = y + ww*sin((a+45)*rf);
         qx = x + ww*cos((a-45)*rf);
@@ -4835,6 +4867,42 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         fprintf(fp, "  %f %f lineto\n", ax, ay);
         *cax = ax;
         *cay = ay;
+#endif
+
+#if 1
+        if(c==0) {
+            fprintf(fp, "  %f %f moveto\n", x, y);
+        }
+        else {
+            mx = (lax+x)/2;
+            my = (lay+y)/2;
+
+            px = mx + ww*cos((a+90)*rf);
+            py = my + ww*sin((a+90)*rf);
+            qx = mx + ww*cos((a-90)*rf);
+            qy = my + ww*sin((a-90)*rf);
+
+#if 0
+            MX(0, (int)mx, (int)my);
+            MC(2, (int)px, (int)py);
+            MQ(4, (int)qx, (int)qy);
+#endif
+
+            if(c%2==0) {
+                ax = px; ay = py;
+            }
+            else 
+            if(c%2==1) {
+                ax = qx; ay = qy;
+            }
+#if 0
+            fprintf(fp, "  %f %f moveto %f %f lineto stroke\n", lax, lay, ax, ay);
+#endif
+            fprintf(fp, "  %f %f lineto\n", ax, ay);
+        }
+    
+        *cax = x;
+        *cay = y;
 #endif
 
         break;
@@ -4905,6 +4973,7 @@ __line_deco2(FILE *fp,
     double vpitch;
     double v, vi;
     double px, py;
+    double qx, qy;
     double ttrip;
 
     double us, ue;
@@ -5072,6 +5141,11 @@ P;
         if(i>=xu->cob.segar->use-1) {
             isfseg = 1;
         }
+#if 0
+        if(xu->cob.arrowevery) {
+        }
+            isfseg = 1;
+#endif
 
         s = (seg*)xu->cob.segar->slot[i];
         if(!s) {
@@ -5520,18 +5594,29 @@ coord_done:
 
 #if 0
             {
-                int g=objunit/8;
+                int g=objunit/4;
+                int lx, ly;
+
                 u=ui+us;
                 lx = x1 + (x2-x1) * u/etrip;
                 ly = y1 + (y2-y1) * u/etrip;
-                MC(4, (int)lx,   (int)ly+g);
-                MC(4, (int)lx+g, (int)ly);
+                MCF(4, (int)lx,   (int)ly+g);
+                MCF(4, (int)lx+g, (int)ly);
                 u=etrip-ue;
                 lx = (double)x1 + ((double)x2-(double)x1) * u/etrip;
                 ly = (double)y1 + ((double)y2-(double)y1) * u/etrip;
-                MQ(1, (int)lx,   (int)ly+g);
-                MQ(1, (int)lx+g, (int)ly);
+                MQF(1, (int)lx,   (int)ly+g);
+                MQF(1, (int)lx+g, (int)ly);
             }
+#endif
+
+#if 0
+                px = x1;
+                py = y1;
+                qx = x1 + (x2-x1) * (ui+us)/etrip;
+                qy = y1 + (y2-y1) * (ui+us)/etrip;
+                fprintf(fp, "%f %f moveto %f %f lineto %% pre-line\n",
+                    px, py, qx, qy);
 #endif
 
             for(u=ui+us;u<=etrip-ue;u+=pitch) {
@@ -5556,27 +5641,39 @@ coord_done:
                 count++;
             }
 
+#define FIN_IGN     (-1)
+#define FIN_NONE    (0)
+#define FIN_LINE    (1)
+#define FIN_SYM     (2)
+#define FIN_ELINE   (3)
+
             if(isfseg>0) {
-                fsegtype = 0;
+                fsegtype = FIN_NONE;
                 switch(gsym) {
                 case LT_MOUNTAIN:
                 case LT_TRIANGLE:
                 case LT_CIRCLE:
-                    fsegtype = -1;
+                    fsegtype = FIN_IGN;
+                    break;
+                case LT_WAVED:
+                    fsegtype = FIN_LINE;
+                    break;
+                case LT_ZIGZAG:
+                    fsegtype = FIN_ELINE;
                     break;
                 case LT_DOTTED:
                 case LT_DASHED:
 #if 0
-                    fsegtype = 1;
+                    fsegtype = FIN_LINE;
 #endif
                     break;
                 case LT_DBL:
                 case LT_DBR:
-                    fsegtype = 2;
+                    fsegtype = FIN_SYM;
                     break;
                 default:
 #if 0
-                    fsegtype = 2;
+                    fsegtype = FIN_SYM;
 #endif
                     break;
                 }
@@ -5585,11 +5682,17 @@ coord_done:
                 px = x1 + (x2-x1) * u/etrip;
                 py = y1 + (y2-y1) * u/etrip;
 
-                if(fsegtype==1) {
-                    fprintf(fp, "%f %f lineto %% final-seg\n", px, py);
-                }
-                if(fsegtype==2) {
+                switch(fsegtype) {
+                case FIN_LINE:
+                    fprintf(fp, "%f %f lineto %% line-to-end\n", px, py);
+                    break;
+                case FIN_ELINE:
+                    fprintf(fp, "%f %f lineto %% final-seg\n", cx, cy);
+                    fprintf(fp, "%f %f lineto %% line-to-end\n", px, py);
+                    break;
+                case FIN_SYM:
                     symdraw(fp, px, py, v, pitch, count, gsym, lx, ly, &cx, &cy);
+                    break;
                 }
             }
 
@@ -10997,11 +11100,13 @@ PP;
             MC(3, gox+xch->x+u->ox+u->csx, goy+xch->y+u->oy+u->csy);
 #endif
 
+#if 0
             epsdraw_Xseglinearrow(fp, 0, 0,
                 u->gsx, u->gsy, u->gex, u->gey,
                 LT_MOUNTAIN, (int)((double)objunit*0.01),
                 6, /*u->cob.outlinecolor, */
                 AR_NONE, AH_WIRE, AH_WIRE);
+#endif
 
             MC(0, u->gx, u->gy);
             {

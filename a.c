@@ -24,6 +24,7 @@
 double rf = M_PI/180.0;
 
 int _t_ = 0;
+#define ISTRACE (_t_>0)
 #define P   if(_t_)printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout);
 #define E   printf("%s:%d;%s probably ERROR\n", __FILE__, __LINE__, __func__); fflush(stdout);
 
@@ -248,8 +249,10 @@ apair_t linetype_ial[] = {
     {"circle",              LT_CIRCLE},
     {"triangle",            LT_TRIANGLE},
     {"mountain",            LT_MOUNTAIN},
+#if 0
     {"cutted",              LT_CUTTED},
     {"arrowcentered",       LT_ARROWCENTERED},
+#endif
     {NULL,                  -1},
 };
 
@@ -294,6 +297,7 @@ apair_t hatchtype_ial[] = {
 #define AH_WIRE             (2)
 #define AH_ARROW3           (3)
 #define AH_ARROW4           (4)
+#define AH_WNORMAL          (7)
 #define AH_DOUBLE           (9)
 #define AH_DIAMOND          (11)
 #define AH_CIRCLE           (12)
@@ -308,6 +312,7 @@ apair_t arrowhead_ial[] = {
     {"wire",                AH_WIRE},
     {"arrow3",              AH_ARROW3},
     {"arrow4",              AH_ARROW4},
+    {"wnormal",             AH_WNORMAL},
     {"double",              AH_DOUBLE},
     {"diamond",             AH_DIAMOND},
     {"circle",              AH_CIRCLE},
@@ -468,6 +473,8 @@ apair_t ls_ial[] = {
 #define OA_MARKNODE         (713)
 #define OA_MARKPITCH        (714)
 
+#define OA_LANENUM          (801)
+
 #define OA_TEXTHEIGHTFACTOR         (901)
 #define OA_TEXTDECENTFACTOR         (902)
 #define OA_TEXTBGMARGINFACTOR       (903)
@@ -558,6 +565,8 @@ apair_t objattr_ial[] = {
     {"markpath",            OA_MARKPATH},
     {"marknode",            OA_MARKNODE},
     {"markpitch",           OA_MARKPITCH},
+    
+    {"lanenum",             OA_LANENUM},
 
     {"textheightfactor",    OA_TEXTHEIGHTFACTOR},
     {"textdecentfactor",    OA_TEXTDECENTFACTOR},
@@ -759,6 +768,10 @@ struct obattr {
     int    markpath;
     int    marknode;
     int    markpitch;
+
+#if 1
+    int    lanenum;
+#endif
 }; 
 
 typedef struct _ch {
@@ -770,6 +783,9 @@ typedef struct _ch {
     int  thick;
     int  scale;
     int  x, y;
+#if 0
+    int  lanenum;
+#endif
 
     /* members */
     struct _ch *root;
@@ -1780,7 +1796,7 @@ P;
         printf("ERROR not equal stored %p xob %p\n", stored, xob);
     }
     else {
-        printf("\tequal stored %p xob %p\n", stored, xob);
+        Echo("\tequal stored %p xob %p\n", stored, xob);
     }
 
     return 0;
@@ -2483,10 +2499,14 @@ main(int argc, char *argv[])
     recalcsizeparam();
 
     ik = parse(stdin, ch0, ns0);
+    if(ISTRACE) {
+        ob_cndump(ch0);
+    }
+
 #if 0
-P;
-    ob_cndump(ch0);
+Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cch.lanenum);
 #endif
+Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cob.lanenum);
 
     ik = fkchk(ch0, ns0);
 P;
@@ -2495,37 +2515,28 @@ P;
     y = 0;
 P;
     ik = put(ch0, &x, &y, ns0);
-#if 0
-P;
-    ob_gdump(ch0);
-#endif
+    if(ISTRACE) {
+        ob_gdump(ch0);
+    }
 
 P;
     ik = linkchk(ch0, ns0);
-#if 0
-P;
-    ob_gdump(ch0);
-#endif
+    if(ISTRACE) {
+        ob_gdump(ch0);
+    }
 
 P;
     finalize(ch0, 0, 0, ns0);
 
-#if 0
-P;
-
-    ob_adump(ch0);
-    ob_bgdump(ch0);
-    ob_bldump(ch0);
-#endif
+    if(ISTRACE) {
+        ob_adump(ch0);
+        ob_bgdump(ch0);
+        ob_bldump(ch0);
+    }
 
 #if 0
     picdraw(ch0, 0, 0, ns0);
     fflush(stdout);
-#endif
-    
-
-#if 0
-    _t_ = 1;
 #endif
 
 #if 0
