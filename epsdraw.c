@@ -34,6 +34,12 @@ int debug_clip = 0;
  *      MTF triangle fill
  */
 
+#define ML(c,x1,y1,x2,y2) \
+    fprintf(fp, "    %% ML %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d moveto %d %d lineto stroke grestore\n", x1, y1, x2, y2); 
+
 #define MX(c,x,y) \
     fprintf(fp, "    %% MX %d\n", __LINE__); \
     fprintf(fp, "      gsave"); changecolor(fp, c); \
@@ -5179,7 +5185,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     break;
 
     case LT_ZIGZAG:
-#if 1
+#if 0
         mx = (lax+x)/2;
         my = (lay+y)/2;
 
@@ -5215,9 +5221,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         *cay = y;
 #endif
 
-
-
-#if 0
+#if 1
         px = x + ww*cos((a+45)*rf);
         py = y + ww*sin((a+45)*rf);
         qx = x + ww*cos((a-45)*rf);
@@ -5881,31 +5885,49 @@ coord_done:
                 ui = 0.0;
             }
             else {
+#if 0
+                ui = pitch  - (trip - (int)(trip/pitch)*pitch);
+#endif
                 ui = pitch  - (trip - (int)(trip/pitch)*pitch);
             }
 
-			us = 0;
-			if(actbh) {
-				us += def_arrowsize;
-			}
-			vs = 0;
-			if(actfh) {
-				ue += def_arrowsize;
-			}
+            us = 0;
+            if(actbh) {
+                us += def_arrowsize;
+            }
+            ue = 0;
+            if(actfh) {
+                ue += def_arrowsize;
+            }
 
 
+#if 0
             fprintf(fp, "%% i %d count %d: ui %f\n", i, count, ui);
+#endif
+            fprintf(fp, "%% i %d count %d: ui %f us %f ue %f\n",
+                i, count, ui, us, ue);
 
             ttrip = trip;
                 fprintf(fp,
                 "%% i %3d count %3d: ttrip %8.2f u %8.2f x1,y1 %8.2f %8.2f line*\n",
                     i, count, ttrip, -1.0, (double)x1, (double)y1);
 
-			{
-				u=ui+us;
+#if 0
+            {
+                int g=objunit/8;
+                u=ui+us;
                 lx = x1 + (x2-x1) * u/etrip;
                 ly = y1 + (y2-y1) * u/etrip;
-			}
+                MC(4, (int)lx,   (int)ly+g);
+                MC(4, (int)lx+g, (int)ly);
+                u=etrip-ue;
+                lx = (double)x1 + ((double)x2-(double)x1) * u/etrip;
+                ly = (double)y1 + ((double)y2-(double)y1) * u/etrip;
+                MQ(1, (int)lx,   (int)ly+g);
+                MQ(1, (int)lx+g, (int)ly);
+            }
+#endif
+
             for(u=ui+us;u<=etrip-ue;u+=pitch) {
                 px = x1 + (x2-x1) * u/etrip;
                 py = y1 + (y2-y1) * u/etrip;
@@ -6096,6 +6118,7 @@ Echo("%s: enter\n", __func__);
 fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
 fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
 fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
+        changethick(fp, xu->cob.hatchthick);
         fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
         epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
 
@@ -9345,6 +9368,25 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     }
     else {
         fprintf(fp, "%% skip clip+fill\n");
+    }
+
+    if(xu->cob.deco) {
+        fprintf(fp, " %% deco |%s|\n", xu->cob.deco);
+#if 0
+            _box_path(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
+#endif
+        fprintf(fp, " gsave %% for clip+fill\n");
+        changecolor(fp, xu->cob.fillcolor);
+        changethick(fp, xu->cob.hatchthick);
+        ik = _line_path(fp, 0, 0, 0, xu, xns);
+        fprintf(fp, "  closepath\n");
+        fprintf(fp, "  clip\n");
+        epsdraw_deco(fp, xu->wd, xu->ht,
+            xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
+        fprintf(fp, " grestore\n");
+    }
+    else {
+        fprintf(fp, "%% no-deco\n");
     }
 
     if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
