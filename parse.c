@@ -755,12 +755,20 @@ Warn("skip sub-command '%s' argument\n", name);
         rob->cob.keepdir = 1;
         uc++;
     }
+    else if(oak==OA_MARKPITCH) {
+        rob->cob.markpitch = 1;
+        uc++;
+    }
     else if(oak==OA_MARKNODE) {
         rob->cob.marknode = 1;
         uc++;
     }
     else if(oak==OA_MARKBB) {
         rob->cob.markbb = 1;
+        uc++;
+    }
+    else if(oak==OA_MARKPATH) {
+        rob->cob.markpath = 1;
         uc++;
     }
     else if(oak==OA_ARROWEVERY) {

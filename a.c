@@ -463,8 +463,10 @@ apair_t ls_ial[] = {
 #define OA_KEEPDIR          (701)
 #define OA_NOEXPAND         (703)
 
-#define OA_MARKNODE         (710)
 #define OA_MARKBB           (711)
+#define OA_MARKPATH         (712)
+#define OA_MARKNODE         (713)
+#define OA_MARKPITCH        (714)
 
 #define OA_TEXTHEIGHTFACTOR         (901)
 #define OA_TEXTDECENTFACTOR         (902)
@@ -551,8 +553,11 @@ apair_t objattr_ial[] = {
 
     {"keepdir",             OA_KEEPDIR},
     {"noexpand",            OA_NOEXPAND},
-    {"marknode",            OA_MARKNODE},
+
     {"markbb",              OA_MARKBB},
+    {"markpath",            OA_MARKPATH},
+    {"marknode",            OA_MARKNODE},
+    {"markpitch",           OA_MARKPITCH},
 
     {"textheightfactor",    OA_TEXTHEIGHTFACTOR},
     {"textdecentfactor",    OA_TEXTDECENTFACTOR},
@@ -750,8 +755,10 @@ struct obattr {
     int    keepdir;
     int    noexpand;
 
-    int    marknode;
     int    markbb;
+    int    markpath;
+    int    marknode;
+    int    markpitch;
 }; 
 
 typedef struct _ch {
