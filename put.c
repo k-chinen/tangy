@@ -1541,9 +1541,11 @@ P;
     int tdir;
     int gap;
     int gw, gh;
+    int maxf;
 
     maxw = -1;
     maxh = -1;
+    maxf = -1;
 
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
@@ -1564,10 +1566,10 @@ P;
         fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
 #endif
 
+    gap = objunit;
 #if 0
-    gap = objunit/2;
-#endif
     gap = 0;
+#endif
     gw = maxw+gap;
     gh = maxh+gap;
     
@@ -1579,18 +1581,38 @@ P;
         gf = gw*f;
         gl = gh*l;
         
-        u->cx = gf;
-        u->cy = gl;
-        u->csx = u->cx - gw/2;
+        u->cx = gf+gw/2;
+        u->cy = gl+gh/2;
+
+        u->csx = u->cx - maxw/2;
         u->csy = u->cy;
-        u->cex = u->cx + gw/2;
+        u->cex = u->cx + maxw/2;
         u->cey = u->cy;
+        u->clx = u->cx - maxw/2;
+        u->crx = u->cx + maxw/2;
+        u->cby = u->cy - maxh/2;
+        u->cty = u->cy + maxh/2;
+
+        if(f>maxf) maxf = f;
+
         c++;
     }
 
-    xch->wd = (xch->cch.nch/xch->cob.lanenum+1)*gw;
-    xch->ht = (xch->cob.lanenum+1)*gh;
-    
+    xch->wd = (maxf+1)*gw;
+    xch->ht = (xch->cob.lanenum)*gh;
+    xch->cx = xch->wd/2;
+    xch->cy = xch->ht/2;
+    xch->csx = 0;
+    xch->csy = xch->ht/2;
+    xch->cex = xch->wd;
+    xch->cey = xch->ht/2;
+    xch->clx = 0;
+    xch->crx = xch->wd;
+    xch->cby = 0;
+    xch->cty = xch->ht;
+    xch->ox  = -xch->wd/2;
+    xch->oy  = -xch->ht/2;
+
  }
     goto gjump;
 #endif
