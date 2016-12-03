@@ -1566,12 +1566,25 @@ P;
         fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
 #endif
 
-    gap = objunit;
+    /***
+     *** RL-RL style
+     ***
+     ***    ======>
+     ***  L |\  |\
+     ***    |   |
+     ***  R |   |
+     ***
+     ***/
+
 #if 0
+    gap = objunit;
     gap = 0;
 #endif
+    gap = xch->cob.lanegap;
     gw = maxw+gap;
     gh = maxh+gap;
+
+fprintf(stderr, "langap %d\n", gap);
     
     c = 0;
     for(i=0;i<xch->cch.nch;i++) {
@@ -1581,8 +1594,14 @@ P;
         gf = gw*f;
         gl = gh*l;
         
+#if 0
         u->cx = gf+gw/2;
         u->cy = gl+gh/2;
+#endif
+#if 1
+        u->cx = (maxw+gap)*(f+1) - maxw/2;
+        u->cy = (maxh+gap)*(l+1) - maxh/2;
+#endif
 
         u->csx = u->cx - maxw/2;
         u->csy = u->cy;
@@ -1598,8 +1617,15 @@ P;
         c++;
     }
 
+#if 0
     xch->wd = (maxf+1)*gw;
     xch->ht = (xch->cob.lanenum)*gh;
+#endif
+#if 1
+    xch->wd = (maxf+1)*maxw+(maxf+2)*gap;
+    xch->ht = (xch->cob.lanenum)*maxh+(xch->cob.lanenum+1)*gap;
+#endif
+
     xch->cx = xch->wd/2;
     xch->cy = xch->ht/2;
     xch->csx = 0;

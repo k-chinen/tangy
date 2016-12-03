@@ -600,6 +600,7 @@ skip_number:
     LADD(OA_DECO,           deco);
 
     ISET(OA_LANENUM,        lanenum);
+    ISET(OA_LANEGAP,        lanegap);
 
     SADD(OA_PORT,           portstr);
     SADD(OA_STARBOARD,      boardstr);
@@ -785,14 +786,6 @@ Warn("skip sub-command '%s' argument\n", name);
         rob->cob.noexpand = 1;
         uc++;
     }
-#if 0
-    else if(oak==OA_LANENUM) {
-        p = draw_wordW(p, value, BUFSIZ); 
-        rob->cch.lanenum = atoi(value);
-fprintf(stderr, "rob oid %d LANE %d\n", rob->oid, rob->cch.lanenum);
-        uc++;
-    }
-#endif
 
     if(uc==0) {
         Echo("WARNING unknown object attribute '%s' [line %d]\n", name, lineno);

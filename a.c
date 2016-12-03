@@ -474,6 +474,7 @@ apair_t ls_ial[] = {
 #define OA_MARKPITCH        (714)
 
 #define OA_LANENUM          (801)
+#define OA_LANEGAP          (802)
 
 #define OA_TEXTHEIGHTFACTOR         (901)
 #define OA_TEXTDECENTFACTOR         (902)
@@ -567,6 +568,7 @@ apair_t objattr_ial[] = {
     {"markpitch",           OA_MARKPITCH},
     
     {"lanenum",             OA_LANENUM},
+    {"lanegap",             OA_LANEGAP},
 
     {"textheightfactor",    OA_TEXTHEIGHTFACTOR},
     {"textdecentfactor",    OA_TEXTDECENTFACTOR},
@@ -771,6 +773,7 @@ struct obattr {
 
 #if 1
     int    lanenum;
+    int    lanegap;
 #endif
 }; 
 
