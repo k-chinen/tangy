@@ -207,6 +207,7 @@ apair_t cmd_ial[] = {
     ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
      (x)==CMD_DOTS||(x)==CMD_CLINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
      (x)==CMD_POLYGON|| \
+     (x)==CMD_DMY1|| (x)==CMD_DMY2|| (x)==CMD_DMY3|| \
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
@@ -393,6 +394,20 @@ apair_t ls_ial[] = {
 };
 
 
+#define LO_RLRL             (0)
+#define LO_RLLR             (1)
+#define LO_LRLR             (2)
+#define LO_LRRL             (3)
+
+apair_t lo_ial[] = {
+    {"lrlr",        LO_LRLR},
+    {"rlrl",        LO_RLRL},
+    {"lrrl",        LO_LRRL},
+    {"rllr",        LO_RLLR},
+    {NULL,          -1},
+};
+
+
 /*
 #define OA_UNKNOWN           (0)
 */
@@ -473,6 +488,7 @@ apair_t ls_ial[] = {
 #define OA_MARKNODE         (713)
 #define OA_MARKPITCH        (714)
 
+#define OA_LANEORDER        (800)
 #define OA_LANENUM          (801)
 #define OA_LANEGAP          (802)
 
@@ -567,6 +583,7 @@ apair_t objattr_ial[] = {
     {"marknode",            OA_MARKNODE},
     {"markpitch",           OA_MARKPITCH},
     
+    {"laneorder",           OA_LANEORDER},
     {"lanenum",             OA_LANENUM},
     {"lanegap",             OA_LANEGAP},
 
@@ -607,7 +624,7 @@ double wlinethickfactor     = 0.20;
 double barrowgapfactor      = 0.25;
 
 double textheightfactor     = 0.30;
-double textdecentfactor     = 0.20;
+double textdecentfactor     = 0.25;
 double textbgmarginfactor   = 0.20;
 
 double hatchthickfactor     = 0.02;
@@ -772,8 +789,13 @@ struct obattr {
     int    markpitch;
 
 #if 1
+    int    laneorder;
     int    lanenum;
     int    lanegap;
+#endif
+
+#if 1
+    char   *note[12];
 #endif
 }; 
 
@@ -807,6 +829,7 @@ typedef struct _ob {
 
     int  pst;
 
+    int  layer;
 
                         /***** LOGICAL *****/
     int  sx, sy;        /* area start */
@@ -2276,7 +2299,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.007"
+    printf("2.011"
 #ifdef GITCHASH
     " " GITCHASH
 #endif

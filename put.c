@@ -1505,6 +1505,14 @@ _putchunk_lane(ob *xch, int *x, int *y, ns *xns)
 
     int   adjrewind=0;
 
+    int maxw, maxh;
+    int f, l;
+    int gf, gl;
+    int tdir;
+    int gap;
+    int gw, gh;
+    int maxf;
+
 #if 0
 P;
 #endif
@@ -1533,15 +1541,6 @@ P;
     }
 
 
-#if 1
- {
-    int maxw, maxh;
-    int f, l;
-    int gf, gl;
-    int tdir;
-    int gap;
-    int gw, gh;
-    int maxf;
 
     maxw = -1;
     maxh = -1;
@@ -1549,6 +1548,12 @@ P;
 
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
+        if(ISCHUNK(u->type) || ISATOM(u->type)) {
+        }
+        else {
+            continue;
+        }
+
         if(ISCHUNK(u->type)) {
             ik = putchunk(u, &nx, &ny, curns);
         }
@@ -1566,711 +1571,88 @@ P;
         fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
 #endif
 
-    /***
-     *** RL-RL style
-     ***
-     ***    ======>
-     ***  L |\  |\
-     ***    |   |
-     ***  R |   |
-     ***
-     ***/
+    switch(xch->cob.laneorder) {
+    default:
+        Warn("not-implemented lane order");
 
-#if 0
-    gap = objunit;
-    gap = 0;
-#endif
-    gap = xch->cob.lanegap;
-    gw = maxw+gap;
-    gh = maxh+gap;
+    case LO_RLRL:
 
-fprintf(stderr, "langap %d\n", gap);
-    
-    c = 0;
-    for(i=0;i<xch->cch.nch;i++) {
-        u = (ob*) xch->cch.ch[i];
-        f = c / xch->cob.lanenum;
-        l = c % xch->cob.lanenum;
-        gf = gw*f;
-        gl = gh*l;
-        
-#if 0
-        u->cx = gf+gw/2;
-        u->cy = gl+gh/2;
-#endif
-#if 1
-        u->cx = (maxw+gap)*(f+1) - maxw/2;
-        u->cy = (maxh+gap)*(l+1) - maxh/2;
-#endif
+        /***
+         *** RL-RL style
+         ***
+         ***    ======>
+         ***  L |\  |\
+         ***    |   |
+         ***  R |   |
+         ***
+         ***/
 
-        u->csx = u->cx - maxw/2;
-        u->csy = u->cy;
-        u->cex = u->cx + maxw/2;
-        u->cey = u->cy;
-        u->clx = u->cx - maxw/2;
-        u->crx = u->cx + maxw/2;
-        u->cby = u->cy - maxh/2;
-        u->cty = u->cy + maxh/2;
+        gap = xch->cob.lanegap;
+        gw = maxw+gap;
+        gh = maxh+gap;
 
-        if(f>maxf) maxf = f;
+        c = 0;
+        for(i=0;i<xch->cch.nch;i++) {
+            u = (ob*) xch->cch.ch[i];
 
-        c++;
-    }
-
-#if 0
-    xch->wd = (maxf+1)*gw;
-    xch->ht = (xch->cob.lanenum)*gh;
-#endif
-#if 1
-    xch->wd = (maxf+1)*maxw+(maxf+2)*gap;
-    xch->ht = (xch->cob.lanenum)*maxh+(xch->cob.lanenum+1)*gap;
-#endif
-
-    xch->cx = xch->wd/2;
-    xch->cy = xch->ht/2;
-    xch->csx = 0;
-    xch->csy = xch->ht/2;
-    xch->cex = xch->wd;
-    xch->cey = xch->ht/2;
-    xch->clx = 0;
-    xch->crx = xch->wd;
-    xch->cby = 0;
-    xch->cty = xch->ht;
-    xch->ox  = -xch->wd/2;
-    xch->oy  = -xch->ht/2;
-
- }
-    goto gjump;
-#endif
-
-
-
-    oldx = 0;
-    oldy = 0;
-
-    nx = 0;
-    ny = 0;
-#if 1
-    xch->sx = nx;
-    xch->sy = ny;
-#endif
-
-    lob = NULL;
-    u   = NULL;
-
-    pointjoint = 0;
-
-
-
-
-    c = 0;
-    for(i=0;i<xch->cch.nch;i++) {
-        c++;
-
-        lob  = u;
-        lx   = oldx;
-        ly   = oldy;
-        ldir = xch->cch.dir;
-        lfx  = fx;
-        lfy  = fy;
-
-        u = (ob*) xch->cch.ch[i];
-
-        xch->cch.x = nx;
-        xch->cch.y = ny;
-
-#if 1
-    /*XXX */
-        if(u->type==CMD_GOTO) {
-            if(u->cob.aat) {
-                int r;
-                int dx, dy;
-
-    Echo("goto AT '%s'\n", u->cob.aat);
-
-                r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-    Echo("  ns_find_objpos '%s' ret %d\n", u->cob.aat, r);
-                if(r==0) {
-                    nx = dx; ny = dy;
-                }
-                continue;
-            }
-        }
-#endif
-
-        if(u->type==CMD_BACK) {
-            if(c>1) {
-                nx = lx;
-                ny = ly;
-Echo("  oid %d back %d,%d\n", u->oid, nx, ny);
-                continue;
-            }
-        }
-        if(u->type==CMD_HBACK) {
-            if(c>1) {
-                nx = (lx+nx)/2;
-                ny = (ly+ny)/2;
-Echo("  oid %d hback %d,%d\n", u->oid, nx, ny);
-                continue;
-            }
-        }
-        if(u->type==CMD_SHORE) {
-            ob* fob;
-
-            fob = NULL;
-
-Echo("u %p oid %d iarg1 %d\n", u, u->oid, u->cob.iarg1);
-            if(u->cob.ato) {    
-                    fob = ns_find_obj(curns, u->cob.ato);
+            if(ISCHUNK(u->type) || ISATOM(u->type)) {
             }
             else {
-                if(lob) {
-                    fob = lob;
-                }
-            }
-
-            if(fob) {
-Echo("fob %p\n", fob);
-                ik = takelastobjpos(fob, u->cob.iarg1, u->cob.keepdir,
-                        &nx, &ny, &xch->cch.dir);
                 continue;
             }
-        }
 
-        if(u->type==CMD_SAVE) {
-#if 0
-Echo("  oid %d b save %d,%d\n", u->oid, nx, ny);
-Echo("  oid %d a save %d,%d\n", u->oid, bs.x, bs.y);
-#endif
-            cha_copy(&bs, &xch->cch);
-Echo("  oid %d save %d,%d\n", u->oid, bs.x, bs.y);
-
-            bsc++;
-            continue;
-        }
-        if(u->type==CMD_RESTORE) {
-            if(bsc<=0) {
-                Echo("ERROR no saved attributes\n");
-                continue;
-            }
+            f = c / xch->cob.lanenum;
+            l = c % xch->cob.lanenum;
+            gf = gw*f;
+            gl = gh*l;
             
-            cha_copy(&xch->cch, &bs);
-            nx = xch->cch.x;
-            ny = xch->cch.y;
+    #if 0
+            u->cx = gf+gw/2;
+            u->cy = gl+gh/2;
+    #endif
+    #if 1
+            u->cx = (maxw+gap)*(f+1) - maxw/2;
+            u->cy = (maxh+gap)*(l+1) - maxh/2;
+    #endif
 
-Echo("  oid %d restore to %d,%d\n", u->oid, nx, ny);
-            bsc--;
-            continue;
+            u->csx = u->cx - maxw/2;
+            u->csy = u->cy;
+            u->cex = u->cx + maxw/2;
+            u->cey = u->cy;
+            u->clx = u->cx - maxw/2;
+            u->crx = u->cx + maxw/2;
+            u->cby = u->cy - maxh/2;
+            u->cty = u->cy + maxh/2;
+
+            if(f>maxf) maxf = f;
+
+            c++;
         }
 
-        if(u->type==CMD_PUSH) {
-            chas_push(&regst, &xch->cch);
-Echo("  oid %d push  %d,%d %d\n", u->oid, bs.x, bs.y, bs.dir);
-Echo("  oid %d push  %d,%d %d\n", u->oid, 
-    regst.slot[regst.use-1].x,
-    regst.slot[regst.use-1].y,
-    regst.slot[regst.use-1].dir);
-
-            continue;
-        }
-        if(u->type==CMD_POP) {
-            ch tmp;
-
-            chas_pop(&regst, &tmp);
-
-            cha_copy(&xch->cch, &tmp);
-            nx = tmp.x;
-            ny = tmp.y;
-
-Echo("  oid %d pop   %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
-            continue;
-        }
-        if(u->type==CMD_AGAIN) {
-            ch tmp;
-
-            chas_top(&regst, &tmp);
-
-            cha_copy(&xch->cch, &tmp);
-            nx = tmp.x;
-            ny = tmp.y;
-
-Echo("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
-            continue;
-        }
-
-        oldx = nx;
-        oldy = ny;
-
-
-#define C(d,s) \
-            (d)->wd = (s)->wd; \
-            (d)->ht = (s)->ht; \
-            (d)->x  = (s)->x;  \
-            (d)->y  = (s)->y;  \
-            (d)->ox = (s)->ox; \
-            (d)->oy = (s)->oy; \
-            (d)->lx = (s)->lx; \
-            (d)->rx = (s)->rx; \
-            (d)->ty = (s)->ty; \
-            (d)->by = (s)->by; 
-
-
-        g = eval_dir(u, &(xch->cch.dir));
-        if(g>0) {
-            continue;
-        }
-#if 0
-        if(u->hasrel) {
-            /* do nothing */
-        }
-#endif
-        if(u->floated) {
-            /* do nothing */
-        }
-        else {
-        }
-
-#if 0
-Echo("  last pos %d,%d dir %d\n", lx, ly, ldir);
-#endif
-
-        if(ISCHUNK(u->type)) {
-#if 0
-Echo("chunk oid %d -> chunk oid %d start\n", xch->oid, u->oid);
-#endif
-            ik = putchunk(u, &nx, &ny, curns);
-#if 0
-Echo("chunk oid %d -> chunk oid %d ; ik %d\n", xch->oid, u->oid, ik);
-#endif
-
-        }
-        else {
-#if 0
-Echo("chunk oid %d -> obj oid %d\n", xch->oid, u->oid);
-#endif
-            ik = putobj(u, curns, &xch->cch.dir);
-#if 1
-Echo("chunk oid %d -> obj oid %d ; ik %d\n", xch->oid, u->oid, ik);
-#endif
-
-        }
-
-#if 0
-Echo("  fx,fy %d,%d dir %d; ik %d\n",
-    u->fx, u->fy, xch->cch.dir, ik);
-#endif
-
-        fx = u->fx;
-        fy = u->fy;
-        
-        if(ik) {
-            uniqpoint = 1;
-        }
-        else {
-            uniqpoint = 0;
-        }
-
-        adjrewind = 0;
-        hasqxy = 0;
-
-#if 0
-        if(u->cob.afrom) {
-            int r;
-            int dx, dy;
-
-Echo("found FROM '%s'\n", u->cob.afrom);
-
-            r = ns_find_objpos(curns, u->cob.afrom, &dx, &dy);
-Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
-            if(r==0) {
-                nx = dx; ny = dy;
-                adjrewind++;
-
-                u->pst += 1;
-            }
-            else {
-                E;
-            }
-        }
-#endif
-#if 0
-        if(u->cob.ato) {
-            int r;
-            int dx, dy;
-
-Echo("found TO '%s'\n", u->cob.ato);
-
-            r = ns_find_objpos(curns, u->cob.ato, &qx, &qy);
-Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
-            if(r==0) {
-                qx = dx; qy = dy;
-                hasqxy++;
-                adjrewind++;
-
-                u->pst += 1;
-            }
-            else {
-                E;
-            }
-        }
-#endif
-
-#if 1
-        if(u->cob.aat) {
-            int r;
-            int dx, dy;
-
-Echo("found AT '%s'\n", u->cob.aat);
-
-            r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
-            if(r==0) {
-                nx = dx; ny = dy;
-                adjrewind++;
-
-                u->pst += 10;
-            }
-            else {
-                E;
-            }
-
-  #if 1
-        if(u->cob.awith) {
-            int r;
-            int dx, dy;
-
-Echo("found WITH '%s'\n", u->cob.awith);
-
-            dx = nx; dy = ny;
-            r = applywith(u, u->cob.awith, &dx, &dy);
-Echo("  applywith '%s' ret %d; %d,%d\n", u->cob.awith, r, dx, dy);
-            if(r==0) {
-                nx = dx; ny = dy;
-                adjrewind++;
-                u->pst += 100;
-            }
-            else {
-                E;
-            }
-        }
-                
-        if(adjrewind>0) {
-            int r;
-            int dx, dy;
-
-            dx = nx; dy = ny;
-            r = rewindcenter(u, xch->cch.dir, &dx, &dy);
-
-Echo("  rewindcenter dir %d ret %d; %d,%d\n", xch->cch.dir, r, dx, dy);
-            if(r==0) {
-                nx = dx; ny = dy;
-                u->pst += 1000;
-            }
-            else {
-                E;
-            }
-        }
-
-        }
-  #endif
-#endif
-
-skip_at_with:
-
-
-    if(uniqpoint && ISGLUE(u->type)) {
-            int gfx, gfy;
-            int isx, isy;
-            int hasfrom;
-
-            gfx = fx;
-            gfy = fy;
-
-            hasfrom = -1;
-            hasfrom = find_from(u, &isx, &isy);
-
-            if(hasfrom==1) {
-                Echo("oid %d hasfrom %d\n", u->oid, hasfrom);
-                u->pst += 10000;
-                nx = isx;
-                ny = isy;
-            }
-
-P;
-            catobj(u, ldir, &nx, &ny, &gfx, &gfy, curns);
-    }
-    else {
-    
-
-        if(pointjoint && u) {
-            int gfx, gfy;
-
-#if 0
-Echo("  pointjoint %d to lfx,lfy %d,%d ldir %d\n",
-    pointjoint, lfx, lfy, ldir);
-#endif
-
-                u->pst += 30000;
-
-            gfx = lfx;
-            gfy = lfy;
-P;
-            fitobj(u, xch->cch.dir, &nx, &ny, curns);
-#if 0
-#endif
-        }
-        else {
-                u->pst += 40000;
-
-P;
-            fitobj(u, xch->cch.dir, &nx, &ny, curns);
-        }
-
-    }
-
-#if 0
-Echo("\tnx,ny = %d,%d\n", nx, ny);
-#endif
-
-        if(uniqpoint) {
-            pointjoint = 1;
-        }
-        else {
-            pointjoint = 0;
-        }
-
-
-#if 0
-        xch->cch.x = nx;
-        xch->cch.x = ny;
-#endif
-
-#if 0
-Echo("  oid %d move %d,%d to %d,%d\n", u->oid, oldx, oldy, nx, ny);
-#endif
-    }
-
-#if 1
-    xch->ex = nx;
-    xch->ey = ny;
-#endif
-
-#if 0
-    Echo("%s: m oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
-        __func__, xch->oid,
-        xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey, xch->ox, xch->coy);
-#endif
-
-#if 0
-Echo("BB\n");
-Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
-#endif
-
-    if(xch->cch.nch>0) {
-
-#if 0
-        for(i=0;i<xch->cch.nch;i++) {
-            u = (ob*)xch->cch.ch[i];
-            Echo("%4d: oid %d: %5d %5d -> %5d %5d\n",
-                i, u->oid, u->sx, u->sy, u->ex, u->ey);
-        }
-            Echo("here: oid %d: %5d %5d -> %5d %5d\n",
-                xch->oid, xch->sx, xch->sy, xch->ex, xch->ey);
-#endif
-
-        maxx = -(INT_MAX-1);
-        minx = INT_MAX;
-        maxy = -(INT_MAX-1);
-        miny = INT_MAX;
-
-#if 1
-        Echo("\t           : oid %d\n", xch->oid);
-        Echo("\t # : oid: i:     x     y    ox    oy :    lx    by    rx    ty\n");
-
-#endif
-        v = 0;
-        for(i=0;i<xch->cch.nch;i++) {
-            u = (ob*)xch->cch.ch[i];
-#if 1
-            Echo("\t%3d: %3d: %d: %5d %5d %5d %5d : %5d %5d %5d %5d\n",
-                i, u->oid, u->ignore, 
-                u->cx, u->cy,
-                u->cox, u->coy,
-                u->clx, u->cby, u->crx, u->cty);
-#endif
-            if(u->ignore) {
-#if 0
-    Echo("oid %d ignored\n", u->oid);
-#endif
-                continue;
-            }
-            v++;
-#if 0
-            if(u->type==CMD_CHUNK) 
-#endif
-            if(ISCHUNK(u->type)) 
-            {
-            }
-            else {
-            }
-
-            if(u->type==CMD_LINE||u->type==CMD_CLINE) {
-            }
-                Echo("OUT oid %-3d (%6d %6d %6d %6d) %6d x %-6d ; %6d x %-6d\n",
-                    u->oid,
-                    u->clx, u->cby, u->crx, u->cty,
-                    u->crx-u->clx, u->cty-u->cby,
-                    u->cwd, u->cht);
-
-#if 1
-            if(u->clx<minx) { minx = u->clx; }
-            if(u->crx<minx) { minx = u->crx; }
-            if(u->clx>maxx) { maxx = u->clx; }
-            if(u->crx>maxx) { maxx = u->crx; }
-            if(u->cby<miny) { miny = u->cby; }
-            if(u->cty<miny) { miny = u->cty; }
-            if(u->cby>maxy) { maxy = u->cby; }
-            if(u->cty>maxy) { maxy = u->cty; }
-#endif
-
-        }
-
-#if 1
-        Echo(
-        "\tsemi       : %5s %5s %5s %5s : %5d %5d %5d %5d (%d/%d)\n",
-            "", "", 
-            "", "",
-            minx, miny, maxx, maxy, v, c);
-#endif
-
-
-        xch->clx = minx;
-        xch->cby = miny;
-        xch->crx = maxx;
-        xch->cty = maxy;
-        xch->cmr = sqrt((maxx-minx)/2*(maxx-minx)/2+
-                        (maxy-miny)/2*(maxy-miny)/2);
-
-    }
-    else {
-        /* no member */
+    #if 0
+        xch->wd = (maxf+1)*gw;
+        xch->ht = (xch->cob.lanenum)*gh;
+    #endif
+    #if 1
+        xch->wd = (maxf+1)*maxw+(maxf+2)*gap;
+        xch->ht = (xch->cob.lanenum)*maxh+(xch->cob.lanenum+1)*gap;
+    #endif
+
+        xch->cx = xch->wd/2;
+        xch->cy = xch->ht/2;
+        xch->csx = 0;
+        xch->csy = xch->ht/2;
+        xch->cex = xch->wd;
+        xch->cey = xch->ht/2;
         xch->clx = 0;
+        xch->crx = xch->wd;
         xch->cby = 0;
-        xch->crx = 0;
-        xch->cty = 0;
-        xch->cmr = 0;
+        xch->cty = xch->ht;
+        xch->ox  = -xch->wd/2;
+        xch->oy  = -xch->ht/2;
+
+        break;
     }
-
-
-    xch->wd = (maxx - minx);
-    xch->ht = (maxy - miny);
-    zx = minx + xch->wd/2;
-    zy = miny + xch->ht/2;
-    xch->ox = -zx;
-    xch->oy = -zy;
-
-#if 1
-    Echo("%s: n oid %d nx,ny %d,%d\n", __func__, xch->oid, nx, ny);
-    Echo("  lx,ly %d,%d\n", lx, ly);
-
-    Echo("  x %d..%d\n", minx, maxx);
-    Echo("  y %d..%d\n", miny, maxy);
-    Echo("  zx,zy %d,%d\n", zx, zy);
-    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
-    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
-#endif
-
-    xch->wd = (maxx - minx) + xch->cgimargin*2;
-    xch->ht = (maxy - miny) + xch->cgimargin*2;
-    zx = minx - xch->cgimargin + xch->wd/2;
-    zy = miny - xch->cgimargin + xch->ht/2;
-    xch->ox = -zx;
-    xch->oy = -zy;
-
-        xch->clx = minx-xch->cgimargin;
-        xch->cby = miny-xch->cgimargin;
-        xch->crx = maxx+xch->cgimargin;
-        xch->cty = maxy+xch->cgimargin;
-
-#if 1
-    Echo("  gimargin %d\n", xch->cgimargin);
-    Echo("  x %d..%d\n", minx, maxx);
-    Echo("  y %d..%d\n", miny, maxy);
-    Echo("  zx,zy %d,%d\n", zx, zy);
-    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
-    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
-#endif
-
-
-#if 1
-    Echo("  new ox,oy %d,%d\n", xch->ox, xch->oy);
-
-    Echo("\ttotal %3d  : %5d %5d %5d %5d : %5d %5d %5d %5d (%d/%d) w,h %d,%d\n",
-        xch->oid,
-        xch->x, xch->y, xch->ox, xch->oy,
-        xch->lx, xch->by, xch->rx, xch->ty, v, c, xch->wd, xch->ht);
-#endif
-
-
-    xch->sizesolved++;
-
-#if 0
-Echo("chunk oid %d solved\n", xch->oid);
-
-#endif
-
-    /***
-     *** check SEP
-     ***/
-    for(i=0;i<xch->cch.nch;i++) {
-        int ik;
-        int qx, qy;
-        u = (ob*)xch->cch.ch[i];
-        if(!MAYEXPAND(u->type)) {
-            continue;
-        }
-        if(u->cnoexpand) {
-            continue;
-        }
-        switch(u->type) {
-        case CMD_SEP:
-            Echo("SEP oid %d %3d: oid %d xy %d,%d curdir %d\n",
-                xch->oid, i, u->oid, u->cx, u->cy, u->cob.sepcurdir);
-
-            ik = expand_sep(xch->cx, xch->cy, xch->cwd, xch->cht,
-                    xch->ox, xch->oy, u);
-        case CMD_LPAREN:
-        case CMD_RPAREN:
-        case CMD_LBRACKET:
-        case CMD_RBRACKET:
-        case CMD_LBRACE:
-        case CMD_RBRACE:
-            Echo("PAREN oid %d %3d: oid %d xy %d,%d curdir %d\n",
-                xch->oid, i, u->oid, u->cx, u->cy, u->cob.sepcurdir);
-
-            ik = expand_paren(xch->cx, xch->cy, xch->cwd, xch->cht,
-                    xch->ox, xch->oy, u);
-            break;
-        }
-    }
-
-out:
-
-#if 1
-    Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
-        __func__, xch->oid,
-        xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey,
-            xch->ox, xch->coy);
-#endif
-#if 1
-    Echo("%s: oid %d b bb g %7d %7d %7d %7d\n",
-            __func__, xch->oid,
-            xch->glx, xch->gby, xch->grx, xch->gty);
-    Echo("             bb _ %7d %7d %7d %7d\n",
-            xch->lx, xch->by, xch->rx, xch->ty);
-#endif
-
-gjump:
 
     return 0;
 }

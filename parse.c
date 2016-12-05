@@ -365,6 +365,7 @@ parseobjattr(ob *rob, char *src)
     int   v1;
     int   uc;
     int   gc;
+    char *s;
 
 
     if(!src || *src=='\0') {
@@ -437,6 +438,35 @@ skip_number:
     if(name[0]=='\0') {
         return NULL;
     }
+
+    s = &name[0];
+    if(*s==':') {
+        char pstr[BUFSIZ];
+        int  pn;
+
+        strcpy(pstr, s+1);
+        fprintf(stderr, "  pstr '%s'\n", pstr);
+        if(!pstr[0]) {
+            goto skip_note;
+        }
+    
+        pn = assoc(pos_ial, pstr);
+        if(pn<0) {
+            goto skip_note;
+        }
+
+        fprintf(stderr, "   pn %d\n", pn);
+
+        p = draw_wordW(p, value, BUFSIZ);
+        
+        fprintf(stderr, "   value '%s'\n", value);
+
+        rob->cob.note[pn] = strdup(value);
+
+        fprintf(stderr, "THEN pn %d '%s'\n", pn, rob->cob.note[pn]);
+        
+    }
+skip_note:
 
     if(strcasecmp(name, "->")==0)     {
         rob->cob.arrowheadpart     = AR_FORE;
@@ -599,6 +629,7 @@ skip_number:
     ISET(OA_ROTATE,         rotateval);
     LADD(OA_DECO,           deco);
 
+    AISET(OA_LANEORDER,     lo_ial, laneorder);
     ISET(OA_LANENUM,        lanenum);
     ISET(OA_LANEGAP,        lanegap);
 

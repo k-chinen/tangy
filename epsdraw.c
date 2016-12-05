@@ -10704,6 +10704,38 @@ Echo("%s: found L\n", __func__);
     return rv;
 }
 
+int
+solvenotepos(int *rx, int *ry, int *ra, ob *u, int pn, int gap)
+{
+    int rv;
+
+    rv = 0;
+    switch(pn) {
+    case PO_CENTER:     *ra =   90;                             break;
+    case PO_NORTH:      *ra =   90; *ry += u->ht/2+gap;         break;
+    case PO_SOUTH:      *ra =  -90; *ry -= u->ht/2+gap;         break;
+    case PO_EAST:       *ra =    0; *rx += u->wd/2+gap;         break;
+    case PO_WEST:       *ra =  180; *rx -= u->wd/2+gap;         break;
+    case PO_NORTHEAST:  *ra =   45; *rx += u->wd/2+gap; *ry += u->ht/2+gap; break;
+    case PO_NORTHWEST:  *ra =  135; *rx -= u->wd/2+gap; *ry += u->ht/2+gap; break;
+    case PO_SOUTHEAST:  *ra =  -45; *rx += u->wd/2+gap; *ry -= u->ht/2+gap; break;
+    case PO_SOUTHWEST:  *ra = -135; *rx -= u->wd/2+gap; *ry -= u->ht/2+gap; break;
+    case PO_START:
+    case PO_END:
+        Error("not implemented yet %d\n", pn);
+        rv = 1;
+        break;
+    default:    
+        Error("ignore position %d\n", pn);
+        rv = -1;
+    }
+
+    Echo("%s: pn %s(%d) rx,ry %d,%d\n", __func__,
+        rassoc(pos_ial, pn), pn, *rx, *ry);
+    
+    return rv;
+}
+
 
 int
 epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
@@ -10906,6 +10938,120 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
                 0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
         }
     }
+
+    {
+        int o;
+        int bx, by, ba;
+        int tx, ty, ta;
+        int nx, ny, nr;
+        int lx, ly, rx, ry;
+        int ik;
+        int fht, fdc;
+
+        nr = objunit/2;
+
+        fht = def_textheight;
+        fdc = (int)(textdecentfactor*fht);
+
+        for(o=0;o<12;o++) {
+            bx = u->cx;
+            by = u->cy;
+            ba = 0;
+            ik = solvenotepos(&bx, &by, &ba, u, o, objunit/10);
+            fprintf(stderr, "%2d: '%s' %6d,%-6d <%d>\n",
+                o, u->cob.note[o], bx, by, ik);
+
+            if(ik) {
+                continue;
+            }
+
+
+            if(o==PO_CENTER) {
+#if 0
+                by -= fht/2 + fdc;
+#endif
+                by -= fdc;
+            }
+
+            ta = ba - 90;
+            tx = bx + fdc*cos(ba*rf);
+            ty = by + fdc*sin(ba*rf);
+            nx = bx + nr*cos(ba*rf);
+            ny = by + nr*sin(ba*rf);
+
+#if 0
+            fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\
+                        %d %d translate %d %d moveto %d rotate\n",
+                def_linethick,
+                bx, by, bx, by, ta);
+            SLW_14(fp);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                0, 0, 0, nr);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, 0, nr, 0);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, fht, nr, fht);
+            SLW_41(fp);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, fdc, nr, fdc);
+            fprintf(fp, "grestore\n");
+#endif
+
+            /* TEMP */
+            fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n",
+                fht);
+            if(u->cob.note[o] && u->cob.note[o][0]) {
+                fprintf(fp, "      %d %d %d (%s) crshow\n",
+                    tx, ty, ta, u->cob.note[o]);
+            }
+        }
+    }
+
+#if 0
+    if(u->cob.note[PO_NORTH]) {
+        int ik;
+        int dx, dy;
+        int qx, qy;
+        int lax, lay;
+        int fht;
+
+        fprintf(fp, "      gsave\n");
+
+        lax = (objunit/8)*cos((*xdir+90)*rf);
+        lay = (objunit/8)*sin((*xdir+90)*rf);
+
+        ik = bumpBB(u->gx, u->gy, u->wd, u->ht,
+                u->gx, u->gy, *xdir+90, &qx, &qy);
+
+        dx = qx - u->gx;
+        dy = qy - u->gy;
+
+        if(ik<=0) {
+            goto skip_portboard;
+        }
+
+        /* TEMP */
+        fht = def_textheight;
+        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n", fht);
+
+            fprintf(fp, "      %d %d %d (%s) rrshow\n",
+                u->gx+dx+lax, u->gy+dy+lay, *xdir-90, u->cob.note[PO_NORTH]);
+
+#if 0
+        if(u->cob.portstr) {
+            fprintf(fp, "      %d %d %d (%s) rrshow\n",
+                u->gx+dx+lax, u->gy+dy+lay, *xdir-90, u->cob.portstr);
+        }
+        if(u->cob.boardstr) {
+            fprintf(fp, "      %d %d %d (%s) lrshow\n",
+                u->gx-dx-lax, u->gy-dy-lay, *xdir-90, u->cob.boardstr);
+        }
+#endif
+        fprintf(fp, "      grestore\n");
+    }
+#endif
+
+skip_note:
 
     if(u->cob.portstr || u->cob.boardstr) {
         int ik;
