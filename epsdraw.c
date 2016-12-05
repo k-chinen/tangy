@@ -7249,6 +7249,8 @@ ss_dump(FILE *ofp, varray_t *ssar)
 
 
 
+
+
 #define FH_NORMAL   (0)
 #define FH_LARGE    (1)
 #define FH_HUGE     (2)
@@ -7960,138 +7962,6 @@ skip_label:
 
     return 0;
 }
-
-
-
-
-
-
-int
-epsdraw_sstrbg(FILE *fp, int x, int y, int wd, int ht, int ro,
-        int bgshape, int qbgmargin, int fgcolor, int bgcolor,
-        varray_t *ssar)
-{
-
-    int   i;
-    int   py;
-    int   pyb;
-    int   gy;
-    sstr *uu;
-    int   fht;
-    int   n;
-    int   rh;
-    char  qs[BUFSIZ];
-    int   bgmargin;
-
-    if(!ssar) {
-        E;
-        return -1;
-    }
-
-#if 0
-    varray_fprint(stdout, ssar);
-#endif
-
-    if(ssar->use<=0)  {
-        goto skip_label;
-    }
-
-    fprintf(fp, "%% %s: sstr %d,%d %dx%d\n", __func__, x, y, wd, ht);
-    fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
-
-    n = ssar->use;
-
-    fht = def_textheight; 
-    pyb = (int)((double)fht*textdecentfactor);
-    bgmargin = (int)((double)fht*textbgmarginfactor);
-
-    py = fht+bgmargin*2;
-    rh = ht-n*py;
-
-    fprintf(fp, "%%  fht %d, ht %d, n %d, rh %d, py %d\n",
-        fht, ht, n, rh, py);
-
-    Echo("ht %d use %d -> py %d\n", 
-        ht, ssar->use, py);
-
-    fprintf(fp, "gsave %% for sstr\n");
-    fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
-    fprintf(fp, "  %d %d translate\n", x, y);
-    fprintf(fp, "  %d rotate\n", ro);
-
-    if(text_mode) {
-        fprintf(fp, "  gsave\n");
-        changetext(fp);
-        fprintf(fp, "    %d %d moveto %d %d rlineto stroke\n",
-                            0, -ht/2, 0, ht);
-        fprintf(fp, "  grestore\n");
-    }
-
-    fprintf(fp, "    %% text offset\n");
-    fprintf(fp, "    %d %d translate\n", 0, ht/2-rh/2);
-
-    gy = 0;
-    for(i=0;i<ssar->use;i++) {
-        gy -= py;
-        uu = (sstr*)ssar->slot[i];
-        psescape(qs, BUFSIZ, uu->ssval);
-
-        if(bgcolor>=0) {
-            fprintf(fp, "  %% textbg\n");
-            fprintf(fp, "  gsave\n");
-            changecolor(fp, bgcolor);
-            fprintf(fp, "    (%s) stringwidth pop %d add 2 div neg %d moveto\n",
-                qs, bgmargin*2, gy-bgmargin);
-            fprintf(fp, "    (%s) stringwidth pop %d add dup\n",
-                qs, bgmargin*2);
-            fprintf(fp, "    0 rlineto 0 %d rlineto neg 0 rlineto\n",
-                fht+bgmargin*2);
-            fprintf(fp, "    0 %d closepath fill\n",
-                -(fht+bgmargin*2));
-            fprintf(fp, "  grestore\n");
-        }
-
-        if(text_mode) {
-            fprintf(fp, "  %% textguide\n");
-            fprintf(fp, "  gsave\n");
-            changetext2(fp);
-            fprintf(fp, "  %d %d moveto %d 0 rlineto stroke\n",
-                            -wd/2, gy, wd);
-            changetext(fp);
-            fprintf(fp, "  %d %d moveto %d 0 rlineto stroke\n",
-                            -wd/2, gy+pyb, wd);
-            fprintf(fp, "  grestore\n");
-        }
-
-        changecolor(fp, fgcolor);
-
-        if(uu->ssopt & SJ_RIGHT) {
-        /* right end on center */
-        fprintf(fp, 
-            "    (%s) dup stringwidth pop neg %d moveto show\n",
-            qs, gy+pyb);
-        }
-        else
-        if(uu->ssopt & SJ_RIGHT) {
-        /* left end on center */
-        fprintf(fp, "    %d %d moveto (%s) show\n",
-            0, gy+pyb, qs);
-        }
-        else {
-        /* centering */
-        fprintf(fp, 
-            "    (%s) dup stringwidth pop 2 div neg %d moveto show\n",
-            qs, gy+pyb);
-        }
-    }
-    fprintf(fp, "grestore %% end of sstr\n");
-
-skip_label:
-    (void)0;
-
-    return 0;
-}
-
 
 
 
@@ -10705,28 +10575,130 @@ Echo("%s: found L\n", __func__);
 }
 
 int
-solvenotepos(int *rx, int *ry, int *ra, ob *u, int pn, int gap)
+solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
+    int ogap, int igap, int tht)
 {
     int rv;
+
+    *rj = SJ_CENTER;
 
     rv = 0;
     switch(pn) {
     case PO_CENTER:     *ra =   90;                             break;
-    case PO_NORTH:      *ra =   90; *ry += u->ht/2+gap;         break;
-    case PO_SOUTH:      *ra =  -90; *ry -= u->ht/2+gap;         break;
-    case PO_EAST:       *ra =    0; *rx += u->wd/2+gap;         break;
-    case PO_WEST:       *ra =  180; *rx -= u->wd/2+gap;         break;
-    case PO_NORTHEAST:  *ra =   45; *rx += u->wd/2+gap; *ry += u->ht/2+gap; break;
-    case PO_NORTHWEST:  *ra =  135; *rx -= u->wd/2+gap; *ry += u->ht/2+gap; break;
-    case PO_SOUTHEAST:  *ra =  -45; *rx += u->wd/2+gap; *ry -= u->ht/2+gap; break;
-    case PO_SOUTHWEST:  *ra = -135; *rx -= u->wd/2+gap; *ry -= u->ht/2+gap; break;
+    case PO_NORTH:      *ra =   90; *ry += u->ht/2+ogap;         break;
+    case PO_SOUTH:      *ra =  -90; *ry -= u->ht/2+ogap;         break;
+    case PO_EAST:       *ra =    0; *rx += u->wd/2+ogap;         break;
+    case PO_WEST:       *ra =  180; *rx -= u->wd/2+ogap;         break;
+    case PO_NORTHEAST:  *ra =   45; *rx += u->wd/2+ogap; *ry += u->ht/2+ogap; break;
+    case PO_NORTHWEST:  *ra =  135; *rx -= u->wd/2+ogap; *ry += u->ht/2+ogap; break;
+    case PO_SOUTHEAST:  *ra =  -45; *rx += u->wd/2+ogap; *ry -= u->ht/2+ogap; break;
+    case PO_SOUTHWEST:  *ra = -135; *rx -= u->wd/2+ogap; *ry -= u->ht/2+ogap; break;
     case PO_START:
     case PO_END:
+#if 0
         Error("not implemented yet %d\n", pn);
+#endif
         rv = 1;
         break;
+
+    case PO_CIC:
+        *ra = 90;   *rj = SJ_CENTER;
+        break;
+    case PO_CIL:
+        *ra =   90; *rj = SJ_LEFT;   *rx -= u->wd/2-igap;
+        break;
+    case PO_CIR:
+        *ra =   90; *rj = SJ_RIGHT;  *rx += u->wd/2-igap;
+        break;
+        
+
+    case PO_NOL:
+        *ra =   90; *rj = SJ_LEFT;   *rx -= u->wd/2;    *ry += u->ht/2+ogap;
+        break;
+    case PO_NOC:
+        *ra =   90; *rj = SJ_CENTER; *rx += 0;          *ry += u->ht/2+ogap;
+        break;
+    case PO_NOR:
+        *ra =   90; *rj = SJ_RIGHT;  *rx += u->wd/2;    *ry += u->ht/2+ogap;
+        break;
+
+    case PO_EOL:
+        *ra =    0; *rj = SJ_LEFT;   *rx += u->wd/2+ogap;   *ry += u->ht/2;
+        break;
+    case PO_EOC:
+        *ra =    0; *rj = SJ_CENTER; *rx += u->wd/2+ogap;   *ry += 0;
+        break;
+    case PO_EOR:
+        *ra =    0; *rj = SJ_RIGHT;  *rx += u->wd/2+ogap;   *ry -= u->ht/2;
+        break;
+
+    case PO_SOL:
+        *ra =  -90; *rj = SJ_LEFT;   *rx += u->wd/2;    *ry -= u->ht/2+ogap;
+        break;
+    case PO_SOC:
+        *ra =  -90; *rj = SJ_CENTER; *rx += 0;          *ry -= u->ht/2+ogap;
+        break;
+    case PO_SOR:
+        *ra =  -90; *rj = SJ_RIGHT;  *rx -= u->wd/2;    *ry -= u->ht/2+ogap;
+        break;
+
+    case PO_WOL:
+        *ra =  180; *rj = SJ_LEFT;   *rx -= u->wd/2+ogap;   *ry -= u->ht/2;
+        break;
+    case PO_WOC:
+        *ra =  180; *rj = SJ_CENTER; *rx -= u->wd/2+ogap;   *ry += 0;
+        break;
+    case PO_WOR:
+        *ra =  180; *rj = SJ_RIGHT;  *rx -= u->wd/2+ogap;   *ry += u->ht/2;
+        break;
+
+    case PO_NIL:
+        *ra =   90; *rj = SJ_LEFT;   *rx -= u->wd/2-igap;   *ry += u->ht/2-tht-igap;
+        break;
+    case PO_NIC:
+        *ra =   90; *rj = SJ_CENTER; *rx += 0;  *ry += u->ht/2-tht-igap;
+        break;
+    case PO_NIR:
+        *ra =   90; *rj = SJ_RIGHT;  *rx += u->wd/2-igap;   *ry += u->ht/2-tht-igap;
+        break;
+
+
+    case PO_SIL:
+        *ra =  -90; *rj = SJ_LEFT;   *rx += u->wd/2-igap;   *ry -= u->ht/2-tht-igap;
+        break;
+    case PO_SIC:
+        *ra =  -90; *rj = SJ_CENTER; *rx += 0;  *ry -= u->ht/2-tht-igap;
+        break;
+    case PO_SIR:
+        *ra =  -90; *rj = SJ_RIGHT;  *rx -= u->wd/2-igap;   *ry -= u->ht/2-tht-igap;
+        break;
+
+
+    case PO_EIL:
+        *ra =    0; *rj = SJ_LEFT;   *rx += u->wd/2-tht-igap;   *ry += u->ht/2-igap;
+        break;
+    case PO_EIC:
+        *ra =    0; *rj = SJ_CENTER; *rx += u->wd/2-tht-igap;   *ry += 0;
+        break;
+    case PO_EIR:
+        *ra =    0; *rj = SJ_RIGHT;  *rx += u->wd/2-tht-igap;   *ry -= u->ht/2-igap;
+        break;
+
+    case PO_WIL:
+        *ra =  180; *rj = SJ_LEFT;   *rx -= u->wd/2-tht-igap;   *ry -= u->ht/2-igap;
+        break;
+    case PO_WIC:
+        *ra =  180; *rj = SJ_CENTER; *rx -= u->wd/2-tht-igap;   *ry += 0;
+        break;
+    case PO_WIR:
+        *ra =  180; *rj = SJ_RIGHT;  *rx -= u->wd/2-tht-igap;   *ry += u->ht/2-igap;
+        break;
+
+
     default:    
+#if 0
         Error("ignore position %d\n", pn);
+#endif
         rv = -1;
     }
 
@@ -10941,36 +10913,62 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
     {
         int o;
-        int bx, by, ba;
+        int bx, by, ba, bj;
         int tx, ty, ta;
         int nx, ny, nr;
         int lx, ly, rx, ry;
         int ik;
         int fht, fdc;
+        char mcont[BUFSIZ];
+        int rev;
 
         nr = objunit/2;
 
         fht = def_textheight;
         fdc = (int)(textdecentfactor*fht);
 
-        for(o=0;o<12;o++) {
+        /* TEMP */
+        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n",
+            fht);
+
+        for(o=0;o<PO_MAX;o++) {
+            rev = 0;
+            mcont[0] = '\0';
+
+            if(u->cob.note[o] && u->cob.note[o][0]) {
+                if(u->cob.note[o][0]=='!') {
+                    rev = 1;
+                    strcpy(mcont, &u->cob.note[o][1]);
+                }           
+                else {  
+                    strcpy(mcont, u->cob.note[o]);
+                }
+            }
+            else {
+                continue;
+            }
+
+
+#if 0
             bx = u->cx;
             by = u->cy;
+#endif
+            bx = u->gx;
+            by = u->gy;
             ba = 0;
-            ik = solvenotepos(&bx, &by, &ba, u, o, objunit/10);
-            fprintf(stderr, "%2d: '%s' %6d,%-6d <%d>\n",
-                o, u->cob.note[o], bx, by, ik);
+            ik = solvenotepos(&bx, &by, &ba, &bj, u, o, objunit/4, objunit/8, fht);
+
+#if 0
+            Echo("%2d: %-8s '%s' %6d,%-6d <%d>\n",
+                o, rassoc(pos_ial, o), u->cob.note[o], bx, by, ik);
+#endif
 
             if(ik) {
                 continue;
             }
 
-
-            if(o==PO_CENTER) {
-#if 0
-                by -= fht/2 + fdc;
-#endif
-                by -= fdc;
+            if(o==PO_CENTER||o==PO_CIL||o==PO_CIC||o==PO_CIR) {
+                by -= fht/2;
             }
 
             ta = ba - 90;
@@ -10980,11 +10978,12 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             ny = by + nr*sin(ba*rf);
 
 #if 0
+            /* draw guide */
             fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\
                         %d %d translate %d %d moveto %d rotate\n",
                 def_linethick,
                 bx, by, bx, by, ta);
-            SLW_14(fp);
+            SLW_1x(fp, 8);
             fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
                 0, 0, 0, nr);
             fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
@@ -10997,59 +10996,35 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             fprintf(fp, "grestore\n");
 #endif
 
-            /* TEMP */
-            fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n",
-                fht);
-            if(u->cob.note[o] && u->cob.note[o][0]) {
-                fprintf(fp, "      %d %d %d (%s) crshow\n",
-                    tx, ty, ta, u->cob.note[o]);
+            fprintf(fp, "gsave %d %d translate %d rotate\n",
+                tx, ty, ta);
+            if(rev) {
+                fprintf(fp, "      %d %d translate %d rotate\n", 0, fht-fdc*2, 180);
+
+                if(bj==SJ_LEFT) {
+                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                }
+                if(bj==SJ_CENTER) {
+                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+                }
+                if(bj==SJ_RIGHT) {
+                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                }
             }
+            else {
+                if(bj==SJ_LEFT) {
+                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                }
+                if(bj==SJ_CENTER) {
+                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+                }
+                if(bj==SJ_RIGHT) {
+                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                }
+            }
+            fprintf(fp, "grestore\n");
         }
     }
-
-#if 0
-    if(u->cob.note[PO_NORTH]) {
-        int ik;
-        int dx, dy;
-        int qx, qy;
-        int lax, lay;
-        int fht;
-
-        fprintf(fp, "      gsave\n");
-
-        lax = (objunit/8)*cos((*xdir+90)*rf);
-        lay = (objunit/8)*sin((*xdir+90)*rf);
-
-        ik = bumpBB(u->gx, u->gy, u->wd, u->ht,
-                u->gx, u->gy, *xdir+90, &qx, &qy);
-
-        dx = qx - u->gx;
-        dy = qy - u->gy;
-
-        if(ik<=0) {
-            goto skip_portboard;
-        }
-
-        /* TEMP */
-        fht = def_textheight;
-        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n", fht);
-
-            fprintf(fp, "      %d %d %d (%s) rrshow\n",
-                u->gx+dx+lax, u->gy+dy+lay, *xdir-90, u->cob.note[PO_NORTH]);
-
-#if 0
-        if(u->cob.portstr) {
-            fprintf(fp, "      %d %d %d (%s) rrshow\n",
-                u->gx+dx+lax, u->gy+dy+lay, *xdir-90, u->cob.portstr);
-        }
-        if(u->cob.boardstr) {
-            fprintf(fp, "      %d %d %d (%s) lrshow\n",
-                u->gx-dx-lax, u->gy-dy-lay, *xdir-90, u->cob.boardstr);
-        }
-#endif
-        fprintf(fp, "      grestore\n");
-    }
-#endif
 
 skip_note:
 

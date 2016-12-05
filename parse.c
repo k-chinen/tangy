@@ -445,7 +445,9 @@ skip_number:
         int  pn;
 
         strcpy(pstr, s+1);
-        fprintf(stderr, "  pstr '%s'\n", pstr);
+#if 0
+        Echo("  pstr '%s'\n", pstr);
+#endif
         if(!pstr[0]) {
             goto skip_note;
         }
@@ -455,15 +457,27 @@ skip_number:
             goto skip_note;
         }
 
-        fprintf(stderr, "   pn %d\n", pn);
+        Echo("   pn %d\n", pn);
 
-        p = draw_wordW(p, value, BUFSIZ);
+        p = skipwhite(p);
+
+        if(*p=='"') {
+            p = draw_wordDQ(p, value, BUFSIZ);
+        }
+        else {
+            p = draw_wordW(p, value, BUFSIZ);
+        }
+
         
-        fprintf(stderr, "   value '%s'\n", value);
+#if 0
+        Echo("   value '%s'\n", value);
+#endif
 
         rob->cob.note[pn] = strdup(value);
 
-        fprintf(stderr, "THEN pn %d '%s'\n", pn, rob->cob.note[pn]);
+#if 1
+        Echo("THEN pn %d '%s'\n", pn, rob->cob.note[pn]);
+#endif
         
     }
 skip_note:

@@ -336,6 +336,39 @@ apair_t arrowhead_ial[] = {
 #define PO_START            (10)
 #define PO_END              (11)
 
+#define PO_CIL              (13)
+#define PO_CIC              (14)
+#define PO_CIR              (15)
+
+#define PO_NOL              (021)
+#define PO_NOC              (022)
+#define PO_NOR              (023)
+#define PO_NIL              (024)
+#define PO_NIC              (025)
+#define PO_NIR              (026)
+
+#define PO_EOL              (031)
+#define PO_EOC              (032)
+#define PO_EOR              (033)
+#define PO_EIL              (034)
+#define PO_EIC              (035)
+#define PO_EIR              (036)
+
+#define PO_SOL              (041)
+#define PO_SOC              (042)
+#define PO_SOR              (043)
+#define PO_SIL              (044)
+#define PO_SIC              (045)
+#define PO_SIR              (046)
+
+#define PO_WOL              (051)
+#define PO_WOC              (052)
+#define PO_WOR              (053)
+#define PO_WIL              (054)
+#define PO_WIC              (055)
+#define PO_WIR              (056)
+#define PO_MAX              (057)
+
 apair_t pos_ial[] = {
 
     {"c",                   PO_CENTER},
@@ -360,6 +393,38 @@ apair_t pos_ial[] = {
 
     {"start",               PO_START},
     {"end",                 PO_END},
+
+    {"CIL",                 PO_CIL},
+    {"CIC",                 PO_CIC},
+    {"CIR",                 PO_CIR},
+
+    {"NOL",                 PO_NOL},
+    {"NOC",                 PO_NOC},
+    {"NOR",                 PO_NOR},
+    {"NIL",                 PO_NIL},
+    {"NIC",                 PO_NIC},
+    {"NIR",                 PO_NIR},
+
+    {"EOL",                 PO_EOL},
+    {"EOC",                 PO_EOC},
+    {"EOR",                 PO_EOR},
+    {"EIL",                 PO_EIL},
+    {"EIC",                 PO_EIC},
+    {"EIR",                 PO_EIR},
+
+    {"SOL",                 PO_SOL},
+    {"SOC",                 PO_SOC},
+    {"SOR",                 PO_SOR},
+    {"SIL",                 PO_SIL},
+    {"SIC",                 PO_SIC},
+    {"SIR",                 PO_SIR},
+
+    {"WOL",                 PO_WOL},
+    {"WOC",                 PO_WOC},
+    {"WOR",                 PO_WOR},
+    {"WIL",                 PO_WIL},
+    {"WIC",                 PO_WIC},
+    {"WIR",                 PO_WIR},
 
     {NULL,                  -1},
 };
@@ -795,7 +860,7 @@ struct obattr {
 #endif
 
 #if 1
-    char   *note[12];
+    char   *note[PO_MAX];
 #endif
 }; 
 
@@ -960,10 +1025,36 @@ dellastcharif(char *src, int xch)
         p++;
     }
 
-  printf(" b src |%s|\n", src);
+    printf(" b src |%s|\n", src);
     if(q && *q==xch) *q='\0';
-  printf(" a src |%s|\n", src);
+    printf(" a src |%s|\n", src);
     return 0;
+}
+
+/* double quoted string */
+char*
+draw_wordDQ(char *src, char *dst, int wlen)
+{
+    register char *p, *q;
+    int c;
+
+    p = src;
+    q = dst;
+    c = 0;
+    if(*p!='"') {
+        return NULL;
+    }
+    p++;
+    while(*p&&c<wlen&&(*p!='"')) {
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+    if(*p=='"') {
+        p++;
+    }
+
+    return p;
 }
 
 
@@ -2299,7 +2390,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.011"
+    printf("2.012"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
