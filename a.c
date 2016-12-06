@@ -459,16 +459,19 @@ apair_t ls_ial[] = {
 };
 
 
-#define LO_RLRL             (0)
-#define LO_RLLR             (1)
-#define LO_LRLR             (2)
-#define LO_LRRL             (3)
+#define LO_NWR              (0)
+#define LO_NWD              (1)
+#define LO_SWU              (2)
+#define LO_SWR              (3)
+#define LO_NEL              (4)
+#define LO_SEL              (4)
 
 apair_t lo_ial[] = {
-    {"lrlr",        LO_LRLR},
-    {"rlrl",        LO_RLRL},
-    {"lrrl",        LO_LRRL},
-    {"rllr",        LO_RLLR},
+    {"nwd",         LO_NWD},
+    {"nwr",         LO_NWR},
+    {"swu",         LO_SWU},
+    {"swr",         LO_SWU},
+    {"nel",         LO_NEL},
     {NULL,          -1},
 };
 
@@ -732,6 +735,11 @@ int def_marknoderad     =  10;
 
 int def_gridpitch       = 10000;
 int def_gridrange       =   5;
+
+#if 0
+char *def_fontname      = "Times-Roman";
+#endif
+extern char *def_fontname;
 
 
 pallet_t *pallet = NULL;
@@ -2214,7 +2222,6 @@ _ns_find_name(ns* s, ob* xob, int w)
 int
 recalcsizeparam()
 {
-P;
 
 #define V(x)    printf("%-20s %8d\n", #x, x);
     
@@ -2390,7 +2397,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.012"
+    printf("2.013"
 #ifdef GITCHASH
     " " GITCHASH
 #endif

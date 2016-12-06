@@ -9,6 +9,8 @@ int epsoutmargin        = 16;
 int epsdraftfontsize    = 10;
 int epsdraftgap         =  5;
 
+char *def_fontname      = "Times-Roman";
+
 int debug_clip = 0;
 
 #define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
@@ -7289,10 +7291,10 @@ apair_t ff_ial[] = {
 };
 
 apair_t ff_act_ial[] = {
-    {"/Times-Roman",    FF_SERIF},
-    {"/Helvetica",      FF_SANSERIF},
-    {"/Times-Italic",   FF_ITALIC},
-    {"/Courier",        FF_TYPE},
+    {"Times-Roman",    FF_SERIF},
+    {"Helvetica",      FF_SANSERIF},
+    {"Times-Italic",   FF_ITALIC},
+    {"Courier",        FF_TYPE},
     {NULL,      -1},
 };
 
@@ -7514,7 +7516,8 @@ Echo("  --- calc size\n");
 
         fprintf(fp, "  %% calc size (width)\n");
         fprintf(fp, "  /sstrw 0 def\n");
-        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+            def_fontname, fht);
         afh = fht;
 
         afhmax = -1;
@@ -7585,7 +7588,7 @@ Echo(" curface %d cursize %d\n", curface, cursize);
 Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 
                     if(afn) {
-                        fprintf(fp, "  %s findfont %d scalefont setfont\n",
+                        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
                             afn, afh);
                     }
                 }
@@ -7836,7 +7839,8 @@ Echo("  --- calc size\n");
         /*** PASS 2 */
 
 Echo("  --- drawing\n");
-        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+            def_fontname, fht);
         fprintf(fp, "  0 0 moveto\n");
 
         cursize = FH_NORMAL;
@@ -7909,7 +7913,7 @@ Echo(" curface %d cursize %d\n", curface, cursize);
 Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
 
                     if(afn) {
-                        fprintf(fp, "  %s findfont %d scalefont setfont\n",
+                        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
                             afn, afh);
                     }
 
@@ -8440,8 +8444,8 @@ P;
         epsdraw_bbox(fp, xu);
     }
     fprintf(fp, "gsave\n");
-    fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n",
-        12*objunit/100);
+    fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+        def_fontname, 12*objunit/100);
     fprintf(fp, "  1 0 0 setrgbcolor\n");
     fprintf(fp, "  100 setlinewidth\n");
     fprintf(fp, "  %d %d moveto\n", xox, xoy);
@@ -10710,8 +10714,199 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
 
 
 int
+epsdraw_note(FILE *fp, ob *u)
+{
+    int   rv;
+    int   o;
+    int   bx, by, ba, bj;
+    int   tx, ty, ta;
+    int   nx, ny, nr;
+    int   lx, ly, rx, ry;
+    int   ik;
+    int   fht, fdc;
+    char  mcont[BUFSIZ];
+    int   exa;
+    char  tmp[BUFSIZ];
+    char *p, *q;
+
+#define INVREV      (180+360*10)        /* inveres but special number */
+
+    rv = 0;
+    nr = objunit/2;
+
+    fht = def_textheight;
+    fdc = (int)(textdecentfactor*fht);
+
+    /* TEMP */
+    fprintf(fp, "      /%s findfont %d scalefont setfont\n",
+        def_fontname, fht);
+
+    for(o=0;o<PO_MAX;o++) {
+        exa = 0;
+        mcont[0] = '\0';
+
+        if(u->cob.note[o] && u->cob.note[o][0]) {
+            if(u->cob.note[o][0]=='!') {
+                p = &u->cob.note[o][0];
+                p++;
+#if 1
+                q = tmp;
+                while(*p&&((*p>='0'&&*p<='9')||(*p=='-')||(*p=='.'))) {
+                    *q++ = *p++;
+                }
+                *q = '\0';
+
+                if(tmp[0]) {
+                    exa = atoi(tmp);
+                }
+                else {
+                    exa = INVREV;
+                }
+#else
+                exa = INVREV;
+#endif
+                strcpy(mcont, p);
+            }           
+            else {  
+                strcpy(mcont, u->cob.note[o]);
+            }
+        }
+        else {
+            continue;
+        }
+
+
+#if 0
+        bx = u->cx;
+        by = u->cy;
+#endif
+        bx = u->gx;
+        by = u->gy;
+        ba = 0;
+        ik = solvenotepos(&bx, &by, &ba, &bj, u, o, objunit/4, objunit/8, fht);
+
+#if 0
+        Echo("%2d: %-8s '%s' %6d,%-6d <%d>\n",
+            o, rassoc(pos_ial, o), u->cob.note[o], bx, by, ik);
+#endif
+
+        if(ik) {
+            continue;
+        }
+
+        if(o==PO_CENTER||o==PO_CIL||o==PO_CIC||o==PO_CIR) {
+            by -= fht/2;
+        }
+
+        ta = ba - 90;
+#if 0
+        tx = bx + fdc*cos(ba*rf);
+        ty = by + fdc*sin(ba*rf);
+#endif
+        tx = bx;
+        ty = by;
+        nx = bx + nr*cos(ba*rf);
+        ny = by + nr*sin(ba*rf);
+
+#if 0
+        /* draw guide */
+        fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\
+                    %d %d translate %d %d moveto %d rotate\n",
+            def_linethick,
+            bx, by, bx, by, ta);
+        SLW_1x(fp, 8);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            0, 0, 0, nr);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, 0, nr, 0);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, fht, nr, fht);
+        SLW_41(fp);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, fdc, nr, fdc);
+        fprintf(fp, "grestore\n");
+#endif
+
+        fprintf(fp, "gsave %d %d translate %d rotate\n",
+            tx, ty, ta);
+
+        if(exa) {
+            fprintf(fp, "      %d rotate\n", exa);
+
+            if(exa==INVREV) {
+                fprintf(fp, "      %d %d translate\n", 0, -fht);
+            }
+
+#if 0
+        /* draw guide */
+        fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth\
+                    %d %d translate %d %d moveto %d rotate\n",
+            def_linethick,
+            0, 0, 0, 0, 0);
+        SLW_1x(fp, 8);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            0, 0, 0, nr);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, 0, nr, 0);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, fht, nr, fht);
+        SLW_41(fp);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            -nr, fdc, nr, fdc);
+        fprintf(fp, "grestore\n");
+#endif
+
+
+            if(exa==INVREV) {
+#if 0
+                changecolor(fp, 1);
+#endif
+
+                fprintf(fp, "      %d %d translate\n", 0, fdc);
+                if(bj==SJ_LEFT) {
+                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                }
+                if(bj==SJ_CENTER) {
+                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+                }
+                if(bj==SJ_RIGHT) {
+                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                }
+            }
+            else {
+
+                fprintf(fp, "      %d %d translate\n", 0, fdc);
+                if(bj==SJ_LEFT||bj==SJ_CENTER) {
+                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                }
+                else {
+                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                }
+            }
+        }
+        else {
+            fprintf(fp, "      %d %d translate\n", 0, fdc);
+            if(bj==SJ_LEFT) {
+                fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+            }
+            if(bj==SJ_CENTER) {
+                fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+            }
+            if(bj==SJ_RIGHT) {
+                fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+            }
+        }
+
+        fprintf(fp, "grestore\n");
+    }
+
+    return rv;
+}
+
+int
 epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 {
+    int ik;
     int wd, ht;
     int g;
 
@@ -10777,7 +10972,8 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->cob.markbb) {
         int fht;
         fht = def_textheight;
-        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+            def_fontname, fht);
 
         epsdraw_bbox(fp, u);
     }
@@ -10911,125 +11107,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         }
     }
 
-    {
-        int o;
-        int bx, by, ba, bj;
-        int tx, ty, ta;
-        int nx, ny, nr;
-        int lx, ly, rx, ry;
-        int ik;
-        int fht, fdc;
-        char mcont[BUFSIZ];
-        int rev;
-
-        nr = objunit/2;
-
-        fht = def_textheight;
-        fdc = (int)(textdecentfactor*fht);
-
-        /* TEMP */
-        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n",
-            fht);
-
-        for(o=0;o<PO_MAX;o++) {
-            rev = 0;
-            mcont[0] = '\0';
-
-            if(u->cob.note[o] && u->cob.note[o][0]) {
-                if(u->cob.note[o][0]=='!') {
-                    rev = 1;
-                    strcpy(mcont, &u->cob.note[o][1]);
-                }           
-                else {  
-                    strcpy(mcont, u->cob.note[o]);
-                }
-            }
-            else {
-                continue;
-            }
-
-
-#if 0
-            bx = u->cx;
-            by = u->cy;
-#endif
-            bx = u->gx;
-            by = u->gy;
-            ba = 0;
-            ik = solvenotepos(&bx, &by, &ba, &bj, u, o, objunit/4, objunit/8, fht);
-
-#if 0
-            Echo("%2d: %-8s '%s' %6d,%-6d <%d>\n",
-                o, rassoc(pos_ial, o), u->cob.note[o], bx, by, ik);
-#endif
-
-            if(ik) {
-                continue;
-            }
-
-            if(o==PO_CENTER||o==PO_CIL||o==PO_CIC||o==PO_CIR) {
-                by -= fht/2;
-            }
-
-            ta = ba - 90;
-            tx = bx + fdc*cos(ba*rf);
-            ty = by + fdc*sin(ba*rf);
-            nx = bx + nr*cos(ba*rf);
-            ny = by + nr*sin(ba*rf);
-
-#if 0
-            /* draw guide */
-            fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\
-                        %d %d translate %d %d moveto %d rotate\n",
-                def_linethick,
-                bx, by, bx, by, ta);
-            SLW_1x(fp, 8);
-            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-                0, 0, 0, nr);
-            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-                -nr, 0, nr, 0);
-            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-                -nr, fht, nr, fht);
-            SLW_41(fp);
-            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-                -nr, fdc, nr, fdc);
-            fprintf(fp, "grestore\n");
-#endif
-
-            fprintf(fp, "gsave %d %d translate %d rotate\n",
-                tx, ty, ta);
-            if(rev) {
-                fprintf(fp, "      %d %d translate %d rotate\n", 0, fht-fdc*2, 180);
-
-                if(bj==SJ_LEFT) {
-                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
-                }
-                if(bj==SJ_CENTER) {
-                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
-                }
-                if(bj==SJ_RIGHT) {
-                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
-                }
-            }
-            else {
-                if(bj==SJ_LEFT) {
-                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
-                }
-                if(bj==SJ_CENTER) {
-                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
-                }
-                if(bj==SJ_RIGHT) {
-                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
-                }
-            }
-            fprintf(fp, "grestore\n");
-        }
-    }
-
-skip_note:
+    ik = epsdraw_note(fp, u);
 
     if(u->cob.portstr || u->cob.boardstr) {
-        int ik;
         int dx, dy;
         int qx, qy;
         int lax, lay;
@@ -11052,7 +11132,8 @@ skip_note:
 
         /* TEMP */
         fht = def_textheight;
-        fprintf(fp, "      /Times-Roman findfont %d scalefont setfont\n", fht);
+        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
+            def_fontname, fht);
 
         if(u->cob.portstr) {
             fprintf(fp, "      %d %d %d (%s) rrshow\n",
@@ -11108,7 +11189,8 @@ P;
     if(xch->cob.markbb) {
         int fht;
         fht = def_textheight;
-        fprintf(fp, "  /Times-Roman findfont %d scalefont setfont\n", fht);
+        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+            def_fontname, fht);
 
         epsdraw_bbox(fp, xch);
     }
@@ -11327,6 +11409,8 @@ Echo(" call obj drawing %d,%d\n", gox+xch->x+xch->ox, goy+xch->y+xch->oy);
 
  }
 #endif
+
+    ik = epsdraw_note(fp, xch);
 
     fprintf(fp, "%% oid %d DONE\n", xch->oid);
 

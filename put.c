@@ -1482,7 +1482,7 @@ _putchunk_lane(ob *xch, int *x, int *y, ns *xns)
     int v;
     int minx, maxx;
     int miny, maxy;
-    int c;
+    int c, maxc;
     int oldx, oldy;
     int lx, ly;
     int nx, ny;
@@ -1510,7 +1510,6 @@ _putchunk_lane(ob *xch, int *x, int *y, ns *xns)
     int gf, gl;
     int tdir;
     int gap;
-    int gw, gh;
     int maxf;
 
 #if 0
@@ -1541,11 +1540,13 @@ P;
     }
 
 
-
     maxw = -1;
     maxh = -1;
     maxf = -1;
 
+    maxc = -1;
+
+    c = 0;
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
         if(ISCHUNK(u->type) || ISATOM(u->type)) {
@@ -1564,95 +1565,115 @@ P;
             tdir = 0;
             ik = putobj(u, curns, &tdir);
         }
+
+        c++;
+
         if(u->wd > maxw) maxw = u->wd;
         if(u->ht > maxh) maxh = u->ht;
+        if(c > maxc) maxc = c;      
     }
+
+
 #if 0
-        fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
+    fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
 #endif
 
-    switch(xch->cob.laneorder) {
-    default:
-        Warn("not-implemented lane order");
+    /***
+     *** RL-RL style
+     ***
+     ***    ======>
+     ***  L |\  |\
+     ***    |   |
+     ***  R |   |
+     ***
+     ***/
 
-    case LO_RLRL:
+    gap = xch->cob.lanegap;
 
-        /***
-         *** RL-RL style
-         ***
-         ***    ======>
-         ***  L |\  |\
-         ***    |   |
-         ***  R |   |
-         ***
-         ***/
+    c = 0;
+    for(i=0;i<xch->cch.nch;i++) {
+        u = (ob*) xch->cch.ch[i];
 
-        gap = xch->cob.lanegap;
-        gw = maxw+gap;
-        gh = maxh+gap;
-
-        c = 0;
-        for(i=0;i<xch->cch.nch;i++) {
-            u = (ob*) xch->cch.ch[i];
-
-            if(ISCHUNK(u->type) || ISATOM(u->type)) {
-            }
-            else {
-                continue;
-            }
-
-            f = c / xch->cob.lanenum;
-            l = c % xch->cob.lanenum;
-            gf = gw*f;
-            gl = gh*l;
-            
-    #if 0
-            u->cx = gf+gw/2;
-            u->cy = gl+gh/2;
-    #endif
-    #if 1
-            u->cx = (maxw+gap)*(f+1) - maxw/2;
-            u->cy = (maxh+gap)*(l+1) - maxh/2;
-    #endif
-
-            u->csx = u->cx - maxw/2;
-            u->csy = u->cy;
-            u->cex = u->cx + maxw/2;
-            u->cey = u->cy;
-            u->clx = u->cx - maxw/2;
-            u->crx = u->cx + maxw/2;
-            u->cby = u->cy - maxh/2;
-            u->cty = u->cy + maxh/2;
-
-            if(f>maxf) maxf = f;
-
-            c++;
+        if(ISCHUNK(u->type) || ISATOM(u->type)) {
+        }
+        else {
+            continue;
         }
 
-    #if 0
-        xch->wd = (maxf+1)*gw;
-        xch->ht = (xch->cob.lanenum)*gh;
-    #endif
-    #if 1
+        f = c / xch->cob.lanenum;
+        l = c % xch->cob.lanenum;
+        if(xch->cob.laneorder==LO_SWU) {
+            u->cx = (maxw+gap)*(f+1) - maxw/2;
+            u->cy = (maxh+gap)*(l+1) - maxh/2;
+        }
+        else 
+        if(xch->cob.laneorder==LO_NWD) {
+            u->cx = (maxw+gap)*(f+1) - maxw/2;
+            u->cy = (maxh+gap)*(xch->cob.lanenum-l) - maxh/2;
+        }
+        else
+        if(xch->cob.laneorder==LO_SWR) {
+            u->cx = (maxw+gap)*(l+1) - maxw/2;
+            u->cy = (maxh+gap)*(f+1) - maxh/2;
+        }
+        else
+        if(xch->cob.laneorder==LO_NWR) {
+            u->cx = (maxw+gap)*(l+1) - maxw/2;
+            u->cy = (maxh+gap)*(maxc/xch->cob.lanenum-f+1) - maxh/2;
+        }
+        else
+        if(xch->cob.laneorder==LO_SWR) {
+            u->cx = (maxw+gap)*(l+1) - maxw/2;
+            u->cy = (maxh+gap)*(f+1) - maxh/2;
+        }
+        else
+        if(xch->cob.laneorder==LO_SEL) {
+            u->cx = (maxw+gap)*(xch->cob.lanenum-l) - maxw/2;
+            u->cy = (maxh+gap)*(f+1) - maxh/2;
+        }
+        else {
+        }
+    
+
+        u->csx = u->cx - maxw/2;
+        u->csy = u->cy;
+        u->cex = u->cx + maxw/2;
+        u->cey = u->cy;
+        u->clx = u->cx - maxw/2;
+        u->crx = u->cx + maxw/2;
+        u->cby = u->cy - maxh/2;
+        u->cty = u->cy + maxh/2;
+
+        if(f>maxf) maxf = f;
+
+        c++;
+    }
+    
+    switch(xch->cob.laneorder) {
+    case LO_SWU:
+    case LO_NWD:
         xch->wd = (maxf+1)*maxw+(maxf+2)*gap;
         xch->ht = (xch->cob.lanenum)*maxh+(xch->cob.lanenum+1)*gap;
-    #endif
-
-        xch->cx = xch->wd/2;
-        xch->cy = xch->ht/2;
-        xch->csx = 0;
-        xch->csy = xch->ht/2;
-        xch->cex = xch->wd;
-        xch->cey = xch->ht/2;
-        xch->clx = 0;
-        xch->crx = xch->wd;
-        xch->cby = 0;
-        xch->cty = xch->ht;
-        xch->ox  = -xch->wd/2;
-        xch->oy  = -xch->ht/2;
-
+        break;
+    default:
+        xch->wd = (xch->cob.lanenum)*maxw+(xch->cob.lanenum+1)*gap;
+        xch->ht = (maxf+1)*maxh+(maxf+2)*gap;
         break;
     }
+
+    xch->cx = xch->wd/2;
+    xch->cy = xch->ht/2;
+    xch->csx = 0;
+    xch->csy = xch->ht/2;
+    xch->cex = xch->wd;
+    xch->cey = xch->ht/2;
+    xch->clx = 0;
+    xch->crx = xch->wd;
+    xch->cby = 0;
+    xch->cty = xch->ht;
+    xch->ox  = -xch->wd/2;
+    xch->oy  = -xch->ht/2;
+
 
     return 0;
 }
@@ -2345,7 +2366,8 @@ putchunk(ob *xch, int *x, int *y, ns *xns)
     Echo("%s: oid %d lanenum %d\n", __func__, xch->oid, xch->cch.lanenum);
     if(xch->cch.lanenum>0) 
 #endif
-    Echo("%s: oid %d lanenum %d\n", __func__, xch->oid, xch->cob.lanenum);
+    Echo("%s: oid %d dir %d lanenum %d\n",
+        __func__, xch->oid, xch->cch.dir, xch->cob.lanenum);
     if(xch->cob.lanenum>0) 
     {
         ik = _putchunk_lane(xch, x, y, xns);
