@@ -2527,8 +2527,8 @@ epsdraw_segblinearrow(FILE *fp,
     dx = (int)(def_barrowgap/2*cos((a+90)*rf));
     dy = (int)(def_barrowgap/2*sin((a+90)*rf));
 
-    fprintf(stderr, "l %d b %d bx %d by %d\n", l, b, bx, by);
-    fprintf(stderr, "dx %d dy %d\n", dx, dy);
+    Echo("l %d b %d bx %d by %d\n", l, b, bx, by);
+    Echo("dx %d dy %d\n", dx, dy);
 
 P;
 PP;
@@ -8762,6 +8762,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     a = 1.0;
     
     switch(xu->type) {
+    case CMD_CHUNK:
     case CMD_BOX:
     case CMD_DMY1:
         ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
@@ -10783,7 +10784,11 @@ epsdraw_note(FILE *fp, ob *u)
         bx = u->gx;
         by = u->gy;
         ba = 0;
+#if 0
         ik = solvenotepos(&bx, &by, &ba, &bj, u, o, objunit/4, objunit/8, fht);
+#endif
+        ik = solvenotepos(&bx, &by, &ba, &bj, u, o,
+                def_noteosep, def_noteisep, fht);
 
 #if 0
         Echo("%2d: %-8s '%s' %6d,%-6d <%d>\n",
@@ -10799,10 +10804,6 @@ epsdraw_note(FILE *fp, ob *u)
         }
 
         ta = ba - 90;
-#if 0
-        tx = bx + fdc*cos(ba*rf);
-        ty = by + fdc*sin(ba*rf);
-#endif
         tx = bx;
         ty = by;
         nx = bx + nr*cos(ba*rf);
@@ -10810,8 +10811,8 @@ epsdraw_note(FILE *fp, ob *u)
 
 #if 0
         /* draw guide */
-        fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\
-                    %d %d translate %d %d moveto %d rotate\n",
+        fprintf(fp, "gsave 1 0 0 setrgbcolor %d setlinewidth\n"
+                    "%d %d translate %d %d moveto %d rotate\n",
             def_linethick,
             bx, by, bx, by, ta);
         SLW_1x(fp, 8);
@@ -10838,9 +10839,9 @@ epsdraw_note(FILE *fp, ob *u)
             }
 
 #if 0
-        /* draw guide */
-        fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth\
-                    %d %d translate %d %d moveto %d rotate\n",
+        /* draw guide for rotated */
+        fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth\n"
+                    "%d %d translate %d %d moveto %d rotate\n",
             def_linethick,
             0, 0, 0, 0, 0);
         SLW_1x(fp, 8);
@@ -11253,9 +11254,10 @@ PP;
         }
         else {
 PP;
-            ik = epsdraw_box(fp,
-                    gox,
-                    goy, xch, xns);
+#if 0
+            ik = epsdraw_box(fp, gox, goy, xch, xns);
+#endif
+            ik = epsdraw_dmyX(fp, gox, goy, xch, xns);
         }
 
         fprintf(fp, "%% chunk itself END\n");

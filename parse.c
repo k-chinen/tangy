@@ -476,7 +476,9 @@ skip_number:
         rob->cob.note[pn] = strdup(value);
 
 #if 1
-        Echo("THEN pn %d '%s'\n", pn, rob->cob.note[pn]);
+        Echo("THEN pn %3d 0%03o %3xH %-4s '%s' %d\n",
+            pn, pn, pn, rassoc(pos_ial, pn), 
+            rob->cob.note[pn], (int)strlen(rob->cob.note[pn]));
 #endif
         
     }
@@ -661,6 +663,8 @@ skip_note:
     GFSET(OA_LINEDECOPITCHFACTOR,   linedecopitchfactor);
     GFSET(OA_HATCHTHICKFACTOR,      hatchthickfactor);
     GFSET(OA_HATCHPITCHFACTOR,      hatchpitchfactor);
+    GFSET(OA_NOTEOSEPFACTOR,        noteosepfactor);
+    GFSET(OA_NOTEISEPFACTOR,        noteisepfactor);
 
 #if 0
     if(strcasecmp(name, "linetype")==0)        {

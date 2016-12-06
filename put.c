@@ -1474,7 +1474,7 @@ Echo("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
 int putchunk(ob *xch, int *x, int *y, ns *xns);
 
 int
-_putchunk_lane(ob *xch, int *x, int *y, ns *xns)
+_putchunk_lane(ob *xch, int *rx, int *ry, ns *xns)
 {
     int ik;
     int i;
@@ -1493,6 +1493,9 @@ _putchunk_lane(ob *xch, int *x, int *y, ns *xns)
     int fx, fy;
     int lfx, lfy;
     ns *curns;
+
+    int x, y;
+    int xc, yc;
 
     int   ldir;
 
@@ -1516,7 +1519,7 @@ _putchunk_lane(ob *xch, int *x, int *y, ns *xns)
 P;
 #endif
 #if 0
-    Echo("%s: oid %d x,y %d,%d\n", __func__, xch->oid, *x, *y);
+    Echo("%s: oid %d x,y %d,%d\n", __func__, xch->oid, *rx, *ry);
     Echo("%s: b oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, xch->oid,
         xch->cx, xch->cy, xch->csx, xch->csy, xch->cex, xch->cey, xch->ox, xch->coy);
@@ -1539,6 +1542,8 @@ P;
         curns = xch->cch.qns;
     }
 
+    gap = xch->cob.lanegap;
+
 
     maxw = -1;
     maxh = -1;
@@ -1549,7 +1554,7 @@ P;
     c = 0;
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
-        if(ISCHUNK(u->type) || ISATOM(u->type)) {
+        if(ISCHUNK(u->type) || HASBODY(u->type)) {
         }
         else {
             continue;
@@ -1578,48 +1583,59 @@ P;
     fprintf(stdout, "maxw %d maxh %d\n", maxw, maxh);
 #endif
 
-    /***
-     *** RL-RL style
-     ***
-     ***    ======>
-     ***  L |\  |\
-     ***    |   |
-     ***  R |   |
-     ***
-     ***/
 
-    gap = xch->cob.lanegap;
+    xc = -1;
+    yc = -1;
+    if(maxc<xch->cob.lanenum) {
+        xc = (maxc%xch->cob.lanenum);
+    }
+    else {
+        xc = xch->cob.lanenum;
+    }
+    yc = ((maxc+xch->cob.lanenum-1)/xch->cob.lanenum);
+
+
 
     c = 0;
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
 
-        if(ISCHUNK(u->type) || ISATOM(u->type)) {
+        if(ISCHUNK(u->type) || HASBODY(u->type)) {
         }
         else {
             continue;
         }
 
+ #define MMD    (0)
+ #define MMU    (1)
+ #define MMR    (0)
+ #define MML    (1)
+
         f = c / xch->cob.lanenum;
         l = c % xch->cob.lanenum;
+
+        x = c % xch->cob.lanenum;
+        y = c / xch->cob.lanenum;
+
+        if(xch->cob.laneorder==LO_NWR) {
+            u->cx = (maxw+gap)*(x+1)  - maxw/2;
+            u->cy = (maxh+gap)*(yc-y) - maxh/2;
+        }
+        else
+        if(xch->cob.laneorder==LO_NWD) {
+            u->cx = (maxw+gap)*(y+1)  - maxw/2;
+            u->cy = (maxh+gap)*(xc-x) - maxh/2;
+        }
+#if 0
+        else
         if(xch->cob.laneorder==LO_SWU) {
             u->cx = (maxw+gap)*(f+1) - maxw/2;
             u->cy = (maxh+gap)*(l+1) - maxh/2;
         }
         else 
-        if(xch->cob.laneorder==LO_NWD) {
-            u->cx = (maxw+gap)*(f+1) - maxw/2;
-            u->cy = (maxh+gap)*(xch->cob.lanenum-l) - maxh/2;
-        }
-        else
         if(xch->cob.laneorder==LO_SWR) {
             u->cx = (maxw+gap)*(l+1) - maxw/2;
             u->cy = (maxh+gap)*(f+1) - maxh/2;
-        }
-        else
-        if(xch->cob.laneorder==LO_NWR) {
-            u->cx = (maxw+gap)*(l+1) - maxw/2;
-            u->cy = (maxh+gap)*(maxc/xch->cob.lanenum-f+1) - maxh/2;
         }
         else
         if(xch->cob.laneorder==LO_SWR) {
@@ -1631,7 +1647,10 @@ P;
             u->cx = (maxw+gap)*(xch->cob.lanenum-l) - maxw/2;
             u->cy = (maxh+gap)*(f+1) - maxh/2;
         }
+#endif
         else {
+            Error("not support laneorder %s (%d) yet\n",
+                rassoc(lo_ial, xch->cob.laneorder), xch->cob.laneorder);
         }
     
 
@@ -1648,18 +1667,21 @@ P;
 
         c++;
     }
+
     
     switch(xch->cob.laneorder) {
     case LO_SWU:
     case LO_NWD:
-        xch->wd = (maxf+1)*maxw+(maxf+2)*gap;
-        xch->ht = (xch->cob.lanenum)*maxh+(xch->cob.lanenum+1)*gap;
+        xch->wd = yc*maxw+(yc+1)*gap;
+        xch->ht = xc*maxh+(xc+1)*gap;
         break;
     default:
-        xch->wd = (xch->cob.lanenum)*maxw+(xch->cob.lanenum+1)*gap;
-        xch->ht = (maxf+1)*maxh+(maxf+2)*gap;
+    case LO_NWR:
+        xch->wd = xc*maxw+(xc+1)*gap;
+        xch->ht = yc*maxh+(yc+1)*gap;
         break;
     }
+
 
     xch->cx = xch->wd/2;
     xch->cy = xch->ht/2;

@@ -367,6 +367,7 @@ apair_t arrowhead_ial[] = {
 #define PO_WIL              (054)
 #define PO_WIC              (055)
 #define PO_WIR              (056)
+
 #define PO_MAX              (057)
 
 apair_t pos_ial[] = {
@@ -571,6 +572,8 @@ apair_t lo_ial[] = {
 #define OA_LINEDECOPITCHFACTOR      (926)
 #define OA_HATCHTHICKFACTOR         (931)
 #define OA_HATCHPITCHFACTOR         (932)
+#define OA_NOTEOSEPFACTOR           (941)
+#define OA_NOTEISEPFACTOR           (942)
 
 
 apair_t objattr_ial[] = {
@@ -666,6 +669,8 @@ apair_t objattr_ial[] = {
     {"wlinethickfactor",    OA_WLINETHICKFACTOR},
     {"hatchthickfactor",    OA_HATCHTHICKFACTOR},
     {"hatchpitchfactor",    OA_HATCHPITCHFACTOR},
+    {"noteosepfactor",      OA_NOTEOSEPFACTOR},
+    {"noteisepfactor",      OA_NOTEISEPFACTOR},
 
     {NULL,                  -1},
 };
@@ -699,6 +704,8 @@ double hatchthickfactor     = 0.02;
 double hatchpitchfactor     = 0.07;
 double marknoderadfactor    = 0.05;
 
+double noteosepfactor       = 0.20;
+double noteisepfactor       = 0.10;
 
 int draft_mode      = 0;
 int skelton_mode    = 0;
@@ -735,6 +742,9 @@ int def_marknoderad     =  10;
 
 int def_gridpitch       = 10000;
 int def_gridrange       =   5;
+
+int def_noteosep        =   5;
+int def_noteisep        =   5;
 
 #if 0
 char *def_fontname      = "Times-Roman";
@@ -2253,6 +2263,8 @@ recalcsizeparam()
         def_hatchthick = 1;
     }
 #endif
+    def_noteosep        = noteosepfactor        * objunit;
+    def_noteisep        = noteisepfactor        * objunit;
     def_marknoderad     = marknoderadfactor     * objunit;
 
 #if 0
@@ -2397,7 +2409,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.013"
+    printf("2.014"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2431,6 +2443,8 @@ print_param()
     QPV(hatchthick);
     QPV(hatchpitch);
     QPV(marknoderad);
+    QPV(noteosep);
+    QPV(noteisep);
 
     printf("  text-base: multiply by text height (dynamic; normal %d)\n",
         def_textheight);
