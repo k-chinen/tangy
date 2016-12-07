@@ -32,6 +32,7 @@ int _t_ = 0;
 
 #define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
 #define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
+#define Info    printf("INFO %s:%s ", __FILE__, __func__);fflush(stdout);printf
 
 
 
@@ -108,6 +109,7 @@ int _t_ = 0;
 #define CMD_DMY3        (9003)
 
 #define CMD_ALIAS       (9007)
+#define CMD_NOTEFILE    (9009)
 
 #define CMD_CHUNK               (10000)
 #define CMD_NAMESPACE           (10001)
@@ -188,6 +190,7 @@ apair_t cmd_ial[] = {
     {".",               CMD_CHUNKOBJATTR},
     {"*",               CMD_CHUNKCHILDATTR},
     {"alias",           CMD_ALIAS},
+    {"notefile",        CMD_NOTEFILE},
     {"namespace",       CMD_NAMESPACE},
     {"object",          CMD_OBJ},
     {"ruler",           CMD_RULER},
@@ -336,6 +339,8 @@ apair_t arrowhead_ial[] = {
 #define PO_START            (10)
 #define PO_END              (11)
 
+#define PO_KEY              (12)
+
 #define PO_CIL              (13)
 #define PO_CIC              (14)
 #define PO_CIR              (15)
@@ -394,6 +399,8 @@ apair_t pos_ial[] = {
 
     {"start",               PO_START},
     {"end",                 PO_END},
+
+    {"key",                 PO_KEY},
 
     {"CIL",                 PO_CIL},
     {"CIC",                 PO_CIC},
@@ -1031,6 +1038,31 @@ skipwhite(char *p)
     return p;
 }
 
+char*
+chomp(char *line)
+{
+    char *p;
+
+    if(line==NULL) {
+        return NULL;
+    }
+
+    p = line;
+    while(*p) {
+        if(*p=='\r' && *(p+1)=='\n' && *(p+2)=='\0') {
+            *p = '\0';
+            break;
+        }
+        if(*p=='\n' && *(p+1)=='\0') {
+            *p = '\0';
+            break;
+        }
+        p++;
+    }
+
+    return line;
+}
+
 int
 dellastcharif(char *src, int xch)
 {
@@ -1361,8 +1393,6 @@ ob_gdump(ob* s)
 {
     int r;
     printf("=== GDUMP\n");
-    printf("oid: type oxy wxh xy sxy exy\n");
-//         "  1: chunk                         0,11000   30000x22000       0,-11000      0,0           0,-22000
     printf("oid: type                          oxy           wxh           xy            sxy           exy\n");
 
     r = _ob_gdump(s, 0);
@@ -2233,6 +2263,11 @@ int
 recalcsizeparam()
 {
 
+    if(objunit<=0) {
+        Error("sorry unit size is zero or negative.\n");
+        exit(7);
+    }
+
 #define V(x)    printf("%-20s %8d\n", #x, x);
     
     def_arrowsize       = arrowsizefactor       * objunit;
@@ -2286,6 +2321,7 @@ recalcsizeparam()
     return 0;
 }
 
+#include "notefile.c"
 
 #include "seg.c"
 
@@ -2409,7 +2445,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.014"
+    printf("2.015"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2628,6 +2664,7 @@ main(int argc, char *argv[])
     }
 #endif
 
+    notefile_setup();
 
     ch0   = newchunk();
     ns0   = newnamespace();
@@ -2640,6 +2677,13 @@ main(int argc, char *argv[])
     if(ISTRACE) {
         ob_cndump(ch0);
     }
+
+    if(ISTRACE) {
+        varray_fprint(stdout, gnotefilelist);
+        varray_fprint(stdout, gnotebindlist);
+    }
+
+    notefile_load();
 
 #if 0
 Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cch.lanenum);
@@ -2680,13 +2724,19 @@ P;
 #if 0
     printf("ht root-chunk %d vs canvas %d\n", ch0->ht, canvasht);
 #endif
+
+    if(ch0->ht<=0 || ch0->wd<=0) {
+        Error("figure is empty or negative size\n");
+        exit(9);
+    }
+
     canvassc = canvasht/ch0->ht;
     canvassc = 0.01;
 
 P;
     fp = fopen(outfile, "w");
     if(!fp) {
-        printf("ERROR cannot open file '%s'\n", outfile);
+        Error("cannot open output file '%s'\n", outfile);
         goto skip_output;
     }
 

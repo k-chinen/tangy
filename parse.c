@@ -443,6 +443,7 @@ skip_number:
     if(*s==':') {
         char pstr[BUFSIZ];
         int  pn;
+        int  ik;
 
         strcpy(pstr, s+1);
 #if 0
@@ -469,6 +470,10 @@ skip_number:
         }
 
         
+        if(pn==PO_KEY && value[0]) {
+            ik = nb_regist(value, rob);
+        }
+
 #if 0
         Echo("   value '%s'\n", value);
 #endif
@@ -944,6 +949,10 @@ Echo("CHECK CHUNK attr\n");
         nob->ignore = 1;
         break;
 
+    case CMD_NOTEFILE:
+        nob->ignore = 1;
+        break;
+
     default:
         break;
     }
@@ -963,6 +972,16 @@ fflush(stdout);
         if(!u) break;
         if(*u=='\0') break;
     } while(1);
+
+    if(nob->type==CMD_NOTEFILE) {
+        if(nob->cob.carg1) {
+            Echo("got note filename |%s|\n", nob->cob.carg1);
+            nf_registfilename(nob->cob.carg1);
+        }
+        else {
+            fprintf(stderr, "no filename\n");
+        }
+    }
 
 
 #define PV(x) if((x) && (x)->use) varray_fprint(stdout, (x));

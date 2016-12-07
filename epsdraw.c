@@ -10979,6 +10979,15 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         epsdraw_bbox(fp, u);
     }
 
+    if(u->type==CMD_NOTEFILE) {
+        goto out;
+    }
+#if 1
+    if(u->ignore) {
+        goto out;
+    }
+#endif
+
     if(u->type==CMD_SCATTER) {
         epsdraw_scatter(fp, *xdir, ox, oy, u, xns);
     }
