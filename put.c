@@ -2286,45 +2286,6 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     Echo("  oxy %d,%d\n", xch->ox, xch->oy);
 #endif
 
-    xch->wd = (maxx - minx) + xch->cgimargin*2;
-    xch->ht = (maxy - miny) + xch->cgimargin*2;
-    zx = minx - xch->cgimargin + xch->wd/2;
-    zy = miny - xch->cgimargin + xch->ht/2;
-    xch->ox = -zx;
-    xch->oy = -zy;
-
-        xch->clx = minx-xch->cgimargin;
-        xch->cby = miny-xch->cgimargin;
-        xch->crx = maxx+xch->cgimargin;
-        xch->cty = maxy+xch->cgimargin;
-
-#if 1
-    Echo("  gimargin %d\n", xch->cgimargin);
-    Echo("  x %d..%d\n", minx, maxx);
-    Echo("  y %d..%d\n", miny, maxy);
-    Echo("  zx,zy %d,%d\n", zx, zy);
-    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
-    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
-#endif
-
-
-#if 1
-    Echo("  new ox,oy %d,%d\n", xch->ox, xch->oy);
-
-    Echo("\ttotal %3d  : %5d %5d %5d %5d : %5d %5d %5d %5d (%d/%d) w,h %d,%d\n",
-        xch->oid,
-        xch->x, xch->y, xch->ox, xch->oy,
-        xch->lx, xch->by, xch->rx, xch->ty, v, c, xch->wd, xch->ht);
-#endif
-
-
-    xch->sizesolved++;
-
-#if 0
-Echo("chunk oid %d solved\n", xch->oid);
-
-#endif
-
     /***
      *** check SEP
      ***/
@@ -2359,6 +2320,50 @@ Echo("chunk oid %d solved\n", xch->oid);
             break;
         }
     }
+
+
+    xch->wd = (maxx - minx) + xch->cgimargin*2;
+    xch->ht = (maxy - miny) + xch->cgimargin*2;
+    zx = minx - xch->cgimargin + xch->wd/2;
+    zy = miny - xch->cgimargin + xch->ht/2;
+    xch->ox = -zx;
+    xch->oy = -zy;
+
+        xch->clx = minx-xch->cgimargin;
+        xch->cby = miny-xch->cgimargin;
+        xch->crx = maxx+xch->cgimargin;
+        xch->cty = maxy+xch->cgimargin;
+
+
+#if 1
+    Echo("  gimargin %d\n", xch->cgimargin);
+    Echo("  x %d..%d\n", minx, maxx);
+    Echo("  y %d..%d\n", miny, maxy);
+    Echo("  zx,zy %d,%d\n", zx, zy);
+    Echo("  wxh %dx%d\n", xch->wd, xch->ht);
+    Echo("  oxy %d,%d\n", xch->ox, xch->oy);
+#endif
+
+
+#if 1
+    Echo("  new ox,oy %d,%d\n", xch->ox, xch->oy);
+
+    Echo("\ttotal %3d  : %5d %5d %5d %5d : %5d %5d %5d %5d (%d/%d) w,h %d,%d\n",
+        xch->oid,
+        xch->x, xch->y, xch->ox, xch->oy,
+        xch->lx, xch->by, xch->rx, xch->ty, v, c, xch->wd, xch->ht);
+#endif
+
+
+    xch->sizesolved++;
+
+#if 0
+Echo("chunk oid %d solved\n", xch->oid);
+
+#endif
+
+
+
 
 out:
 

@@ -10,6 +10,7 @@ int epsdraftfontsize    = 10;
 int epsdraftgap         =  5;
 
 char *def_fontname      = "Times-Roman";
+int   def_markcolor     = 5;
 
 int debug_clip = 0;
 
@@ -3875,7 +3876,9 @@ Echo("%s: ydir %d xox %d xoy %d \n",
             continue;
         }
 
+#if 0
 Echo("%s: ptype %d\n", __func__, s->ptype);
+#endif
 
         switch(s->ptype) {
 
@@ -4293,7 +4296,9 @@ fprintf(fp, "%% %s: no segar %p use -\n",
             continue;
         }
 
+#if 0
 Echo("%s: ptype %d\n", __func__, s->ptype);
+#endif
 
 
         actfh = actch = actbh = 0;
@@ -5154,8 +5159,10 @@ P;
             continue;
         }
 
+#if 0
 Echo("%s: ptype %d\n", __func__, s->ptype);
 Echo("b cdir %d\n", cdir);
+#endif
 
 #if 0
         MP(4, x1, y1);
@@ -10713,6 +10720,52 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
     return rv;
 }
 
+int
+epsdraw_portboard(FILE *fp, int xdir, ob *u)
+{
+    int ik;
+    int dx, dy;
+    int qx, qy;
+    int lax, lay;
+    int fht;
+
+    if(u->cob.portstr || u->cob.boardstr) {
+        fprintf(fp, "      gsave\n");
+
+        lax = (objunit/8)*cos((xdir+90)*rf);
+        lay = (objunit/8)*sin((xdir+90)*rf);
+
+        ik = bumpBB(u->gx, u->gy, u->wd, u->ht,
+                u->gx, u->gy, xdir+90, &qx, &qy);
+
+        dx = qx - u->gx;
+        dy = qy - u->gy;
+
+        if(ik<=0) {
+            goto skip_portboard;
+        }
+
+        /* TEMP */
+        fht = def_textheight;
+        fprintf(fp, "      /%s findfont %d scalefont setfont %% port/board\n",
+            def_fontname, fht);
+
+        if(u->cob.portstr) {
+            fprintf(fp, "      %d %d %d (%s) rrshow\n",
+                u->gx+dx+lax, u->gy+dy+lay, xdir-90, u->cob.portstr);
+        }
+        if(u->cob.boardstr) {
+            fprintf(fp, "      %d %d %d (%s) lrshow\n",
+                u->gx-dx-lax, u->gy-dy-lay, xdir-90, u->cob.boardstr);
+        }
+        fprintf(fp, "      grestore\n");
+    }
+skip_portboard:
+
+    return 0;
+}
+
+
 
 int
 epsdraw_note(FILE *fp, ob *u)
@@ -10729,6 +10782,7 @@ epsdraw_note(FILE *fp, ob *u)
     int   exa;
     char  tmp[BUFSIZ];
     char *p, *q;
+    int   fs;
 
 #define INVREV      (180+360*10)        /* inveres but special number */
 
@@ -10737,10 +10791,7 @@ epsdraw_note(FILE *fp, ob *u)
 
     fht = def_textheight;
     fdc = (int)(textdecentfactor*fht);
-
-    /* TEMP */
-    fprintf(fp, "      /%s findfont %d scalefont setfont\n",
-        def_fontname, fht);
+    fs  = 0;
 
     for(o=0;o<PO_MAX;o++) {
         exa = 0;
@@ -10839,24 +10890,31 @@ epsdraw_note(FILE *fp, ob *u)
             }
 
 #if 0
-        /* draw guide for rotated */
-        fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth\n"
-                    "%d %d translate %d %d moveto %d rotate\n",
-            def_linethick,
-            0, 0, 0, 0, 0);
-        SLW_1x(fp, 8);
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            0, 0, 0, nr);
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            -nr, 0, nr, 0);
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            -nr, fht, nr, fht);
-        SLW_41(fp);
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            -nr, fdc, nr, fdc);
-        fprintf(fp, "grestore\n");
+            /* draw guide for rotated */
+            fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth\n"
+                        "%d %d translate %d %d moveto %d rotate\n",
+                def_linethick,
+                0, 0, 0, 0, 0);
+            SLW_1x(fp, 8);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                0, 0, 0, nr);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, 0, nr, 0);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, fht, nr, fht);
+            SLW_41(fp);
+            fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+                -nr, fdc, nr, fdc);
+            fprintf(fp, "grestore\n");
 #endif
 
+
+            if(fs==0) {
+                fprintf(fp,
+            "      /%s findfont %d scalefont setfont %% note default\n",
+                def_fontname, fht);
+                fs++;
+            }
 
             if(exa==INVREV) {
 #if 0
@@ -10970,13 +11028,21 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         }
     }
 
-    if(u->cob.markbb) {
+    if(draft_mode) {
         int fht;
         fht = def_textheight;
-        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+        fprintf(fp, "  /%s findfont %d scalefont setfont %% bbox\n",
             def_fontname, fht);
 
         epsdraw_bbox(fp, u);
+    }
+
+    if(u->cob.markbb) {
+        fprintf(fp, "  gsave %% markbb\n");
+        changecolor(fp, def_markcolor);
+        changethick(fp, def_markbbthick);
+        drawCRrect(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval);
+        fprintf(fp, "  grestore\n");
     }
 
     if(u->type==CMD_NOTEFILE) {
@@ -11118,44 +11184,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 
     ik = epsdraw_note(fp, u);
-
-    if(u->cob.portstr || u->cob.boardstr) {
-        int dx, dy;
-        int qx, qy;
-        int lax, lay;
-        int fht;
-
-        fprintf(fp, "      gsave\n");
-
-        lax = (objunit/8)*cos((*xdir+90)*rf);
-        lay = (objunit/8)*sin((*xdir+90)*rf);
-
-        ik = bumpBB(u->gx, u->gy, u->wd, u->ht,
-                u->gx, u->gy, *xdir+90, &qx, &qy);
-
-        dx = qx - u->gx;
-        dy = qy - u->gy;
-
-        if(ik<=0) {
-            goto skip_portboard;
-        }
-
-        /* TEMP */
-        fht = def_textheight;
-        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
-            def_fontname, fht);
-
-        if(u->cob.portstr) {
-            fprintf(fp, "      %d %d %d (%s) rrshow\n",
-                u->gx+dx+lax, u->gy+dy+lay, *xdir-90, u->cob.portstr);
-        }
-        if(u->cob.boardstr) {
-            fprintf(fp, "      %d %d %d (%s) lrshow\n",
-                u->gx-dx-lax, u->gy-dy-lay, *xdir-90, u->cob.boardstr);
-        }
-        fprintf(fp, "      grestore\n");
-    }
-skip_portboard:
+    ik = epsdraw_portboard(fp, *xdir, u);
 
     u->drawed = 1;
 
@@ -11197,12 +11226,12 @@ P;
     cha_reset(&xch->cch);
 
     if(xch->cob.markbb) {
-        int fht;
-        fht = def_textheight;
-        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
-            def_fontname, fht);
-
-        epsdraw_bbox(fp, xch);
+        fprintf(fp, "  gsave %% markbb\n");
+        changecolor(fp, def_markcolor);
+        changethick(fp, def_markbbthick*2);
+        drawCRrectskel(fp, xch->gx, xch->gy, xch->wd, xch->ht,
+            xch->cob.rotateval);
+        fprintf(fp, "  grestore\n");
     }
 
     if(0*bbox_mode) {
@@ -11422,6 +11451,7 @@ Echo(" call obj drawing %d,%d\n", gox+xch->x+xch->ox, goy+xch->y+xch->oy);
 #endif
 
     ik = epsdraw_note(fp, xch);
+    ik = epsdraw_portboard(fp, xch->cch.dir, u);
 
     fprintf(fp, "%% oid %d DONE\n", xch->oid);
 
@@ -11820,6 +11850,11 @@ P;
     fprintf(fp, "%d %d translate %% margin\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
     fprintf(fp, "%d %d translate %% bbox\n", -xch->lx, -xch->by);
+
+#if 1
+	fprintf(fp, "/%s findfont %d scalefont setfont %% font (fail-safe)\n",
+		def_fontname, def_textheight);
+#endif
 
 #if 0
     changedraft(fp);

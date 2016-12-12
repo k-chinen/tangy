@@ -710,6 +710,7 @@ double textbgmarginfactor   = 0.20;
 double hatchthickfactor     = 0.02;
 double hatchpitchfactor     = 0.07;
 double marknoderadfactor    = 0.05;
+double markbbthickfactor    = 0.02;
 
 double noteosepfactor       = 0.20;
 double noteisepfactor       = 0.10;
@@ -746,9 +747,10 @@ int def_textheight      =  30;
 int def_hatchpitch      =   5;
 int def_hatchthick      =   1;
 int def_marknoderad     =  10;
+int def_markbbthick     =  10;
 
-int def_gridpitch       = 10000;
-int def_gridrange       =   5;
+int def_gridpitch       = 1000;
+int def_gridrange       =  100;
 
 int def_noteosep        =   5;
 int def_noteisep        =   5;
@@ -757,6 +759,7 @@ int def_noteisep        =   5;
 char *def_fontname      = "Times-Roman";
 #endif
 extern char *def_fontname;
+extern int   def_markcolor;
 
 
 pallet_t *pallet = NULL;
@@ -2301,6 +2304,7 @@ recalcsizeparam()
     def_noteosep        = noteosepfactor        * objunit;
     def_noteisep        = noteisepfactor        * objunit;
     def_marknoderad     = marknoderadfactor     * objunit;
+    def_markbbthick     = markbbthickfactor     * objunit;
 
 #if 0
     V(objunit);
@@ -2370,10 +2374,10 @@ print_usage()
     printf("   *-L      draw labels\n");
     printf("   *-D      debug mode\n");
     printf("   *-v      verbose mode\n");
-    printf("\n");
     printf("   *-r      draw ruler\n");
     printf("   *-s num  set scale\n");
     printf("   *-n      no draw\n");
+    printf("   *-N file set notefile\n");
 
     return 0;
 }
@@ -2445,7 +2449,7 @@ print_hints()
 int
 print_version()
 {
-    printf("2.015"
+    printf("tangy version 2.017"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2479,6 +2483,7 @@ print_param()
     QPV(hatchthick);
     QPV(hatchpitch);
     QPV(marknoderad);
+    QPV(markbbthick);
     QPV(noteosep);
     QPV(noteisep);
 
