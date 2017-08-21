@@ -570,6 +570,32 @@ epsdraw_bbox_glbrt(FILE *fp, ob *xu)
 }
 
 int
+epsdraw_bbox_glbrtB(FILE *fp, ob *xu)
+{
+    char msg[BUFSIZ];
+
+    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
+            xu->glx, xu->gby, xu->grx, xu->gty);
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
+    fprintf(fp, "    currentlinewidth 40 mul setlinewidth\n");
+    changecolor(fp, 2);
+
+#if 0
+    drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby);
+#endif
+    sprintf(msg, "oid %d", xu->oid);
+    drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_RIGHT);
+
+    if(0*xu->cob.rotateval) {
+    }
+    fprintf(fp, "  grestore %% for bbox\n");
+
+    return 0;
+}
+
+int
 epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 {
     char msg[BUFSIZ];
@@ -802,7 +828,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
 
         dx =  (int)(r*2/3*cos((xdir+180)*rf));
         dy =  (int)(r*2/3*sin((xdir+180)*rf));
-        fprintf(fp, "%d %d lineto\n", x+dx, y);
+        fprintf(fp, "%d %d lineto\n", x+dx, y+dy);
 
         dx =  (int)(r*cos((xdir+180-def_arrowangle/2)*rf));
         dy =  (int)(r*sin((xdir+180-def_arrowangle/2)*rf));
@@ -2161,7 +2187,7 @@ int
 epsdraw_Xseglinearrow(FILE *fp,
     int xox, int xoy, 
     int x1, int y1, int x2, int y2,
-    int xltype, int xlt, int xlc, int xahpart, int xahfore, int xahback)
+    int xltype, int xlt, int xlc, int xahpart, int xahfore, int xahcent, int xahback)
 {
     ob* pf;
     ob* pt;
@@ -2171,10 +2197,11 @@ epsdraw_Xseglinearrow(FILE *fp,
 
     int x1i, y1i;
     int x2i, y2i;
+    int x3, y3;
 
     /*
-     *   x1,y1 x1i,y1i  x2i,y2i  x2,y2
-     *     <---+--------------+---->
+     *   x1,y1 x1i,y1i x3,y3 x2i,y2i  x2,y2
+     *     <---+---------+------+---->
      */
 
     Echo("%s: enter\n", __func__);
@@ -2254,6 +2281,14 @@ no_forehead:
     /*** MAIN LINE */
     epsdraw_segline(fp, xltype, xlt, xlc, x1i, y1i, x2i, y2i);
 
+#if 1
+    if(xahpart & AR_CENT) {
+        x3 = (x1+x2)/2;
+        y3 = (y1+y2)/2;
+        xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+        epsdraw_arrowhead(fp, xahcent, xdir, xlc, x3, y3);
+    }
+#endif
 
     /*** FORE ARROW HEAD */
     if(x2i!=x2 || y2i!=y2) {
@@ -2279,7 +2314,7 @@ epsdraw_Xsegwlinearrow(FILE *fp,
     int xox, int xoy, 
     int x1, int y1, int x2, int y2,
     int xwlt,
-    int xltype, int xlt, int xlc, int xahpart, int xahfore, int xahback)
+    int xltype, int xlt, int xlc, int xahpart, int xahfore, int xahcent, int xahback)
 {
     ob* pf;
     ob* pt;
@@ -2421,7 +2456,9 @@ epsdraw_seglinearrow(FILE *fp,
         xu->cob.outlinethick,
         xu->cob.outlinecolor,
         xu->cob.arrowheadpart,
-        xu->cob.arrowforeheadtype, xu->cob.arrowbackheadtype);
+        xu->cob.arrowforeheadtype,
+        xu->cob.arrowcentheadtype,
+        xu->cob.arrowbackheadtype);
 
 out:
     return ik;
@@ -2496,7 +2533,9 @@ apply:
         xu->cob.outlinethick,
         xu->cob.outlinecolor,
         xu->cob.arrowheadpart,
-        xu->cob.arrowforeheadtype, xu->cob.arrowbackheadtype);
+        xu->cob.arrowforeheadtype,
+        xu->cob.arrowcentheadtype,
+        xu->cob.arrowbackheadtype);
 
 out:
     return ik;
@@ -2547,10 +2586,10 @@ PP;
 
     epsdraw_Xseglinearrow(fp, 0, 0, s1x, s1y, e1x, e1y,
         LT_SOLID, xu->cob.outlinethick, xu->cob.outlinecolor,
-        AR_FORE, AH_NORMAL, AH_NONE);
+        AR_FORE, AH_NORMAL, AH_NONE, AH_NONE);
     epsdraw_Xseglinearrow(fp, 0, 0, e2x, e2y, s2x, s2y,
         LT_SOLID, xu->cob.outlinethick, xu->cob.outlinecolor,
-        AR_FORE, AH_NORMAL, AH_NONE);
+        AR_FORE, AH_NORMAL, AH_NONE, AH_NONE);
 
     fprintf(fp, "  grestore %% for blinearrow\n");
 
@@ -4072,8 +4111,16 @@ P;
                 Echo("    part seg %d: ftflag %d : %d,%d\n",
                     i, s->ftflag, s->x1, s->y1);
             
+#if 1
                 /* skip */
                 continue;
+#endif
+#if 0
+                goto confirm_arrow;
+#endif
+#if 0
+                goto coord_done;
+#endif
             }
             if(s->ftflag & COORD_TO) {
 P;
@@ -4195,6 +4242,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
 
     cdir = ydir;
 
+#if 0
     if(bbox_mode) {
 #if 0
         epsdraw_bbox(fp, xu);
@@ -4202,6 +4250,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
 #endif
         epsdraw_bbox_lbrt(fp, xox, xoy, xu);
     }
+#endif
 
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
@@ -4318,6 +4367,8 @@ Echo("%s: ptype %d\n", __func__, s->ptype);
                 actfh = xu->cob.arrowforeheadtype;
             }
         }
+printf("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
+    xu->oid, __func__, actbh, actch, actfh);
 
         if(xu->cob.marknode) {
             marknode(xu->cob.outlinecolor, x1, y1);
@@ -4581,8 +4632,13 @@ P;
                 Echo("    part seg %d: ftflag %d : %d,%d\n",
                     i, s->ftflag, s->x1, s->y1);
             
+#if 1
                 /* skip */
                 continue;
+#endif
+#if 0
+                goto confirm_arrow;
+#endif
             }
             if(s->ftflag & COORD_TO) {
 P;
@@ -4631,6 +4687,7 @@ fprintf(fp, "%% arrow f %d c %d b %d\n", actfh, actch, actbh);
                 fprintf(fp, "grestore\n");
             }
             if(actbh>0) {
+P;
                 fprintf(fp, "gsave\n");
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowbackheadtype, cdir-180,
@@ -5009,10 +5066,12 @@ __line_deco2(FILE *fp,
     int isfseg;
     int fsegtype;
 
+P;
     changethick(fp, xu->vob.outlinethick);
     changecolor(fp, xu->vob.outlinecolor);
 
     if(xu->cob.outlinetype==LT_SOLID) {
+P;
         _line_patharrow(fp, ydir, xox, xoy, xu, xns);
         fprintf(fp, "  stroke\n");
         return 0;
@@ -5141,7 +5200,6 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     trip  = 0.0;
     count = 0;
 
-
     for(i=0;i<xu->cob.segar->use;i++) {
 P;
         isfseg = 0;
@@ -5189,6 +5247,9 @@ Echo("b cdir %d\n", cdir);
                 actfh = xu->cob.arrowforeheadtype;
             }
         }
+
+printf("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
+    xu->oid, __func__, actbh, actch, actfh);
 
         switch(s->ptype) {
 
@@ -5730,6 +5791,7 @@ coord_done:
                     xu->cob.outlinecolor, x2, y2);
             }
             if(actbh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowbackheadtype, cdir-180,
                     xu->cob.outlinecolor, x1, y1);
@@ -5827,6 +5889,7 @@ Zepsdraw_linearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
     int r;
+P;
 #if 0
 Echo("%s: enter\n", __func__);
 #endif
@@ -5846,7 +5909,19 @@ Echo("%s: enter\n", __func__);
     }
 #endif
 
+#if 1
+    fprintf(stdout, "segar");
+    varray_fprint(stdout, xu->cob.segar);
+#endif 
+#if 0
+    fprintf(fp, "%% xox %d xoy %d\n", xox, xoy);
+    fprintf(fp, "%% csx %d csy %d\n", xu->csx, xu->csy);
+    fprintf(fp, "%% cex %d cey %d\n", xu->cex, xu->cey);
+    varray_fprint(fp, xu->cob.segar);
+#endif
+
     if(!xu->cob.originalshape) {
+P;
         try_regline(xu->cob.segar, xu->csx, xu->csy, xu->cex, xu->cey);
     }
 
@@ -6835,6 +6910,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     switch(hty) {
 
     case HT_HZIGZAG:
+#if 0
         for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
             c = 0;
             for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
@@ -6854,8 +6930,34 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
             }
         }
         break;
+#endif
+#if 1
+        for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+            c = 0;
+            for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+                if(c%2==0) {
+                    y2 = y1-def_hatchpitch/2;
+                    y3 = y1;
+                }
+                else {
+                    y3 = y1-def_hatchpitch/2;
+                    y2 = y1;
+                }
+                x2 = x1;
+                x3 = x1+def_hatchpitch;
+                if(c==0) {
+                    fprintf(fp, " %d %d moveto\n", x2, y2);
+                }
+                fprintf(fp, " %d %d lineto\n", x3, y3);
+                c++;
+            }
+            fprintf(fp, "stroke\n");
+        }
+        break;
+#endif
 
     case HT_VZIGZAG:
+#if 0
         for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
             c = 0;
             for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
@@ -6874,6 +6976,30 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
                 c++;
             }
         }
+#endif
+#if 1
+        for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+            c = 0;
+            for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+                if(c%2==0) {
+                    x2 = x1-def_hatchpitch/2;
+                    x3 = x1;
+                }
+                else {
+                    x3 = x1-def_hatchpitch/2;
+                    x2 = x1;
+                }
+                y2 = y1;
+                y3 = y1+def_hatchpitch;
+                if(c==0) {
+                    fprintf(fp, " %d %d moveto\n", x2, y2);
+                }
+                fprintf(fp, " %d %d lineto\n", x3, y3);
+                c++;
+            }
+            fprintf(fp, "stroke\n");
+        }
+#endif
         break;
 
     case HT_HLINED:
@@ -6978,6 +7104,45 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
                     x1, y1, x2, y2);
             }
         }
+        break;
+
+    case HT_CHECKED:
+      {
+            int u, v;
+        u = 0;
+        for(x1=-aw;x1<aw;x1+=def_hatchpitch) {
+            v = 0;
+            for(y1=-ah;y1<ah;y1+=def_hatchpitch) {
+                
+                if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
+                    fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
+                        x1, y1, def_hatchpitch, def_hatchpitch, -def_hatchpitch);
+                }
+                v++;
+            }
+            u++;
+        }
+      }
+        break;
+    
+
+    case HT_BIGCHECKED:
+      {
+            int u, v;
+        u = 0;
+        for(x1=-aw;x1<aw;x1+=def_hatchpitch*2) {
+            v = 0;
+            for(y1=-ah;y1<ah;y1+=def_hatchpitch*2) {
+                
+                if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
+                    fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
+                        x1, y1, def_hatchpitch*2, def_hatchpitch*2, -def_hatchpitch*2);
+                }
+                v++;
+            }
+            u++;
+        }
+      }
         break;
     
     default:
@@ -7351,12 +7516,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     }
 
 #if 0
-    varray_fprint(stdout, ssar);
+    Echo("%s: x,y %d,%d wd,ht %d,%d ro %d\n", __func__, x, y, wd, ht, ro);
 #endif
-
-    if(ssar->use<=0)  {
-        goto skip_label;
-    }
 
 #if 0
     ss_dump(stdout, ssar);
@@ -7365,6 +7526,19 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 #if 0
     Echo("mcontall '%s'\n", mcontall);
 #endif
+
+#if 1
+    Echo("%s: x,y %d,%d wd,ht %d,%d ro %d '%s'\n",
+        __func__, x, y, wd, ht, ro, mcontall);
+#endif
+
+#if 0
+    varray_fprint(stdout, ssar);
+#endif
+
+    if(ssar->use<=0)  {
+        goto skip_label;
+    }
 
     fprintf(fp, "%% %s: pos %6d,%-6d %6dx%-6d %4d fg %d bg %d %d %d ; %s\n",
         __func__, x, y, wd, ht, ro,
@@ -8691,9 +8865,25 @@ int
 mkpath_circle(varray_t *sar, int wd, int ht, int rad)
 {
 P;
+#if 0
     try_regsegmove(sar,     0, -ht/2);
     try_regsegarc(sar,   ht/2,   360);
     try_regsegclose(sar);
+#endif
+    if(rad>0) {
+        try_regsegmove(sar,     0,  -rad);
+        try_regsegarc(sar,    rad,   360);
+        try_regsegclose(sar);
+    }
+    else
+    if(rad==0) {
+        /* skip */
+    }
+    else {
+        try_regsegmove(sar,     0, -ht/2);
+        try_regsegarc(sar,   ht/2,   360);
+        try_regsegclose(sar);
+    }
 
     return 0;
 }
@@ -8771,15 +8961,21 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     switch(xu->type) {
     case CMD_CHUNK:
     case CMD_BOX:
+#if 0
     case CMD_DMY1:
+#endif
         ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         break;
     case CMD_CIRCLE:
+#if 0
     case CMD_DMY2:
+#endif
         ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         break;
     case CMD_ELLIPSE:
+#if 0
     case CMD_DMY3:
+#endif
         ik = mkpath_ellipse(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         break;
     default:
@@ -8797,6 +8993,16 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 #endif
 
     fprintf(fp, "gsave %% dmyX\n");
+
+#if 1
+    if(bbox_mode) {
+        epsdraw_bbox_glbrt(fp, xu);
+#if 0
+        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
+#endif
+    }
+#endif
+
     changecolor(fp, xu->cob.outlinecolor);
     changethick(fp, xu->cob.outlinethick);
     fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
@@ -10434,7 +10640,7 @@ Echo("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n",
                     xox+xu->cob.gsepx2, xoy+xu->cob.gsepy2,
                     xu->cob.outlinetype,
                     xu->cob.outlinethick,
-                    xu->cob.outlinecolor, 0, 0, 0);
+                    xu->cob.outlinecolor, 0, 0, 0, 0);
 #endif
 
     epsdraw_Xseglinearrow(fp, xox, xoy,
@@ -10442,7 +10648,7 @@ Echo("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n",
                     xu->cob.gsepx2, xu->cob.gsepy2,
                     xu->cob.outlinetype,
                     xu->cob.outlinethick,
-                    xu->cob.outlinecolor, 0, 0, 0);
+                    xu->cob.outlinecolor, 0, 0, 0, 0);
 
     fprintf(fp, "grestore\n");
 
@@ -11018,7 +11224,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             u->gsx, u->gsy, u->gex, u->gey,
             LT_MOUNTAIN, (int)((double)objunit*0.01),
             6, /*u->cob.outlinecolor, */
-            AR_NONE, AH_WIRE, AH_WIRE);
+            AR_NONE, AH_WIRE, AH_WIRE, AH_WIRE);
         fprintf(fp, "grestore\n");
     }
 
@@ -11163,10 +11369,13 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_BOX|| u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE) {
         epsdraw_dmyX(fp, ox, oy, u, xns);
     }
+#if 0
     if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
         epsdraw_dmyX(fp, ox, oy, u, xns);
     }
+#endif
 
+#if 1
     if(u->cob.ssar) {
         if(ISGLUE(u->type)) {
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
@@ -11182,6 +11391,43 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
                 0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
         }
     }
+#endif
+
+#if 0
+    if(u->cob.ssar) {
+        if(ISGLUE(u->type)) {
+            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+        }
+        else
+        if(u->cob.fillhatch==HT_NONE) {
+            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+        }
+        else {
+            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
+        }
+    }
+#endif
+
+#if 0
+    if(u->cob.ssar) {
+        if(ISGLUE(u->type)) {
+            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+        }
+        else
+        if(u->cob.fillhatch==HT_NONE) {
+            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+        }
+        else {
+            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
+        }
+    }
+#endif
 
     ik = epsdraw_note(fp, u);
     ik = epsdraw_portboard(fp, *xdir, u);
@@ -11234,6 +11480,9 @@ P;
         fprintf(fp, "  grestore\n");
     }
 
+    if(1*bbox_mode) {
+        epsdraw_bbox_glbrtB(fp, xch);
+    }
     if(0*bbox_mode) {
         epsdraw_bbox(fp, xch);
     }
@@ -11852,8 +12101,8 @@ P;
     fprintf(fp, "%d %d translate %% bbox\n", -xch->lx, -xch->by);
 
 #if 1
-	fprintf(fp, "/%s findfont %d scalefont setfont %% font (fail-safe)\n",
-		def_fontname, def_textheight);
+    fprintf(fp, "/%s findfont %d scalefont setfont %% font (fail-safe)\n",
+        def_fontname, def_textheight);
 #endif
 
 #if 0

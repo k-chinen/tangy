@@ -24,8 +24,9 @@
 double rf = M_PI/180.0;
 
 int _t_ = 0;
+int _p_ = 0;
 #define ISTRACE (_t_>0)
-#define P   if(_t_)printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout);
+#define P   if(_t_||_p_)printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout);
 #define E   printf("%s:%d;%s probably ERROR\n", __FILE__, __LINE__, __func__); fflush(stdout);
 
 #define Echo    if(_t_)printf
@@ -170,9 +171,11 @@ apair_t cmd_ial[] = {
     {"fork",            CMD_FORK},
     {"forkend",         CMD_FORKEND},
     {"branch",          CMD_BRANCH},
+#if 0
     {"dmy1",            CMD_DMY1},
     {"dmy2",            CMD_DMY2},
     {"dmy3",            CMD_DMY3},
+#endif
     {"lparen",          CMD_LPAREN},
     {"rparen",          CMD_RPAREN},
     {"\"(\"",           CMD_LPAREN},
@@ -216,7 +219,7 @@ apair_t cmd_ial[] = {
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
     )
 #define HASBODY(x)  \
-    (ISGLUE(x)||ISATOM(x)) 
+    (ISGLUE(x)||ISATOM(x)||(x)==CMD_NOP) 
 #define MAYEXPAND(x)  \
     ((x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
@@ -272,6 +275,8 @@ apair_t linetype_ial[] = {
 #define HT_SPARSEDOTTED     (14)
 #define HT_VZIGZAG          (15)
 #define HT_HZIGZAG          (16)
+#define HT_CHECKED          (17)
+#define HT_BIGCHECKED       (18)
 
 apair_t hatchtype_ial[] = {
     {"none",                HT_NONE},
@@ -286,6 +291,8 @@ apair_t hatchtype_ial[] = {
     {"sparsedotted",        HT_SPARSEDOTTED},
     {"vzigzag",             HT_VZIGZAG},
     {"hzigzag",             HT_HZIGZAG},
+    {"checked",             HT_CHECKED},
+    {"bigchecked",          HT_BIGCHECKED},
     {NULL,                  -1},
 };
 
@@ -567,6 +574,8 @@ apair_t lo_ial[] = {
 #define OA_LANEORDER        (800)
 #define OA_LANENUM          (801)
 #define OA_LANEGAP          (802)
+#define OA_LANEGAPV         (803)
+#define OA_LANEGAPH         (804)
 
 #define OA_TEXTHEIGHTFACTOR         (901)
 #define OA_TEXTDECENTFACTOR         (902)
@@ -664,6 +673,8 @@ apair_t objattr_ial[] = {
     {"laneorder",           OA_LANEORDER},
     {"lanenum",             OA_LANENUM},
     {"lanegap",             OA_LANEGAP},
+    {"lanegapv",            OA_LANEGAPV},
+    {"lanegaph",            OA_LANEGAPH},
 
     {"textheightfactor",    OA_TEXTHEIGHTFACTOR},
     {"textdecentfactor",    OA_TEXTDECENTFACTOR},
@@ -884,7 +895,8 @@ struct obattr {
 #if 1
     int    laneorder;
     int    lanenum;
-    int    lanegap;
+    int    lanegapv;
+    int    lanegaph;
 #endif
 
 #if 1
@@ -909,6 +921,9 @@ typedef struct _ch {
     struct _ch *root;
     struct _ch *parent;
     struct _ns *qns;
+
+    struct _ob *qob;
+
     int  nch;
     struct obattr*  ch[CH_OBJ_LEN];
 } ch;
@@ -923,6 +938,8 @@ typedef struct _ob {
     int  pst;
 
     int  layer;
+
+    ch  *behas;
 
                         /***** LOGICAL *****/
     int  sx, sy;        /* area start */
@@ -1078,9 +1095,14 @@ dellastcharif(char *src, int xch)
         p++;
     }
 
-    printf(" b src |%s|\n", src);
+#if 0
+    printf("%s: ", __func__);
+    printf(" b src |%s| -> ", src);
+#endif
     if(q && *q==xch) *q='\0';
+#if 0
     printf(" a src |%s|\n", src);
+#endif
     return 0;
 }
 
@@ -1772,6 +1794,8 @@ P;
     r->cob.textcolor    = def_fgcolor;
     r->cob.textbgcolor  = def_bgcolor;
     r->cob.fillcolor    = def_bgcolor;
+
+    r->cob.rad      = -1;
     
     r->cob.ssar     = varray_new();
     r->cob.segopar  = varray_new();
@@ -1873,6 +1897,12 @@ newchunk_child(ob* pch)
     cha_copy(&nch->cch, &pch->cch);
     nch->cch.root   = pch->cch.root;
     nch->cch.parent = &pch->cch;
+#if 0
+    nch->cch.qob    = pch;
+#endif
+#if 1
+    nch->cch.qob    = nch;
+#endif
 
     return nch;
 }
@@ -1920,6 +1950,10 @@ chadd(ob* xch, ob* xob)
 
     xch->cch.ch[xch->cch.nch] = (struct obattr*)xob;
     xch->cch.nch++;
+
+#if 1
+    xob->behas = &xch->cch;
+#endif
 
     return 0;
 }
@@ -2038,60 +2072,132 @@ splitdot(char *h, int hlen, char *r, int rlen, char *full)
     return 0;
 }
 
+#define _ns_find_obj(a1,a2) _ns_find_objP(a1,a2,NULL,NULL)
+
+#if 0
 ob*
 _ns_find_obj(ns* xns, char *xname)
+#endif
+ob*
+_ns_find_objP(ns* xns, char *xname, int* xx, int* xy)
 {
     char head[BUFSIZ];
     char rest[BUFSIZ];
     int i;
     ob* r;
     int ik;
+    int mx, my;
+
 #if 1
-P;
-    printf("%s: xns %p, xname '%s'\n", __func__, xns, xname);
+    Echo("  %s: xns %p, xname '%s' xx %p xy %p\n",
+        __func__, xns, xname, xx, xy);
+    if(xx && xy) {
+        Echo("  *xx,*xy = %d,%d\n", *xx, *xy);
+    }
 #endif
-    if(!xns) {
-        return NULL;
+#if 1
+    ns_dump(xns);
+#endif
+
+    if(xx && xy) {
+        mx = *xx;
+        my = *xy;
+    }
+    else {
+        mx = my = 0;
     }
 
     r = NULL;
+    if(!xns) {
+        goto out;
+    }
 
-#if 1
-    printf("xname '%s'\n", xname);
+#if 0
+    Echo("  xname '%s'\n", xname);
 #endif
     ik = splitdot(head, BUFSIZ, rest, BUFSIZ, xname);
-#if 1
-    printf("head '%s' rest '%s'\n", head, rest);
+#if 0
+    Echo("  head  '%s' rest '%s'\n", head, rest);
 #endif
 
     for(i=0;i<xns->nch;i++) {
+#if 0
+        Echo("     %2d '%s' vs '%s'\n", i, head, xns->chn[i]);
+#endif
         if(strcasecmp(xns->chn[i], head)==0) {
+P;
+#if 1
+            Echo("       FOUND\n");
+            Echo("         chn '%s'\n", xns->chn[i]);
+            Echo("         cht %d\n",   xns->cht[i]);
+            Echo("         chv %p\n",   xns->chv[i]);
+#endif
+
+            ob *mm;
+            mm = xns->chv[i];
+#if 1
+            if(mm) {
+                Echo(
+                  " mm %p ox,oy %d,%d x,y %d,%d gx,gy %d,%d\n",
+                    mm, mm->cox, mm->coy, mm->cx, mm->cy,
+                    mm->cgx, mm->cgy);
+            }
+#endif
+
+
             if(xns->cht[i]==CMD_OBJ) {
+P;
                 if(rest[0]=='\0') {
+P;
                     r = xns->chv[i];
+        Echo("b mx,my %d,%d\n", mx, my);
+                    mx += r->cx;
+                    my += r->cy;
+        Echo("a mx,my %d,%d\n", mx, my);
+                    break;
                 }
             }
             if(xns->cht[i]==CMD_NAMESPACE) {
                 if(rest[0]=='\0') {
-#if 1
 P;
                     r = xns->chv[i];
-#endif
+        Echo("b mx,my %d,%d\n", mx, my);
+                    mx += r->cx;
+                    my += r->cy;
+        Echo("a mx,my %d,%d\n", mx, my);
                 }
                 else {
-                    r = _ns_find_obj(xns->chc[i], rest);
+P;
+
+        Echo("b mx,my %d,%d\n", mx, my);
+                    if(mm) {
+                        mx += mm->cox + mm->cx;
+                        my += mm->coy + mm->cy;
+                    }
+        Echo("a mx,my %d,%d\n", mx, my);
+                    r = _ns_find_objP(xns->chc[i], rest, &mx, &my);
                 }
                 break;
             }
+#if 0
             else {
                 break;
             }
+#endif
         }
+        /* next */
+#if 0
+        if(r) break;
+#endif
     }
 
+out:
 #if 1
-    printf("r %p\n", r);
+    Echo("%s:  xname '%s' ; r %p mx,my %d,%d\n", __func__, xname, r, mx, my);
+    Echo("  mx,my %d,%d\n", mx, my);
 #endif
+    if(xx) *xx = mx;
+    if(xy) *xy = my;
     return r;
 }
 
@@ -2100,27 +2206,136 @@ ns_find_obj(ns* xns, char *xname)
 {
     ob* r;
 
-#if 1
-    printf("%s: xns %p, xname '%s'\n", __func__, xns, xname);
+#if 0
+    Echo("%s:    xns %p, xname '%s'\n", __func__, xns, xname);
 #endif
     r = _ns_find_obj(xns, xname);
-#if 1
+#if 0
     if(r) {
-        printf("r %p oid %d type %d\n", r, r->oid, r->type);
+        Echo("r   %p oid %d type %d\n", r, r->oid, r->type);
     }
     else {
-        printf("r %p\n", r);
+        Echo("r   %p\n", r);
     }
 #endif
+    return r;
+}
+
+int
+ch_sprintf(char*dst, int dlen, void* xv, int opt)
+{
+    int ik;
+    ch *xch;
+
+    xch = (ch*)xv;
+    ik = sprintf(dst, "ch-'%s'",
+            xch->name);
+
+    return ik;
+}
+
+
+int
+revch(ob *x, ch* ref, int *rx, int *ry)
+{
+    ch  *qch;
+    int  r;
+    ch  *c;
+    int  i;
+    varray_t *chpath;
+    ob  *u;
+    int  mx, my;
+
+    Echo("%s: x %p ref %p START\n", __func__, x, ref);
+    if(x) {
+        Echo("  x->oid %d\n", x->oid);
+    }
+
+    mx = my = 0;
+    qch = NULL;
+    r = -3;
+    chpath = NULL;
+    
+    if(!x) {
+        r = -1;
+        goto out;
+    }
+
+#if 1
+    mx = x->cx;
+    my = x->cy;
+#endif
+
+    if(x->behas) {
+        chpath = varray_new();
+        varray_entrysprintfunc(chpath, ch_sprintf);
+
+        c = x->behas;
+        Echo("c %p\n", c);
+        while(c) {
+            Echo("  c %p parent %p root %p\n", c, c->parent, c->root);
+            u = c->qob;
+            if(u) {
+                Echo("    qob %p oid %d\n", u, u->oid);
+            }
+
+            varray_push(chpath, (void*)c);
+
+            c = c->parent;
+            Echo("c %p\n", c);
+        }
+
+#if 0
+        varray_dump(chpath);
+#endif
+        varray_fprint(stdout, chpath);
+
+        Echo("chpath\n");
+        for(i=0;i<chpath->use;i++) {
+            c = (ch*)chpath->slot[i];
+            Echo("  %2d: %p qob %p\n", i, c, c->qob);
+
+            u = c->qob;
+            if(u) {
+                Echo("    u %p; oid %d ox,oy %d,%d x,y %d,%d\n",
+                    u, u->oid, u->cox, u->coy, u->cx, u->cy);
+                mx += u->cox + u->cx;
+                my += u->coy + u->cy;
+            }
+
+            Echo("    mx,my %d,%d\n", mx, my);
+
+            if(c==ref) {
+                r = 1;
+                qch = c;
+                break;
+            }
+        }
+
+    }
+    
+out:
+    if(r==1) {
+        *rx = mx;
+        *ry = my;
+    }
+    if(x) {
+        Echo("%s: x %p oid %d; r %d rx,ry %d,%d\n",
+            __func__, x, x->oid, r, *rx, *ry);
+    }
+    else {
+        Echo("%s: x %p; r %d rx,ry %d,%d\n", __func__, x, r, *rx, *ry);
+    }
+    fflush(stdout);
+
     return r;
 }
 
 #define LPOS    (1)
 #define PPOS    (2)
 
-
 int
-_ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
+_ns_find_objposP(ns *xns, ob *b, char *xname, int pmode, int *rx, int *ry)
 {
     char  yname[BUFSIZ];
     char  token[BUFSIZ];
@@ -2128,9 +2343,14 @@ _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
     ob   *u;
     int   pos;
     int   r;
-
-#if 0
-        printf("%s: xname '%s'\n", __func__, xname);
+    int   ux, uy;
+P;
+#if 1
+        Echo("%s: b %p xname '%s' pmode %d\n",
+            __func__, p, xname, pmode);
+        if(b) {
+            Echo("  b->behas %p\n", b->behas);
+        }
 #endif
 
     r = -1;
@@ -2151,39 +2371,165 @@ _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
     }
 
 
-#if 0
-        printf("  yname '%s'\n", yname);
+#if 1
+        Echo("  yname '%s' 1\n", yname);
 #endif
     dellastcharif(yname, '.');
-#if 0
-        printf("  yname '%s'\n", yname);
+#if 1
+        Echo("  yname '%s' 2\n", yname);
     if(q) {
-        printf("  q     '%s'\n", q);
+        Echo("  q     '%s'\n", q);
     }
     if(p) {
-        printf("  p     '%s'\n", p);
+        Echo("  p     '%s'\n", p);
     }
 #endif
 
-    u = ns_find_obj(xns, yname);
+    ux = uy = 0;
+
+    u = _ns_find_objP(xns, yname, &ux, &uy);
     if(u) {
-#if 0
-        printf("  u %p\n", u);
+#if 1
+        Echo("  u %p gx,gy = %d,%d solved? %d drawed? %d finalized? %d\n",
+            u, u->gx, u->gy, u->sizesolved, u->drawed, u->finalized);
+        Echo("  u %p ux,uy = %d, %d\n", u, ux, uy);
+#endif
+
+#if 1
+        {
+            int ik;
+            ik = revch(u, b->behas, &ux, &uy);
+        }
 #endif
 
         if(q) {
             pos = assoc(pos_ial, q);
+#if 1
+            Echo("  pos %d q '%s'\n", pos, q);
+#endif
         }
         else {
             pos = PO_CENTER;
         }
-#if 0
-        printf("  pos %d '%s'\n", pos, p);
+#if 1
+        Echo("  pos %d\n", pos);
 #endif
         int x, y;
 
         if(pmode==PPOS) { x = u->cgx;   y = u->cgy; }
         else            { x = u->cx;    y = u->cy; }
+
+#if 1
+        Echo("  original x,y = %d,%d ; %s\n", x, y, __func__);
+        Echo("     guess x,y = %d,%d\n", ux, uy);
+#endif
+        *rx = ux;
+        *ry = uy;
+
+        switch(pos) {
+        case PO_CENTER:    *rx += 0;          *ry += 0;           break;
+        case PO_NORTH:     *rx += 0;          *ry += u->cht/2;  break;
+        case PO_NORTHEAST: *rx += u->cwd/2;   *ry += u->cht/2;  break;
+        case PO_EAST:      *rx += u->cwd/2;   *ry += 0;           break;
+        case PO_SOUTHEAST: *rx += u->cwd/2;   *ry += -u->cht/2;  break;
+        case PO_SOUTH:     *rx += 0;          *ry += -u->cht/2;  break;
+        case PO_SOUTHWEST: *rx += -u->cwd/2;  *ry += -u->cht/2;  break;
+        case PO_WEST:      *rx += -u->cwd/2;  *ry += 0;           break;
+        case PO_NORTHWEST: *rx += -u->cwd/2;  *ry += u->cht/2;  break;
+        default:
+            printf("ERROR ignore position '%s' of '%s'\n", p, xname);
+        }
+
+#if 1
+        Echo("  cooked  rx,y = %d,%d\n", *rx, *ry);
+#endif
+
+        r = 0;
+    }
+    else {
+    }
+
+P;
+    Echo("%s: xname %-16s pmode %d; r %d x,y %d,%d\n",
+        __func__, xname, pmode, r, *rx, *ry);
+
+    return r;
+}
+
+
+int
+_ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
+{
+    char  yname[BUFSIZ];
+    char  token[BUFSIZ];
+    char *p, *q;
+    ob   *u;
+    int   pos;
+    int   r;
+
+#if 1
+        Echo("%s: xname '%s' pmode %d\n", __func__, xname, pmode);
+#endif
+
+    r = -1;
+    yname[0] = '\0';
+
+    q = NULL;
+    p = xname;
+    while(*p) {
+        q = p;
+        p = draw_word(p, token, BUFSIZ, '.');
+        if((token[0]>='A'&&token[0]<='Z')||token[0]=='_') {
+            strcat(yname, token);
+            strcat(yname, ".");
+        }
+        else {
+            break;
+        }
+    }
+
+
+#if 1
+        Echo("  yname '%s' 1\n", yname);
+#endif
+    dellastcharif(yname, '.');
+#if 1
+        Echo("  yname '%s' 2\n", yname);
+    if(q) {
+        Echo("  q     '%s'\n", q);
+    }
+    if(p) {
+        Echo("  p     '%s'\n", p);
+    }
+#endif
+
+    u = ns_find_obj(xns, yname);
+    if(u) {
+#if 1
+        Echo("  u %p gx,gy = %d,%d solved? %d drawed? %d finalized? %d\n",
+            u, u->gx, u->gy, u->sizesolved, u->drawed, u->finalized);
+#endif
+
+        if(q) {
+            pos = assoc(pos_ial, q);
+#if 1
+            Echo("  pos %d q '%s'\n", pos, q);
+#endif
+        }
+        else {
+            pos = PO_CENTER;
+        }
+#if 1
+        Echo("  pos %d\n", pos);
+#endif
+        int x, y;
+
+        if(pmode==PPOS) { x = u->cgx;   y = u->cgy; }
+        else            { x = u->cx;    y = u->cy; }
+
+#if 1
+        Echo("  original x,y = %d,%d ; %s\n", x, y, __func__);
+#endif
 
         switch(pos) {
         case PO_CENTER:    *rx = x;          *ry = y;           break;
@@ -2199,8 +2545,8 @@ _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
             printf("ERROR ignore position '%s' of '%s'\n", p, xname);
         }
 
-#if 0
-        printf("  x,y %d,%d\n", *rx, *ry);
+#if 1
+        Echo("  cooked  rx,y = %d,%d\n", *rx, *ry);
 #endif
 
         r = 0;
@@ -2208,10 +2554,13 @@ _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
     else {
     }
 
-    Echo("%s: xname '%s' r %d x,y %d,%d\n", __func__, xname, r, *rx, *ry);
+P;
+    Echo("%s: xname %-16s pmode %d; r %d x,y %d,%d\n",
+        __func__, xname, pmode, r, *rx, *ry);
 
     return r;
 }
+
 
 int
 ns_find_objpos(ns *xns, char *xname, int *rx, int *ry)
@@ -2224,6 +2573,232 @@ ns_find_objposG(ns *xns, char *xname, int *rx, int *ry)
 {
     return _ns_find_objpos(xns, xname, rx, ry, PPOS);
 }
+
+ob*
+_ns_find_objX(ns* xns, char *xname, int *ux, int *uy)
+{
+    char head[BUFSIZ];
+    char rest[BUFSIZ];
+    int i;
+    ob* r;
+    int ik;
+    int cx, cy;
+
+#if 1
+    Echo("  %s: xns %p, xname '%s'\n", __func__, xns, xname);
+#endif
+#if 1
+    ns_dump(xns);
+#endif
+
+    *ux = -99999;
+    *uy = -99999;
+
+    r = NULL;
+    if(!xns) {
+        goto out;
+    }
+
+#if 0
+    Echo("  xname '%s'\n", xname);
+#endif
+    ik = splitdot(head, BUFSIZ, rest, BUFSIZ, xname);
+#if 0
+    Echo("  head  '%s' rest '%s'\n", head, rest);
+#endif
+
+    for(i=0;i<xns->nch;i++) {
+#if 0
+        Echo("     %2d '%s' vs '%s'\n", i, head, xns->chn[i]);
+#endif
+        if(strcasecmp(xns->chn[i], head)==0) {
+P;
+#if 1
+            Echo("       FOUND\n");
+            Echo("         chn '%s'\n", xns->chn[i]);
+            Echo("         cht %d\n",   xns->cht[i]);
+            Echo("         chv %p\n",   xns->chv[i]);
+#endif
+            if(xns->cht[i]==CMD_OBJ) {
+P;
+                if(rest[0]=='\0') {
+P;
+                    r = xns->chv[i];
+                    *ux = r->gx;
+                    *uy = r->gy;
+                    break;
+                }
+            }
+            if(xns->cht[i]==CMD_NAMESPACE) {
+                if(rest[0]=='\0') {
+P;
+                    r = xns->chv[i];
+#if 1
+#endif
+                }
+                else {
+P;
+                    r = _ns_find_objX(xns->chc[i], rest, &cx, &cy);
+
+#if 1
+                    Echo("  nest %d,%d and %d,%d\n", r->ox, r->oy, cx, cy);
+#endif
+
+                    *ux = r->ox + cx;
+                    *uy = r->oy + cy;
+                }
+                break;
+            }
+#if 0
+            else {
+                break;
+            }
+#endif
+        }
+        /* next */
+#if 0
+        if(r) break;
+#endif
+    }
+
+out:
+#if 1
+    Echo("%s: r %p; %d,%d\n", __func__, r, *ux, *uy);
+#endif
+    return r;
+}
+
+int
+_ns_find_objposX(ns *xns, char *xname, int *rx, int *ry, int pmode)
+{
+    char  yname[BUFSIZ];
+    char  token[BUFSIZ];
+    char *p, *q;
+    ob   *u;
+    int   pos;
+    int   r;
+
+    int   gx, gy;
+
+#if 1
+        Echo("%s: xname '%s' pmode %d\n", __func__, xname, pmode);
+#endif
+
+    r = -1;
+    yname[0] = '\0';
+
+    q = NULL;
+    p = xname;
+    while(*p) {
+        q = p;
+        p = draw_word(p, token, BUFSIZ, '.');
+        if((token[0]>='A'&&token[0]<='Z')||token[0]=='_') {
+            strcat(yname, token);
+            strcat(yname, ".");
+        }
+        else {
+            break;
+        }
+    }
+
+
+#if 1
+        Echo("  yname '%s' 1\n", yname);
+#endif
+    dellastcharif(yname, '.');
+#if 1
+        Echo("  yname '%s' 2\n", yname);
+    if(q) {
+        Echo("  q     '%s'\n", q);
+    }
+    if(p) {
+        Echo("  p     '%s'\n", p);
+    }
+#endif
+
+
+#if 1
+
+#endif
+
+
+    u = _ns_find_objX(xns, yname, &gx, &gy);
+    if(u) {
+#if 1
+        Echo("  xname '%s'\n", xname);
+#endif
+#if 1
+        Echo("  u %p gx,y %d,%d\n", u, gx, gy);
+#endif
+
+        if(q) {
+            pos = assoc(pos_ial, q);
+#if 1
+            Echo("  pos %d q '%s'\n", pos, q);
+#endif
+        }
+        else {
+            pos = PO_CENTER;
+        }
+#if 1
+        Echo("  pos %d\n", pos);
+#endif
+        int x, y;
+
+#if 1
+        Echo("  guess    x,y = %d,%d\n", gx, gy);
+#endif
+
+        if(pmode==PPOS) { x = u->cgx;   y = u->cgy; }
+        else            { x = u->cx;    y = u->cy; }
+
+#if 1
+        Echo("  original x,y = %d,%d ; %s\n", x, y, __func__);
+#endif
+
+        switch(pos) {
+        case PO_CENTER:    *rx = x;          *ry = y;           break;
+        case PO_NORTH:     *rx = x;          *ry = y+u->cht/2;  break;
+        case PO_NORTHEAST: *rx = x+u->cwd/2; *ry = y+u->cht/2;  break;
+        case PO_EAST:      *rx = x+u->cwd/2; *ry = y;           break;
+        case PO_SOUTHEAST: *rx = x+u->cwd/2; *ry = y-u->cht/2;  break;
+        case PO_SOUTH:     *rx = x;          *ry = y-u->cht/2;  break;
+        case PO_SOUTHWEST: *rx = x-u->cwd/2; *ry = y-u->cht/2;  break;
+        case PO_WEST:      *rx = x-u->cwd/2; *ry = y;           break;
+        case PO_NORTHWEST: *rx = x-u->cwd/2; *ry = y+u->cht/2;  break;
+        default:
+            printf("ERROR ignore position '%s' of '%s'\n", p, xname);
+        }
+
+#if 1
+        Echo("  cooked  rx,y = %d,%d\n", *rx, *ry);
+#endif
+
+        r = 0;
+    }
+    else {
+    }
+
+P;
+    Echo("%s: xname %-16s pmode %d; r %d x,y %d,%d\n",
+        __func__, xname, pmode, r, *rx, *ry);
+
+    return r;
+}
+
+
+int
+ns_find_objposX(ns *xns, char *xname, int *rx, int *ry)
+{
+    return _ns_find_objposX(xns, xname, rx, ry, LPOS);
+}
+
+int
+ns_find_objposXG(ns *xns, char *xname, int *rx, int *ry)
+{
+    return _ns_find_objposX(xns, xname, rx, ry, PPOS);
+}
+
 
 char*
 _ns_find_name(ns* s, ob* xob, int w)
@@ -2330,9 +2905,13 @@ recalcsizeparam()
 #include "seg.c"
 
 #include "parse.c"
+#ifdef DO_FORKCHK
 #include "forkchk.c"
+#endif
 #include "put.c"
+#ifdef DO_LINKCHK
 #include "linkchk.c"
+#endif
 #include "finalize.c"
 #include "picdraw.c"
 #include "epsdraw.c"
@@ -2369,6 +2948,7 @@ print_usage()
     printf("    -i      draw object IDs\n");
     printf("    -l      print object list for debug\n");
     printf("    -c      print color list for debug\n");
+    printf("    -F font set default font (default '%s')\n", def_fontname);
     printf("following itmes are reserved for future. do not use.\n");
     printf("   *-d      draft mode\n");
     printf("   *-L      draw labels\n");
@@ -2449,7 +3029,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.017"
+    printf("tangy version 2.018"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
@@ -2561,7 +3141,7 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "0hmVPvngbSdiLrtDo:u:G:R:M:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv, "0hmVPvpngbSdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -2585,6 +3165,9 @@ main(int argc, char *argv[])
             break;
         case 'v':
             _t_ = 1 - _t_;
+            break;
+        case 'p':
+            _p_ = 1 - _p_;
             break;
         case 'n':
             nodraw = 1;
@@ -2636,6 +3219,10 @@ main(int argc, char *argv[])
             break;
         case 'M':
             epsoutmargin = atoi(optarg);
+            break;
+
+        case 'F':
+            def_fontname = strdup(optarg);
             break;
 
 #if 0
@@ -2695,8 +3282,10 @@ Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cch.lanenum);
 #endif
 Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cob.lanenum);
 
+#ifdef DO_FORKCHK
     ik = fkchk(ch0, ns0);
 P;
+#endif
 
     x = 0;
     y = 0;
@@ -2706,11 +3295,13 @@ P;
         ob_gdump(ch0);
     }
 
+#ifdef DO_LINKCHK
 P;
     ik = linkchk(ch0, ns0);
     if(ISTRACE) {
         ob_gdump(ch0);
     }
+#endif
 
 P;
     finalize(ch0, 0, 0, ns0);

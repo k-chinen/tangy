@@ -187,7 +187,7 @@ find_to_last(ob *xob, int *riex, int *riey)
 }
 
 int
-est_seg(ns* xns, varray_t *opar, varray_t *segar,
+est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
     int *rfx, int *rfy)
 {
@@ -361,10 +361,21 @@ Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
 
+#if 0
             ik = ns_find_objpos(xns, e->val, &mx, &my);
+            ik = ns_find_objposG(xns, e->val, &mx, &my);
+            ik = ns_find_objposXG(xns, e->val, &mx, &my);
+#endif
+#if 0
+            ik = ns_find_objposX(xns, e->val, &mx, &my);
+#endif
+#if 1
+P;
+            ik = _ns_find_objposP(xns, u, e->val, 1, &mx, &my);
+#endif
             if(ik==0) {
 P;
-#if 0
+#if 1
                 MARK("e ", mx, my);
 #endif
             }
@@ -859,7 +870,7 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
             int ik;
             int lx, by, rx, ty, fx, fy;
 
-            ik = est_seg(xns, u->cob.segopar, u->cob.segar,
+            ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
 
 #if 1
@@ -908,6 +919,15 @@ Echo("\t  2   wd %d ht %d\n", wd, ht);
 #endif
     if(u->wd<0) u->wd = wd;
     if(u->ht<0) u->ht = ht;
+
+#if 1
+    if(u->type==CMD_CIRCLE) {
+        if(u->cob.rad>0) {
+            u->wd = u->cob.rad*2;
+            u->ht = u->cob.rad*2;
+        }
+    }
+#endif
 
     u->sizesolved++;
 #if 0
@@ -1512,7 +1532,8 @@ _putchunk_lane(ob *xch, int *rx, int *ry, ns *xns)
     int f, l;
     int gf, gl;
     int tdir;
-    int gap;
+    int gaph;
+    int gapv;
     int maxf;
 
 #if 0
@@ -1542,7 +1563,8 @@ P;
         curns = xch->cch.qns;
     }
 
-    gap = xch->cob.lanegap;
+    gapv = xch->cob.lanegapv;
+    gaph = xch->cob.lanegaph;
 
 
     maxw = -1;
@@ -1618,34 +1640,34 @@ P;
         y = c / xch->cob.lanenum;
 
         if(xch->cob.laneorder==LO_NWR) {
-            u->cx = (maxw+gap)*(x+1)  - maxw/2;
-            u->cy = (maxh+gap)*(yc-y) - maxh/2;
+            u->cx = (maxw+gaph)*(x+1)  - maxw/2;
+            u->cy = (maxh+gapv)*(yc-y) - maxh/2;
         }
         else
         if(xch->cob.laneorder==LO_NWD) {
-            u->cx = (maxw+gap)*(y+1)  - maxw/2;
-            u->cy = (maxh+gap)*(xc-x) - maxh/2;
+            u->cx = (maxw+gaph)*(y+1)  - maxw/2;
+            u->cy = (maxh+gapv)*(xc-x) - maxh/2;
         }
 #if 0
         else
         if(xch->cob.laneorder==LO_SWU) {
-            u->cx = (maxw+gap)*(f+1) - maxw/2;
-            u->cy = (maxh+gap)*(l+1) - maxh/2;
+            u->cx = (maxw+gaph)*(f+1) - maxw/2;
+            u->cy = (maxh+gapv)*(l+1) - maxh/2;
         }
         else 
         if(xch->cob.laneorder==LO_SWR) {
-            u->cx = (maxw+gap)*(l+1) - maxw/2;
-            u->cy = (maxh+gap)*(f+1) - maxh/2;
+            u->cx = (maxw+gaph)*(l+1) - maxw/2;
+            u->cy = (maxh+gapv)*(f+1) - maxh/2;
         }
         else
         if(xch->cob.laneorder==LO_SWR) {
-            u->cx = (maxw+gap)*(l+1) - maxw/2;
-            u->cy = (maxh+gap)*(f+1) - maxh/2;
+            u->cx = (maxw+gaph)*(l+1) - maxw/2;
+            u->cy = (maxh+gapv)*(f+1) - maxh/2;
         }
         else
         if(xch->cob.laneorder==LO_SEL) {
-            u->cx = (maxw+gap)*(xch->cob.lanenum-l) - maxw/2;
-            u->cy = (maxh+gap)*(f+1) - maxh/2;
+            u->cx = (maxw+gaph)*(xch->cob.lanenum-l) - maxw/2;
+            u->cy = (maxh+gapv)*(f+1) - maxh/2;
         }
 #endif
         else {
@@ -1672,13 +1694,13 @@ P;
     switch(xch->cob.laneorder) {
     case LO_SWU:
     case LO_NWD:
-        xch->wd = yc*maxw+(yc+1)*gap;
-        xch->ht = xc*maxh+(xc+1)*gap;
+        xch->wd = yc*maxw+(yc+1)*gaph;
+        xch->ht = xc*maxh+(xc+1)*gapv;
         break;
     default:
     case LO_NWR:
-        xch->wd = xc*maxw+(xc+1)*gap;
-        xch->ht = yc*maxh+(yc+1)*gap;
+        xch->wd = xc*maxw+(xc+1)*gaph;
+        xch->ht = yc*maxh+(yc+1)*gapv;
         break;
     }
 
@@ -1795,7 +1817,7 @@ P;
     Echo("goto AT '%s'\n", u->cob.aat);
 
                 r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-    Echo("  ns_find_objpos '%s' ret %d\n", u->cob.aat, r);
+    Echo("  ns_find_objpos  '%s' ret %d\n", u->cob.aat, r);
                 if(r==0) {
                     nx = dx; ny = dy;
                 }
@@ -1979,15 +2001,31 @@ Echo("  fx,fy %d,%d dir %d; ik %d\n",
         adjrewind = 0;
         hasqxy = 0;
 
-#if 0
+
+#define S(x)    ((x)?(x):"*none*")
+P;
+printf("POS oid %d from %s to %s at %s\n",
+    u->oid,
+    S(u->cob.afrom),
+    S(u->cob.ato),
+    S(u->cob.aat)
+ );
+#undef S
+
+#if 1
         if(u->cob.afrom) {
             int r;
             int dx, dy;
 
+P;
 Echo("found FROM '%s'\n", u->cob.afrom);
 
+#if 0
             r = ns_find_objpos(curns, u->cob.afrom, &dx, &dy);
 Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
+#endif
+            r = _ns_find_objposP(curns, u, u->cob.afrom, 1 /*LPOS*/, &dx, &dy);
+Echo("  ns_find_objposP '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
                 adjrewind++;
@@ -1999,15 +2037,19 @@ Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
             }
         }
 #endif
-#if 0
+#if 1
         if(u->cob.ato) {
             int r;
             int dx, dy;
-
+P;
 Echo("found TO '%s'\n", u->cob.ato);
 
+#if 0
             r = ns_find_objpos(curns, u->cob.ato, &qx, &qy);
 Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
+#endif
+            r = _ns_find_objposP(curns, u, u->cob.ato, 1 /*LPOS*/, &dx, &dy);
+Echo("  ns_find_objposP '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
             if(r==0) {
                 qx = dx; qy = dy;
                 hasqxy++;
@@ -2026,12 +2068,18 @@ Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.ato, r, dx, dy);
             int r;
             int dx, dy;
 
+P;
 Echo("found AT '%s'\n", u->cob.aat);
 
+#if 0
             r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-Echo("  ns_find_objpos '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
+Echo("  ns_find_objpos  '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
+#endif
+            r = _ns_find_objposP(curns, u, u->cob.aat, 1 /*LPOS*/, &dx, &dy);
+Echo("  ns_find_objposP '%s' ret %d; %d,%d\n", u->cob.aat, r, dx, dy);
             if(r==0) {
                 nx = dx; ny = dy;
+
                 adjrewind++;
 
                 u->pst += 10;

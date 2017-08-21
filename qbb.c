@@ -45,13 +45,30 @@ qbb_new()
 }
 
 int
+qbb_isinit(qbb_t *qb)
+{
+    int rv;
+    rv = 0;
+    if((qb->rx == -(INT_MAX-1)) && 
+        (qb->ty == -(INT_MAX-1)) &&
+         (qb->lx == INT_MAX) &&
+          (qb->by == INT_MAX)) {
+        rv = 1;
+    }
+    return rv;
+}
+
+int
 qbb_fprint(FILE *fp, qbb_t *qb)
 {
+    int c;
     if(!qb) {
         return -1;
     }
-    fprintf(fp, "qbb (id %d) %d %d %d %d\n",
-        qb->qbbid, qb->lx, qb->by, qb->rx, qb->ty);
+    c = qbb_isinit(qb);
+    fprintf(fp, "qbb (id %d) %c [%d %d %d %d] %d\n",
+        qb->qbbid, c==1 ? 'I' : '-',
+        qb->lx, qb->by, qb->rx, qb->ty, qb->cc);
     return 0;
 }
 

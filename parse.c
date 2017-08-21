@@ -243,7 +243,7 @@ parsetype(int *rot, char *line)
     ot = assoc(cmd_ial, word);
 
     if(ot<0) {
-        Echo("ERROR falldown unknown '%s' [line %d]\n", word, lineno);
+        Error("falldown unknown object '%s' [line %d]\n", word, lineno);
         exit(3);
     }
 
@@ -268,7 +268,7 @@ parse_segop(char *sin, int dt, ob *nob)
     int     sop;
     int     top;
 
-#if 0
+#if 1
     Echo("%s: sin '%s' dt %d nob %p\n", __func__, sin, dt, nob);
 #endif
     r = NULL;
@@ -289,10 +289,13 @@ parse_segop(char *sin, int dt, ob *nob)
 
         sop = assoc(objattr_ial, tmp);
         if(sop>=0) {
-Warn("tmp '%s' seems not value\n", tmp);
+Info("tmp '%s' seems not value\n", tmp);
             tmp[0] = '\0';
         }
         else {
+#if 0
+Info("segop tmp '%s'\n", tmp);
+#endif
             co = 1;
 
             strcpy(vstr, tmp);
@@ -330,9 +333,29 @@ E;
     newop->val = strdup(vstr);
 
 #if 0
+    if(dt==OA_FROM && *vstr) {
+P;
+        nob->cob.afrom = strdup(vstr);
+    }
+    if(dt==OA_TO   && *vstr) {
+P;
+        nob->cob.ato   = strdup(vstr);
+    }
+#endif
+
+#if 0
 Echo("  push cmd %d val '%s'\n", newop->cmd, newop->val);
 #endif
+#if 1
+Echo("  push cmd '%s'(%d) val '%s'\n",
+        rassoc(objattr_ial, newop->cmd), newop->cmd, newop->val);
+#endif
     varray_push(nob->cob.segopar, (void*)newop);
+
+#if 1
+    fprintf(stdout, "segopar");
+    varray_fprint(stdout, nob->cob.segopar);
+#endif
 
     nob->cob.originalshape++;
 
@@ -343,7 +366,7 @@ Echo("  push cmd %d val '%s'\n", newop->cmd, newop->val);
         r = NULL;
     }
 
-#if 0
+#if 1
     Echo("%s: r %p\n", __func__, r);
 #endif
 
@@ -521,6 +544,11 @@ skip_note:
 #if 0
     Echo("oak %d\n", oak);
 #endif
+#if 1
+    if(oak==OA_FROM||oak==OA_TO) {
+        Echo("from/to oak %d '%s'\n", oak, name);
+    }
+#endif
 
 
     /* integer setting */
@@ -528,6 +556,14 @@ skip_note:
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
         rob->cob.y = xatoi(value); \
+        uc++; \
+    }
+
+#define ISET2(x,y1,y2) \
+    if(oak==(x)) { \
+        p = draw_wordW(p, value, BUFSIZ); \
+        rob->cob.y1 = xatoi(value); \
+        rob->cob.y2 = xatoi(value); \
         uc++; \
     }
 
@@ -628,6 +664,7 @@ skip_note:
         uc++;   \
     }
 
+P;
     uc = 0;
     ISET(OA_LINECOLOR,      outlinecolor);
     ISET(OA_LINETHICK,      outlinethick);
@@ -652,7 +689,9 @@ skip_note:
 
     AISET(OA_LANEORDER,     lo_ial, laneorder);
     ISET(OA_LANENUM,        lanenum);
-    ISET(OA_LANEGAP,        lanegap);
+    ISET(OA_LANEGAPV,       lanegapv);
+    ISET(OA_LANEGAPH,       lanegaph);
+    ISET2(OA_LANEGAP,       lanegapv, lanegaph);
 
     SADD(OA_PORT,           portstr);
     SADD(OA_STARBOARD,      boardstr);
@@ -756,6 +795,7 @@ skip_note:
         }
         uc++;
     }
+
     else if(strcasecmp(name, "bothhead")==0) {
         rob->cob.arrowheadpart |= AR_BOTH;
         p = draw_wordW(p, value, BUFSIZ);
@@ -770,6 +810,24 @@ skip_note:
         }
         uc++;
     }
+
+    else if(strcasecmp(name, "allhead")==0) {
+        rob->cob.arrowheadpart |= AR_ALL;
+        p = draw_wordW(p, value, BUFSIZ);
+        x = assoc(arrowhead_ial, value);
+        if(x>=0) {
+            rob->cob.arrowforeheadtype = x;
+            rob->cob.arrowcentheadtype = x;
+            rob->cob.arrowbackheadtype = x;
+        }
+        else {
+            rob->cob.arrowforeheadtype = atoi(value);
+            rob->cob.arrowcentheadtype = atoi(value);
+            rob->cob.arrowbackheadtype = atoi(value);
+        }
+        uc++;
+    }
+
     else if((strcasecmp(name, "right")==0)  ||
             (strcasecmp(name, "left")==0)   ||
             (strcasecmp(name, "up")==0)     ||
@@ -793,13 +851,20 @@ skip_note:
         char *j;
         int   dt;
         dt = assoc(objattr_ial, name);
+#if 1
+Info("sub-command '%s' %d\n", name, dt);
+#endif
         j = parse_segop(p, dt, rob);
         if(j) {
+#if 1
+Info("sub-command '%s' argument '%s'\n", name, p);
+#endif
             p = j;
+
         }
         else {
-#if 0
-Warn("skip sub-command '%s' argument\n", name);
+#if 1
+Info("sub-command '%s' argument skip\n", name);
 #endif
         }
         uc++;
@@ -1291,6 +1356,9 @@ parse(FILE *fp, ob* ch0, ns *ns0)
     curch = ch0;
     curns = ns0;
     ch0->cch.qns = ns0;
+#if 1
+    ch0->cch.qob = ch0;
+#endif
 
     lineno = 0;
     cmdno  = 0;

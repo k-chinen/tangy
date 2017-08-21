@@ -386,7 +386,7 @@ notefile_load()
 
     _t_ = savedflag;
 
-	return 0;
+    return 0;
 }
 
 int
@@ -397,5 +397,5 @@ notefile_setup()
     gnotebindlist = varray_new();
     varray_entrysprintfunc(gnotebindlist, nb_sprintf);
 
-	return 0;
+    return 0;
 }

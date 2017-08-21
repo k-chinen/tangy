@@ -1,7 +1,8 @@
 ### 
 ### temporary Makefile for tangy
 ###
-CFLAGS=-g -O0
+#CFLAGS=-g -O0 -DDO_LINKCHK
+CFLAGS=-g -O0 -DDO_FORKCHK
 
 all: tangy 
 tangy: a.c alist.h chas.c chs.c color.h epsdraw.c finalize.c forkchk.c \
