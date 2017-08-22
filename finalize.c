@@ -2,7 +2,8 @@
 
 
 #define MARK(m,x,y) \
-    Echo("MARK finalize %d %s x %4d, y %4d\n", __LINE__, m, x, y); \
+    Echo("MARK finalize oid %d line %d %s x %4d, y %4d\n", \
+        u->oid, __LINE__, m, x, y); \
     if(x<_lx) { _lx = x; } if(x>_rx) { _rx = x; }\
     if(y<_by) { _by = y; } if(y>_ty) { _ty = y; } 
 

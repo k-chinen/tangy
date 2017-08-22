@@ -84,7 +84,7 @@ Echo("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
 #if 1
 
 #define MARK(m,x,y) \
-    Echo("MARK %d %s x %6d, y %6d\n", __LINE__, m, x, y); \
+    Echo("MARK oid %d line %d %s x %6d, y %6d\n", u->oid, __LINE__, m, x, y); \
     if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
     if(y<_by)  _by = y; if(y>_ty)  _ty = y; 
 
@@ -222,7 +222,7 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
 
     rv = 0;
 
-#if 0
+#if 1
 Echo("%s:\n", __func__);
     varray_fprint(stdout, opar);
 #endif
@@ -235,11 +235,43 @@ Echo("%s:\n", __func__);
     _rx = _ty = -(INT_MAX-1);
     _lx = _by = INT_MAX;
 
-        x = y = 0;
-        lx = ly = 0;
+        x = lx = 0;
+        y = ly = 0;
+#if 0
+        MARK("a0", x, y);
+#endif
+
+#if 1
+    int adjbyfrom=0;
+    for(i=0;i<opar->use;i++) {
+        e = (segop*)opar->slot[i];
+        if(!e)
+            continue;
+        switch(e->cmd) {
+        case OA_FROM:       
+#if 1
+P;
+            ik = _ns_find_objposP(xns, u, e->val, 1, &mx, &my);
+#endif
+            if(ik==0) {
+P;
+                x = lx = mx;
+                y = ly = my;
+#if 1
+                MARK("aF", mx, my);
+#endif
+            }
+            else {
+                Error("not found object/position '%s'\n", e->val);
+            }
+            break;
+        }
+    }
+#endif
 #if 1
         MARK("a ", x, y);
 #endif
+
 
     c = 0; /* count of putted commands w/o then */
     jc = 0;
@@ -376,7 +408,7 @@ P;
             if(ik==0) {
 P;
 #if 1
-                MARK("e ", mx, my);
+                MARK("fP", mx, my);
 #endif
             }
             else {
@@ -593,6 +625,11 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
     }
         MARK("z ", x, y);
 
+    fprintf(stdout, "MARK oid %d (%d %d %d %d)\n",
+        u->oid, _lx, _by, _rx, _ty);
+
+
+#if 0
     if(rv & COORD_FROM) {
         *rlx = _lx + isx;
         *rby = _by + isy;
@@ -605,6 +642,17 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
         *rrx = _rx;
         *rty = _ty;
     }
+#endif
+
+    {
+        *rlx = _lx;
+        *rby = _by;
+        *rrx = _rx;
+        *rty = _ty;
+    }
+
+    fprintf(stdout, "MARK*oid %d (%d %d %d %d)\n",
+        u->oid, *rlx, *rby, *rrx, *rty);
 
 #if 0
     Echo("opar\n");
@@ -763,9 +811,16 @@ putobj(ob *u, ns *xns, int *gdir)
     int    dir;
     int    re;
 
-
 #if 1
-    Echo("%s: oid %d\n", __func__, u->oid);
+    if(u) {
+        Echo("%s: oid %d type %s(%d)\n",
+            __func__, u->oid,
+            rassoc(cmd_ial, u->type),
+             u->type);
+    }
+    else {
+        Echo("%s: null object\n", __func__);
+    }
 #endif
 #if 1
 Echo("\toid %d u b wd %d ht %d solved? %d\n",
@@ -787,7 +842,9 @@ P;
 P;
         wd = 0;
         ht = 0;
+#if 0
         goto apply;
+#endif
     }
 
     if(u->sizesolved) {
@@ -816,6 +873,9 @@ P;
     wd = ht = 0;
 
     switch(u->type) {
+    case CMD_NOP:
+        WO;
+        break;
 
     case CMD_CHUNKOBJATTR:  ZZ; break;
 
@@ -882,7 +942,6 @@ Echo("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
             u->crx = rx;
             u->cty = ty;
 
-
             wd = rx - lx;
             ht = ty - by;
 
@@ -900,13 +959,19 @@ Echo("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
             re = 1;
         }
         else {
+#if 1
+Echo("\tseg not-originalshape\n");
+#endif
             WO;     
         }
         break;
     default:
         if(ISATOM(u->type)) {
-            Echo("WARNING: sorry the object(oid %d) has no size\n",
+            Warn("WARNING: sorry the object(oid %d) has no size\n",
                 u->oid);
+        }
+        else {
+            Warn("unsupported type %d\n", u->type);
         }
         break;
     }
@@ -2005,14 +2070,12 @@ Echo("  fx,fy %d,%d dir %d; ik %d\n",
 #define S(x)    ((x)?(x):"*none*")
 P;
 printf("POS oid %d from %s to %s at %s\n",
-    u->oid,
-    S(u->cob.afrom),
-    S(u->cob.ato),
-    S(u->cob.aat)
- );
+    u->oid, S(u->cob.afrom), S(u->cob.ato), S(u->cob.aat));
 #undef S
+printf("POS oid %d from %d to %d\n",
+    u->oid, u->cob.hasfrom, u->cob.hasto);
 
-#if 1
+#if 0
         if(u->cob.afrom) {
             int r;
             int dx, dy;
@@ -2036,8 +2099,6 @@ Echo("  ns_find_objposP '%s' ret %d; %d,%d\n", u->cob.afrom, r, dx, dy);
                 E;
             }
         }
-#endif
-#if 1
         if(u->cob.ato) {
             int r;
             int dx, dy;

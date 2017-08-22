@@ -332,6 +332,19 @@ E;
     newop->cmd = dt;
     newop->val = strdup(vstr);
 
+#if 1
+    if(dt==OA_FROM && *vstr) {
+P;
+        nob->cob.hasfrom++;
+        nob->cob.originalshape++;
+    }
+    if(dt==OA_TO   && *vstr) {
+P;
+        nob->cob.hasto++;
+        nob->cob.originalshape++;
+    }
+#endif
+
 #if 0
     if(dt==OA_FROM && *vstr) {
 P;
@@ -358,6 +371,10 @@ Echo("  push cmd '%s'(%d) val '%s'\n",
 #endif
 
     nob->cob.originalshape++;
+#if 1
+    fprintf(stdout, "original %d oid %d\n",
+        nob->cob.originalshape, nob->oid);
+#endif
 
     if(co) {
         r = p;

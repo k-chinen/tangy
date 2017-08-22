@@ -11650,7 +11650,8 @@ PP;
 #endif
         else {
 
-Echo(" call obj drawing %d,%d\n", gox+xch->x+xch->ox, goy+xch->y+xch->oy);
+Echo(" call obj oid %d drawing start %d,%d\n",
+            u->oid, gox+xch->x+xch->ox, goy+xch->y+xch->oy);
             ik = epsdrawobj(fp, u, &xch->cch.dir,
                     gox+xch->x+xch->ox,
                     goy+xch->y+xch->oy, xns);

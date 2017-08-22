@@ -854,6 +854,9 @@ struct obattr {
     char  *afrom;
     char  *ato;
 
+    int    hasfrom;
+    int    hasto;
+
     void  *forkfocus;
     int    forkhasbranch;
     void  *forkbranchmem[MAXBRANCH];    /* XXX */
@@ -1199,9 +1202,16 @@ confirm_attr(ob *xo)
     struct obattr *xoa;
     xoa = &xo->vob;
 
+#if 0
     if(xoa->ato && xoa->afrom) {
         xo->floated = 1;
     }
+#endif
+#if 1
+    if(xoa->hasto && xoa->hasfrom) {
+        xo->floated = 1;
+    }
+#endif
 
     return 0;
 }

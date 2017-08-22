@@ -1,6 +1,7 @@
 ### 
 ### temporary Makefile for tangy
 ###
+#CFLAGS=-g -O0 -DDO_FORKCHK -DDO_LINKCHK
 #CFLAGS=-g -O0 -DDO_LINKCHK
 CFLAGS=-g -O0 -DDO_FORKCHK
 
