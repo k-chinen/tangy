@@ -1034,7 +1034,7 @@ out:
 
 
 int
-catobj(ob *u, int xxdir, int *x, int *y, int *fx, int *fy, ns *xns)
+fitobj_LBRT(ob *u, int xxdir, int *x, int *y, int *fx, int *fy, ns *xns)
 {
     int dx, dy;
 
@@ -1118,7 +1118,7 @@ E;
 }
 
 int
-fitobj(ob *u, int xxdir, int *x, int *y, ns *xns)
+fitobj_wdht(ob *u, int xxdir, int *x, int *y, ns *xns)
 {
     int oldx, oldy;
     double dx, dy;
@@ -1808,6 +1808,9 @@ _putchunk(ob *xch, int *x, int *y, ns *xns)
     int lfx, lfy;
     ns *curns;
 
+    int isx, isy;
+    int ckfrom;
+
     int   ldir;
 
     int pointjoint;
@@ -2192,27 +2195,51 @@ Echo("  rewindcenter dir %d ret %d; %d,%d\n", xch->cch.dir, r, dx, dy);
 
 skip_at_with:
 
+    Echo("oid %-3d floated %d originalshape %d uniqpoint %d; pointjoint %d\n",
+        u->oid, u->floated, u->cob.originalshape, uniqpoint, pointjoint);
 
+
+    ckfrom = -1;
+    if(u->cob.hasfrom) {
+        ckfrom = find_from(u, &isx, &isy);
+        Echo("oid %d ckfrom %d\n", u->oid, ckfrom);
+        Echo("  isx,isy %d,%d\n", isx, isy);
+        u->pst += 10000;
+    }
+
+#if 1
+    if(u->floated) {
+            int zx1, zy1;
+            int zx2, zy2;
+
+            zx1 = nx;
+            zy1 = ny;
+            zx2 = fx;
+            zy2 = fy;
+
+            if(ckfrom==1) {
+                zx1 = isx;
+                zy1 = isy;
+            }
+
+P;
+            fitobj_LBRT(u, ldir, &zx1, &zy1, &zx2, &zy2, curns);
+    }
+    else
+#endif
     if(uniqpoint && ISGLUE(u->type)) {
             int gfx, gfy;
-            int isx, isy;
-            int hasfrom;
 
             gfx = fx;
             gfy = fy;
 
-            hasfrom = -1;
-            hasfrom = find_from(u, &isx, &isy);
-
-            if(hasfrom==1) {
-                Echo("oid %d hasfrom %d\n", u->oid, hasfrom);
-                u->pst += 10000;
+            if(ckfrom==1) {
                 nx = isx;
                 ny = isy;
             }
 
 P;
-            catobj(u, ldir, &nx, &ny, &gfx, &gfy, curns);
+            fitobj_LBRT(u, ldir, &nx, &ny, &gfx, &gfy, curns);
     }
     else {
     
@@ -2230,7 +2257,7 @@ Echo("  pointjoint %d to lfx,lfy %d,%d ldir %d\n",
             gfx = lfx;
             gfy = lfy;
 P;
-            fitobj(u, xch->cch.dir, &nx, &ny, curns);
+            fitobj_wdht(u, xch->cch.dir, &nx, &ny, curns);
 #if 0
 #endif
         }
@@ -2238,7 +2265,7 @@ P;
                 u->pst += 40000;
 
 P;
-            fitobj(u, xch->cch.dir, &nx, &ny, curns);
+            fitobj_wdht(u, xch->cch.dir, &nx, &ny, curns);
         }
 
     }
@@ -2300,14 +2327,14 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 
 #if 1
         Echo("\t           : oid %d\n", xch->oid);
-        Echo("\t # : oid: i:     x     y    ox    oy :    lx    by    rx    ty\n");
+        Echo("\t # : oid: i:      x      y     ox     oy :     lx     by     rx     ty\n");
 
 #endif
         v = 0;
         for(i=0;i<xch->cch.nch;i++) {
             u = (ob*)xch->cch.ch[i];
 #if 1
-            Echo("\t%3d: %3d: %d: %5d %5d %5d %5d : %5d %5d %5d %5d\n",
+            Echo("\t%3d: %3d: %d: %6d %6d %6d %6d : %6d %6d %6d %6d\n",
                 i, u->oid, u->ignore, 
                 u->cx, u->cy,
                 u->cox, u->coy,
@@ -2338,21 +2365,26 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
                     u->cwd, u->cht);
 
 #if 1
-            if(u->clx<minx) { minx = u->clx; }
-            if(u->crx<minx) { minx = u->crx; }
-            if(u->clx>maxx) { maxx = u->clx; }
-            if(u->crx>maxx) { maxx = u->crx; }
-            if(u->cby<miny) { miny = u->cby; }
-            if(u->cty<miny) { miny = u->cty; }
-            if(u->cby>maxy) { maxy = u->cby; }
-            if(u->cty>maxy) { maxy = u->cty; }
+			if(u->floated) {
+				/* nothing */
+			}
+			else {
+				if(u->clx<minx) { minx = u->clx; }
+				if(u->crx<minx) { minx = u->crx; }
+				if(u->clx>maxx) { maxx = u->clx; }
+				if(u->crx>maxx) { maxx = u->crx; }
+				if(u->cby<miny) { miny = u->cby; }
+				if(u->cty<miny) { miny = u->cty; }
+				if(u->cby>maxy) { maxy = u->cby; }
+				if(u->cty>maxy) { maxy = u->cty; }
+			}
 #endif
 
         }
 
 #if 1
         Echo(
-        "\tsemi       : %5s %5s %5s %5s : %5d %5d %5d %5d (%d/%d)\n",
+        "\tsemi       : %6s %6s %6s %6s : %6d %6d %6d %6d (%d/%d)\n",
             "", "", 
             "", "",
             minx, miny, maxx, maxy, v, c);
@@ -2523,8 +2555,8 @@ P;
     ik = putchunk(xch, x, y, xns);
 P;
 #if 0
-    ik = fitobj(xch, def_dir, x, y, xns);
+    ik = fitobj_wdht(xch, def_dir, x, y, xns);
 #endif
-    ik = fitobj(xch, xch->cch.dir, x, y, xns);
+    ik = fitobj_wdht(xch, xch->cch.dir, x, y, xns);
     return ik;
 }
