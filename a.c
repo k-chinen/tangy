@@ -2931,7 +2931,7 @@ char   *outfile = "out.eps";
 int     canvaswd = (int)( 8.27 * 72);
 int     canvasht = (int)(11.69 * 72);
 int     canvasrt = 0;
-double  canvassc = 1.0;
+double  canvassc = 0.01;
 
 int
 print_usage()
@@ -3336,8 +3336,10 @@ P;
         exit(9);
     }
 
+#if 0
     canvassc = canvasht/ch0->ht;
     canvassc = 0.01;
+#endif
 
 P;
     fp = fopen(outfile, "w");
