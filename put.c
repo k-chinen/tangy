@@ -946,16 +946,30 @@ Echo("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
             ht = ty - by;
 
 #if 1
-Echo("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
+Echo("\tseg originalshape 1 wd %d ht %d\n", wd, ht);
 #endif
 
             u->fx = fx;
             u->fy = fy;
 
-            if(u->type==CMD_CLINE) {
-            }
+#if 1
                 u->ox = -(lx+rx)/2;
                 u->oy = -(ty+by)/2;
+#endif
+            if(u->type==CMD_CLINE) {
+            }
+            else {
+#if 0
+                u->x = -(lx+rx)/2;
+                u->y = -(ty+by)/2;
+#endif
+            }
+
+#if 1
+Echo("\tseg originalshape 1 u; ox,oy %d,%d fx,fy %d,%d\n",
+    u->ox, u->oy, u->fx, u->fy);
+#endif
+
             re = 1;
         }
         else {
@@ -963,6 +977,10 @@ Echo("\tseg originalshape 1 wd %d ht %d fx,fy %d,%d\n", wd, ht, fx, fy);
 Echo("\tseg not-originalshape\n");
 #endif
             WO;     
+#if 1
+Echo("\tseg not-originalshape u; ox,oy %d,%d fx,fy %d,%d\n",
+    u->ox, u->oy, u->fx, u->fy);
+#endif
         }
         break;
     default:
@@ -1060,8 +1078,13 @@ E;
     u->csx = *x;
     u->csy = *y;
 
+#if 1
     u->cx = *x - u->ox;
     u->cy = *y - u->oy;
+#else
+    u->cx = *x + u->ox;
+    u->cy = *y + u->oy;
+#endif
 
 #if 1 
     u->clx = *x + u->clx;
@@ -1085,8 +1108,14 @@ E;
     Echo("%s: oid %d (%d %d %d %d)\n",
         __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
 
+#if 0
+    u->cex = *fx - *x;
+    u->cey = *fy - *y;
+#endif
+#if 1
     u->cex = *x+*fx;
     u->cey = *y+*fy;
+#endif
     *x = u->cex;
     *y = u->cey;
 
@@ -2217,10 +2246,14 @@ skip_at_with:
             zx2 = fx;
             zy2 = fy;
 
+Echo("fit fl 1: zx1,zy1 %d,%d zx2,zy2 %d,%d\n", zx1, zy1, zx2, zy2);
             if(ckfrom==1) {
                 zx1 = isx;
                 zy1 = isy;
             }
+Echo("fit fl 2: zx1,zy1 %d,%d zx2,zy2 %d,%d\n", zx1, zy1, zx2, zy2);
+#if 0
+#endif
 
 P;
             fitobj_LBRT(u, ldir, &zx1, &zy1, &zx2, &zy2, curns);
@@ -2365,19 +2398,19 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
                     u->cwd, u->cht);
 
 #if 1
-			if(u->floated) {
-				/* nothing */
-			}
-			else {
-				if(u->clx<minx) { minx = u->clx; }
-				if(u->crx<minx) { minx = u->crx; }
-				if(u->clx>maxx) { maxx = u->clx; }
-				if(u->crx>maxx) { maxx = u->crx; }
-				if(u->cby<miny) { miny = u->cby; }
-				if(u->cty<miny) { miny = u->cty; }
-				if(u->cby>maxy) { maxy = u->cby; }
-				if(u->cty>maxy) { maxy = u->cty; }
-			}
+            if(u->floated) {
+                /* nothing */
+            }
+            else {
+                if(u->clx<minx) { minx = u->clx; }
+                if(u->crx<minx) { minx = u->crx; }
+                if(u->clx>maxx) { maxx = u->clx; }
+                if(u->crx>maxx) { maxx = u->crx; }
+                if(u->cby<miny) { miny = u->cby; }
+                if(u->cty<miny) { miny = u->cty; }
+                if(u->cby>maxy) { maxy = u->cby; }
+                if(u->cty>maxy) { maxy = u->cty; }
+            }
 #endif
 
         }

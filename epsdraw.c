@@ -7651,7 +7651,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 
         fprintf(fp, " gsave %% oneline\n");
 
-Echo("  --- calc size\n");
+Echo("  --- calc size 1\n");
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
@@ -7914,7 +7914,7 @@ skip_bgdrawing:
         fprintf(fp, " gsave %% oneline\n");
 
 
-Echo("  --- calc size\n");
+Echo("  --- calc size 2\n");
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
@@ -11377,9 +11377,24 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
 #if 1
     if(u->cob.ssar) {
+        char cont[BUFSIZ];
+        ss_strip(cont, BUFSIZ, u->cob.ssar);
+        
+        if(!cont[0]) {
+            goto skip_sstr;
+        }
+
         if(ISGLUE(u->type)) {
+#if 0
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
                 0, 2, u->cob.textcolor, -1, u->cob.ssar);
+#else
+            Echo("call sstrbgX oid %d gx,y %d,%d with ox,y %d,%d\n",
+                u->oid, u->gx, u->gy, u->ox, u->oy);
+            epsdraw_sstrbgX(fp, u->gx+u->ox, u->gy+u->oy,
+                u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+#endif
         }
         else
         if(u->cob.fillhatch==HT_NONE) {
@@ -11390,6 +11405,8 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
                 0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
         }
+skip_sstr:
+        (void)0;
     }
 #endif
 
