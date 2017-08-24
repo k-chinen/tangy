@@ -934,7 +934,8 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
 
 #if 1
-Echo("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
+Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, lx, by, rx, ty, fx, fy);
 #endif
 
             u->clx = lx;
@@ -946,13 +947,23 @@ Echo("\tseg bb (%d %d %d %d) fxy %d,%d\n", lx, by, rx, ty, fx, fy);
             ht = ty - by;
 
 #if 1
-Echo("\tseg originalshape 1 wd %d ht %d\n", wd, ht);
+Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
 #endif
 
+#if 0
             u->fx = fx;
             u->fy = fy;
+#endif
+#if 1
+            u->fx = fx - lx;
+            u->fy = fy - by;
+#endif
 
 #if 1
+                u->ox = -wd/2;
+                u->oy = -ht/2;
+#endif
+#if 0
                 u->ox = -(lx+rx)/2;
                 u->oy = -(ty+by)/2;
 #endif
@@ -966,7 +977,7 @@ Echo("\tseg originalshape 1 wd %d ht %d\n", wd, ht);
             }
 
 #if 1
-Echo("\tseg originalshape 1 u; ox,oy %d,%d fx,fy %d,%d\n",
+Echo("\tseg original 1 u; ox,oy %d,%d fx,fy %d,%d\n",
     u->ox, u->oy, u->fx, u->fy);
 #endif
 
@@ -974,11 +985,11 @@ Echo("\tseg originalshape 1 u; ox,oy %d,%d fx,fy %d,%d\n",
         }
         else {
 #if 1
-Echo("\tseg not-originalshape\n");
+Echo("\tseg not-orig oid %d\n", u->oid);
 #endif
             WO;     
 #if 1
-Echo("\tseg not-originalshape u; ox,oy %d,%d fx,fy %d,%d\n",
+Echo("\tseg not-orig u; ox,oy %d,%d fx,fy %d,%d\n",
     u->ox, u->oy, u->fx, u->fy);
 #endif
         }
@@ -1036,9 +1047,9 @@ Echo("\toid %d u a wd %d ht %d solved? %d\n",
         u->lx, u->by, u->rx, u->y);
 #endif
 #if 1
-    Echo("%s: oid %d dir %d wxh %dx%d; xy %d,%d\n",
+    Echo("%s: oid %d dir %d wxh %dx%d; xy %d,%d; re %d\n",
         __func__, u->oid, dir, u->wd, u->ht,
-        u->x, u->y);
+        u->x, u->y, re);
 #endif
 
 #if 1
@@ -1061,7 +1072,7 @@ E;
         return -1;
     }
 
-    Echo("%s: oid %d\n", __func__, u->oid);
+    Echo("%s: oid %d START\n", __func__, u->oid);
 
 #if 1
     Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
@@ -1112,9 +1123,17 @@ E;
     u->cex = *fx - *x;
     u->cey = *fy - *y;
 #endif
+#if 0
+    u->cex = *fx;
+    u->cey = *fy;
+#endif
 #if 1
     u->cex = *x+*fx;
     u->cey = *y+*fy;
+#endif
+#if 0
+    u->cex = *x+u->wd;
+    u->cey = *y+u->ht;
 #endif
     *x = u->cex;
     *y = u->cey;
@@ -1163,7 +1182,7 @@ fitobj_wdht(ob *u, int xxdir, int *x, int *y, ns *xns)
         return -1;
     }
 
-Echo("%s: oid %d\n", __func__, u->oid);
+Echo("%s: oid %d START\n", __func__, u->oid);
 
 #if 1
     Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
@@ -2075,14 +2094,18 @@ Echo("chunk oid %d -> obj oid %d\n", xch->oid, u->oid);
 #endif
             ik = putobj(u, curns, &xch->cch.dir);
 #if 1
-Echo("chunk oid %d -> obj oid %d ; ik %d\n", xch->oid, u->oid, ik);
+Echo("chunk oid %d -> obj oid %d ; putobj ik %d\n", xch->oid, u->oid, ik);
 #endif
 
         }
 
-#if 0
+#if 1
 Echo("  fx,fy %d,%d dir %d; ik %d\n",
     u->fx, u->fy, xch->cch.dir, ik);
+#endif
+#if 1
+Echo("  fx-ox,fy-oy %d,%d dir %d; ik %d\n",
+    u->fx-u->ox, u->fy-u->oy, xch->cch.dir, ik);
 #endif
 
         fx = u->fx;
@@ -2257,6 +2280,9 @@ Echo("fit fl 2: zx1,zy1 %d,%d zx2,zy2 %d,%d\n", zx1, zy1, zx2, zy2);
 
 P;
             fitobj_LBRT(u, ldir, &zx1, &zy1, &zx2, &zy2, curns);
+#if 0
+            fitobj_wdht(u, ldir, &zx1, &zy1, curns);
+#endif
     }
     else
 #endif
@@ -2275,7 +2301,6 @@ P;
             fitobj_LBRT(u, ldir, &nx, &ny, &gfx, &gfy, curns);
     }
     else {
-    
 
         if(pointjoint && u) {
             int gfx, gfy;
