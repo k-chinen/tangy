@@ -202,7 +202,7 @@ changedraft(FILE *fp)
 static int
 changetext(FILE *fp)
 {
-    fprintf(fp, "    1 0.5 0 setrgbcolor\n");
+    fprintf(fp, "        1 0.5 0 setrgbcolor %% %s\n", __func__);
 #if 0
     fprintf(fp, "    /Courier findfont %d scalefont setfont\n",
         epsdraftfontsize);
@@ -213,7 +213,7 @@ changetext(FILE *fp)
 static int
 changetext2(FILE *fp)
 {
-    fprintf(fp, "    1 1 0 setrgbcolor\n");
+    fprintf(fp, "        1 1 0 setrgbcolor %% %s\n", __func__);
 #if 0
     fprintf(fp, "    /Courier findfont %d scalefont setfont\n",
         epsdraftfontsize);
@@ -5978,13 +5978,14 @@ P;
     return r;
 }
 
+int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
+
 int
 Zepsdraw_clinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
     int r;
     int aw, ah;
-int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
 
 #if 0
 Echo("%s: enter\n", __func__);
@@ -6019,7 +6020,8 @@ fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
 fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
         changethick(fp, xu->cob.hatchthick);
         fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
-        epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+        epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor,
+            xu->cob.fillhatch, xu->cob.hatchpitch);
 
         fprintf(fp, " grestore\n");
     }
@@ -6200,7 +6202,6 @@ Zepsdraw_wlinearrow(FILE *fp,
     int af1_x, af1_y, af2_x, af2_y, afc_x, afc_y;
     int ab1_x, ab1_y, ab2_x, ab2_y, abc_x, abc_y;
 
-    int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty);
 
     Lsegs = (seg*)malloc(sizeof(seg)*xu->cob.segar->use);
     if(!Lsegs) {
@@ -6598,7 +6599,8 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
 
     fprintf(fp, "%d %d translate\n", ccx, ccy);
 
-    epsdraw_hatch(fp, cw, ch, xu->cob.fillcolor, xu->cob.fillhatch);
+    epsdraw_hatch(fp, cw, ch, xu->cob.fillcolor,
+        xu->cob.fillhatch, xu->cob.hatchpitch);
  }
 #endif
 
@@ -6917,7 +6919,7 @@ out:
  *      H -ah/2 - 0 - ah/2
  */
 int
-epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
+epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 {
     int x1, y1, x2, y2;
     int x3, y3;
@@ -6937,19 +6939,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 
     case HT_HZIGZAG:
 #if 0
-        for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+        for(y1=-ah*3/5;y1<ah*3/5;y1+=hp) {
             c = 0;
-            for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+            for(x1=-aw*3/5;x1<aw*3/5;x1+=hp) {
                 if(c%2==0) {
-                    y2 = y1-def_hatchpitch/2;
+                    y2 = y1-hp/2;
                     y3 = y1;
                 }
                 else {
-                    y3 = y1-def_hatchpitch/2;
+                    y3 = y1-hp/2;
                     y2 = y1;
                 }
                 x2 = x1;
-                x3 = x1+def_hatchpitch;
+                x3 = x1+hp;
                 fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
                     x2, y2, x3, y3);
                 c++;
@@ -6958,19 +6960,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
         break;
 #endif
 #if 1
-        for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+        for(y1=-ah*3/5;y1<ah*3/5;y1+=hp) {
             c = 0;
-            for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+            for(x1=-aw*3/5;x1<aw*3/5;x1+=hp) {
                 if(c%2==0) {
-                    y2 = y1-def_hatchpitch/2;
+                    y2 = y1-hp/2;
                     y3 = y1;
                 }
                 else {
-                    y3 = y1-def_hatchpitch/2;
+                    y3 = y1-hp/2;
                     y2 = y1;
                 }
                 x2 = x1;
-                x3 = x1+def_hatchpitch;
+                x3 = x1+hp;
                 if(c==0) {
                     fprintf(fp, " %d %d moveto\n", x2, y2);
                 }
@@ -6984,19 +6986,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 
     case HT_VZIGZAG:
 #if 0
-        for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+        for(x1=-aw*3/5;x1<aw*3/5;x1+=hp) {
             c = 0;
-            for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+            for(y1=-ah*3/5;y1<ah*3/5;y1+=hp) {
                 if(c%2==0) {
-                    x2 = x1-def_hatchpitch/2;
+                    x2 = x1-hp/2;
                     x3 = x1;
                 }
                 else {
-                    x3 = x1-def_hatchpitch/2;
+                    x3 = x1-hp/2;
                     x2 = x1;
                 }
                 y2 = y1;
-                y3 = y1+def_hatchpitch;
+                y3 = y1+hp;
                 fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
                     x2, y2, x3, y3);
                 c++;
@@ -7004,19 +7006,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
         }
 #endif
 #if 1
-        for(x1=-aw*3/5;x1<aw*3/5;x1+=def_hatchpitch) {
+        for(x1=-aw*3/5;x1<aw*3/5;x1+=hp) {
             c = 0;
-            for(y1=-ah*3/5;y1<ah*3/5;y1+=def_hatchpitch) {
+            for(y1=-ah*3/5;y1<ah*3/5;y1+=hp) {
                 if(c%2==0) {
-                    x2 = x1-def_hatchpitch/2;
+                    x2 = x1-hp/2;
                     x3 = x1;
                 }
                 else {
-                    x3 = x1-def_hatchpitch/2;
+                    x3 = x1-hp/2;
                     x2 = x1;
                 }
                 y2 = y1;
-                y3 = y1+def_hatchpitch;
+                y3 = y1+hp;
                 if(c==0) {
                     fprintf(fp, " %d %d moveto\n", x2, y2);
                 }
@@ -7031,7 +7033,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     case HT_HLINED:
         x1 = -2*aw;
         x2 =  2*aw;
-        for(y1=-2*ah;y1<2*ah;y1+=def_hatchpitch) {
+        for(y1=-2*ah;y1<2*ah;y1+=hp) {
             y2 = y1;
             fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -7041,7 +7043,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     case HT_VLINED:
         y1 = -2*aw;
         y2 =  2*aw;
-        for(x1=-2*aw;x1<2*aw;x1+=def_hatchpitch) {
+        for(x1=-2*aw;x1<2*aw;x1+=hp) {
             x2=x1;
             fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -7051,14 +7053,14 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     case HT_CROSSED:
         x1 = -2*aw;
         x2 =  2*aw;
-        for(y1=-2*ah;y1<2*ah;y1+=def_hatchpitch) {
+        for(y1=-2*ah;y1<2*ah;y1+=hp) {
             y2 = y1;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
         }
         y1 = -2*aw;
         y2 =  2*aw;
-        for(x1=-2*aw;x1<2*aw;x1+=def_hatchpitch) {
+        for(x1=-2*aw;x1<2*aw;x1+=hp) {
             x2=x1;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -7069,7 +7071,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 #if 0
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-2*aw;x1<aw*2+ah*2;x1+=def_hatchpitch) {
+        for(x1=-2*aw;x1<aw*2+ah*2;x1+=hp) {
             x2 = x1-ah*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -7077,7 +7079,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=def_hatchpitch) {
+        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=hp) {
             x2 = x1-ah*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x2, y1, x1, y2);
@@ -7085,14 +7087,14 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
 #endif
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-2*aw;x1<aw*2+ah*2;x1+=def_hatchpitch) {
+        for(x1=-2*aw;x1<aw*2+ah*2;x1+=hp) {
             x2 = x1-ah*6/10*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
         }
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=def_hatchpitch) {
+        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=hp) {
             x2 = x1-ah*6/10*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x2, y1, x1, y2);
@@ -7103,7 +7105,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     case HT_BACKSLASHED:
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-2*aw;x1<aw*2+ah*2;x1+=def_hatchpitch) {
+        for(x1=-2*aw;x1<aw*2+ah*2;x1+=hp) {
             x2 = x1-ah*6/10*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -7111,8 +7113,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
         break;
 
     case HT_DOTTED:
-        for(x1=-aw;x1<aw;x1+=def_hatchpitch) {
-            for(y1=-ah;y1<ah;y1+=def_hatchpitch) {
+        for(x1=-aw;x1<aw;x1+=hp) {
+            for(y1=-ah;y1<ah;y1+=hp) {
                 x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
@@ -7122,8 +7124,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
         break;
 
     case HT_SPARSEDOTTED:
-        for(x1=-aw;x1<aw;x1+=def_hatchpitch*2) {
-            for(y1=-ah;y1<ah;y1+=def_hatchpitch*2) {
+        for(x1=-aw;x1<aw;x1+=hp*2) {
+            for(y1=-ah;y1<ah;y1+=hp*2) {
                 x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
@@ -7136,13 +7138,13 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
       {
             int u, v;
         u = 0;
-        for(x1=-aw;x1<aw;x1+=def_hatchpitch) {
+        for(x1=-aw;x1<aw;x1+=hp) {
             v = 0;
-            for(y1=-ah;y1<ah;y1+=def_hatchpitch) {
+            for(y1=-ah;y1<ah;y1+=hp) {
                 
                 if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
                     fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
-                        x1, y1, def_hatchpitch, def_hatchpitch, -def_hatchpitch);
+                        x1, y1, hp, hp, -hp);
                 }
                 v++;
             }
@@ -7156,13 +7158,13 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
       {
             int u, v;
         u = 0;
-        for(x1=-aw;x1<aw;x1+=def_hatchpitch*2) {
+        for(x1=-aw;x1<aw;x1+=hp*2) {
             v = 0;
-            for(y1=-ah;y1<ah;y1+=def_hatchpitch*2) {
+            for(y1=-ah;y1<ah;y1+=hp*2) {
                 
                 if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
                     fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
-                        x1, y1, def_hatchpitch*2, def_hatchpitch*2, -def_hatchpitch*2);
+                        x1, y1, hp*2, hp*2, -hp*2);
                 }
                 v++;
             }
@@ -7185,7 +7187,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty)
     case HT_SLASHED:
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=def_hatchpitch) {
+        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=hp) {
             x2 = x1-ah*6/10*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x2, y1, x1, y2);
@@ -7613,11 +7615,11 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         fprintf(fp, "  grestore %% textmode\n");
     }
 
-    fprintf(fp, "    %% text offset\n");
+    fprintf(fp, "  %% text offset\n");
 #if 0
-    fprintf(fp, "    %d %d translate\n", 0, ht/2-rh/2);
+    fprintf(fp, "  %d %d translate\n", 0, ht/2-rh/2);
 #endif
-    fprintf(fp, "    %d %d translate\n", 0, (py*n)/2-py+pyb);
+    fprintf(fp, "  %d %d translate\n", 0, (py*n)/2-py+pyb);
 
     if(text_mode) {
         fprintf(fp, "  gsave\n");
@@ -7842,8 +7844,8 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
             "      sstrwar %d sstrw put %% store value to reuse\n", i);
 
         if(text_mode) {
-            fprintf(fp, "  %% textguide\n");
-            fprintf(fp, "  gsave\n");
+            fprintf(fp, "      %% textguide 1st\n");
+            fprintf(fp, "      gsave\n");
 
 #if 0
             changetext3(fp);
@@ -7854,13 +7856,13 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 #endif
 
             changetext2(fp);
-            fprintf(fp, "    sstrw 2 div neg %d moveto\n", objunit*7/100);
-            fprintf(fp, "    0 %d rlineto\n", -objunit*7/100);
-            fprintf(fp, "    sstrw 0 rlineto\n");
-            fprintf(fp, "    0 %d rlineto\n", objunit*7/100);
-            fprintf(fp, "    stroke\n");
+            fprintf(fp, "        sstrw 2 div neg %d moveto\n", objunit*7/100);
+            fprintf(fp, "        0 %d rlineto\n", -objunit*7/100);
+            fprintf(fp, "        sstrw 0 rlineto\n");
+            fprintf(fp, "        0 %d rlineto\n", objunit*7/100);
+            fprintf(fp, "        stroke\n");
 
-            fprintf(fp, "  grestore\n");
+            fprintf(fp, "      grestore %% textguide\n");
         }
 
 
@@ -7908,7 +7910,7 @@ skip_bgdrawing:
 
         fprintf(fp, "    grestore %% oneline\n");
 
-        fprintf(fp, "   0 %d translate\n", -py);
+        fprintf(fp, "    0 %d translate\n", -py);
     }
     fprintf(fp, "  grestore %% bgdraw\n");
 
@@ -8000,8 +8002,8 @@ Echo("  --- calc size 2\n");
 #endif
 
         if(text_mode) {
-            fprintf(fp, "  %% textguide\n");
-            fprintf(fp, "  gsave\n");
+            fprintf(fp, "      %% textguide 2nd\n");
+            fprintf(fp, "      gsave\n");
 
 #if 0
             changetext3(fp);
@@ -8012,13 +8014,13 @@ Echo("  --- calc size 2\n");
 #endif
 
             changetext2(fp);
-            fprintf(fp, "    sstrw 2 div neg %d moveto\n", objunit*7/100);
-            fprintf(fp, "    0 %d rlineto\n", -objunit*7/100);
-            fprintf(fp, "    sstrw 0 rlineto\n");
-            fprintf(fp, "    0 %d rlineto\n", objunit*7/100);
-            fprintf(fp, "    stroke\n");
+            fprintf(fp, "        sstrw 2 div neg %d moveto\n", objunit*7/100);
+            fprintf(fp, "        0 %d rlineto\n", -objunit*7/100);
+            fprintf(fp, "        sstrw 0 rlineto\n");
+            fprintf(fp, "        0 %d rlineto\n", objunit*7/100);
+            fprintf(fp, "        stroke\n");
 
-            fprintf(fp, "  grestore\n");
+            fprintf(fp, "      grestore %% textguide\n");
         }
 
 
@@ -8246,7 +8248,7 @@ apply:
             }
             changethick(fp, xu->cob.hatchthick);
             epsdraw_hatch(fp, xu->wd, xu->ht, 
-                xu->cob.fillcolor, xu->cob.fillhatch);
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
             fprintf(fp, "grestore\n");
         }
     }
@@ -8367,7 +8369,7 @@ apply:
 
             changethick(fp, xu->cob.hatchthick);
             epsdraw_hatch(fp, xu->wd, xu->ht,
-                 xu->cob.fillcolor, xu->cob.fillhatch);
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "grestore\n");
         }
@@ -8472,7 +8474,7 @@ apply:
             }
             changethick(fp, xu->cob.hatchthick);
             epsdraw_hatch(fp, xu->wd, xu->ht, 
-                xu->cob.fillcolor, xu->cob.fillhatch);
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
             fprintf(fp, "grestore\n");
         }
     }
@@ -8591,7 +8593,8 @@ apply:
             }
 
             changethick(fp, xu->cob.hatchthick);
-            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "  grestore\n");
             fprintf(fp, "grestore\n");
@@ -8670,7 +8673,8 @@ P;
         fprintf(fp, "  closepath \n");
         fprintf(fp, "  clip\n");
     }
-    epsdraw_hatch(fp, xu->wd, xu->ht*2, xu->cob.fillcolor, xu->cob.fillhatch);
+    epsdraw_hatch(fp, xu->wd, xu->ht*2,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
     if(debug_clip) {
         fprintf(fp, "  initclip\n");
@@ -8791,7 +8795,8 @@ apply:
         }
 
         changethick(fp, xu->cob.hatchthick);
-        epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+        epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
         fprintf(fp, "  initclip\n");
     }
@@ -9012,7 +9017,8 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  closepath\n");
         fprintf(fp, "  clip\n");
-        epsdraw_hatch(fp, xu->wd, xu->ht, xu->cob.fillcolor, xu->cob.fillhatch);
+        epsdraw_hatch(fp, xu->wd, xu->ht,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
         fprintf(fp, " grestore\n");
     }
     else {
@@ -9197,8 +9203,8 @@ apply:
 
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
-        epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
-
+        epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
         if(xu->cob.deco) {
             fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
@@ -9369,7 +9375,8 @@ apply:
             }
 
             changethick(fp, xu->cob.hatchthick);
-            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "  grestore\n");
 
@@ -10106,7 +10113,8 @@ apply:
             }
 
             changethick(fp, xu->cob.hatchthick);
-            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "  grestore\n");
         }
@@ -10295,7 +10303,8 @@ apply:
             }
 
             changethick(fp, xu->cob.hatchthick);
-            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "  grestore\n");
         }
@@ -10462,7 +10471,8 @@ epsdraw_Xbracket(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
             }
 
             changethick(fp, xu->cob.hatchthick);
-            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor, xu->cob.fillhatch);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
             fprintf(fp, "  grestore\n");
         }
