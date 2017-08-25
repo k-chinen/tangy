@@ -4367,7 +4367,7 @@ Echo("%s: ptype %d\n", __func__, s->ptype);
                 actfh = xu->cob.arrowforeheadtype;
             }
         }
-printf("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
+Echo("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
     xu->oid, __func__, actbh, actch, actfh);
 
         if(xu->cob.marknode) {
@@ -5909,7 +5909,7 @@ Echo("%s: enter\n", __func__);
     }
 #endif
 
-#if 1
+#if 0
     fprintf(stdout, "segar");
     varray_fprint(stdout, xu->cob.segar);
 #endif 

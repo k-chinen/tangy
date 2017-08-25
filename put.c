@@ -222,8 +222,8 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
 
     rv = 0;
 
-#if 1
 Echo("%s:\n", __func__);
+#if 0
     varray_fprint(stdout, opar);
 #endif
 
@@ -625,7 +625,7 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
     }
         MARK("z ", x, y);
 
-    fprintf(stdout, "MARK oid %d (%d %d %d %d)\n",
+    Echo("MARK oid %d (%d %d %d %d)\n",
         u->oid, _lx, _by, _rx, _ty);
 
 
@@ -651,7 +651,7 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
         *rty = _ty;
     }
 
-    fprintf(stdout, "MARK*oid %d (%d %d %d %d)\n",
+    Echo("MARK*oid %d (%d %d %d %d)\n",
         u->oid, *rlx, *rby, *rrx, *rty);
 
 #if 0
@@ -2124,10 +2124,10 @@ Echo("  fx-ox,fy-oy %d,%d dir %d; ik %d\n",
 
 #define S(x)    ((x)?(x):"*none*")
 P;
-printf("POS oid %d from %s to %s at %s\n",
+Echo("POS oid %d from %s to %s at %s\n",
     u->oid, S(u->cob.afrom), S(u->cob.ato), S(u->cob.aat));
 #undef S
-printf("POS oid %d from %d to %d\n",
+Echo("POS oid %d from %d to %d\n",
     u->oid, u->cob.hasfrom, u->cob.hasto);
 
 #if 0

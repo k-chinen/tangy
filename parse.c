@@ -365,14 +365,14 @@ Echo("  push cmd '%s'(%d) val '%s'\n",
 #endif
     varray_push(nob->cob.segopar, (void*)newop);
 
-#if 1
+#if 0
     fprintf(stdout, "segopar");
     varray_fprint(stdout, nob->cob.segopar);
 #endif
 
     nob->cob.originalshape++;
 #if 1
-    fprintf(stdout, "original %d oid %d\n",
+    Echo("original %d oid %d\n",
         nob->cob.originalshape, nob->oid);
 #endif
 

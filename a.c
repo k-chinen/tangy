@@ -23,17 +23,17 @@
 
 double rf = M_PI/180.0;
 
-int _t_ = 0;
+int _t_ = 1;
 int _p_ = 0;
 #define ISTRACE (_t_>0)
-#define P   if(_t_||_p_)printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout);
+#define P   if(!_p_){printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout); }
 #define E   printf("%s:%d;%s probably ERROR\n", __FILE__, __LINE__, __func__); fflush(stdout);
 
-#define Echo    if(_t_)printf
 
 #define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
 #define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
-#define Info    printf("INFO %s:%s ", __FILE__, __func__);fflush(stdout);printf
+#define Info    if(_t_)printf("INFO %s:%s ", __FILE__, __func__),fflush(stdout),printf
+#define Echo    if(_t_)printf
 
 
 
@@ -2105,7 +2105,7 @@ _ns_find_objP(ns* xns, char *xname, int* xx, int* xy)
         Echo("  *xx,*xy = %d,%d\n", *xx, *xy);
     }
 #endif
-#if 1
+#if 0
     ns_dump(xns);
 #endif
 
@@ -2298,7 +2298,9 @@ revch(ob *x, ch* ref, int *rx, int *ry)
 #if 0
         varray_dump(chpath);
 #endif
+#if 0
         varray_fprint(stdout, chpath);
+#endif
 
         Echo("chpath\n");
         for(i=0;i<chpath->use;i++) {
@@ -2597,7 +2599,7 @@ _ns_find_objX(ns* xns, char *xname, int *ux, int *uy)
 #if 1
     Echo("  %s: xns %p, xname '%s'\n", __func__, xns, xname);
 #endif
-#if 1
+#if 0
     ns_dump(xns);
 #endif
 
@@ -2960,10 +2962,12 @@ print_usage()
     printf("    -c      print color list for debug\n");
     printf("    -F font set default font (default '%s')\n", def_fontname);
     printf("following itmes are reserved for future. do not use.\n");
+    printf("    -v      verbose mode\n");
+    printf("    -q      quiet mode\n");
+    printf("    -p      passing trace mode\n");
     printf("   *-d      draft mode\n");
     printf("   *-L      draw labels\n");
     printf("   *-D      debug mode\n");
-    printf("   *-v      verbose mode\n");
     printf("   *-r      draw ruler\n");
     printf("   *-s num  set scale\n");
     printf("   *-n      no draw\n");
@@ -3151,7 +3155,8 @@ main(int argc, char *argv[])
     
     pallet = new_default_pallet();
 
-    while((flag=getopt(argc, argv, "0hmVPvpngbSdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
+    while((flag=getopt(argc, argv,
+            "0hmVPvqpngbSdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -3174,8 +3179,10 @@ main(int argc, char *argv[])
             exit(0);
             break;
         case 'v':
-            _t_ = 1 - _t_;
+            _t_ ++;
             break;
+        case 'q':
+            _t_ = 0;
         case 'p':
             _p_ = 1 - _p_;
             break;
