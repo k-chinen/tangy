@@ -25,8 +25,8 @@ double rf = M_PI/180.0;
 
 int _t_ = 1;
 int _p_ = 0;
-#define ISTRACE (_t_>0)
-#define P   if(!_p_){printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout); }
+#define INTRACE (_t_>0)
+#define P   if(_p_){printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout); }
 #define E   printf("%s:%d;%s probably ERROR\n", __FILE__, __LINE__, __func__); fflush(stdout);
 
 
@@ -3183,6 +3183,7 @@ main(int argc, char *argv[])
             break;
         case 'q':
             _t_ = 0;
+            break;
         case 'p':
             _p_ = 1 - _p_;
             break;
@@ -3283,11 +3284,11 @@ main(int argc, char *argv[])
     recalcsizeparam();
 
     ik = parse(stdin, ch0, ns0);
-    if(ISTRACE) {
+    if(INTRACE) {
         ob_cndump(ch0);
     }
 
-    if(ISTRACE) {
+    if(INTRACE) {
         varray_fprint(stdout, gnotefilelist);
         varray_fprint(stdout, gnotebindlist);
     }
@@ -3308,14 +3309,14 @@ P;
     y = 0;
 P;
     ik = put(ch0, &x, &y, ns0);
-    if(ISTRACE) {
+    if(INTRACE) {
         ob_gdump(ch0);
     }
 
 #ifdef DO_LINKCHK
 P;
     ik = linkchk(ch0, ns0);
-    if(ISTRACE) {
+    if(INTRACE) {
         ob_gdump(ch0);
     }
 #endif
@@ -3323,7 +3324,7 @@ P;
 P;
     finalize(ch0, 0, 0, ns0);
 
-    if(ISTRACE) {
+    if(INTRACE) {
         ob_adump(ch0);
         ob_bgdump(ch0);
         ob_bldump(ch0);

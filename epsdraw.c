@@ -532,7 +532,10 @@ drawCRrectG(FILE *fp, int x1, int y1, int wd, int ht, int ro, int gl)
 int
 epsdraw_bbox_cwh(FILE *fp, ob *xu)
 {
-    fprintf(fp, "%% bbox guide with CWH\n");
+    if(INTRACE) {
+        fprintf(fp, "%% bbox guide oid %d with WH (%d %d) by %s\n",
+            xu->oid, xu->wd, xu->ht, __func__);
+    }
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changebbox(fp);
     drawCrect(fp, xu->gx, xu->gy, xu->wd, xu->ht);
@@ -549,8 +552,10 @@ epsdraw_bbox_glbrt(FILE *fp, ob *xu)
 {
     char msg[BUFSIZ];
 
-    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
-            xu->glx, xu->gby, xu->grx, xu->gty);
+    if(INTRACE) {
+    fprintf(fp, "  %% bbox guide oid %d with GLBRT (%d %d %d %d) by %s\n",
+        xu->oid, xu->glx, xu->gby, xu->grx, xu->gty, __func__);
+    }
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changecolor(fp, 5);
 
@@ -574,8 +579,10 @@ epsdraw_bbox_glbrtB(FILE *fp, ob *xu)
 {
     char msg[BUFSIZ];
 
-    fprintf(fp, "  %% bbox guide with GLBRT (%d %d %d %d)\n",
-            xu->glx, xu->gby, xu->grx, xu->gty);
+    if(INTRACE) {
+        fprintf(fp, "  %% bbox guide oid %d with GLBRT (%d %d %d %d) by %s\n",
+            xu->oid, xu->glx, xu->gby, xu->grx, xu->gty, __func__);
+    }
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     fprintf(fp, "    currentlinewidth 40 mul setlinewidth\n");
     changecolor(fp, 2);
@@ -596,12 +603,62 @@ epsdraw_bbox_glbrtB(FILE *fp, ob *xu)
 }
 
 int
+epsdraw_bbox_glbrtR(FILE *fp, ob *xu)
+{
+    char msg[BUFSIZ];
+    int  br;
+extern int _box_path(FILE *fp, int x1, int y1, int aw, int ah, int r, int op);
+
+    if(INTRACE) {
+    fprintf(fp, "  %% bbox guide oid %d with GLBRT (%d %d %d %d) by %s\n",
+        xu->oid, xu->glx, xu->gby, xu->grx, xu->gty, __func__);
+    }
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
+    changecolor(fp, 5);
+    changethick(fp, def_markbbthick);
+
+    br = objunit/16;
+
+#if 0
+    drawCrect(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby);
+#endif
+    sprintf(msg, "oid %d", xu->oid);
+#if 0
+    drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_RIGHT);
+#endif
+#if 0
+    _box_path(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, objunit/8, 1);
+#endif
+    fprintf(fp, "    %d %d translate\n",
+        (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2
+        );
+#if 0
+    _box_path(fp, (xu->glx), (xu->gby)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, objunit/8, 1);
+#endif
+    _box_path(fp, (xu->glx), (xu->gby)/2,
+        xu->grx-xu->glx+br*2, xu->gty-xu->gby+br*2, br, 1);
+
+    if(0*xu->cob.rotateval) {
+    }
+    fprintf(fp, "  grestore %% for bbox\n");
+
+    return 0;
+}
+
+int
 epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 {
     char msg[BUFSIZ];
 
-    fprintf(fp, "%% bbox guide with LBRT %d,%d (%d %d %d %d)\n",
-            xox, xoy, xu->lx, xu->by, xu->rx, xu->ty);
+    if(INTRACE) {
+        fprintf(fp,
+            "%% bbox guide oid %d with LBRT %d,%d (%d %d %d %d) by %s\n",
+            xu->oid, xox, xoy, xu->lx, xu->by, xu->rx, xu->ty, __func__);
+    }
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
     changecolor(fp, 3);
 #if 0
@@ -619,8 +676,8 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
     return 0;
 }
 
-#define epsdraw_bbox    epsdraw_bbox_glbrt
 
+#define epsdraw_bbox    epsdraw_bbox_glbrtR
 
 
 
@@ -3846,14 +3903,6 @@ Echo("%s: ydir %d xox %d xoy %d \n",
 
     cdir = ydir;
 
-    if(bbox_mode) {
-#if 0
-        epsdraw_bbox(fp, xu);
-        epsdraw_bbox_glbrt(fp, xu);
-#endif
-        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
-    }
-
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
 
@@ -5117,14 +5166,6 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
             xu->glx, xu->gby, xu->grx, xu->gty);
 #endif
 
-        epsdraw_bbox_glbrt(fp, xu);
-#if 0
-        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
-#endif
-
-        SLW_12(fp);
-        epsdraw_bbox_lbrt(fp, xox+xu->csx, xoy+xu->csy, xu);
-        SLW_21(fp);
 
 #if 0
         Echo("REMARK END\n");
@@ -6619,23 +6660,6 @@ epsdraw_blinearrow(FILE *fp,
 P;
 PP;
 
-    if(bbox_mode) {
-#if 0
-        fprintf(fp, "gsave\n");
-        changethick(fp, objunit*4/100);
-        changecolor(fp, 1);
-        drawCrect(fp, xox+xu->lx, xoy+xu->by, xu->rx-xu->lx, xu->ty-xu->by);
-        fprintf(fp, "grestore\n");
-#endif
-#if 0
-        fprintf(fp, "gsave\n");
-        changethick(fp, objunit*1/100);
-        changecolor(fp, 4);
-        drawCrect(fp, xu->glx, xu->gby, xu->grx-xu->glx, xu->gty-xu->gby);
-        fprintf(fp, "grestore\n");
-#endif
-        epsdraw_bbox(fp, xu);
-    }
 
     if(!xu->cob.originalshape) {
         x1 = xox+xu->csx;
@@ -8191,9 +8215,6 @@ apply:
 
     fprintf(fp, "gsave %% for circle\n");
 
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
 
     if(xu->cob.fillcolor>=0) {
         changecolor(fp, xu->cob.fillcolor);
@@ -8290,10 +8311,6 @@ epsdraw_polygon(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 apply:
 
     fprintf(fp, "%% polygon no imagin\n");
-
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
 
     fprintf(fp, "gsave %% for polygon\n");
 
@@ -8421,11 +8438,6 @@ apply:
 
     fprintf(fp, "gsave %% for ellipse\n");
 
-
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
-
     if(xu->cob.fillcolor>=0) {
         changecolor(fp, xu->cob.fillcolor);
         if(xu->cob.fillhatch==HT_NONE) {
@@ -8518,10 +8530,6 @@ apply:
     fprintf(fp, "gsave %% for drum\n");
 
     fprintf(fp, "%% frame\n");
-
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
 
     fprintf(fp, "%% inside\n");
 
@@ -8624,9 +8632,6 @@ epsdraw_ruler(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
 P;
     fprintf(fp, "%% ruler\n");
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
     fprintf(fp, "gsave\n");
     fprintf(fp, "  /%s findfont %d scalefont setfont\n",
         def_fontname, 12*objunit/100);
@@ -8754,18 +8759,6 @@ apply:
     fprintf(fp, "%%     bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
     fprintf(fp, "gsave %% for box\n");
 
-    if(bbox_mode) {
-PP;
-#if 0
-        epsdraw_bbox_glbrt(fp, xu);
-#endif
-        epsdraw_bbox_lbrt(fp, 0, 0, xu);
-        fprintf(fp, "  gsave %% bbox skel\n");
-        fprintf(fp, "    1 0 0 setrgbcolor\n");
-        fprintf(fp, "    currentlinewidth 4 mul setlinewidth\n");
-        drawCRrectskel2(fp, x1, y1, xu->wd, xu->ht, 0);
-        fprintf(fp, "  grestore %% bbox skel\n");
-    }
 
     fprintf(fp, " %% mainbody\n");
     fprintf(fp, "    %d %d translate\n", x1, y1);
@@ -8997,14 +8990,6 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     fprintf(fp, "gsave %% dmyX\n");
 
-#if 1
-    if(bbox_mode) {
-        epsdraw_bbox_glbrt(fp, xu);
-#if 0
-        epsdraw_bbox_lbrt(fp, xox, xoy, xu);
-#endif
-    }
-#endif
 
     changecolor(fp, xu->cob.outlinecolor);
     changethick(fp, xu->cob.outlinethick);
@@ -9173,16 +9158,6 @@ apply:
     fprintf(fp, "%% cloud xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for cloud\n");
 
-    if(bbox_mode) {
-PP;
-        epsdraw_bbox(fp, xu);
-        fprintf(fp, "gsave\n");
-        fprintf(fp, "1 0 0 setrgbcolor\n");
-        fprintf(fp, "currentlinewidth 4 mul setlinewidth\n");
-        drawCRrectskel2(fp, x1, y1, xu->wd, xu->ht, 0);
-        fprintf(fp, "grestore\n");
-    }
-
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
         xu->cob.outlinecolor, xu->cob.fillhatch,
@@ -9285,10 +9260,6 @@ apply:
     fprintf(fp, "%% dots xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for dots\n");
 
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
-
     r  = objunit/20;
     x2 = objunit/4*cos((xu->cob.sepcurdir)*rf);
     y2 = objunit/4*sin((xu->cob.sepcurdir)*rf);
@@ -9333,11 +9304,6 @@ apply:
 
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for box\n");
-
-    if(bbox_mode) {
-PP;
-        epsdraw_bbox(fp, xu);
-    }
 
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
@@ -10075,11 +10041,6 @@ apply:
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for box\n");
 
-    if(bbox_mode) {
-PP;
-        epsdraw_bbox(fp, xu);
-    }
-
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
         xu->cob.outlinecolor, xu->cob.fillhatch,
@@ -10269,11 +10230,6 @@ apply:
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", bx, by, aw, ah);
     fprintf(fp, "gsave %% for box\n");
 
-    if(bbox_mode) {
-PP;
-        epsdraw_bbox(fp, xu);
-    }
-
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
         xu->cob.outlinecolor, xu->cob.fillhatch,
@@ -10441,11 +10397,6 @@ epsdraw_Xbracket(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
     fprintf(fp, "gsave %% for box\n");
 
-    if(bbox_mode) {
-PP;
-        epsdraw_bbox(fp, xu);
-    }
-
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
         xu->cob.outlinecolor, xu->cob.fillhatch,
@@ -10579,10 +10530,6 @@ epsdraw_sep(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 
     fprintf(fp, "%% sep oid %d\n", xu->oid);
     fprintf(fp, "gsave    %% for sep\n");
-
-    if(bbox_mode) {
-        epsdraw_bbox(fp, xu);
-    }
 
 
 #if 0
@@ -11246,14 +11193,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         epsdraw_bbox(fp, u);
     }
 
-    if(u->cob.markbb) {
-        fprintf(fp, "  gsave %% markbb\n");
-        changecolor(fp, def_markcolor);
-        changethick(fp, def_markbbthick);
-        drawCRrect(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval);
-        fprintf(fp, "  grestore\n");
-    }
-
     if(u->type==CMD_NOTEFILE) {
         goto out;
     }
@@ -11262,6 +11201,18 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         goto out;
     }
 #endif
+
+    if(bbox_mode) {
+        epsdraw_bbox(fp, u);
+    }
+
+    if(u->cob.markbb) {
+        fprintf(fp, "  gsave %% markbb\n");
+        changecolor(fp, def_markcolor);
+        changethick(fp, def_markbbthick);
+        drawCRrect(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval);
+        fprintf(fp, "  grestore\n");
+    }
 
     if(u->type==CMD_SCATTER) {
         epsdraw_scatter(fp, *xdir, ox, oy, u, xns);
@@ -11491,54 +11442,33 @@ P;
 
     cha_reset(&xch->cch);
 
-    if(xch->cob.markbb) {
+    if(xch->cob.markbb || bbox_mode) {
         fprintf(fp, "  gsave %% markbb\n");
         changecolor(fp, def_markcolor);
         changethick(fp, def_markbbthick*2);
+#if 0
         drawCRrectskel(fp, xch->gx, xch->gy, xch->wd, xch->ht,
             xch->cob.rotateval);
+#endif
+#if 0
+        drawrectcm(fp, xch->glx, xch->gby, xch->grx, xch->gty, "whole");
+#endif
+#if 1 
+        drawCRrectskel(fp, (xch->glx+xch->grx)/2, (xch->gby+xch->gty)/2,
+            (xch->grx-xch->glx), (xch->gty-xch->gby),
+            xch->cob.rotateval);
+#endif
+printf("gx,y %d,%d wdxht %d,%d\n", xch->gx, xch->gy, xch->wd, xch->ht);
+printf("glx,by,rx,ty %d,%d,%d,%d\n", xch->glx, xch->gby, xch->grx, xch->gty);
         fprintf(fp, "  grestore\n");
     }
-
-    if(1*bbox_mode) {
-        epsdraw_bbox_glbrtB(fp, xch);
-    }
-    if(0*bbox_mode) {
+#if 0
+    if(bbox_mode) {
         epsdraw_bbox(fp, xch);
     }
-
-    if(0*draft_mode) {
-        sprintf(msg, "chunk %d", xch->oid);
-
-        fprintf(fp, "gsave\n");
-
-#if 0
-        changeground(fp);
-        Xdrawrectcm(fp, xch->glx, xch->gby, xch->grx, xch->gty, msg);
-
-        fprintf(fp, "  newpath %d %d 3 0 360 arc stroke\n", xch->x, xch->y);
 #endif
-
-        changedraft(fp);
-        fprintf(fp, "    %d %d moveto (oid %d) show\n",
-                        gox+xch->x,
-                        goy+xch->y, xch->oid);
-
-#if 0
-        Xdrawrectcm(fp, gox+xch->x-xch->wd/2,
-                        goy+xch->y-xch->ht/2,
-                        gox+xch->x+xch->wd/2,
-                        goy+xch->y+xch->ht/2, msg);
-#endif
-        fprintf(fp, "grestore\n");
-
-        fflush(fp);
-    }
 
 #if 1
-/*
-    if(xch->cob.outlinethick>0)
-*/
     if(
         (xch->cob.fillhatch!=HT_NONE && xch->cob.fillcolor>=0) ||
         (xch->cob.outlinethick>0) ) 
@@ -11570,22 +11500,6 @@ PP;
         fprintf(fp, "%% chunk itself END\n");
     }
 #endif
-
-    if(0*bbox_mode) {
-        fprintf(fp, "gsave\n");
-        changedraft(fp);
-        drawCRrectG(fp, gox+xch->x, goy+xch->y, xch->wd, xch->ht,
-            xch->cob.rotateval, objunit/10);
-        fprintf(fp, "  gsave\n");
-        fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
-            gox+xch->x+xch->wd/2,
-            goy+xch->y+xch->ht/2,
-            45);
-        fprintf(fp, "  %d %d moveto (chunk %d) show\n",
-            objunit/10, 0, xch->oid);
-        fprintf(fp, "  grestore\n");
-        fprintf(fp, "grestore\n");
-    }
 
 #if 0
     if(xch->cob.outlinethick>0 && xch->cob.outlinecolor>=0) {
@@ -11645,29 +11559,18 @@ PP;
 
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*)xch->cch.ch[i];
+
 #if 0
-        if(u->type==CMD_CHUNK) 
+        if(bbox_mode) {
+            epsdraw_bbox(fp, u);
+        }
 #endif
+
         if(ISCHUNK(u->type)) {
             ik = epsdrawchunk(fp, u,
                     gox+xch->x+xch->ox,
                     goy+xch->y+xch->oy, xns);
         }
-#if 0
-        else
-        if(u->type==CMD_BRANCH) {
-            ob* bb;
-            bb = u->cob.forkbranchbody;
-            if(bb->drawed) {
-                Echo("brach %d body %d skip already drawed\n",
-                    u->oid, bb->oid);
-                continue;
-            }
-            ik = epsdrawchunk(fp, bb,
-                    xch->x+xch->ox+u->ox,
-                    xch->y+xch->oy+u->oy, xns);
-        }
-#endif
         else {
 
 Echo(" call obj oid %d drawing start %d,%d\n",
@@ -11677,48 +11580,6 @@ Echo(" call obj oid %d drawing start %d,%d\n",
                     goy+xch->y+xch->oy, xns);
         }
     }
-
-#if 0
- {
-    int q;
-
-    fprintf(fp, "gsave\n");
-    fprintf(fp, " 0 0 1 setrgbcolor\n");
-    for(i=0;i<xch->cch.nch;i++) {
-        u = (ob*)xch->cch.ch[i];
-        q = (u->oid%10+1)*3;
-        fprintf(fp, "newpath\n");
-            fprintf(fp, "  %d %d moveto\n", u->gsx, u->gsy+q);
-            fprintf(fp, "  %d %d lineto\n", u->gex, u->gey+q);
-        fprintf(fp, "stroke\n");
-    }
-    fprintf(fp, "grestore\n");
-
- }
-#endif
-
-#if 0
- {
-    int q;
-
-    fprintf(fp, "gsave\n");
-    fprintf(fp, " 0 0 1 setrgbcolor\n");
-    for(i=0;i<xch->cch.nch;i++) {
-        u = (ob*)xch->cch.ch[i];
-        q = (u->oid%10+1)*3;
-        fprintf(fp, "newpath\n");
-#if 0
-            fprintf(fp, "  %d %d moveto\n", u->ox+u->sx, u->oy+u->gsy-q);
-            fprintf(fp, "  %d %d lineto\n", u->ox+u->ex, u->oy+u->gey-q);
-#endif
-            fprintf(fp, "  %d %d moveto\n", xch->ox+u->sx, xch->oy+u->gsy-q);
-            fprintf(fp, "  %d %d lineto\n", xch->ox+u->ex, xch->oy+u->gey-q);
-        fprintf(fp, "stroke\n");
-    }
-    fprintf(fp, "grestore\n");
-
- }
-#endif
 
     ik = epsdraw_note(fp, xch);
     ik = epsdraw_portboard(fp, xch->cch.dir, u);
@@ -11835,7 +11696,6 @@ epsdrawobj_namel(FILE *fp, ob *u, char *n, int *xdir, int ox, int oy, ns *xns)
     fht = def_textheight;
     r = objunit*1.5;
     a = 60+(u->oid-1)*17;
-    sprintf(tmp, "oid %d %s", u->oid, rassoc(cmd_ial, u->type));
 
     fprintf(fp, "  gsave\n");
     fprintf(fp, "    %d %d translate\n", cx, cy-fht);
@@ -11845,9 +11705,6 @@ epsdrawobj_namel(FILE *fp, ob *u, char *n, int *xdir, int ox, int oy, ns *xns)
     fprintf(fp, "    exch 0 rlineto 0 %d rlineto neg 0 rlineto closepath fill\n", fht);
     fprintf(fp, "    0.2 0.5 1 setrgbcolor\n");
     fprintf(fp, "    0 0 moveto show\n");
-#if 0
-    fprintf(fp, "    (%s) show\n", tmp);
-#endif
     fprintf(fp, "  grestore\n");
 #endif
 
@@ -11866,8 +11723,12 @@ epsdrawchunk_namel(FILE *fp, ob *xch, int gox, int goy, ns *xns)
 #if 0
     fprintf(fp, "  /Helvetica findfont 10 scalefont setfont\n");
 #endif
-    fprintf(fp, "  /Helvetica findfont %d scalefont setfont\n", def_textheight);
+    fprintf(fp, "  /Helvetica findfont %d scalefont setfont\n",
+        def_textheight);
+
+#if 0
     epsdrawobj_oidl(fp, xch, &xdir, gox, goy, xns);
+#endif
 
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*)xch->cch.ch[i];
@@ -11875,6 +11736,10 @@ epsdrawchunk_namel(FILE *fp, ob *xch, int gox, int goy, ns *xns)
 
         q = _ns_find_name(xns, u, 0);
 Echo(" q %p\n", q);
+
+        if(!q) {
+            continue;
+        }
 
         if(ISCHUNK(u->type)) {
             epsdrawchunk_namel(fp, u, gox, goy, xns);
@@ -12139,8 +12004,8 @@ P;
         gp = def_gridpitch;
 
 #define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/8);
-#define GGM fprintf(fp, "  0.6 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/4);
-#define GGL fprintf(fp, "  0.8 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/2);
+#define GGM fprintf(fp, "  0.6 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/2);
+#define GGL fprintf(fp, "  0.8 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/1);
 
         fprintf(fp, "%%\n%% grid\n");
         fprintf(fp, "gsave\n");
@@ -12180,10 +12045,10 @@ P;
         fprintf(fp, "gsave\n");
         changeground(fp);
         fprintf(fp, "  %d setlinewidth\n", def_linedecothick);
-#if 0
         drawrectcm(fp, xch->glx, xch->gby, xch->grx, xch->gty, "whole");
-#endif
+#if 0
         drawrectcm(fp, xch->lx, xch->by, xch->rx, xch->ty, "whole");
+#endif
         fprintf(fp, "grestore\n");
     }
 
