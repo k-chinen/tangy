@@ -874,7 +874,6 @@ P;
 
     switch(u->type) {
     case CMD_NOP:
-        WO;
         break;
 
     case CMD_CHUNKOBJATTR:  ZZ; break;

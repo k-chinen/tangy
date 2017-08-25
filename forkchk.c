@@ -119,67 +119,6 @@ P;
             continue;
         }
 
-        if(u->type==CMD_FORK) {
-#if 0
-            printf("oid %d FORK\n", u->oid);
-#endif
-
-            lastfork = u;
-        }
-        if(u->type==CMD_FORKEND) {
-#if 0
-            printf("oid %d FORKEND %s\n", u->oid, 
-                (u->cob.afrom ?  u->cob.afrom : "*none"));
-#endif
-
-            if(!u->cob.afrom) {
-                printf("ERROR no FROM specify\n");
-                continue;
-            }
-
-            curfork = ns_find_obj(xns, u->cob.afrom);
-            if(!curfork) {
-#if 0
-                printf("\tcurfork %p\n", curfork);
-#endif
-                printf("ERROR not fond fork '%s'\n", u->cob.afrom);
-                continue;
-            }
-
-#if 0
-            printf("\tcurfork %p oid %d\n", curfork, curfork->oid);
-#endif
-            curfork->cob.forkhasend++;
-
-            lastfork = NULL;
-        }
-        if(u->type==CMD_BRANCH) {
-#if 0
-            printf("oid %d FORKEND %s\n", u->oid, 
-                (u->cob.afrom ?  u->cob.afrom : "*none"));
-#endif
-
-            if(!u->cob.afrom) {
-                printf("ERROR no FROM specify\n");
-                continue;
-            }
-
-            curfork = ns_find_obj(xns, u->cob.afrom);
-            if(!curfork) {
-#if 0
-                printf("\tcurfork %p\n", curfork);
-#endif
-                printf("ERROR not fond fork '%s'\n", u->cob.afrom);
-                continue;
-            }
-
-#if 0
-            printf("\tcurfork %p oid %d\n", curfork, curfork->oid);
-#endif
-            curfork->cob.forkhasbranch++;
-
-        }
-
 #if 0
         ik = fkchkobj(u, 0);
 #endif
@@ -190,6 +129,7 @@ P;
 
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*) xch->cch.ch[i];
+#if 0
         if(u->type==CMD_FORK) {
 #if 0
             printf("oid %d branch %d end %d\n",
@@ -202,6 +142,7 @@ P;
             }
 #endif
         }
+#endif
         if(u->type==CMD_CHUNK) {
             ik = fkchkchunk(u, xns);
         }

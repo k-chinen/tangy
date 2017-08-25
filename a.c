@@ -91,10 +91,6 @@ int _p_ = 0;
 #define CMD_BACK        (2021)
 #define CMD_HBACK       (2022)
 
-#define CMD_FORK        (3001)
-#define CMD_FORKEND     (3002)
-#define CMD_BRANCH      (3003)
-
 #define CMD_GATHER      (3007)
 #define CMD_SCATTER     (3008)
 
@@ -168,9 +164,6 @@ apair_t cmd_ial[] = {
     {"again",           CMD_AGAIN},
     {"back",            CMD_BACK},
     {"hback",           CMD_HBACK},
-    {"fork",            CMD_FORK},
-    {"forkend",         CMD_FORKEND},
-    {"branch",          CMD_BRANCH},
 #if 0
     {"dmy1",            CMD_DMY1},
     {"dmy2",            CMD_DMY2},
@@ -203,7 +196,11 @@ apair_t cmd_ial[] = {
 };
 
 
+#if 0
 #define ISCHUNK(x)  ((x)==CMD_CHUNK||(x)==CMD_FORK||(x)==CMD_BRANCH)
+#endif
+
+#define ISCHUNK(x)  ((x)==CMD_CHUNK)
 #define ISGLUE(x)   \
     ((x)==CMD_LINE||(x)==CMD_LINK||(x)==CMD_ARROW||\
      (x)==CMD_WLINE||(x)==CMD_WARROW|(x)==CMD_PING||(x)==CMD_PINGPONG|| \
@@ -857,11 +854,13 @@ struct obattr {
     int    hasfrom;
     int    hasto;
 
+#if 0
     void  *forkfocus;
     int    forkhasbranch;
     void  *forkbranchmem[MAXBRANCH];    /* XXX */
     int    forkhasend;
     void  *forkbranchbody;
+#endif
 
     int   originalshape;
 
@@ -3259,7 +3258,7 @@ main(int argc, char *argv[])
             do_colorlist++;
             break;
         case 's':
-            canvassc = atof(optarg);
+            canvassc *= atof(optarg);
             break;
         }
     }

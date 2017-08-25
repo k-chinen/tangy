@@ -4301,10 +4301,10 @@ fprintf(fp, "%% %s: no segar %p use -\n",
     }
 #endif
 
-    fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
+    fprintf(fp, "    %% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
 
-    fprintf(fp, "  newpath\n");
+    fprintf(fp, "    newpath\n");
 
 #if 0
     if(!xu->cob.originalshape) {
@@ -4386,7 +4386,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
 
-    fprintf(fp, "  %d %d moveto %% zero-point\n", x1, y1);
+    fprintf(fp, "    %d %d moveto %% zero-point\n", x1, y1);
 
     for(i=0;i<xu->cob.segar->use;i++) {
         s = (seg*)xu->cob.segar->slot[i];
@@ -4667,7 +4667,9 @@ PP;
             y1 = s->y1+xoy;
             x2 = s->x2+xox;
             y2 = s->y2+xoy;
-    fprintf(fp, "  %d %d moveto %d %d lineto %% LINE\n", x1, y1, x2, y2);
+            fprintf(fp,
+                "    %d %d moveto %d %d lineto %% LINE\n",
+                x1, y1, x2, y2);
 
             goto confirm_arrow;
 
@@ -4764,7 +4766,7 @@ next:
     }
 
     if(xu->type==CMD_CLINE) {
-        fprintf(fp, "  closepath\n");
+        fprintf(fp, "    closepath\n");
     }
 
 #if 0
@@ -5122,7 +5124,7 @@ P;
     if(xu->cob.outlinetype==LT_SOLID) {
 P;
         _line_patharrow(fp, ydir, xox, xoy, xu, xns);
-        fprintf(fp, "  stroke\n");
+        fprintf(fp, "    stroke\n");
         return 0;
     }
 
@@ -5289,7 +5291,7 @@ Echo("b cdir %d\n", cdir);
             }
         }
 
-printf("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
+Echo("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
     xu->oid, __func__, actbh, actch, actfh);
 
         switch(s->ptype) {
@@ -5966,12 +5968,12 @@ P;
         try_regline(xu->cob.segar, xu->csx, xu->csy, xu->cex, xu->cey);
     }
 
-    fprintf(fp, " gsave\n");
+    fprintf(fp, "  gsave %% %s\n", __func__);
     r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
 #if 0
     fprintf(fp, "  stroke\n");
 #endif
-    fprintf(fp, " grestore\n");
+    fprintf(fp, "  grestore %% %s\n", __func__);
 
     return r;
 }
@@ -7650,7 +7652,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
      ***** 1st pass
      *****/
 
-    fprintf(fp, "gsave %% bgdraw\n");
+    fprintf(fp, "  gsave %% bgdraw\n");
 
     gy = 0;
     for(i=0;i<ssar->use;i++) {
@@ -7671,9 +7673,9 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         justify = SJ_CENTER;
         hscale = 100;
 
-        fprintf(fp, "%% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
+        fprintf(fp, "    %% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
 
-        fprintf(fp, " gsave %% oneline\n");
+        fprintf(fp, "    gsave %% oneline\n");
 
 Echo("  --- calc size 1\n");
 
@@ -7702,11 +7704,11 @@ Echo("  --- calc size 1\n");
         txear_extract(mcontline, BUFSIZ, tq);
 
         if(!mcontline[0]) {
-            fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
+            fprintf(fp, "    %% skip  sstr drawing %d '%s'\n", i, mcontline);
             goto skip_bgdrawing;
         }
         else {
-            fprintf(fp, "%% enter sstr drawing %d '%s'\n", i, mcontline);
+            fprintf(fp, "    %% enter sstr drawing %d '%s'\n", i, mcontline);
         }
         mcar[i] = strlen(mcontline);
 
@@ -7719,9 +7721,9 @@ Echo("  --- calc size 1\n");
         MQF(5, -wd/2, -pyb-bgmargin);
 #endif
 
-        fprintf(fp, "  %% calc size (width)\n");
-        fprintf(fp, "  /sstrw 0 def\n");
-        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+        fprintf(fp, "      %% calc size (width)\n");
+        fprintf(fp, "      /sstrw 0 def\n");
+        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
             def_fontname, fht);
         afh = fht;
 
@@ -7793,7 +7795,7 @@ Echo(" curface %d cursize %d\n", curface, cursize);
 Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 
                     if(afn) {
-                        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+                        fprintf(fp, "    /%s findfont %d scalefont setfont\n",
                             afn, afh);
                     }
                 }
@@ -7812,17 +7814,21 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
                 psescape(qs, BUFSIZ, mcpart);
 
                 if(hscale!=100) {
-                    fprintf(fp, "  gsave\n");
+                    fprintf(fp, "  gsave %% text-scale\n");
                     fprintf(fp, "    %.3f 1 scale\n", (double)hscale/100);
                 }
     if(hscale!=100) {
-        fprintf(fp, "  (%s) stringwidth pop /sstrw exch %f mul sstrw add def\n", qs, (double)hscale/100);
+        fprintf(fp,
+        "      (%s) stringwidth pop /sstrw exch %f mul sstrw add def\n",
+            qs, (double)hscale/100);
     }
     else {
-        fprintf(fp, "  (%s) stringwidth pop /sstrw exch sstrw add def\n", qs);
+        fprintf(fp,
+        "      (%s) stringwidth pop /sstrw exch sstrw add def\n",
+            qs);
     }
                 if(hscale!=100) {
-                    fprintf(fp, "  grestore\n");
+                    fprintf(fp, "  grestore %% text-scale\n");
                 }
 #if 1
                 /* check max height when it used */
@@ -7833,7 +7839,7 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
         }
 
         fprintf(fp, 
-            "  sstrwar %d sstrw put %% store value to reuse\n", i);
+            "      sstrwar %d sstrw put %% store value to reuse\n", i);
 
         if(text_mode) {
             fprintf(fp, "  %% textguide\n");
@@ -7858,34 +7864,33 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
         }
 
 
-
-        fprintf(fp, "%% justify %d\n", justify);
+        fprintf(fp, "      %% justify %d\n", justify);
         
         switch(justify) {
         case SJ_LEFT:
-            fprintf(fp, "  sstrw neg 0 translate\n");
+            fprintf(fp, "      sstrw neg 0 translate\n");
             break;
         case SJ_RIGHT:
             break;
         default:
         case SJ_CENTER:
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
             break;
         case SJ_FIT:
 #if 0
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
 #endif
 #if 0
-            fprintf(fp, "  %d 2 div neg 0 translate\n", wd);
+            fprintf(fp, "      %d 2 div neg 0 translate\n", wd);
 #endif
-            fprintf(fp, "  %d sstrw div 1 scale\n", wd);
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      %d sstrw div 1 scale\n", wd);
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
             break;
         }
 
         if(bgcolor>=0) {
             fprintf(fp, "%% bg fill\n");
-            fprintf(fp, "  gsave %% textbg\n");
+            fprintf(fp, "    gsave %% textbg\n");
             changecolor(fp, bgcolor);
 
             fprintf(fp, "    0 %d neg sstrw %d %d mrboxfill\n",
@@ -7895,24 +7900,25 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
             MTF(1, 0, afhmax, 0);
 #endif
 
-            fprintf(fp, "  grestore %% textbg\n");
+            fprintf(fp, "    grestore %% textbg\n");
         }
 
 skip_bgdrawing:
         (void)0;
 
-        fprintf(fp, " grestore %% oneline\n");
+        fprintf(fp, "    grestore %% oneline\n");
 
         fprintf(fp, "   0 %d translate\n", -py);
     }
-    fprintf(fp, "grestore %% bgdraw\n");
+    fprintf(fp, "  grestore %% bgdraw\n");
 
 
     /*****
      ***** 2nd pass
      *****/
 
-    fprintf(fp, "gsave %% txtdraw\n");
+    fprintf(fp, "  %%%% text\n");
+    fprintf(fp, "  gsave %% txtdraw\n");
 
     gy = 0;
     for(i=0;i<ssar->use;i++) {
@@ -7933,9 +7939,9 @@ skip_bgdrawing:
         justify = SJ_CENTER;
         hscale = 100;
 
-        fprintf(fp, "%% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
+        fprintf(fp, "    %% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
 
-        fprintf(fp, " gsave %% oneline\n");
+        fprintf(fp, "    gsave %% oneline\n");
 
 
 Echo("  --- calc size 2\n");
@@ -7970,15 +7976,15 @@ Echo("  --- calc size 2\n");
         txear_extract(mcontline, BUFSIZ, tq);
 
         if(!mcontline[0]) {
-            fprintf(fp, "%% skip  sstr drawing %d '%s'\n", i, mcontline);
+            fprintf(fp, "      %% skip  sstr drawing %d '%s'\n", i, mcontline);
             goto skip_txtdrawing;
         }
         else {
-            fprintf(fp, "%% enter sstr drawing %d '%s'\n", i, mcontline);
+            fprintf(fp, "      %% enter sstr drawing %d '%s'\n", i, mcontline);
         }
 
 
-        fprintf(fp, "  /sstrw sstrwar %d get def %% reuse width\n", i);
+        fprintf(fp, "      /sstrw sstrwar %d get def %% reuse width\n", i);
 
 #if 0
         MCF(1, -wd/2-(i+1)*wd/10, afhmax+bgmargin);
@@ -8017,36 +8023,36 @@ Echo("  --- calc size 2\n");
 
 
 
-        fprintf(fp, "%% justify %d\n", justify);
+        fprintf(fp, "      %% justify %d\n", justify);
         
         switch(justify) {
         case SJ_LEFT:
-            fprintf(fp, "  sstrw neg 0 translate\n");
+            fprintf(fp, "      sstrw neg 0 translate\n");
             break;
         case SJ_RIGHT:
             break;
         default:
         case SJ_CENTER:
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
             break;
         case SJ_FIT:
 #if 0
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
 #endif
 #if 0
-            fprintf(fp, "  %d 2 div neg 0 translate\n", wd);
+            fprintf(fp, "      %d 2 div neg 0 translate\n", wd);
 #endif
-            fprintf(fp, "  %d sstrw div 1 scale\n", wd);
-            fprintf(fp, "  sstrw 2 div neg 0 translate\n");
+            fprintf(fp, "      %d sstrw div 1 scale\n", wd);
+            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
             break;
         }
 
         /*** PASS 2 */
 
 Echo("  --- drawing\n");
-        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
             def_fontname, fht);
-        fprintf(fp, "  0 0 moveto\n");
+        fprintf(fp, "      0 0 moveto\n");
 #if 1
         changecolor(fp, fgcolor);
 #endif
@@ -8121,7 +8127,7 @@ Echo(" curface %d cursize %d\n", curface, cursize);
 Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
 
                     if(afn) {
-                        fprintf(fp, "  /%s findfont %d scalefont setfont\n",
+                        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
                             afn, afh);
                     }
 
@@ -8145,7 +8151,7 @@ P;
                     fprintf(fp, "  gsave %% comp\n");
                     fprintf(fp, "    %.3f 1 scale\n", (double)hscale/100);
                 }
-                fprintf(fp, "    (%s) show\n", qs);
+                fprintf(fp, "        (%s) show\n", qs);
                 if(hscale!=100) {
 P;
                     fprintf(fp, "  grestore %% comp\n");
@@ -8157,14 +8163,12 @@ P;
 skip_txtdrawing:
         (void)0;
 
-        fprintf(fp, " grestore %% oneline\n");
+        fprintf(fp, "    grestore %% oneline\n");
 
-        fprintf(fp, "   0 %d translate\n", -py);
+        fprintf(fp, "    0 %d translate\n", -py);
     }
-#if 1
-    fprintf(fp, "grestore %% txtdraw\n");
-#endif
 
+    fprintf(fp, "  grestore %% txtdraw\n");
 
 
     fprintf(fp, "grestore %% end of sstr\n");
@@ -11265,22 +11269,6 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 
 
-    if(u->type==CMD_FORK) {
-        changedraft(fp);
-        drawrectcm(fp, u->cglx, u->cgby, u->cgrx, u->cgty, "fork");
-        fflush(fp);
-    }
-    if(u->type==CMD_FORKEND) {
-        changedraft(fp);
-        drawrectcm(fp, u->cglx, u->cgby, u->cgrx, u->cgty, "      forkend");
-        fflush(fp);
-    }
-    if(u->type==CMD_BRANCH) {
-        changedraft(fp);
-        drawrectcm(fp, u->cglx, u->cgby, u->cgrx, u->cgty, "branch");
-        fflush(fp);
-    }
-
     changenormal(fp); /* for faill safe */
     if(u->type==CMD_PAPER) {
         epsdraw_paper(fp, ox, oy, u, xns);
@@ -11458,8 +11446,12 @@ P;
             (xch->grx-xch->glx), (xch->gty-xch->gby),
             xch->cob.rotateval);
 #endif
-printf("gx,y %d,%d wdxht %d,%d\n", xch->gx, xch->gy, xch->wd, xch->ht);
-printf("glx,by,rx,ty %d,%d,%d,%d\n", xch->glx, xch->gby, xch->grx, xch->gty);
+#if 0
+        printf("gx,y %d,%d wdxht %d,%d\n",
+            xch->gx, xch->gy, xch->wd, xch->ht);
+        printf("glx,by,rx,ty %d,%d,%d,%d\n",
+             xch->glx, xch->gby, xch->grx, xch->gty);
+#endif
         fprintf(fp, "  grestore\n");
     }
 #if 0
