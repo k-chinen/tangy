@@ -8023,6 +8023,9 @@ Echo("  --- drawing\n");
         fprintf(fp, "  /%s findfont %d scalefont setfont\n",
             def_fontname, fht);
         fprintf(fp, "  0 0 moveto\n");
+#if 1
+        changecolor(fp, fgcolor);
+#endif
 
         cursize = FH_NORMAL;
         curface = FF_SERIF;
@@ -11384,16 +11387,16 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             goto skip_sstr;
         }
 
+        Echo("call sstrbgX oid %d gx,y %d,%d with ox,y %d,%d |%s|\n",
+            u->oid, u->gx, u->gy, u->ox, u->oy, cont);
+
         if(ISGLUE(u->type)) {
-#if 0
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
                 0, 2, u->cob.textcolor, -1, u->cob.ssar);
-#else
-            Echo("call sstrbgX oid %d gx,y %d,%d with ox,y %d,%d\n",
-                u->oid, u->gx, u->gy, u->ox, u->oy);
+#if 0
             epsdraw_sstrbgX(fp, u->gx+u->ox, u->gy+u->oy,
                 u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+                0, 2, 8 /* u->cob.textcolor */, -1, u->cob.ssar);
 #endif
         }
         else
