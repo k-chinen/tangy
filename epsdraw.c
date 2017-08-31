@@ -2,8 +2,12 @@
 #include "tx.h"
 #include "qbb.h"
 
+#ifndef EPSOUTMARGIN
+#define EPSOUTMARGIN 	(18)	/* 1/4 inch */
+#endif
+
 /* outside of scaling */
-int epsoutmargin        = 16;
+int epsoutmargin        = EPSOUTMARGIN;
 
 /* inside of scaling */
 int epsdraftfontsize    = 10;
@@ -7516,6 +7520,9 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     int   gy;
     sstr *uu;
     int   fht;
+#if 0
+    int   fsz;
+#endif
     int   n;
     int   rh;
     char  qs[BUFSIZ];
@@ -7579,6 +7586,19 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     n = ssar->use;
 
     fht = def_textheight; 
+#if 0
+    fht = def_textheight; 
+    fsz = fht;
+#endif
+#if 0
+    fht = def_textheight; 
+    fsz = (int)(def_textheight*0.8); 
+#endif
+#if 0
+    fsz = def_textheight; 
+    fht = (int)(def_textheight*0.8); 
+#endif
+
     pyb = (int)((double)fht*textdecentfactor);
     bgmargin = (int)((double)fht*textbgmarginfactor);
 
@@ -7891,18 +7911,18 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
         }
 
         if(bgcolor>=0) {
-            fprintf(fp, "%% bg fill\n");
-            fprintf(fp, "    gsave %% textbg\n");
+            fprintf(fp, "      %% bg fill\n");
+            fprintf(fp, "      gsave %% textbg\n");
             changecolor(fp, bgcolor);
 
-            fprintf(fp, "    0 %d neg sstrw %d %d mrboxfill\n",
+            fprintf(fp, "        0 %d neg sstrw %d %d mrboxfill\n",
                 pyb, pyb+afhmax, bgmargin);
 
 #if 0
             MTF(1, 0, afhmax, 0);
 #endif
 
-            fprintf(fp, "    grestore %% textbg\n");
+            fprintf(fp, "      grestore %% textbg\n");
         }
 
 skip_bgdrawing:
@@ -11216,9 +11236,11 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 #endif
 
+#if 0
     if(bbox_mode) {
         epsdraw_bbox(fp, u);
     }
+#endif
 
     if(u->cob.markbb) {
         fprintf(fp, "  gsave %% markbb\n");
@@ -11562,18 +11584,18 @@ PP;
     for(i=0;i<xch->cch.nch;i++) {
         u = (ob*)xch->cch.ch[i];
 
-#if 0
-        if(bbox_mode) {
-            epsdraw_bbox(fp, u);
-        }
-#endif
-
         if(ISCHUNK(u->type)) {
             ik = epsdrawchunk(fp, u,
                     gox+xch->x+xch->ox,
                     goy+xch->y+xch->oy, xns);
         }
         else {
+
+#if 1
+            if(bbox_mode) {
+                epsdraw_bbox(fp, u);
+            }
+#endif
 
 Echo(" call obj oid %d drawing start %d,%d\n",
             u->oid, gox+xch->x+xch->ox, goy+xch->y+xch->oy);
