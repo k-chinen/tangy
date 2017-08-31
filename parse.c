@@ -116,21 +116,28 @@ xatoi(char *src)
     printf("  p '%s'\n", p);
 #endif
 
+	/*
+     * 1u		objunit
+	 * 1inch	72bp	7200
+	 * 1cm		28.34bp	2834
+	 * 1mm		2.834bp	 283.4
+	 */
+	
     if(strcasecmp(p,"u")==0) {
         dm *= objunit;
     }
     else
     if(strcasecmp(p,"inch")==0) {
-        dm *= 216;
+        dm *= 7200;
     }
     else
     if(strcasecmp(p,"cm")==0) {
 
-        dm *= 28.34;
+        dm *= 2834;
     }
     else
     if(strcasecmp(p,"mm")==0) {
-        dm *= 2.834;
+        dm *= 283.4;
     }
 
     m = (int)(dm);
