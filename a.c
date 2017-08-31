@@ -712,8 +712,12 @@ double wlinethickfactor     = 0.20;
 double barrowgapfactor      = 0.25;
 
 double textheightfactor     = 0.30;
+#if 0
 double textdecentfactor     = 0.25;
 double textbgmarginfactor   = 0.20;
+#endif
+double textdecentfactor     = 0.20;
+double textbgmarginfactor   = 0.10;
 
 double hatchthickfactor     = 0.02;
 double hatchpitchfactor     = 0.07;
