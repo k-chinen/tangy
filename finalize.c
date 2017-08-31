@@ -65,7 +65,7 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
         goto out;
     }
 
-Echo("obj oid %d shift %d,%d\n",  u->oid, ox, oy);
+    Echo("obj oid %d shift %d,%d\n",  u->oid, ox, oy);
 
     u->cfixed = 1;
     u->cgx  = ox+u->cx;     u->cgy  = oy+u->cy;
@@ -86,7 +86,7 @@ Echo("obj oid %d shift %d,%d\n",  u->oid, ox, oy);
         u->oid, u->type, u->cx, u->cy, u->cgx, u->cgy);
 
 #if 0
-    Echo("obb oid %d s1  %d %d %d %d\n",
+    Echo("obb oid %-4d s1 %6d %6d %6d %6d\n",
         u->oid, _lx, _by, _rx, _ty);
 #endif
 
@@ -106,8 +106,14 @@ Echo("obj oid %d shift %d,%d\n",  u->oid, ox, oy);
     MARK("objcRT",  ox+u->cx+u->wd/2, oy+u->cy+u->ht/2);
 #endif
 
-    Echo("obb oid %d s2 %d %d %d %d ; %d x %d\n",
+    Echo("obb oid %-4d s2 %6d %6d %6d %6d ; %6d x %6d\n",
         u->oid, _lx, _by, _rx, _ty, (_rx-_lx), (_ty-_by));
+
+#if 0
+#include <assert.h>
+assert(_lx<=_rx);
+assert(_by<=_ty);
+#endif
 
     u->glx = _lx;
     u->gby = _by;
@@ -127,7 +133,6 @@ Echo("obj oid %d shift %d,%d\n",  u->oid, ox, oy);
     Echo("%s: oid %d finalized %d %d: %d %d %d %d\n",
         __func__, u->oid, u->gx, u->gy, u->glx, u->gby, u->grx, u->gty);
     u->finalized++;
-
 
 out:
     return 0;
