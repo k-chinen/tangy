@@ -2948,26 +2948,26 @@ print_usage()
     printf("    -m      print hints for language\n");
     printf("    -V      print version\n");
     printf("    -P      print parameters\n");
-    printf("    -o file set output file (default '%s')\n",
+    printf("    -o file set output file (current '%s')\n",
             outfile);
-    printf("    -u num  set unit by 0.01bp (default %d)\n",
+    printf("    -u num  set unit by 0.01bp (current %d)\n",
             objunit);
-    printf("    -M num  set EPS outside margin by bp (default %d)\n",
+    printf("    -M num  set EPS outside margin by bp (current %d)\n",
             epsoutmargin);
     printf("    -g      draw grid\n");
-    printf("    -G num  set grid pitch in bp (default %d)\n", 
+    printf("    -G num  set grid pitch in bp (current %d)\n", 
             def_gridpitch);
-    printf("    -R num  set grid range; how many times of pitch (default %d)\n",
+    printf("    -R num  set grid range; how many times of pitch (current %d)\n",
         def_gridrange);
     printf("    -b      draw boundingbox of objects\n");
     printf("    -i      draw object IDs\n");
     printf("    -l      print object list for debug\n");
     printf("    -c      print color list for debug\n");
-    printf("    -F font set default font (default '%s')\n", def_fontname);
+    printf("    -F font set default font (current '%s')\n", def_fontname);
     printf("following itmes are reserved for future. do not use.\n");
-    printf("    -v      verbose mode\n");
+    printf("    -v      verbose mode (current %d)\n", _t_);
     printf("    -q      quiet mode\n");
-    printf("    -p      passing trace mode\n");
+    printf("    -p      passing trace mode (current %d)\n", _p_);
     printf("   *-d      draft mode\n");
     printf("   *-L      draw labels\n");
     printf("   *-D      debug mode\n");
@@ -3046,7 +3046,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.018"
+    printf("tangy version 2.030"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
