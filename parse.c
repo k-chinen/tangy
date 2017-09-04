@@ -116,13 +116,13 @@ xatoi(char *src)
     printf("  p '%s'\n", p);
 #endif
 
-	/*
-     * 1u		objunit
-	 * 1inch	72bp	7200
-	 * 1cm		28.34bp	2834
-	 * 1mm		2.834bp	 283.4
-	 */
-	
+    /*
+     * 1u       objunit
+     * 1inch    72bp    7200
+     * 1cm      28.34bp 2834
+     * 1mm      2.834bp  283.4
+     */
+    
     if(strcasecmp(p,"u")==0) {
         dm *= objunit;
     }
@@ -131,8 +131,11 @@ xatoi(char *src)
         dm *= 7200;
     }
     else
+    if(strcasecmp(p,"pica")==0) {
+        dm *= 1200;
+    }
+    else
     if(strcasecmp(p,"cm")==0) {
-
         dm *= 2834;
     }
     else
