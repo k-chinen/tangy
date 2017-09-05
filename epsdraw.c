@@ -9558,6 +9558,8 @@ P;
         fprintf(fp, "    gsave\n");
 
     if(ISCHUNK(pb->type)) {
+        changethick(fp, xu->cob.outlinethick);
+        changecolor(fp, xu->cob.outlinecolor);
         cu = ce = cd = call = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
@@ -9762,6 +9764,8 @@ P;
         fprintf(fp, "    gsave\n");
 
     if(ISCHUNK(pb->type)) {
+        changethick(fp, xu->cob.outlinethick);
+        changecolor(fp, xu->cob.outlinecolor);
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
             if(ISATOM(pe->type)) {
@@ -11351,9 +11355,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 #endif
 
-#if 1
     if(u->cob.ssar) {
+        int _tbgc = -1;
         char cont[BUFSIZ];
+
         ss_strip(cont, BUFSIZ, u->cob.ssar);
         
         if(!cont[0]) {
@@ -11363,95 +11368,27 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Echo("call sstrbgX oid %d gx,y %d,%d with ox,y %d,%d |%s|\n",
             u->oid, u->gx, u->gy, u->ox, u->oy, cont);
 
-#if 0
         if(ISGLUE(u->type)) {
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
         }
         else
         if(u->cob.fillhatch==HT_NONE) {
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
         }
         else {
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
-        }
-#endif
-
-#if 1
-        int _tbgc = -1;
-        if(ISGLUE(u->type)) {
- /*
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-  */
-        }
-        else
-        if(u->cob.fillhatch==HT_NONE) {
- /*
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-  */
-        }
-        else {
- /*
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
-  */
             _tbgc = u->cob.textbgcolor;
         }
 
-P;
+#if 0
         Echo("text angle %d\n",
             u->cob.rotateval + u->cob.textrotate);
+#endif
         epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
             u->cob.rotateval + u->cob.textrotate,
             0, 2, u->cob.textcolor, _tbgc, u->cob.ssar);
-P;
 
-#endif
 
 skip_sstr:
         (void)0;
     }
-#endif
-
-#if 0
-    if(u->cob.ssar) {
-        if(ISGLUE(u->type)) {
-            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-        }
-        else
-        if(u->cob.fillhatch==HT_NONE) {
-            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-        }
-        else {
-            epsdraw_sstrbgX(fp, u->x, u->y, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
-        }
-    }
-#endif
-
-#if 0
-    if(u->cob.ssar) {
-        if(ISGLUE(u->type)) {
-            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-        }
-        else
-        if(u->cob.fillhatch==HT_NONE) {
-            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, -1, u->cob.ssar);
-        }
-        else {
-            epsdraw_sstrbgX(fp, ox, oy, u->wd, u->ht, u->cob.rotateval,
-                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
-        }
-    }
-#endif
 
     ik = epsdraw_note(fp, u);
     ik = epsdraw_portboard(fp, *xdir, u);
