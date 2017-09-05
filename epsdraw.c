@@ -9514,7 +9514,7 @@ out:
 
 int
 epsdraw_gather_man(FILE *fp, int xdir, int xox, int xoy,
-    ob *xu, ob *pf, ob *pb, ns *xns, int opt)
+    ob *xu, ob *pf, ob *pb, ns *xns, int dsdir)
 {
     ob *pe;
     int i;
@@ -9543,7 +9543,7 @@ P;
 
     jr = xu->cob.outlinethick*2;
 
-    ex = xox + pf->cx - pf->cwd/2;
+    ex = xox + pf->cx - pf->cwd/2 * (dsdir);
     ey = xoy + pf->cy;
 
     eyt = xoy + pf->cy + pf->cht/2;
@@ -9587,7 +9587,7 @@ P;
                 continue;
             }
 
-            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2;
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
             sy = xoy + pb->cy + pb->oy + pe->cy;
 
             if(sy>maxy) maxy = sy;
@@ -9682,7 +9682,7 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
              *   t2x,t2y +---- ex,ey
              *            h2
              */ 
-            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2;
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
             sy = xoy + pb->cy + pb->oy + pe->cy;
 
 #if 0
@@ -9695,7 +9695,7 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                         );
             }
             else {
-                h1 = yp*(k+1);
+                h1 = yp*(k+1) * dsdir;
                 h2 = (ex-sx) - h1;
                 v  = (eey-sy);
 
@@ -9712,7 +9712,7 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
 
     }
     else {
-        sx = xox + pb->cx + pb->cwd/2;
+        sx = xox + pb->cx + pb->cwd/2 *dsdir;
         sy = xoy + pb->cy;
 
         if(sy==ey) {
@@ -9728,7 +9728,7 @@ out:
 
 
 int
-epsdraw_gather_square(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int opt)
+epsdraw_gather_square(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir)
 {
     ob *pe;
     int i;
@@ -9745,14 +9745,14 @@ P;
     }
 
     jr = -1;
-    if(opt>0) {
+    if(drad>0) {
 #if 0
         jr = objunit/20;
 #endif
         jr = xu->cob.outlinethick*2;
     }
 
-    ex = pf->cx - pf->cwd/2;
+    ex = pf->cx - pf->cwd/2 *(dsdir);
     ey = pf->cy;
 
     miny = INT_MAX;
@@ -9774,7 +9774,7 @@ P;
                 continue;
             }
 
-            sx = pe->cgx + pe->cwd/2;
+            sx = pe->cgx + pe->cwd/2 *dsdir;
             sy = pe->cgy;
 
             if(sy>maxy) maxy = sy;
@@ -9803,7 +9803,7 @@ P;
             }
 
 
-            sx = pe->cx + pe->cwd/2;
+            sx = pe->cx + pe->cwd/2*dsdir;
             sy = pe->cy;
 
             fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
@@ -9827,7 +9827,7 @@ P;
         }
     }
     else {
-        sx = pb->cx + pb->cwd/2;
+        sx = pb->cx + pb->cwd/2*dsdir;
         sy = pb->cy;
 
         if(sy==ey) {
@@ -9921,20 +9921,20 @@ P;
     }
 
     switch(xu->cob.linkstyle) {
-    case LS_DIRECT:
-        ik = epsdraw_gather_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
-        break;
     case LS_SQUARE:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 0);
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 0, 1);
         break;
     case LS_SQUAREDOT:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 1, 1);
         break;
+    case LS_MAN:
+        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+		break;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
-    case LS_MAN:
+    case LS_DIRECT:
     default:
-        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+        ik = epsdraw_gather_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
         break;
     }
 
@@ -10026,24 +10026,24 @@ P;
     }
 
     switch(xu->cob.linkstyle) {
-    default:
-    case LS_DIRECT:
-        ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
-        break;
-#if 0
-    case LS_SQUARE:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 0);
-        break;
     case LS_SQUAREDOT:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
+        break;
+    case LS_SQUARE:
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 0, -1);
+        break;
+    case LS_MAN:
+/*
+        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+*/
+        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
         break;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
-    case LS_MAN:
-    default:
-        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+    case LS_DIRECT:
+	default:
+        ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
         break;
-#endif
     }
 
 out:
