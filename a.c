@@ -32,7 +32,7 @@ int _p_ = 0;
 
 #define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
 #define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
-#define Info    if(_t_)printf("INFO %s:%s ", __FILE__, __func__),fflush(stdout),printf
+#define Info    if(_t_>=2)printf("INFO %s:%s ", __FILE__, __func__),fflush(stdout),printf
 #define Echo    if(_t_)printf
 
 
@@ -3049,7 +3049,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.030"
+    printf("tangy version 2.031"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
