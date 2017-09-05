@@ -704,6 +704,7 @@ P;
 
     ISET(OA_TEXTCOLOR,      textcolor);
     ISET(OA_TEXTBGCOLOR,    textbgcolor);
+    ISET(OA_TEXTROTATE,     textrotate);
 
     AISET(OA_LINKSTYLE, ls_ial, linkstyle);
     ISET(OA_RAD,            rad);

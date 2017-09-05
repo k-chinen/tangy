@@ -517,6 +517,7 @@ apair_t lo_ial[] = {
 #define OA_IMARGIN          (77)
 #define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
+#define OA_TEXTROTATE       (80)
 #define OA_DECO             (90)
 
 #define OA_AT               (100)
@@ -613,6 +614,7 @@ apair_t objattr_ial[] = {
     {"gimargin",            OA_GIMARGIN},
     {"peak",                OA_PEAK},
     {"peakrotate",          OA_PEAKROTATE},
+    {"textrotate",          OA_TEXTROTATE},
     {"rotate",              OA_ROTATE},
     {"rad",                 OA_RAD},
     {"deco",                OA_DECO},
@@ -869,6 +871,7 @@ struct obattr {
     int   originalshape;
 
     varray_t *ssar;
+    int   textrotate;
 
     char  *portstr;
     char  *boardstr;

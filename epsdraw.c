@@ -3,7 +3,7 @@
 #include "qbb.h"
 
 #ifndef EPSOUTMARGIN
-#define EPSOUTMARGIN 	(18)	/* 1/4 inch */
+#define EPSOUTMARGIN    (18)    /* 1/4 inch */
 #endif
 
 /* outside of scaling */
@@ -7185,8 +7185,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         fprintf(fp,
     "%d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
             -aw/2, -ah/2, aw, ah, -aw);
-#if 0
         break;
+#if 0
 #endif
     case HT_SLASHED:
         y1 = -ah*6/10;
@@ -9035,7 +9035,9 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
+#if 0
         fprintf(fp, "  closepath\n");
+#endif
         fprintf(fp, "  clip\n");
         epsdraw_hatch(fp, xu->wd, xu->ht,
                 xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
@@ -11361,14 +11363,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Echo("call sstrbgX oid %d gx,y %d,%d with ox,y %d,%d |%s|\n",
             u->oid, u->gx, u->gy, u->ox, u->oy, cont);
 
+#if 0
         if(ISGLUE(u->type)) {
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
                 0, 2, u->cob.textcolor, -1, u->cob.ssar);
-#if 0
-            epsdraw_sstrbgX(fp, u->gx+u->ox, u->gy+u->oy,
-                u->wd, u->ht, u->cob.rotateval,
-                0, 2, 8 /* u->cob.textcolor */, -1, u->cob.ssar);
-#endif
         }
         else
         if(u->cob.fillhatch==HT_NONE) {
@@ -11379,6 +11377,41 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
                 0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
         }
+#endif
+
+#if 1
+        int _tbgc = -1;
+        if(ISGLUE(u->type)) {
+ /*
+            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+  */
+        }
+        else
+        if(u->cob.fillhatch==HT_NONE) {
+ /*
+            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, -1, u->cob.ssar);
+  */
+        }
+        else {
+ /*
+            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval,
+                0, 2, u->cob.textcolor, u->cob.textbgcolor, u->cob.ssar);
+  */
+            _tbgc = u->cob.textbgcolor;
+        }
+
+P;
+        Echo("text angle %d\n",
+            u->cob.rotateval + u->cob.textrotate);
+        epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
+            u->cob.rotateval + u->cob.textrotate,
+            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar);
+P;
+
+#endif
+
 skip_sstr:
         (void)0;
     }
