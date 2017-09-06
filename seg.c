@@ -49,7 +49,7 @@ try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
     Echo("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
     Echo("b use %d\n", segar->use);
 #endif
-
+P;
     if(segar->use>0) {
         goto out;
     }

@@ -660,7 +660,7 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 
     if(INTRACE) {
         fprintf(fp,
-            "%% bbox guide oid %d with LBRT %d,%d (%d %d %d %d) by %s\n",
+            "%% bbox guide oid %d with %d,%d (%d %d %d %d) by %s\n",
             xu->oid, xox, xoy, xu->lx, xu->by, xu->rx, xu->ty, __func__);
     }
     fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
@@ -672,6 +672,35 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
     sprintf(msg, "oid %d", xu->oid);
     drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
         xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_LEFT);
+
+    if(0*xu->cob.rotateval) {
+    }
+    fprintf(fp, "  grestore %% for bbox\n");
+
+    return 0;
+}
+
+int
+epsdraw_bbox_lbrtR(FILE *fp, int xox, int xoy, ob *xu)
+{
+    char msg[BUFSIZ];
+
+    if(INTRACE) {
+        fprintf(fp,
+            "%% bbox guide oid %d with %d,%d (%d %d %d %d) by %s\n",
+            xu->oid, xox, xoy, xu->lx, xu->by, xu->rx, xu->ty, __func__);
+    }
+    fprintf(fp, "  gsave %% for bbox of oid %d\n", xu->oid);
+    changecolor(fp, 3);
+#if 1
+    drawCrect(fp, xox+(xu->lx+xu->rx)/2, xoy+(xu->by+xu->ty)/2,
+        xu->rx-xu->lx, xu->ty-xu->by);
+#endif
+#if 0
+    sprintf(msg, "oid %d", xu->oid);
+    drawCRrectMJ(fp, (xu->glx+xu->grx)/2, (xu->gby+xu->gty)/2,
+        xu->grx-xu->glx, xu->gty-xu->gby, 0, msg, SJ_LEFT);
+#endif
 
     if(0*xu->cob.rotateval) {
     }
@@ -4274,8 +4303,8 @@ _line_patharrow(FILE *fp,
     int actfh, actch, actbh;
 
 #if 1
-Echo("%s: ydir %d xox %d xoy %d \n",
-    __func__, ydir, xox, xoy);
+Echo("%s: oid %d ydir %d xox %d xoy %d \n",
+    __func__, xu->oid, ydir, xox, xoy);
 #endif
     Echo("%s: enter\n", __func__);
     if(xu->cob.segar) {
@@ -5145,7 +5174,6 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d linetype %d\n",
         __func__, ydir, xox, xoy, xu->cob.outlinetype);
 
-
     cdir = ydir;
     dcdir = ydir;
 
@@ -5198,7 +5226,6 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
         goto out;
     }
 #endif
-
 
     if(xu->cob.segar && xu->cob.segar->use>0) {
     }
@@ -5931,6 +5958,7 @@ _line_deco2(FILE *fp,
 
 
 
+#if 0
 int
 Zepsdraw_linearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
@@ -5941,32 +5969,6 @@ P;
 Echo("%s: enter\n", __func__);
 #endif
 
-#if 0
-    fprintf(fp, " gsave\n");
-    changecolor(fp, 10);
-    changethick(fp, objunit/10);
-    r = _line_path(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, "  stroke\n");
-    fprintf(fp, " grestore\n");
-#endif
-
-#if 0
-    if(xu->cob.markpath) {
-        ik = _line_path(fp, ydir, xox, xoy, xu, xns);
-    }
-#endif
-
-#if 0
-    fprintf(stdout, "segar");
-    varray_fprint(stdout, xu->cob.segar);
-#endif 
-#if 0
-    fprintf(fp, "%% xox %d xoy %d\n", xox, xoy);
-    fprintf(fp, "%% csx %d csy %d\n", xu->csx, xu->csy);
-    fprintf(fp, "%% cex %d cey %d\n", xu->cex, xu->cey);
-    varray_fprint(fp, xu->cob.segar);
-#endif
-
     if(!xu->cob.originalshape) {
 P;
         try_regline(xu->cob.segar, xu->csx, xu->csy, xu->cex, xu->cey);
@@ -5974,83 +5976,79 @@ P;
 
     fprintf(fp, "  gsave %% %s\n", __func__);
     r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
-#if 0
-    fprintf(fp, "  stroke\n");
-#endif
     fprintf(fp, "  grestore %% %s\n", __func__);
 
     return r;
 }
+#endif
 
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
 
+#if 0
+int
+Zepsdraw_linearrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+#endif
 int
 Zepsdraw_clinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
     int r;
     int aw, ah;
-
+P;
 #if 0
 Echo("%s: enter\n", __func__);
 #endif
 
-    fprintf(fp, " %% fill color %d hatch %d\n",
-        xu->cob.fillcolor, xu->cob.fillhatch);
-    if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
-        fprintf(fp, " gsave\n");
+    if(!xu->cob.originalshape) {
+P;
+        try_regline(xu->cob.segar, xu->csx, xu->csy, xu->cex, xu->cey);
+    }
 
-        if(xu->cob.imargin>0) {
-            aw = xu->wd - xu->cob.imargin*2;
-            ah = xu->ht - xu->cob.imargin*2;
+    if(xu->type==CMD_CLINE) {
+        fprintf(fp, " %% fill color %d hatch %d\n",
+            xu->cob.fillcolor, xu->cob.fillhatch);
+        if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
+            fprintf(fp, " gsave\n");
+
+            if(xu->cob.imargin>0) {
+                aw = xu->wd - xu->cob.imargin*2;
+                ah = xu->ht - xu->cob.imargin*2;
+            }
+            else {
+                aw = xu->wd;
+                ah = xu->ht;
+            }
+            changecolor(fp, xu->cob.fillcolor);
+            r = _line_path(fp, ydir, xox, xoy, xu, xns);
+            fprintf(fp, "  clip\n");
+    #if 0
+            fprintf(fp, "  eoclip\n");
+            fprintf(fp, "  stroke\n");
+    #endif
+            fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
+            fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
+            fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
+
+            changethick(fp, xu->cob.hatchthick);
+            fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
+            epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor,
+                xu->cob.fillhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, " grestore\n");
         }
         else {
-            aw = xu->wd;
-            ah = xu->ht;
+            fprintf(fp, " %% no-fill\n");
         }
-        changecolor(fp, xu->cob.fillcolor);
-#if 0
-        r = _line_path(fp, ydir, xox, xoy+objunit/4, xu, xns);
-        fprintf(fp, "  stroke\n");
-#endif
-        r = _line_path(fp, ydir, xox, xoy, xu, xns);
-        fprintf(fp, "  clip\n");
-#if 0
-        fprintf(fp, "  eoclip\n");
-        fprintf(fp, "  stroke\n");
-#endif
-fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
-fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
-fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
-        changethick(fp, xu->cob.hatchthick);
-        fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
-        epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor,
-            xu->cob.fillhatch, xu->cob.hatchpitch);
-
-        fprintf(fp, " grestore\n");
     }
-    else {
-        fprintf(fp, " %% no-fill\n");
-    }
-
-#if 0
-    fprintf(fp, " gsave\n");
-    changecolor(fp, 10);
-    changethick(fp, objunit/10);
-    r = _line_path(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, "  stroke\n");
-    fprintf(fp, " grestore\n");
-#endif
 
     fprintf(fp, " gsave\n");
     changecolor(fp, xu->cob.outlinecolor);
     r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
     fprintf(fp, " grestore\n");
 
-
     return r;
 }
-
 
 
 #define X_RLINE     (0)
@@ -9929,7 +9927,7 @@ P;
         break;
     case LS_MAN:
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
-		break;
+        break;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
     case LS_DIRECT:
@@ -10041,7 +10039,7 @@ P;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
     case LS_DIRECT:
-	default:
+    default:
         ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
         break;
     }
@@ -10592,7 +10590,7 @@ Echo("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n",
                     xox+xu->cob.gsepx1, xoy+xu->cob.gsepy1, 
                     xox+xu->cob.gsepx2, xoy+xu->cob.gsepy2);
 
-    fprintf(fp, "gsave\n");
+    fprintf(fp, "  gsave\n");
     changethick(fp, xu->cob.outlinethick);
     changecolor(fp, xu->cob.outlinecolor);
 #if 0
@@ -10640,7 +10638,7 @@ Echo("    xox,xoy+gx1,y1 %d,%d gx2,y2 %d,%d\n",
                     xu->cob.outlinethick,
                     xu->cob.outlinecolor, 0, 0, 0, 0);
 
-    fprintf(fp, "grestore\n");
+    fprintf(fp, "  grestore\n");
 
     fprintf(fp, "grestore %% for sep\n");
     
@@ -11184,8 +11182,19 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         return 0;
     }
 
+#if 0
     fprintf(fp, "%%\n%% --- oid %d %s\n",
         u->oid, rassoc(cmd_ial, u->type));
+#endif
+
+#if 0
+        epsdraw_bbox(fp, u);
+#endif
+#if 0
+    if(bbox_mode) {
+        epsdraw_bbox_lbrt(fp, ox, oy, u);
+    }
+#endif
     
     wd = u->crx-u->clx;
     ht = u->cty-u->cby;
@@ -11263,7 +11272,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
     }
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) || (u->type==CMD_ARROW)) {
-        Zepsdraw_linearrow(fp, *xdir, ox, oy, u, xns);
+        Zepsdraw_clinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_CLINE) {
         Zepsdraw_clinearrow(fp, *xdir, ox, oy, u, xns);
@@ -11562,11 +11571,21 @@ PP;
         else {
 
 #if 1
+            fprintf(fp, "%%\n%% --- oid %d %s\n",
+                u->oid, rassoc(cmd_ial, u->type));
+#endif
+
+#if 0
+                epsdraw_bbox(fp, u);
+                epsdraw_bbox_lbrt(fp, xch->x, xch->y, u);
+                epsdraw_bbox_lbrtR(fp, xch->x, xch->y, u);
+#endif
+#if 1
             if(bbox_mode) {
                 epsdraw_bbox(fp, u);
             }
 #endif
-
+    
 Echo(" call obj oid %d drawing start %d,%d\n",
             u->oid, gox+xch->x+xch->ox, goy+xch->y+xch->oy);
             ik = epsdrawobj(fp, u, &xch->cch.dir,
