@@ -304,19 +304,6 @@ drawCRrectM(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg)
 static int
 drawCRrect(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 {
-#if 0
-    fprintf(fp, "    gsave %% CRrect\n");
-    fprintf(fp, "      %d %d translate\n", x1, y1);
-    fprintf(fp, "      0 0 moveto %d rotate\n", ro);
-    fprintf(fp, "      newpath\n");
-    fprintf(fp, "      %d %d moveto\n",   -wd/2, -ht/2);
-    fprintf(fp, "      %d %d lineto\n",    wd/2, -ht/2);
-    fprintf(fp, "      %d %d lineto\n",    wd/2,  ht/2);
-    fprintf(fp, "      %d %d lineto\n",   -wd/2,  ht/2);
-    fprintf(fp, "      closepath\n");
-    fprintf(fp, "      stroke\n");
-    fprintf(fp, "    grestore\n");
-#endif
     drawCRrectM(fp, x1, y1, wd, ht, ro, NULL); 
 
     return 0;
@@ -712,8 +699,6 @@ epsdraw_bbox_lbrtR(FILE *fp, int xox, int xoy, ob *xu)
 
 #define epsdraw_bbox    epsdraw_bbox_glbrtR
 
-
-
 double
 epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
 {
@@ -783,6 +768,73 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
         fprintf(fp, "fill\n");
         }
 
+
+        break;
+
+    case AH_SHIP:
+    case AH_WSHIP:
+        {   
+        int k;
+        double th;
+        int d;
+        k = objunit/4;
+        r = k;
+        th = acos(0.5);
+        d = (int)((double)r - (double)r*sin(th));
+        fprintf(fp, "%% th %f; k %d d %d\n", th, k, d);
+
+#if 0
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    0 0 1 setrgbcolor\n");
+        fprintf(fp, "    %d %d moveto\n", x, y);
+        fprintf(fp, "    %d %d rlineto\n", 0, k/2);
+        fprintf(fp, "    %d %d rlineto\n", -k*2, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, -k);
+        fprintf(fp, "    %d %d rlineto\n", k*2, 0);
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    stroke\n");
+        fprintf(fp, "  grestore\n");
+#endif
+
+        fprintf(fp, "  gsave\n");
+#if 0
+        fprintf(fp, "    1 0 0 setrgbcolor\n");
+#endif
+        fprintf(fp, "    %d %d translate\n", x, y);
+#if 0
+        fprintf(fp, "    0 %d translate\n", objunit);
+#endif
+        fprintf(fp, "    %d rotate\n", xdir);
+
+        fprintf(fp, "    %d %d moveto\n", 0, 0);
+        fprintf(fp, "    %d %d %d 30 90 arc\n", 0-k+d, 0-k/2, r);
+        fprintf(fp, "    %d %d rlineto\n", -k-d, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, -k);
+        fprintf(fp, "    %d %d %d -90 -30 arc\n", 0-k+d, 0+k/2, r);
+        fprintf(fp, "    closepath\n");
+
+        if(atype==AH_SHIP) {
+        fprintf(fp, "    fill\n");
+        }
+        else {
+        fprintf(fp, "    gsave\n");
+        fprintf(fp, "    1 setgray\n");
+        fprintf(fp, "    1 0 0 setrgbcolor\n");
+        fprintf(fp, "    fill\n");
+        fprintf(fp, "    grestore\n");
+
+        fprintf(fp, "    %d %d moveto\n", 0, 0);
+        fprintf(fp, "    %d %d %d 30 90 arc\n", 0-k+d, 0-k/2, r);
+        fprintf(fp, "    %d %d rlineto\n", -k-d, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, -k);
+        fprintf(fp, "    %d %d %d -90 -30 arc\n", 0-k+d, 0+k/2, r);
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    stroke\n");
+
+        }
+        fprintf(fp, "  grestore\n");
+
+        }
 
         break;
 
@@ -2065,10 +2117,12 @@ epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
     case LT_DOUBLED:
         rv = epsdraw_seglineW(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
+#if 0
     case LT_CUTTED:
         rv = epsdraw_seglineM(fp, ltype, lt, lc, x1, y1, x2, y2);
         break;
     case LT_ARROWCENTERED:
+#endif
     case LT_SOLID:
     default:
         changethick(fp, lt);
@@ -2077,6 +2131,7 @@ epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
         fprintf(fp, "  %d %d moveto\n", x1, y1);
         fprintf(fp, "  %d %d lineto\n", x2, y2);
         fprintf(fp, "  stroke\n");
+#if 0
         if(ltype==LT_ARROWCENTERED) {
             double xdir, r;
             int x3, y3;
@@ -2091,6 +2146,7 @@ epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
             y3   = (y1+y2)/2;
             rv = epsdraw_Xarrowhead(fp, AH_NORMAL, xdir, lc, x3, y3);
         }
+#endif
         break;
     }
     return rv;
@@ -2356,6 +2412,10 @@ no_forehead:
     }
 
 
+P;
+    /*** MAIN LINE */
+    epsdraw_segline(fp, xltype, xlt, xlc, x1i, y1i, x2i, y2i);
+
     /*** BACK ARROW HEAD */
     if(x1i!=x1 || y1i!=y1) {
         fprintf(fp, "%% back arrow head\n");
@@ -2367,9 +2427,6 @@ no_forehead:
         xdir = (int)(atan2((y1-y2),(x1-x2))/rf);
         epsdraw_arrowhead(fp, xahback, xdir, xlc, x1, y1);
     }
-
-    /*** MAIN LINE */
-    epsdraw_segline(fp, xltype, xlt, xlc, x1i, y1i, x2i, y2i);
 
 #if 1
     if(xahpart & AR_CENT) {
@@ -2386,6 +2443,7 @@ no_forehead:
         fprintf(fp, "newpath\n");
         fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
             x2i, y2i, x2, y2);
+P;
     }
     if(xahpart & AR_FORE) {
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -2686,166 +2744,6 @@ PP;
 out:
     return ik;
 }
-
-
-
-#if 0
-int
-epsdraw_Xlinearrow(FILE *fp,
-    int ydir, int xox, int xoy, 
-    int x1, int y1, int x2, int y2,
-    ob *xu, ns *xns)
-{
-    ob* pf;
-    ob* pt;
-#if 0
-    int x1, y1;
-    int x2, y2;
-#endif
-    int r;
-    int dx, dy;
-    int xdir;
-
-    int x1i, y1i;
-    int x2i, y2i;
-
-    /*
-     *   x1,y1 x1i,y1i  x2i,y2i  x2,y2
-     *     <---+--------------+---->
-     */
-
-#if 0
-    x1 = xox+xu->csx;
-    y1 = xoy+xu->csy;
-    x2 = xox+xu->cex;
-    y2 = xoy+xu->cey;
-#endif
-
-    pf = NULL;
-    if(xu->cafrom) {
-        pf = ns_find_obj(xns, xu->cafrom);
-        Echo("%s: pf %p\n", __func__, pf);
-        if(!pf) {
-            goto to_phase;
-        }
-        if(pf->cfixed) {
-            Echo("  from %d,%d\n", pf->gx, pf->gy);
-            x1 = pf->gx;
-            y1 = pf->gy;
-        }
-    }
-
-to_phase:
-
-    pt = NULL;
-    if(xu->cato) {
-        pt = ns_find_obj(xns, xu->cato);
-        Echo("%s: pt %p\n", __func__, pt);
-        if(!pt) {
-            goto apply;
-        }
-        if(pt->cfixed) {
-            Echo("  to %d,%d\n", pt->gx, pt->gy);
-            x2 = pt->gx;
-            y2 = pt->gy;
-        }
-    }
-
-apply:
-
-    if(draft_mode) {
-        changedraft(fp);
-        fprintf(fp, "%d %d moveto\n", x1, y1);
-        fprintf(fp, "%d %d lineto\n", x2, y2);
-        fprintf(fp, "stroke\n");
-
-
-        char tmp[BUFSIZ];
-
-        sprintf(tmp, "oid %d", xu->oid);
-        fprintf(fp, "gsave\n");
-        changedraft(fp);
-        fprintf(fp, "%d %d moveto (%s) show\n",
-            (x1+x2)/2*12/10, (y1+y2)/2*12/10, tmp);
-        fprintf(fp, "grestore\n");
-    }
-
-    fprintf(fp, "%% line-type          %d\n", xu->cob.outlinetype);
-    fprintf(fp, "%% arrowhead-part     %d\n", xu->cob.arrowheadpart);
-    fprintf(fp, "%% arrowforehead-type %d\n", xu->cob.arrowforeheadtype);
-    fprintf(fp, "%% arrowbackhead-type %d\n", xu->cob.arrowbackheadtype);
-    fflush(fp);
-    xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-
-    if(xu->cob.arrowheadpart & AR_BACK) {
-        if( (xu->cob.arrowbackheadtype==AH_REVNORMAL)||
-            (xu->cob.arrowbackheadtype==AH_REVWIRE)) {
-            goto no_backhead;
-        }
-        dx = def_arrowsize*2*cos((xdir)*rf);
-        dy = def_arrowsize*2*sin((xdir)*rf);
-        x1i = x1 + dx;
-        y1i = y1 + dy;
-    }
-    else {
-no_backhead:
-        x1i = x1;
-        y1i = y1;
-    }
-
-    if((xu->cob.arrowheadpart & AR_FORE)) {
-        if((xu->cob.arrowforeheadtype==AH_REVNORMAL)||
-            (xu->cob.arrowforeheadtype==AH_REVWIRE)) {
-            goto no_forehead;
-        }
-        dx = def_arrowsize*2*cos((xdir+180)*rf);
-        dy = def_arrowsize*2*sin((xdir+180)*rf);
-        x2i = x2 + dx;
-        y2i = y2 + dy;
-    }
-    else {
-no_forehead:
-        x2i = x2;
-        y2i = y2;
-    }
-
-    if(x1i!=x1 || y1i!=y1) {
-        fprintf(fp, "newpath\n");
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            x1, y1, x1i, y1i);
-    }
-    fprintf(fp, "%% linetype %d\n", xu->cob.outlinetype);
-    epsdraw_segline(fp, xu->cob.outlinetype, 
-            xu->cob.outlinethick, xu->cob.outlinecolor,
-            x1i, y1i, x2i, y2i);
-    if(x2i!=x2 || y2i!=y2) {
-        fprintf(fp, "newpath\n");
-        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
-            x2i, y2i, x2, y2);
-    }
-
-    /*****
-     ***** ARROW HEADs
-     *****/
-
-    if(xu->cob.arrowheadpart & AR_FORE) {
-        xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
-            xu->cob.outlinecolor,
-            xdir, x2, y2);
-    }
-
-    if(xu->cob.arrowheadpart & AR_BACK) {
-        xdir = (int)(atan2((y1-y2),(x1-x2))/rf);
-        epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype, 
-            xu->cob.outlinecolor,
-            xdir, x1, y1);
-    }
-
-out:
-    return 0;
-}
-#endif
 
 static
 int
@@ -4825,13 +4723,37 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     double ax, ay;
     double mx, my;
 
+    int    mact;
+    int    mangle;
+
+#if 0
+    fprintf(stdout, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
+    fflush(stdout);
+#endif
+
 #if 1
     fprintf(fp, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
 #endif
 
+    mact = 0;
+    mangle = 45;
     ww = def_linedecothick;
 
     switch(ty){ 
+#if 1
+    case LT_LMUST:
+        mact = 1;
+        mangle = 90;
+        act = 1;
+        run = pt;
+        break;
+    case LT_RMUST:
+        mact = 1;
+        mangle = -90;
+        act = 1;
+        run = pt;
+        break;
+#endif
     case LT_DASHED:
     case LT_DOTTED:
         if(ty==LT_DASHED) { if(c%2==0) act = 1; }
@@ -5076,9 +4998,20 @@ purelinetype:
             "  %9.2f %9.2f moveto %9.2f %9.2f rlineto stroke %% symdraw\n",
             x1, y1, x2, y2);
     }
+
 #if 0
     MTF(1, (int)x1, (int)y1, (int)a);
 #endif
+
+    if(mact) {
+        x1 = x;
+        y1 = y;
+        x2 = def_mustsize*cos((a+mangle)*rf);
+        y2 = def_mustsize*sin((a+mangle)*rf);
+        fprintf(fp,
+            "  %9.2f %9.2f moveto %9.2f %9.2f rlineto stroke %% symdraw\n",
+            x1, y1, x2, y2);
+    }
 
 out:
 
@@ -5093,6 +5026,8 @@ solve_pitch(int ty)
     rv = def_linedecopitch; 
 
     switch(ty) {
+    case LT_LMUST:          rv = def_linedecopitch;   break;
+    case LT_RMUST:          rv = def_linedecopitch;   break;
     case LT_DASHED:         rv = def_linedecopitch;     break;
     case LT_DOTTED:         rv = def_linedecopitch/2;   break;
     case LT_CHAINED:        rv = def_linedecopitch/2;   break;
@@ -5276,6 +5211,13 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
 
     for(i=0;i<xu->cob.segar->use;i++) {
 P;
+
+        if(count>10) {
+            printf("%s:%d oid %d count %d\n",
+                __func__, __LINE__, xu->oid, count);
+            fflush(stdout);
+        }
+
         isfseg = 0;
         if(i>=xu->cob.segar->use-1) {
             isfseg = 1;
@@ -5392,13 +5334,15 @@ P;
             etrip = ((double)s->rad*2*M_PI)*((double)s->ang/360.0);
             nd = etrip / pitch;
 
-#if 0
+#if 1
             fprintf(fp, "%% etrip %f pitch %f -> nd %d\n",
                 etrip, pitch, nd);
 
                 fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
                     i, count, trip, etrip);
 #endif
+
+    if(nd<=0) goto skip_arc;
 
             if(trip<=0) {
                 ui = 0.0;
@@ -5449,6 +5393,15 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                 px = arcx + s->rad*cos((cdir+v-90)*rf);
                 py = arcy + s->rad*sin((cdir+v-90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
+
+
+        if(count>10) {
+            printf("%s:%d oid %d count %d\n",
+                __func__, __LINE__, xu->oid, count);
+            printf("  ui %f us %f etrip %f ue %f ; pitch %f\n",
+                ui, us, etrip, ue, pitch);
+            fflush(stdout);
+        }
 
 #if 0
                 MP(4, (int)px, (int)py);
@@ -5512,6 +5465,7 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                     xu->cob.outlinecolor, x1, y1);
             }
 
+skip_arc:
             cdir += s->ang;
             dcdir += s->ang;
 
@@ -5540,6 +5494,8 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
 
                 fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
                     i, count, trip, etrip);
+
+    if(nd<=0) goto skip_arcn;
 
             if(trip<=0) {
                 ui = 0.0;
@@ -5575,6 +5531,12 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                 py = arcy + s->rad*sin((cdir-v+90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
 
+
+        if(count>10) {
+            printf("%s:%d oid %d count %d\n",
+                __func__, __LINE__, xu->oid, count);
+            fflush(stdout);
+        }
 #if 0
                 MP(4, (int)px, (int)py);
 #endif
@@ -5626,6 +5588,7 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                     xu->cob.outlinecolor, x1, y1);
             }
 
+skip_arcn:
             cdir -= s->ang;
             dcdir -= s->ang;
 
@@ -5703,11 +5666,12 @@ coord_done:
 
             etrip = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
             nd = etrip / pitch;
+#if 0
             fprintf(fp, "%% etrip %f pitch %f -> nd %d\n",
                 etrip, pitch, nd);
-
-                fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
-                    i, count, trip, etrip);
+            fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
+                i, count, trip, etrip);
+#endif
 
             if(trip<=0) {
                 ui = 0.0;
@@ -5728,13 +5692,18 @@ coord_done:
 #if 0
             fprintf(fp, "%% i %d count %d: ui %f\n", i, count, ui);
 #endif
+
+#if 0
             fprintf(fp, "%% i %d count %d: ui %f us %f ue %f\n",
                 i, count, ui, us, ue);
+#endif
 
             ttrip = trip;
+#if 0
                 fprintf(fp,
-                "%% i %3d count %3d: ttrip %8.2f u %8.2f x1,y1 %8.2f %8.2f line*\n",
+    "%% i %3d count %3d: ttrip %8.2f u %8.2f x1,y1 %8.2f %8.2f line*\n",
                     i, count, ttrip, -1.0, (double)x1, (double)y1);
+#endif
 
 #if 0
             {
@@ -5768,6 +5737,14 @@ coord_done:
                 py = y1 + (y2-y1) * u/etrip;
                 ttrip = trip + u;
 
+        if(count>10) {
+            printf("%s:%d oid %d count %d\n",
+                __func__, __LINE__, xu->oid, count);
+            printf("  ui %f us %f etrip %f ue %f ; pitch %f\n",
+                ui, us, etrip, ue, pitch);
+            fflush(stdout);
+        }
+
 #if 0
                 MP(4, (int)px, (int)py);
 #endif
@@ -5775,9 +5752,11 @@ coord_done:
                     MP(1, (int)px, (int)py);
                 }
 
+#if 0
                 fprintf(fp,
-                "%% i %3d count %3d: ttrip %8.2f u %8.2f px,py %8.2f %8.2f line\n",
+        "%% i %3d count %3d: ttrip %8.2f u %8.2f px,py %8.2f %8.2f line\n",
                     i, count, ttrip, u, px, py);
+#endif
 
                 symdraw(fp, px, py, v, pitch, count, gsym, lx, ly, &cx, &cy);
                 lx = cx;
@@ -5860,6 +5839,7 @@ coord_done:
                 }
             }
             if(actfh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir,
                     xu->cob.outlinecolor, x2, y2);
@@ -5957,38 +5937,8 @@ _line_deco2(FILE *fp,
 }
 
 
-
-#if 0
-int
-Zepsdraw_linearrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-{
-    int r;
-P;
-#if 0
-Echo("%s: enter\n", __func__);
-#endif
-
-    if(!xu->cob.originalshape) {
-P;
-        try_regline(xu->cob.segar, xu->csx, xu->csy, xu->cex, xu->cey);
-    }
-
-    fprintf(fp, "  gsave %% %s\n", __func__);
-    r = _line_deco2(fp, ydir, xox, xoy, xu, xns);
-    fprintf(fp, "  grestore %% %s\n", __func__);
-
-    return r;
-}
-#endif
-
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
 
-#if 0
-int
-Zepsdraw_linearrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
-#endif
 int
 Zepsdraw_clinearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
@@ -11271,10 +11221,13 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_GATHER) {
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
     }
-    if((u->type==CMD_LINK) || (u->type==CMD_LINE) || (u->type==CMD_ARROW)) {
+    if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
+            (u->type==CMD_ARROW)) {
+P;
         Zepsdraw_clinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_CLINE) {
+P;
         Zepsdraw_clinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_WLINE) {

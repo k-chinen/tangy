@@ -235,9 +235,14 @@ apair_t cmd_ial[] = {
 #define LT_WCIRCLE          (10)
 #define LT_TRIANGLE         (11)
 #define LT_MOUNTAIN         (12)
+#if 0
 #define LT_CUTTED           (13)
 #define LT_ARROWCENTERED    (14)
+#endif
+#define LT_LMUST            (21)
+#define LT_RMUST            (22)
 #define LT_DOUBLED          (100)
+    /* DBL and DBR are pair. do not use single */
 #define LT_DBR              (101)
 #define LT_DBL              (102)
 
@@ -253,6 +258,8 @@ apair_t linetype_ial[] = {
     {"circle",              LT_CIRCLE},
     {"triangle",            LT_TRIANGLE},
     {"mountain",            LT_MOUNTAIN},
+    {"lmust",               LT_LMUST},
+    {"rmust",               LT_RMUST},
 #if 0
     {"cutted",              LT_CUTTED},
     {"arrowcentered",       LT_ARROWCENTERED},
@@ -311,6 +318,8 @@ apair_t hatchtype_ial[] = {
 #define AH_CIRCLE           (12)
 #define AH_WDIAMOND         (13)
 #define AH_WCIRCLE          (14)
+#define AH_SHIP             (21)
+#define AH_WSHIP            (22)
 #define AH_REVNORMAL        (101)
 #define AH_REVWIRE          (102)
 
@@ -324,6 +333,8 @@ apair_t arrowhead_ial[] = {
     {"double",              AH_DOUBLE},
     {"diamond",             AH_DIAMOND},
     {"circle",              AH_CIRCLE},
+    {"ship",                AH_SHIP},
+    {"wship",               AH_WSHIP},
     {"wdiamond",            AH_WDIAMOND},
     {"wcircle",             AH_WCIRCLE},
     {"revnormal",           AH_REVNORMAL},
@@ -712,6 +723,7 @@ double linedecothickfactor  = 0.06;
 double linedecopitchfactor  = 0.06;
 double wlinethickfactor     = 0.20;
 double barrowgapfactor      = 0.25;
+double mustsizefactor       = 0.10;
 
 double textheightfactor     = 0.30;
 #if 0
@@ -750,6 +762,7 @@ int def_arrowangle      =  30;
 int def_arrowsize       =  20;
 int def_linedecothick   =   5;
 int def_linedecopitch   =   5;
+int def_mustsize        =  20;
 
 int def_wlinethick      =   1;
 int def_warrowangle     =  60;
@@ -2874,6 +2887,7 @@ recalcsizeparam()
     def_wlinethick      = wlinethickfactor      * objunit;
     def_linedecothick   = linedecothickfactor   * objunit;
     def_linedecopitch   = linedecopitchfactor   * objunit;
+    def_mustsize        = mustsizefactor        * objunit;
 #if 1
     if(def_linethick<=0) {
         def_linethick = 1;
