@@ -3809,15 +3809,18 @@ fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
         x3, y3, x4, y4, xu, xns);
 }
 
+
 int
-_line_path(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
+_line_pathMM(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, int MM, ns *xns, int f_new, int f_close)
 {
     int i;
     int x0, y0;
     int x1, y1, x2, y2;
     seg *s;
     int cdir;
+
+    varray_t *qar;
 
     int ap, fh, bh;
     int arcx, arcy;
@@ -3832,12 +3835,21 @@ Echo("%s: ydir %d xox %d xoy %d \n",
 #endif
     Echo("%s: enter\n", __func__);
 
+    if(MM==1) {
+        qar = xu->cob.seghar;
+    }
+    else {
+        qar = xu->cob.segar;
+    }
+
     cdir = ydir;
 
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
 
-    fprintf(fp, "  newpath\n");
+    if(f_new) {
+        fprintf(fp, "  newpath\n");
+    }
 
 #if 0
     if(!xu->cob.originalshape) {
@@ -3851,7 +3863,7 @@ Echo("%s: ydir %d xox %d xoy %d \n",
     }
 #endif
 
-    if(xu->cob.segar && xu->cob.segar->use>0) {
+    if(qar && qar->use>0) {
     }
     else {
         goto out;
@@ -3861,7 +3873,7 @@ Echo("%s: ydir %d xox %d xoy %d \n",
     fprintf(fp, " gsave %% %s\n", __func__);
 #endif
 
-    Echo("    segar.use %d\n", xu->cob.segar->use);
+    Echo("    segar.use %d\n", qar->use);
 
 #if 0
     x0 = x1 = xox+xu->csx;
@@ -3889,8 +3901,8 @@ Echo("%s: ydir %d xox %d xoy %d \n",
 #if 0
 #endif
 
-    for(i=0;i<xu->cob.segar->use;i++) {
-        s = (seg*)xu->cob.segar->slot[i];
+    for(i=0;i<qar->use;i++) {
+        s = (seg*)qar->slot[i];
         if(!s) {
             continue;
         }
@@ -4044,12 +4056,12 @@ PP;
 
             break;
 
-
-
         case OA_CLOSE:
             x2 = x1;
             y2 = y1;
-            fprintf(fp, "  closepath\n");
+            if(f_close) {
+                fprintf(fp, "  closepath\n");
+            }
             goto next;
             break;
 
@@ -4132,7 +4144,7 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
                     xu->cob.arrowheadpart &= ~AR_FORE;
                 }
                 else 
-                if(i==xu->cob.segar->use-1) {
+                if(i==qar->use-1) {
                     xu->cob.arrowheadpart &= ~AR_BACK;
                 }
                 else {
@@ -4173,6 +4185,10 @@ next:
 out:
     return 0;
 }
+
+#define _line_path(f,d,x,y,u,n)     _line_pathMM(f,d,x,y,u,0,n,1,1)
+#define _line_Rpath(f,d,x,y,u,n)    _line_pathMM(f,d,x,y,u,1,n,1,1)
+
 
 #define marknode(c,x,y) \
     fprintf(fp, "    %% marknode %d\n", __LINE__); \
@@ -8835,6 +8851,33 @@ P;
 }
 
 int
+mkpath_Rbox(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    if(rad==0) {
+        try_regsegmove(sar,   wd/2, -ht/2);
+        try_regsegrline(sar,   -wd,     0);
+        try_regsegrline(sar,     0,    ht);
+        try_regsegrline(sar,    wd,     0);
+        try_regsegrline(sar,     0,   -ht);
+    }
+    else {
+        try_regsegmove(sar,      wd/2-rad,        -ht/2);
+        try_regsegforward(sar,-(wd-2*rad),            0);
+        try_regsegarcn(sar,           rad,           90);
+        try_regsegforward(sar,          0,     ht-2*rad);
+        try_regsegarcn(sar,           rad,           90);
+        try_regsegforward(sar, (wd-2*rad),            0);
+        try_regsegarcn(sar,           rad,           90);
+        try_regsegforward(sar,          0,  -(ht-2*rad));
+        try_regsegarcn(sar,           rad,           90);
+    }
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
 mkpath_circle(varray_t *sar, int wd, int ht, int rad)
 {
 P;
@@ -8938,6 +8981,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     case CMD_DMY1:
 #endif
         ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
     case CMD_CIRCLE:
 #if 0
@@ -8979,17 +9023,44 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     }
 
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
+
+ if(xu->cob.hollow) {
+        fprintf(fp, " gsave %% for hollow+clip+fill\n");
+        changecolor(fp, xu->cob.fillcolor);
+        changethick(fp, xu->cob.hatchthick);
+#if 0
+        ik = _line_path(fp, 0, 0, 0, xu, xns);
+#endif
+        ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
+
+        fprintf(fp, "     0.8 0.8 scale\n");
+#if 0
+        ik = _line_Rpath(fp, 0, 0, 0, xu, xns);
+#endif
+        ik = _line_pathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
+        fprintf(fp, "  clip\n");
+
+        fprintf(fp, "     1.25 1.25 scale\n");
+
+        epsdraw_hatch(fp, xu->wd, xu->ht,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
+        fprintf(fp, " grestore\n");
+ }
+ else {
+
         fprintf(fp, " gsave %% for clip+fill\n");
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
-#if 0
-        fprintf(fp, "  closepath\n");
-#endif
         fprintf(fp, "  clip\n");
+
         epsdraw_hatch(fp, xu->wd, xu->ht,
                 xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
         fprintf(fp, " grestore\n");
+ }
+
     }
     else {
         fprintf(fp, "%% skip clip+fill\n");

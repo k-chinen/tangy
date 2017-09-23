@@ -575,6 +575,8 @@ apair_t lo_ial[] = {
 #define OA_KEEPDIR          (701)
 #define OA_NOEXPAND         (703)
 
+#define OA_HOLLOW           (601)
+
 #define OA_MARKBB           (711)
 #define OA_MARKPATH         (712)
 #define OA_MARKNODE         (713)
@@ -679,6 +681,8 @@ apair_t objattr_ial[] = {
     {"markpath",            OA_MARKPATH},
     {"marknode",            OA_MARKNODE},
     {"markpitch",           OA_MARKPITCH},
+
+    {"hollow",              OA_HOLLOW},
     
     {"laneorder",           OA_LANEORDER},
     {"lanenum",             OA_LANENUM},
@@ -891,6 +895,7 @@ struct obattr {
 
     varray_t *segopar;
     varray_t *segar;
+    varray_t *seghar;
 
     int    iarg1;
     int    iarg2;
@@ -913,6 +918,7 @@ struct obattr {
     int    markpath;
     int    marknode;
     int    markpitch;
+    int    hollow;
 
 #if 1
     int    laneorder;
@@ -1829,9 +1835,11 @@ P;
     r->cob.ssar     = varray_new();
     r->cob.segopar  = varray_new();
     r->cob.segar    = varray_new();
-    varray_entrysprintfunc(r->cob.ssar, ss_sprintf);
-    varray_entrysprintfunc(r->cob.segopar, segop_sprintf);
-    varray_entrysprintfunc(r->cob.segar, seg_sprintf);
+    r->cob.seghar   = varray_new();
+    varray_entrysprintfunc(r->cob.ssar,     ss_sprintf);
+    varray_entrysprintfunc(r->cob.segopar,  segop_sprintf);
+    varray_entrysprintfunc(r->cob.segar,    seg_sprintf);
+    varray_entrysprintfunc(r->cob.seghar,   seg_sprintf);
 
     qbb_reset(&r->localbb);
     qbb_reset(&r->globalbb);

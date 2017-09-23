@@ -921,6 +921,10 @@ Info("sub-command '%s' argument skip\n", name);
         rob->cob.markpath = 1;
         uc++;
     }
+    else if(oak==OA_HOLLOW) {
+        rob->cob.hollow = 1;
+        uc++;
+    }
     else if(oak==OA_ARROWEVERY) {
         rob->cob.arrowevery = 1;
         uc++;

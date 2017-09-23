@@ -191,3 +191,25 @@ out:
     return 0;
 }
 
+int
+try_regsegarcn(varray_t *segar, int rad, int ang)
+{
+    seg *e;
+
+    Echo("%s: rad,ang %d,%d\n", __func__, rad, ang);
+
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_ARCN;
+    e->coordtype    = REL_COORD;
+    e->rad          = rad;
+    e->ang          = ang;
+    varray_push(segar, e);
+
+out:
+
+    return 0;
+}
+
