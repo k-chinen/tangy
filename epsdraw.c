@@ -3830,10 +3830,9 @@ _line_pathMM(FILE *fp,
 
 
 #if 1
-Echo("%s: ydir %d xox %d xoy %d \n",
-    __func__, ydir, xox, xoy);
+Echo("%s: ydir %d xox %d xoy %d MM %d f_new %d f_close %d\n",
+    __func__, ydir, xox, xoy, MM, f_new, f_close);
 #endif
-    Echo("%s: enter\n", __func__);
 
     if(MM==1) {
         qar = xu->cob.seghar;
@@ -3841,6 +3840,9 @@ Echo("%s: ydir %d xox %d xoy %d \n",
     else {
         qar = xu->cob.segar;
     }
+
+    Echo("%s: enter MM %d qar %p %d\n",
+        __func__, MM, qar, ((qar)? qar->use : -1));
 
     cdir = ydir;
 
@@ -4183,6 +4185,7 @@ next:
 #endif
 
 out:
+    Echo("%s: leave\n", __func__);
     return 0;
 }
 
@@ -8906,7 +8909,78 @@ P;
 
 
 int
-mkpath_ellipse(varray_t *sar, int wd, int ht, int rad)
+mkpath_Rcircle(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    if(rad>0) {
+        try_regsegmove(sar,     0,    rad);
+        try_regsegarcn(sar,    rad,   360);
+        try_regsegclose(sar);
+    }
+    else
+    if(rad==0) {
+        /* skip */
+    }
+    else {
+        try_regsegmove(sar,     0,   ht/2);
+        try_regsegarcn(sar,   ht/2,   360);
+        try_regsegclose(sar);
+    }
+
+    return 0;
+}
+
+int
+mkpath_ellipseXXX(varray_t *sar, int wd, int ht, int rad, int dir)
+{
+    double r;
+    double x, y;
+    double lx, ly;
+    double a;
+    double ep = 0.01*objunit;
+P;
+#if 0
+    try_regsegmove(sar,     0, -ht/2);
+    try_regsegarc(sar,   ht/2,   360);
+#endif
+    a = ((double)wd/ht);
+Echo("a %9.2f\n", a);
+    r = ((double)ht)/2;
+    try_regsegmove(sar,     0, -r);
+    lx = 0;
+    ly = -r;
+    for(y=-r;y<=r;y+=ep) {
+        x = ((double)dir)*sqrt(r*r-y*y);
+#if 0
+fprintf(stderr, "u y %9.2f x %9.2f\n", y-ly, x-lx);
+#endif
+        try_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        lx = x; ly = y;
+    }
+#if 0
+    try_regsegforward(sar, 0, r);
+#endif
+    lx = 0;
+    ly = r;
+    for(y=r;y>=-r;y+=-ep) {
+        x = ((double)-dir)*sqrt(r*r-y*y);
+#if 0
+fprintf(stderr, "d y %9.2f x %9.2f\n", y-ly, x-lx);
+#endif
+        try_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        lx = x; ly = y;
+    }
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+
+#define mkpath_ellipse(a,w,h,r)     mkpath_ellipseXXX(a,w,h,r, 1)
+#define mkpath_Rellipse(a,w,h,r)    mkpath_ellipseXXX(a,w,h,r,-1)
+
+int
+XXXmkpath_ellipse(varray_t *sar, int wd, int ht, int rad)
 {
     double r;
     double x, y;
@@ -8988,12 +9062,14 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     case CMD_DMY2:
 #endif
         ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rcircle(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
     case CMD_ELLIPSE:
 #if 0
     case CMD_DMY3:
 #endif
-        ik = mkpath_ellipse(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_ellipse(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rellipse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
     default:
         fprintf(fp, "%% unknown type %d\n", xu->type);
@@ -9023,43 +9099,55 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     }
 
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
+        if(xu->cob.hollow && xu->cob.seghar) {
+            fprintf(fp, " gsave %% for hollow+clip+fill\n");
 
- if(xu->cob.hollow) {
-        fprintf(fp, " gsave %% for hollow+clip+fill\n");
-        changecolor(fp, xu->cob.fillcolor);
-        changethick(fp, xu->cob.hatchthick);
-#if 0
-        ik = _line_path(fp, 0, 0, 0, xu, xns);
+#if 1
+            changecolor(fp, xu->cob.fillcolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
+
+            fprintf(fp, "     0.8 0.8 scale\n");
+            ik = _line_pathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
+            fprintf(fp, "  clip\n");
+
+            fprintf(fp, "     1.25 1.25 scale\n");
+
+            epsdraw_hatch(fp, xu->wd, xu->ht,
+              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
 #endif
-        ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
 
-        fprintf(fp, "     0.8 0.8 scale\n");
 #if 0
-        ik = _line_Rpath(fp, 0, 0, 0, xu, xns);
+            changecolor(fp, xu->cob.fillcolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_path(fp, 0, 0, 0, xu, xns);
+            fprintf(fp, "  clip\n");
+
+            epsdraw_hatch(fp, xu->wd, xu->ht,
+              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, "     0.8 0.8 scale\n");
+            fprintf(fp, "     1 0 0 setrgbcolor\n");
+            ik = _line_Rpath(fp, 0, 0, 0, xu, xns);
+            fprintf(fp, "  stroke\n");
+
 #endif
-        ik = _line_pathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
-        fprintf(fp, "  clip\n");
 
-        fprintf(fp, "     1.25 1.25 scale\n");
+            fprintf(fp, " grestore\n");
+         }
+         else {
+            fprintf(fp, " gsave %% for clip+fill\n");
+            changecolor(fp, xu->cob.fillcolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_path(fp, 0, 0, 0, xu, xns);
+            fprintf(fp, "  clip\n");
 
-        epsdraw_hatch(fp, xu->wd, xu->ht,
-                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+            epsdraw_hatch(fp, xu->wd, xu->ht,
+              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
-        fprintf(fp, " grestore\n");
- }
- else {
-
-        fprintf(fp, " gsave %% for clip+fill\n");
-        changecolor(fp, xu->cob.fillcolor);
-        changethick(fp, xu->cob.hatchthick);
-        ik = _line_path(fp, 0, 0, 0, xu, xns);
-        fprintf(fp, "  clip\n");
-
-        epsdraw_hatch(fp, xu->wd, xu->ht,
-                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
-
-        fprintf(fp, " grestore\n");
- }
+            fprintf(fp, " grestore\n");
+        }
 
     }
     else {
