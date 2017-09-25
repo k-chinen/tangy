@@ -4763,13 +4763,13 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     case LT_LMUST:
         mact = 1;
         mangle = 90;
-        act = 1;
+        act = 0;
         run = pt;
         break;
     case LT_RMUST:
         mact = 1;
         mangle = -90;
-        act = 1;
+        act = 0;
         run = pt;
         break;
 #endif
@@ -5948,6 +5948,14 @@ _line_deco2(FILE *fp,
         xu->cob.outlinetype = LT_DBR;
         ik = __line_deco2(fp, ydir, xox, xoy, xu, xns);
         xu->cob.outlinetype = orig_ltype;
+        return ik;
+    }
+    else
+    if(orig_ltype==LT_LMUST || orig_ltype==LT_RMUST) {
+        xu->cob.outlinetype = LT_SOLID;
+        ik = __line_deco2(fp, ydir, xox, xoy, xu, xns);
+        xu->cob.outlinetype = orig_ltype;
+        ik = __line_deco2(fp, ydir, xox, xoy, xu, xns);
         return ik;
     }
     else {
