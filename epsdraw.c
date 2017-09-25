@@ -10907,7 +10907,7 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
 
     rv = 0;
     switch(pn) {
-    case PO_CENTER:     *ra =   90;                             break;
+    case PO_CENTER:     *ra =   90;                              break;
     case PO_NORTH:      *ra =   90; *ry += u->ht/2+ogap;         break;
     case PO_SOUTH:      *ra =  -90; *ry -= u->ht/2+ogap;         break;
     case PO_EAST:       *ra =    0; *rx += u->wd/2+ogap;         break;
@@ -10943,6 +10943,16 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
         break;
     case PO_NOR:
         *ra =   90; *rj = SJ_RIGHT;  *rx += u->wd/2;    *ry += u->ht/2+ogap;
+        break;
+
+    case PO_NBL:
+        *ra =   90; *rj = SJ_LEFT;   *rx -= u->wd/2;    *ry += u->ht/2-tht/2;
+        break;
+    case PO_NBC:
+        *ra =   90; *rj = SJ_CENTER; *rx += 0;          *ry += u->ht/2-tht/2;
+        break;
+    case PO_NBR:
+        *ra =   90; *rj = SJ_RIGHT;  *rx += u->wd/2;    *ry += u->ht/2-tht/2;
         break;
 
     case PO_EOL:

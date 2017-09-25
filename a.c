@@ -360,35 +360,38 @@ apair_t arrowhead_ial[] = {
 #define PO_CIC              (14)
 #define PO_CIR              (15)
 
-#define PO_NOL              (021)
-#define PO_NOC              (022)
-#define PO_NOR              (023)
-#define PO_NIL              (024)
-#define PO_NIC              (025)
-#define PO_NIR              (026)
+#define PO_NOL              (21)
+#define PO_NOC              (22)
+#define PO_NOR              (23)
+#define PO_NBL              (24)
+#define PO_NBC              (25)
+#define PO_NBR              (26)
+#define PO_NIL              (27)
+#define PO_NIC              (28)
+#define PO_NIR              (29)
 
-#define PO_EOL              (031)
-#define PO_EOC              (032)
-#define PO_EOR              (033)
-#define PO_EIL              (034)
-#define PO_EIC              (035)
-#define PO_EIR              (036)
+#define PO_EOL              (31)
+#define PO_EOC              (32)
+#define PO_EOR              (33)
+#define PO_EIL              (34)
+#define PO_EIC              (35)
+#define PO_EIR              (36)
 
-#define PO_SOL              (041)
-#define PO_SOC              (042)
-#define PO_SOR              (043)
-#define PO_SIL              (044)
-#define PO_SIC              (045)
-#define PO_SIR              (046)
+#define PO_SOL              (41)
+#define PO_SOC              (42)
+#define PO_SOR              (43)
+#define PO_SIL              (44)
+#define PO_SIC              (45)
+#define PO_SIR              (46)
 
-#define PO_WOL              (051)
-#define PO_WOC              (052)
-#define PO_WOR              (053)
-#define PO_WIL              (054)
-#define PO_WIC              (055)
-#define PO_WIR              (056)
+#define PO_WOL              (51)
+#define PO_WOC              (52)
+#define PO_WOR              (53)
+#define PO_WIL              (54)
+#define PO_WIC              (55)
+#define PO_WIR              (56)
 
-#define PO_MAX              (057)
+#define PO_MAX              (57)
 
 apair_t pos_ial[] = {
 
@@ -424,6 +427,9 @@ apair_t pos_ial[] = {
     {"NOL",                 PO_NOL},
     {"NOC",                 PO_NOC},
     {"NOR",                 PO_NOR},
+    {"NBL",                 PO_NBL},
+    {"NBC",                 PO_NBC},
+    {"NBR",                 PO_NBR},
     {"NIL",                 PO_NIL},
     {"NIC",                 PO_NIC},
     {"NIR",                 PO_NIR},
