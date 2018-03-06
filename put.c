@@ -918,6 +918,10 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
 
+    case CMD_CURVE:
+            WO;
+            break;
+
     case CMD_CLINE:
     case CMD_LINE:     
     case CMD_ARROW:
@@ -959,12 +963,12 @@ Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
 #endif
 
 #if 1
-                u->ox = -wd/2;
-                u->oy = -ht/2;
+            u->ox = -wd/2;
+            u->oy = -ht/2;
 #endif
 #if 0
-                u->ox = -(lx+rx)/2;
-                u->oy = -(ty+by)/2;
+            u->ox = -(lx+rx)/2;
+            u->oy = -(ty+by)/2;
 #endif
             if(u->type==CMD_CLINE) {
             }

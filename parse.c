@@ -728,6 +728,11 @@ P;
     OISET(OA_WIDTH,         wd);
     OISET(OA_HEIGHT,        ht);
 
+    ISET2(OA_CHOP,          forechop, backchop);
+    ISET(OA_FORECHOP,       forechop);
+    ISET(OA_BACKCHOP,       backchop);
+    ISET(OA_BULGE,          bulge);
+
     GFSET(OA_TEXTHEIGHTFACTOR,      textheightfactor);
     GFSET(OA_ARROWSIZEFACTOR,       arrowsizefactor);
     GFSET(OA_LINETHICKFACTOR,       linethickfactor);

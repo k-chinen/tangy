@@ -5055,7 +5055,7 @@ solve_pitch(int ty)
     case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
     }
 
-    Echo("%s: rv %f\n", __func__, rv);
+    Echo("%s: rv %f def_linedecopitch %d\n", __func__, rv, def_linedecopitch);
 
     return rv;
 }
@@ -5118,6 +5118,10 @@ P;
 
     gsym = xu->cob.outlinetype;
     pitch = solve_pitch(xu->cob.outlinetype);
+#if 1
+    Echo("%s: gsym %d pitch %f (def_linedecopitch %d)\n",
+        __func__, gsym, pitch, def_linedecopitch); 
+#endif
 
 #if 1
 Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
@@ -5283,8 +5287,8 @@ Echo("b cdir %d\n", cdir);
             }
         }
 
-Echo("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
-    xu->oid, __func__, actbh, actch, actfh);
+Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achbh %d\n",
+    xu->oid, __func__, __LINE__,  s->ptype, actbh, actch, actfh);
 
         switch(s->ptype) {
 
@@ -5965,6 +5969,183 @@ _line_deco2(FILE *fp,
 
 
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
+
+        
+int
+__solve_fandt(ns *xns, ob *u, varray_t *opar,
+    int X, int *sx, int *sy, int *ex, int *ey)
+{
+    int    i;
+    segop *e;
+    int    ik;
+
+    Echo("%s: enter\n", __func__);
+    Echo("%s: sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+
+    for(i=0;i<opar->use;i++) {
+        e = (segop*)opar->slot[i];
+        if(!e)
+            continue;
+        if(!e->val || !e->val[0]) {
+            continue;
+        }
+        switch(e->cmd) {
+        case OA_FROM:
+            ik = _ns_find_objposP(xns, u, e->val, X, sx, sy);
+            Echo("  FROM ik %d\n", ik);
+            break;
+        case OA_TO:
+            ik = _ns_find_objposP(xns, u, e->val, X, ex, ey);
+            Echo("  TO   ik %d\n", ik);
+            break;
+        }
+    }
+
+    Echo("%s: sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+    Echo("%s: leave\n", __func__);
+
+    return 0;
+}
+
+int
+Zepsdraw_curvearrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+#if 0
+    int r;
+#endif
+    int aw, ah;
+    int x1, x2, y1, y2;
+    int cx, cy, tx, ty;
+    double th;
+    double ph;
+    double mu, mv;
+    double d;
+    double r;
+    double q;
+    int    c1;
+    int    c2;
+    int    ux, uy, vx, vy;
+
+#if 0
+    ph = ((double)M_PI)/4.0;
+    c1 = objunit/3;
+    c2 = objunit/4;
+#endif
+    ph = xu->cob.bulge*rf;
+    c1 = xu->cob.backchop;
+    c2 = xu->cob.forechop;
+
+P;
+#if 1
+Echo("%s: enter\n", __func__);
+Echo("%s: ph %f (%f) c1 %d c2 %d\n",
+    __func__, ph, ph/rf, c1, c2);
+#endif
+
+    if(xu->cob.hasfrom && xu->cob.hasto) {
+
+        varray_fprint(stdout, xu->cob.segopar);
+#if 0
+        varray_fprint(stdout, xu->cob.ssar);
+        varray_fprint(stdout, xu->cob.segar);
+        varray_fprint(stdout, xu->cob.seghar);
+#endif
+
+#if 0
+        int ck;
+        ik = _ns_find_objposP(xns, u, e->val, 1, &mx, &my);
+#endif
+        __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+
+Echo("%s: - FROM %d,%d TO %d,%d\n", __func__,
+        xu->csx, xu->csy, xu->cex, xu->cey);
+Echo("%s: g FROM %d,%d TO %d,%d\n", __func__,
+        xu->gsx, xu->gsy, xu->gex, xu->gey);
+Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
+        x1, y1, x2, y2);
+
+        d = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+        r = d/2;
+
+        th = (double)(atan2((y2-y1),(x2-x1)));
+        cx = (x1+x2)/2;
+        cy = (y1+y2)/2;
+
+        /*
+         *             + tx,ty
+         *            / \
+         *           /   + vx,vy
+         *    ux,uy +     \
+         *         /       + x2,y2
+         *        /
+         * x1,y1 +
+         */
+
+        mu = th + ph;
+        mv = th + M_PI - ph;
+        q  = r/cos(ph);
+Echo("%s: d %f r %f q %f\n", __func__, d, r, q);
+        tx = x1+q*cos(mu);
+        ty = y1+q*sin(mu);
+        if(c1>0) {
+            ux = x1+c1*cos(mu);
+            uy = y1+c1*sin(mu);
+        }
+        else {
+            ux = x1;
+            uy = y1;
+        }
+        if(c2>0) {
+            vx = x2+c2*cos(mv);
+            vy = y2+c2*sin(mv);
+        }
+        else {
+            vx = x2;
+            vy = y2;
+        }
+
+Echo("%s: th %f (%f) ph %f (%f) mu %f (%f) mv %f (%f)\n",
+    __func__, th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
+
+        fprintf(fp, "gsave\n");
+
+#if 0
+        fprintf(fp, "  %d setlinewidth\n", objunit/50);
+        fprintf(fp, "  0 0 1 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            x1, y1, x2, y2);
+        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
+            x1, y1, c1);
+        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
+            x2, y2, c2);
+        fprintf(fp, "  %d setlinewidth\n", objunit/30);
+        fprintf(fp, "  0 1 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            x1, y1, tx, ty);
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            tx, ty, x2, y2);
+        fprintf(fp, "  1 0 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto stroke\n",
+            ux, uy, tx, ty, vx, vy);
+#endif
+
+
+        /* main body */
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            ux, uy, tx, ty, tx, ty, vx, vy);
+
+        fprintf(fp, "grestore\n");
+    }
+    else {
+Echo("%s: no FROM and TO\n", __func__);
+    }
+
+    return 0;
+}
+
 
 int
 Zepsdraw_clinearrow(FILE *fp,
@@ -11397,6 +11578,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
     if(u->type==CMD_GATHER) {
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
+    }
+    if(u->type==CMD_CURVE) {
+P;
+        Zepsdraw_curvearrow(fp, *xdir, ox, oy, u, xns);
     }
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
             (u->type==CMD_ARROW)) {

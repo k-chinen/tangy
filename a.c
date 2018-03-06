@@ -70,6 +70,8 @@ int _p_ = 0;
 #define CMD_PING        (401)
 #define CMD_PINGPONG    (402)
 
+#define CMD_CURVE       (501)
+
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
 
@@ -148,6 +150,7 @@ apair_t cmd_ial[] = {
     {"sep",             CMD_SEP},
     {"ping",            CMD_PING},
     {"pingpong",        CMD_PINGPONG},
+    {"curve",           CMD_CURVE},
     {"dir",             CMD_DIR},
     {"incdir",          CMD_INCDIR},
     {"decdir",          CMD_DECDIR},
@@ -550,6 +553,11 @@ apair_t lo_ial[] = {
 #define OA_ARROWEVERY       (211)
 #define OA_ARROWEDGE        (212)
 
+#define OA_CHOP             (221)
+#define OA_FORECHOP         (222)
+#define OA_BACKCHOP         (223)
+#define OA_BULGE            (230)
+
 #define OA_RIGHT            (301)
 #define OA_LEFT             (302)
 #define OA_UP               (303)
@@ -672,6 +680,12 @@ apair_t objattr_ial[] = {
     {"bothhead",            OA_BOTHHEAD},
     {"arrowevery",          OA_ARROWEVERY},
     {"arrowedge",           OA_ARROWEDGE},
+
+    {"chop",                OA_CHOP},
+    {"forechop",            OA_FORECHOP},
+    {"backchop",            OA_BACKCHOP},
+
+    {"bulge",               OA_BULGE},
 
     {"port",                OA_PORT},
     {"larboard",            OA_PORT},
@@ -846,6 +860,9 @@ struct obattr {
     int   outlinethickmode;
 
     int   wlinethick;
+    int   forechop;
+    int   backchop;
+    int   bulge;
 
     int   arrowheadpart;
     int   arrowforeheadtype;
@@ -2885,6 +2902,7 @@ _ns_find_name(ns* s, ob* xob, int w)
 int
 recalcsizeparam()
 {
+    Echo("%s: enter\n", __func__);
 
     if(objunit<=0) {
         Error("sorry unit size is zero or negative.\n");
