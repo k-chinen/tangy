@@ -6058,34 +6058,39 @@ Echo("%s: ph %f (%f) c1 %d c2 %d\n",
 #endif
         __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
 
+#if 0
 Echo("%s: - FROM %d,%d TO %d,%d\n", __func__,
         xu->csx, xu->csy, xu->cex, xu->cey);
 Echo("%s: g FROM %d,%d TO %d,%d\n", __func__,
         xu->gsx, xu->gsy, xu->gex, xu->gey);
+#endif
 Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
         x1, y1, x2, y2);
 
-        d = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-        r = d/2;
-
-        th = (double)(atan2((y2-y1),(x2-x1)));
         cx = (x1+x2)/2;
         cy = (y1+y2)/2;
+Echo(" cx,y %d,%d\n", cx, cy);
+
+        d  = sqrt((double)(y2-y1)*(y2-y1)+(double)(x2-x1)*(x2-x1));
+        r  = d/2;
+        q  = r/cos(ph);
+Echo(" d %f r %f q %f\n", d, r, q);
+
+        th = (double)(atan2((y2-y1),(x2-x1)));
 
         /*
          *             + tx,ty
          *            / \
          *           /   + vx,vy
          *    ux,uy +     \
-         *         /       + x2,y2
-         *        /
-         * x1,y1 +
+         *         /   ____+ x2,y2
+         *        / __+ cx,cy
+         * x1,y1 +--
          */
 
         mu = th + ph;
         mv = th + M_PI - ph;
-        q  = r/cos(ph);
-Echo("%s: d %f r %f q %f\n", __func__, d, r, q);
+
         tx = x1+q*cos(mu);
         ty = y1+q*sin(mu);
         if(c1>0) {
@@ -6105,8 +6110,11 @@ Echo("%s: d %f r %f q %f\n", __func__, d, r, q);
             vy = y2;
         }
 
-Echo("%s: th %f (%f) ph %f (%f) mu %f (%f) mv %f (%f)\n",
-    __func__, th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
+Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
+    th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
+
+Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
+    ux, uy, tx, ty, vx, vy);
 
         fprintf(fp, "gsave\n");
 
@@ -6129,7 +6137,6 @@ Echo("%s: th %f (%f) ph %f (%f) mu %f (%f) mv %f (%f)\n",
         fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto stroke\n",
             ux, uy, tx, ty, vx, vy);
 #endif
-
 
         /* main body */
         changecolor(fp, xu->cob.outlinecolor);
