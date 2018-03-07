@@ -539,6 +539,12 @@ skip_number:
     }
 skip_note:
 
+    if(strcasecmp(name, "--")==0)     {
+        rob->cob.arrowheadpart     = AR_NONE;
+        rob->cob.arrowforeheadtype = AH_NONE;
+        rob->cob.arrowbackheadtype = AH_NONE;
+        goto out;
+    }
     if(strcasecmp(name, "->")==0)     {
         rob->cob.arrowheadpart     = AR_FORE;
         rob->cob.arrowforeheadtype = AH_NORMAL;
@@ -1031,6 +1037,14 @@ Echo("CHECK CHUNK attr\n");
         nob->cob.arrowheadpart     = AR_FORE;
         nob->cob.arrowforeheadtype = AH_NORMAL;
         break;
+
+#if 0
+    case CMD_CURVE:
+    case CMD_CURVESELF:
+        nob->cob.arrowheadpart     = AR_FORE;
+        nob->cob.arrowforeheadtype = AH_NORMAL;
+        break;
+#endif
 
     case CMD_LINE:
         nob->cob.keepdir = 0;

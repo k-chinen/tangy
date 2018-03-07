@@ -920,7 +920,6 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
 
     case CMD_CURVE:
     case CMD_CURVESELF:
-            WO;
             break;
 
     case CMD_CLINE:

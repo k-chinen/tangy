@@ -6022,10 +6022,18 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
         case OA_FROM:
             ik = _ns_find_objposP(xns, u, e->val, X, sx, sy);
             Echo("  FROM ik %d\n", ik);
+            if(ik<0) {
+                printf("ERROR not found label-'%s' as FROM\n", e->val);
+                exit(11);
+            }
             break;
         case OA_TO:
             ik = _ns_find_objposP(xns, u, e->val, X, ex, ey);
             Echo("  TO   ik %d\n", ik);
+            if(ik<0) {
+                printf("ERROR not found label-'%s' as TO\n", e->val);
+                exit(11);
+            }
             break;
         }
     }
@@ -6132,8 +6140,12 @@ Echo(" d %f r %f q %f\n", d, r, q);
 Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
     th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
 
+#if 0
 Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
     ux, uy, tx, ty, vx, vy);
+#endif
+Echo(" ux,y %d,%d px,y %d,%d qx,y %d,%d vx,y %d,%d\n",
+    ux, uy, px, py, qx, qy, vx, vy);
 
         fprintf(fp, "gsave\n");
 
