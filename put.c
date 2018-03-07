@@ -919,6 +919,7 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
             break;
 
     case CMD_CURVE:
+    case CMD_CURVESELF:
             WO;
             break;
 

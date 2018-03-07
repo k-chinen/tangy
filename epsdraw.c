@@ -5970,6 +5970,35 @@ _line_deco2(FILE *fp,
 
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
 
+int
+__solve_dir(ns *xns, ob *u, varray_t *opar,
+    int X, int *ang)
+{
+    int    i;
+    segop *e;
+    int    ik;
+
+    Echo("%s: enter\n", __func__);
+
+    for(i=0;i<opar->use;i++) {
+        e = (segop*)opar->slot[i];
+        if(!e)
+            continue;
+        if(!e->val || !e->val[0]) {
+            continue;
+        }
+        switch(e->cmd) {
+        case OA_DIR:
+            *ang = atoi(e->val);
+            break;
+        }
+    }
+
+    Echo("%s: leave\n", __func__);
+
+    return 0;
+}
+
         
 int
 __solve_fandt(ns *xns, ob *u, varray_t *opar,
@@ -6006,6 +6035,168 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
 
     return 0;
 }
+
+int
+Zepsdraw_curveselfarrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+#if 0
+    int r;
+#endif
+    int aw, ah;
+    int x1, x2, y1, y2;
+    int cx, cy, tx, ty;
+    int xxth;
+    double th;
+    double ph;
+    double mu, mv;
+    double d;
+    double r;
+    double q;
+    int    c1;
+    int    c2;
+    int    ux, uy, vx, vy;
+    int    px, py, qx, qy;
+
+    ph = xu->cob.bulge*rf;
+    c1 = c2 = xu->cob.backchop;
+
+P;
+#if 0
+Echo("%s: enter\n", __func__);
+Echo("%s: ph %f (%f) c1 %d c2 %d\n",
+    __func__, ph, ph/rf, c1, c2);
+#endif
+
+    if(xu->cob.hasfrom) {
+#if 0
+        varray_fprint(stdout, xu->cob.segopar);
+#endif
+
+        __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+        x2 = x1;
+        y2 = y1;
+
+Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
+        x1, y1, x2, y2);
+
+        cx = (x1+x2)/2;
+        cy = (y1+y2)/2;
+Echo(" cx,y %d,%d\n", cx, cy);
+
+        d  = xu->cob.rad*2;
+
+        r  = d/2;
+        q  = r/cos(ph);
+Echo(" d %f r %f q %f\n", d, r, q);
+
+        __solve_dir(xns, xu, xu->cob.segopar, 1, &xxth);
+        th = xxth*rf;
+
+        /*
+         *             + tx,ty
+         *            / \
+         *           /   + vx,vy
+         *    ux,uy +     \
+         *         /   ____+ x2,y2
+         *        / __+ cx,cy
+         * x1,y1 +--
+         */
+
+        mu = th + ph;
+        mv = th - ph;
+
+        tx = x1+d*cos(th);
+        ty = y1+d*sin(th);
+        px = x1+q*cos(mu);
+        py = y1+q*sin(mu);
+        qx = x1+q*cos(mv);
+        qy = y1+q*sin(mv);
+        if(c1>0) {
+            ux = x1+c1*cos(mu);
+            uy = y1+c1*sin(mu);
+        }
+        else {
+            ux = x1;
+            uy = y1;
+        }
+        if(c2>0) {
+            vx = x2+c2*cos(mv);
+            vy = y2+c2*sin(mv);
+        }
+        else {
+            vx = x2;
+            vy = y2;
+        }
+
+Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
+    th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
+
+Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
+    ux, uy, tx, ty, vx, vy);
+
+        fprintf(fp, "gsave\n");
+
+#if 0
+        fprintf(fp, "  %d setlinewidth\n", objunit/50);
+        fprintf(fp, "  0 0 1 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            x1, y1, x2, y2);
+        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
+            x1, y1, c1);
+        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
+            x2, y2, c2);
+#endif
+#if 0
+        fprintf(fp, "  %d setlinewidth\n", objunit/30);
+        fprintf(fp, "  0 1 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            x1, y1, tx, ty);
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
+            tx, ty, x2, y2);
+        fprintf(fp, "  1 0 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto stroke\n",
+            ux, uy, tx, ty, vx, vy);
+#endif
+
+#if 0
+        fprintf(fp, "  1 1 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto %d %d lineto %d %d lineto stroke\n",
+            x1, y1, px, py, tx, ty, qx, qy, x2, y2);
+        fprintf(fp, "  1 0 0 setrgbcolor\n");
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            ux, uy, px, py, px, py, tx, ty);
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            px, py, tx, ty, tx, ty, qx, qy);
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            tx, ty, qx, qy, qx, qy, vx, vy);
+#endif
+
+        /* main body */
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            ux, uy, px, py, qx, qy, vx, vy);
+
+        if(xu->cob.arrowheadpart & AR_BACK) {
+            epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
+        }
+        if(xu->cob.arrowheadpart & AR_FORE) {
+            epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
+        }
+
+
+        fprintf(fp, "grestore\n");
+    }
+    else {
+Echo("%s: no FROM\n", __func__);
+    }
+
+    return 0;
+}
+
 
 int
 Zepsdraw_curvearrow(FILE *fp,
@@ -6143,6 +6334,15 @@ Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
         changethick(fp, xu->cob.outlinethick);
         fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
             ux, uy, tx, ty, tx, ty, vx, vy);
+
+        if(xu->cob.arrowheadpart & AR_BACK) {
+            epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
+        }
+        if(xu->cob.arrowheadpart & AR_FORE) {
+            epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
+        }
 
         fprintf(fp, "grestore\n");
     }
@@ -11587,8 +11787,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_CURVE) {
-P;
         Zepsdraw_curvearrow(fp, *xdir, ox, oy, u, xns);
+    }
+    if(u->type==CMD_CURVESELF) {
+        Zepsdraw_curveselfarrow(fp, *xdir, ox, oy, u, xns);
     }
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
             (u->type==CMD_ARROW)) {

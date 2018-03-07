@@ -71,6 +71,7 @@ int _p_ = 0;
 #define CMD_PINGPONG    (402)
 
 #define CMD_CURVE       (501)
+#define CMD_CURVESELF   (502)
 
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
@@ -151,6 +152,7 @@ apair_t cmd_ial[] = {
     {"ping",            CMD_PING},
     {"pingpong",        CMD_PINGPONG},
     {"curve",           CMD_CURVE},
+    {"curveself",       CMD_CURVESELF},
     {"dir",             CMD_DIR},
     {"incdir",          CMD_INCDIR},
     {"decdir",          CMD_DECDIR},
