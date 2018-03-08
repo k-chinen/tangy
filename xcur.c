@@ -76,9 +76,6 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
 int
 EST_curveself(FILE *fp, ob *xu, ns *xns, int *_lx, int *_by, int *_rx, int *_ty)
 {
-#if 0
-    int r;
-#endif
     int aw, ah;
     int x1, x2, y1, y2;
     int cx, cy, tx, ty;
@@ -261,10 +258,7 @@ Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
         cy = (y1+y2)/2;
 Echo(" cx,y %d,%d\n", cx, cy);
 
-#if 0
-        d  = sqrt((double)(y2-y1)*(y2-y1)+(double)(x2-x1)*(x2-x1));
-#endif
-        d  = SQRT_I2D(x1,y1,x2,y2);
+        d  = SQRT_2DD_I2D(x1,y1,x2,y2);
         r  = d/2;
         q  = r/cos(ph);
 Echo(" d %f r %f q %f\n", d, r, q);

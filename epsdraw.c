@@ -31,11 +31,6 @@ int debug_clip = 0;
 #define SLW_41(fp) fprintf(fp, "    currentlinewidth 4 mul setlinewidth\n");
 
 
-#define SQ_I2D(a1,a2) \
-    (((double)(a2)-(double)(a1))*((double)(a2)-(double)(a1)))
-#define SQRT_I2D(px1,py1,px2,py2) \
-    sqrt( SQ_I2D(px1,px2) + SQ_I2D(py1,py2))
-
 /*
  * Marking
  *      MX  cross
@@ -1357,10 +1352,7 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1435,10 +1427,7 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1544,10 +1533,7 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1621,10 +1607,7 @@ fprintf(fp, "%% hx,hy %.2f,%.2f tx,ty %.2f,%.2f\n", hx, hy, tx, ty);
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1736,16 +1719,12 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
 
-
-        r  = sqrt(px*px+py*py);
+        r  = SQRT_2D(px, py);
 
         d1x = sepw*cos((xdir+45)*rf);
         d1y = sepw*sin((xdir+45)*rf);
@@ -1837,15 +1816,12 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
-#if 0
-        ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-        ll = SQRT_I2D(x1,y1,x2,y2);
+        ll = SQRT_2DD_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
 
-        r  = sqrt(px*px+py*py);
+        r  = SQRT_2D(px, py);
 
         d1x = sepw*cos((xdir+45)*rf);
         d1y = sepw*sin((xdir+45)*rf);
@@ -2061,10 +2037,7 @@ fprintf(fp, "%% no swap x1,x2 y1,y2\n");
     opx = def_linedecothick*cos((xdir+0)*rf);
     opy = def_linedecothick*sin((xdir+0)*rf);
 
-#if 0
-    ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-    ll = SQRT_I2D(x1,y1,x2,y2);
+    ll = SQRT_2DD_I2D(x1,y1,x2,y2);
     cy = ((double)x2-x1)/def_linedecothick;
     px = (x2-x1)/cy;
     py = (y2-y1)/cy;
@@ -2248,10 +2221,7 @@ fprintf(fp, "%% no swap x1,x2 y1,y2\n");
     opx = wlt*cos((xdir+0)*rf);
     opy = wlt*sin((xdir+0)*rf);
 
-#if 0
-    ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-    ll = SQRT_I2D(x1,y1,x2,y2);
+    ll = SQRT_2DD_I2D(x1,y1,x2,y2);
     cy = ((double)x2-x1)/def_linedecothick;
     px = (x2-x1)/cy;
     py = (y2-y1)/cy;
@@ -2736,10 +2706,7 @@ epsdraw_segblinearrow(FILE *fp,
 
     ik = 0;
 
-#if 0
-    l = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-    l = SQRT_I2D(x1,y1,x2,y2);
+    l = SQRT_2DD_I2D(x1,y1,x2,y2);
     a = atan2(y2-y1, x2-x1)/rf;
     b = (int)(def_barrowgap/2*tan(a*rf));
 
@@ -2791,10 +2758,7 @@ fitarc(FILE *fp, int x1, int y1, int x2, int y2, int ph)
     mx = ((double)x2+x1)/2;
     my = ((double)y2+y1)/2;
 
-#if 0
-    d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-#endif
-    d = SQRT_I2D(x1,y1,x2,y2);
+    d = SQRT_2DD_I2D(x1,y1,x2,y2);
     r = d/2;
 
     na = atan2((y2-y1), (x2-x1))/rf;
@@ -3675,10 +3639,7 @@ epsdraw_ping(FILE *fp,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
     ag = (int)(atan2(xu->ht/2, xu->wd)/rf);
 
-#if 0
-    r0 = (int)sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-    r0 = (int)SQRT_I2D(x1,y1,x2,y2);
+    r0 = (int)SQRT_2DD_I2D(x1,y1,x2,y2);
 
     fprintf(fp, "gsave %% ping\n");
     changethick(fp, xu->vob.outlinethick);
@@ -3717,10 +3678,7 @@ epsdraw_pingpong(FILE *fp,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
     ag = (int)(atan2(((xu->ht*7/8)*9/10)/2, xu->wd)/rf);
 
-#if 0
-    r0 = (int)sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
-#endif
-    r0 = (int)SQRT_I2D(x1,y1,x2,y2);
+    r0 = (int)SQRT_2DD_I2D(x1,y1,x2,y2);
 
     dx = (int)(xu->ht/8*cos((xdir+90)*rf));
     dy = (int)(xu->ht/8*sin((xdir+90)*rf));
@@ -5736,7 +5694,7 @@ coord_done:
             dcdir = atan2(y2-y1,x2-x1)/rf;
             v = atan2(y2-y1,x2-x1)/rf;
 
-            etrip = SQRT_I2D(x1,y1,x2,y2);
+            etrip = SQRT_2DD_I2D(x1,y1,x2,y2);
             nd = etrip / pitch;
 #if 0
             fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d ; cdir %d dcdir %f v %f\n",
@@ -6121,13 +6079,10 @@ int
 Zepsdraw_curveselfarrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
-#if 0
-    int r;
-#endif
-    int aw, ah;
-    int x1, x2, y1, y2;
-    int cx, cy, tx, ty;
-    int xxth;
+    int    aw, ah;
+    int    x1, x2, y1, y2;
+    int    cx, cy, tx, ty;
+    int    xxth;
     double th;
     double ph;
     double mu, mv;
@@ -6222,6 +6177,18 @@ Echo(" ux,y %d,%d px,y %d,%d qx,y %d,%d vx,y %d,%d\n",
 
         fprintf(fp, "gsave\n");
 
+        if(xu->cob.marknode) {
+            marknode(xu->cob.outlinecolor, x1, y1);
+            marknode(xu->cob.outlinecolor, ux, uy);
+            marknode(xu->cob.outlinecolor, px, py);
+#if 0
+            marknode(xu->cob.outlinecolor, tx, ty);
+#endif
+            marknode(xu->cob.outlinecolor, qx, qy);
+            marknode(xu->cob.outlinecolor, vx, vy);
+            marknode(xu->cob.outlinecolor, x2, y2);
+        }
+
 #if 0
         fprintf(fp, "  %d setlinewidth\n", objunit/50);
         fprintf(fp, "  0 0 1 setrgbcolor\n");
@@ -6272,7 +6239,6 @@ Echo(" ux,y %d,%d px,y %d,%d qx,y %d,%d vx,y %d,%d\n",
                 (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
         }
 
-
         fprintf(fp, "grestore\n");
     }
     else {
@@ -6287,12 +6253,9 @@ int
 Zepsdraw_curvearrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
-#if 0
-    int r;
-#endif
-    int aw, ah;
-    int x1, x2, y1, y2;
-    int cx, cy, tx, ty;
+    int    aw, ah;
+    int    x1, x2, y1, y2;
+    int    cx, cy, tx, ty;
     double th;
     double ph;
     double mu, mv;
@@ -6303,17 +6266,12 @@ Zepsdraw_curvearrow(FILE *fp,
     int    c2;
     int    ux, uy, vx, vy;
 
-#if 0
-    ph = ((double)M_PI)/4.0;
-    c1 = objunit/3;
-    c2 = objunit/4;
-#endif
     ph = xu->cob.bulge*rf;
     c1 = xu->cob.backchop;
     c2 = xu->cob.forechop;
 
 P;
-#if 1
+#if 0
 Echo("%s: enter\n", __func__);
 Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
@@ -6321,11 +6279,8 @@ Echo("%s: ph %f (%f) c1 %d c2 %d\n",
 
     if(xu->cob.hasfrom && xu->cob.hasto) {
 
-        varray_fprint(stdout, xu->cob.segopar);
 #if 0
-        varray_fprint(stdout, xu->cob.ssar);
-        varray_fprint(stdout, xu->cob.segar);
-        varray_fprint(stdout, xu->cob.seghar);
+        varray_fprint(stdout, xu->cob.segopar);
 #endif
 
 #if 0
@@ -6348,10 +6303,7 @@ Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
 Echo(" cx,y %d,%d\n", cx, cy);
 
 
-#if 0
-        d  = sqrt((double)(y2-y1)*(y2-y1)+(double)(x2-x1)*(x2-x1));
-#endif
-        d  = SQRT_I2D(x1,y1,x2,y2);
+        d  = SQRT_2DD_I2D(x1,y1,x2,y2);
         r  = d/2;
         q  = r/cos(ph);
 Echo(" d %f r %f q %f\n", d, r, q);
@@ -6401,6 +6353,14 @@ Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
     ux, uy, tx, ty, vx, vy);
 
         fprintf(fp, "gsave\n");
+
+        if(xu->cob.marknode) {
+            marknode(xu->cob.outlinecolor, x1, y1);
+            marknode(xu->cob.outlinecolor, ux, uy);
+            marknode(xu->cob.outlinecolor, tx, ty);
+            marknode(xu->cob.outlinecolor, vx, vy);
+            marknode(xu->cob.outlinecolor, x2, y2);
+        }
 
 #if 0
         fprintf(fp, "  %d setlinewidth\n", objunit/50);
