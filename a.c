@@ -16,6 +16,7 @@
 #include "color.h"
 
 #include "qbb.h"
+#include "geom.h"
 
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))

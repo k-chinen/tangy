@@ -680,8 +680,8 @@ Echo("set final as specified position\n");
     }
 
 
-#if 0
-Echo("%s: %d %d %d %d\n", __func__, *rlx, *rby, *rrx, *rty);
+#if 1
+Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 }
@@ -803,6 +803,7 @@ insboxpath(varray_t *xar, int xwd, int xht)
 #define NNO     {wd = objunit/4;    ht = objunit; }
 #define ZZ      {wd = 0;            ht = 0;       }
 
+#include "xcur.c"
 
 int
 putobj(ob *u, ns *xns, int *gdir)
@@ -920,6 +921,37 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
 
     case CMD_CURVE:
     case CMD_CURVESELF:
+            {
+            int ik;
+            int lx, by, rx, ty, fx, fy;
+            if(u->type==CMD_CURVE) {
+                ik = EST_curve(stdout, u, xns, &lx, &by, &rx, &ty);
+            }
+            else
+            if(u->type==CMD_CURVESELF) {
+                ik = EST_curveself(stdout, u, xns, &lx, &by, &rx, &ty);
+            }
+            else {
+                break;
+            }
+#if 1
+Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, lx, by, rx, ty, fx, fy);
+#endif
+            u->clx = lx;
+            u->cby = by;
+            u->crx = rx;
+            u->cty = ty;
+
+            wd = rx - lx;
+            ht = ty - by;
+
+#if 0
+            u->fx = wd;
+            u->fy = ht;
+#endif
+
+            }
             break;
 
     case CMD_CLINE:

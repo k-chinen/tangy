@@ -1,6 +1,5 @@
 
 #include "tx.h"
-#include "qbb.h"
 
 #ifndef EPSOUTMARGIN
 #define EPSOUTMARGIN    (18)    /* 1/4 inch */
@@ -20,6 +19,8 @@ int debug_clip = 0;
 
 #define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
 
+#define SLW_x(fp,x) \
+    fprintf(fp, "    %d setlinewidth\n", x);
 #define SLW_1x(fp,x) \
     fprintf(fp, "    currentlinewidth %d div setlinewidth\n", x);
 #define SLW_x1(fp,x) \
@@ -28,6 +29,12 @@ int debug_clip = 0;
 #define SLW_14(fp) fprintf(fp, "    currentlinewidth 4 div setlinewidth\n");
 #define SLW_21(fp) fprintf(fp, "    currentlinewidth 2 mul setlinewidth\n");
 #define SLW_41(fp) fprintf(fp, "    currentlinewidth 4 mul setlinewidth\n");
+
+
+#define SQ_I2D(a1,a2) \
+    (((double)(a2)-(double)(a1))*((double)(a2)-(double)(a1)))
+#define SQRT_I2D(px1,py1,px2,py2) \
+    sqrt( SQ_I2D(px1,px2) + SQ_I2D(py1,py2))
 
 /*
  * Marking
@@ -1350,7 +1357,10 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1425,7 +1435,10 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1531,7 +1544,10 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1605,7 +1621,10 @@ fprintf(fp, "%% hx,hy %.2f,%.2f tx,ty %.2f,%.2f\n", hx, hy, tx, ty);
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1717,7 +1736,10 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)y2-y1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
@@ -1815,11 +1837,13 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+#if 0
         ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+        ll = SQRT_I2D(x1,y1,x2,y2);
         cy = ((double)x2-x1)/sepw;
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
-
 
         r  = sqrt(px*px+py*py);
 
@@ -2037,7 +2061,10 @@ fprintf(fp, "%% no swap x1,x2 y1,y2\n");
     opx = def_linedecothick*cos((xdir+0)*rf);
     opy = def_linedecothick*sin((xdir+0)*rf);
 
+#if 0
     ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+    ll = SQRT_I2D(x1,y1,x2,y2);
     cy = ((double)x2-x1)/def_linedecothick;
     px = (x2-x1)/cy;
     py = (y2-y1)/cy;
@@ -2221,7 +2248,10 @@ fprintf(fp, "%% no swap x1,x2 y1,y2\n");
     opx = wlt*cos((xdir+0)*rf);
     opy = wlt*sin((xdir+0)*rf);
 
+#if 0
     ll = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+    ll = SQRT_I2D(x1,y1,x2,y2);
     cy = ((double)x2-x1)/def_linedecothick;
     px = (x2-x1)/cy;
     py = (y2-y1)/cy;
@@ -2706,7 +2736,10 @@ epsdraw_segblinearrow(FILE *fp,
 
     ik = 0;
 
+#if 0
     l = sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+    l = SQRT_I2D(x1,y1,x2,y2);
     a = atan2(y2-y1, x2-x1)/rf;
     b = (int)(def_barrowgap/2*tan(a*rf));
 
@@ -2758,7 +2791,10 @@ fitarc(FILE *fp, int x1, int y1, int x2, int y2, int ph)
     mx = ((double)x2+x1)/2;
     my = ((double)y2+y1)/2;
 
+#if 0
     d = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+#endif
+    d = SQRT_I2D(x1,y1,x2,y2);
     r = d/2;
 
     na = atan2((y2-y1), (x2-x1))/rf;
@@ -3639,7 +3675,10 @@ epsdraw_ping(FILE *fp,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
     ag = (int)(atan2(xu->ht/2, xu->wd)/rf);
 
+#if 0
     r0 = (int)sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+    r0 = (int)SQRT_I2D(x1,y1,x2,y2);
 
     fprintf(fp, "gsave %% ping\n");
     changethick(fp, xu->vob.outlinethick);
@@ -3678,7 +3717,10 @@ epsdraw_pingpong(FILE *fp,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
     ag = (int)(atan2(((xu->ht*7/8)*9/10)/2, xu->wd)/rf);
 
+#if 0
     r0 = (int)sqrt((y2-y1)*(y2-y1)+(x2-x1)*(x2-x1));
+#endif
+    r0 = (int)SQRT_I2D(x1,y1,x2,y2);
 
     dx = (int)(xu->ht/8*cos((xdir+90)*rf));
     dy = (int)(xu->ht/8*sin((xdir+90)*rf));
@@ -3746,8 +3788,10 @@ epsdraw_plinearrow(FILE *fp,
     dx = (int)(r*cos((xdir+90)*rf));
     dy = (int)(r*sin((xdir+90)*rf));
 
-fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
-fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
+#if 0
+    fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
+    fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
+#endif
 
     x3 = xox+xu->cx+dx;
     y3 = xoy+xu->cy+dy;
@@ -3789,8 +3833,10 @@ epsdraw_plinearrowR(FILE *fp,
     dx = (int)(r*cos((xdir+90)*rf));
     dy = (int)(r*sin((xdir+90)*rf));
 
-fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
-fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
+#if 0
+    fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
+    fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
+#endif
 
     x3 = xox+xu->cx+dx;
     y3 = xoy+xu->cy+dy;
@@ -4750,7 +4796,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     fflush(stdout);
 #endif
 
-#if 1
+#if 0
     fprintf(fp, "%% %s: x %f y %f a %f c %d ty %d\n", __func__, x, y, a, c, ty);
 #endif
 
@@ -5055,7 +5101,8 @@ solve_pitch(int ty)
     case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
     }
 
-    Echo("%s: rv %f def_linedecopitch %d\n", __func__, rv, def_linedecopitch);
+    Echo("%s: rv %f ty %d def_linedecopitch %d\n",
+        __func__, rv, ty, def_linedecopitch);
 
     return rv;
 }
@@ -5119,7 +5166,7 @@ P;
     gsym = xu->cob.outlinetype;
     pitch = solve_pitch(xu->cob.outlinetype);
 #if 1
-    Echo("%s: gsym %d pitch %f (def_linedecopitch %d)\n",
+    Echo("%s: gsym %d pitch %.2f (def_linedecopitch %d)\n",
         __func__, gsym, pitch, def_linedecopitch); 
 #endif
 
@@ -5357,12 +5404,12 @@ P;
             etrip = ((double)s->rad*2*M_PI)*((double)s->ang/360.0);
             nd = etrip / pitch;
 
-#if 1
+#if 0
             fprintf(fp, "%% etrip %f pitch %f -> nd %d\n",
                 etrip, pitch, nd);
 
-                fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
-                    i, count, trip, etrip);
+            fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
+                i, count, trip, etrip);
 #endif
 
     if(nd<=0) goto skip_arc;
@@ -5374,6 +5421,7 @@ P;
                 ui = pitch  - (trip - (int)(trip/pitch)*pitch);
             }
 
+P;
             vpitch = ((double)s->ang)*pitch/etrip;
             vi = ui/(2*M_PI*s->rad)*360;
 
@@ -5417,14 +5465,14 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                 py = arcy + s->rad*sin((cdir+v-90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
 
-
-        if(count>10) {
-            printf("%s:%d oid %d count %d\n",
-                __func__, __LINE__, xu->oid, count);
-            printf("  ui %f us %f etrip %f ue %f ; pitch %f\n",
-                ui, us, etrip, ue, pitch);
-            fflush(stdout);
-        }
+P;
+                if(count>10) {
+                    printf("%s:%d oid %d count %d\n",
+                        __func__, __LINE__, xu->oid, count);
+                    printf("  ui %f us %f etrip %f ue %f ; pitch %f\n",
+                        ui, us, etrip, ue, pitch);
+                    fflush(stdout);
+                }
 
 #if 0
                 MP(4, (int)px, (int)py);
@@ -5527,6 +5575,7 @@ skip_arc:
                 ui = pitch  - (trip - (int)(trip/pitch)*pitch);
             }
 
+P;
             vpitch = ((double)s->ang)*pitch/etrip;
             vi = ui/(2*M_PI*s->rad)*360;
 
@@ -5554,12 +5603,12 @@ Echo("us %f vs %f; ue %f ve %f; etrip %f vi %f s->ang %f\n",
                 py = arcy + s->rad*sin((cdir-v+90)*rf);
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
 
+                if(count>10) {
+                    printf("%s:%d oid %d count %d\n",
+                        __func__, __LINE__, xu->oid, count);
+                    fflush(stdout);
+                }
 
-        if(count>10) {
-            printf("%s:%d oid %d count %d\n",
-                __func__, __LINE__, xu->oid, count);
-            fflush(stdout);
-        }
 #if 0
                 MP(4, (int)px, (int)py);
 #endif
@@ -5687,9 +5736,11 @@ coord_done:
             dcdir = atan2(y2-y1,x2-x1)/rf;
             v = atan2(y2-y1,x2-x1)/rf;
 
-            etrip = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+            etrip = SQRT_I2D(x1,y1,x2,y2);
             nd = etrip / pitch;
 #if 0
+            fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d ; cdir %d dcdir %f v %f\n",
+                x1, y1, x2, y2, cdir, dcdir, v);
             fprintf(fp, "%% etrip %f pitch %f -> nd %d\n",
                 etrip, pitch, nd);
             fprintf(fp, "%% i %d count %d: trip %f etrip %f\n",
@@ -5747,26 +5798,48 @@ coord_done:
 #endif
 
 #if 0
-                px = x1;
-                py = y1;
-                qx = x1 + (x2-x1) * (ui+us)/etrip;
-                qy = y1 + (y2-y1) * (ui+us)/etrip;
-                fprintf(fp, "%f %f moveto %f %f lineto %% pre-line\n",
-                    px, py, qx, qy);
+            px = x1;
+            py = y1;
+            qx = x1 + (x2-x1) * (ui+us)/etrip;
+            qy = y1 + (y2-y1) * (ui+us)/etrip;
+            fprintf(fp, "gsave\n");
+            fprintf(fp, "0 1 1 setrgbcolor\n");
+            SLW_x(fp, 2000);
+            fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto %% pre-line\n",
+                px, py, qx, qy);
+            fprintf(fp, "stroke\n");
+            fprintf(fp, "grestore\n");
 #endif
 
             for(u=ui+us;u<=etrip-ue;u+=pitch) {
+static double lpx, lpy;
+double xd, yd;
+#if 1
                 px = x1 + (x2-x1) * u/etrip;
                 py = y1 + (y2-y1) * u/etrip;
+#endif
+
                 ttrip = trip + u;
 
-        if(count>10) {
-            printf("%s:%d oid %d count %d\n",
-                __func__, __LINE__, xu->oid, count);
-            printf("  ui %f us %f etrip %f ue %f ; pitch %f\n",
-                ui, us, etrip, ue, pitch);
-            fflush(stdout);
-        }
+                xd = lpx - px;
+                yd = lpy - py;
+                lpx = px;
+                lpy = py;
+
+                if(count<10 || count>nd-10) {
+#if 0
+                    printf("%s:%d oid %d count %d\n",
+                        __func__, __LINE__, xu->oid, count);
+                    printf("  u %f ui %f us %f etrip %f ue %f ; pitch %f\n",
+#endif
+                    printf("%s:%d oid %d count %d u %.2f ui %.2f us %.2f etrip %.2f ue %.2f ; pitch %.2f\n",
+                        __func__, __LINE__, xu->oid, count,
+                        u, ui, us, etrip, ue, pitch);
+                    printf("%s:%d oid %d count %d px %.2f py %.2f xd %.2f yd %.2f\n",
+                        __func__, __LINE__, xu->oid, count,
+                        px, py, xd, yd);
+                    fflush(stdout);
+                }
 
 #if 0
                 MP(4, (int)px, (int)py);
@@ -5843,9 +5916,9 @@ coord_done:
             }
 
 
-                trip += etrip;
-                fprintf(fp, "%% i %d count %d: trip %f\n",
-                    i, count, trip);
+            trip += etrip;
+            fprintf(fp, "%% i %d count %d: trip %f\n",
+                i, count, trip);
 
             if(actch) {
                 px = x1 + (x2-x1)/2;
@@ -5905,9 +5978,9 @@ next:
     }
 #endif
 
-        if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
-        }
+    if(xu->cob.marknode) {
+        marknode(xu->cob.outlinecolor, x1, y1);
+    }
 
     if(xu->type==CMD_CLINE) {
 #if 1
@@ -5971,7 +6044,7 @@ _line_deco2(FILE *fp,
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
 
 int
-__solve_dir(ns *xns, ob *u, varray_t *opar,
+QQ__solve_dir(ns *xns, ob *u, varray_t *opar,
     int X, int *ang)
 {
     int    i;
@@ -6001,7 +6074,7 @@ __solve_dir(ns *xns, ob *u, varray_t *opar,
 
         
 int
-__solve_fandt(ns *xns, ob *u, varray_t *opar,
+QQ__solve_fandt(ns *xns, ob *u, varray_t *opar,
     int X, int *sx, int *sy, int *ex, int *ey)
 {
     int    i;
@@ -6274,7 +6347,11 @@ Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
         cy = (y1+y2)/2;
 Echo(" cx,y %d,%d\n", cx, cy);
 
+
+#if 0
         d  = sqrt((double)(y2-y1)*(y2-y1)+(double)(x2-x1)*(x2-x1));
+#endif
+        d  = SQRT_I2D(x1,y1,x2,y2);
         r  = d/2;
         q  = r/cos(ph);
 Echo(" d %f r %f q %f\n", d, r, q);
@@ -6296,6 +6373,10 @@ Echo(" d %f r %f q %f\n", d, r, q);
 
         tx = x1+q*cos(mu);
         ty = y1+q*sin(mu);
+#if 1
+        xu->gx = tx;
+        xu->gy = ty;
+#endif
         if(c1>0) {
             ux = x1+c1*cos(mu);
             uy = y1+c1*sin(mu);
