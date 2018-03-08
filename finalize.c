@@ -1,4 +1,13 @@
 
+#include <stdio.h>
+
+#include "alist.h"
+#include "gv.h"
+#include "seg.h"
+#include "chas.h"
+#include "notefile.h"
+#include "a.h"
+
 
 
 #define MARK(m,x,y) \

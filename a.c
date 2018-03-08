@@ -21,6 +21,7 @@
 #include "chas.h"
 #include "notefile.h"
 #include "a.h"
+#include "font.h"
 
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))
@@ -1903,14 +1904,17 @@ recalcsizeparam()
 
 #if 0
 #include "put.c"
+#include "finalize.c"
 #endif
 
 #ifdef DO_LINKCHK
 #include "linkchk.c"
 #endif
-#include "finalize.c"
+
 #include "picdraw.c"
+#if 0
 #include "epsdraw.c"
+#endif
 
 int     nodraw = 0;
 char   *outfile = "out.eps";

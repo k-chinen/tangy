@@ -6,9 +6,9 @@
 CFLAGS=-g -O0 -DDO_FORKCHK
 
 all: tangy 
-tangy: a.c tx.o qbb.o alist.o color.o varray.o put.o gv.o
+tangy: a.c tx.o qbb.o alist.o color.o varray.o put.o finalize.o gv.o epsdraw.o font.o
 	cc $(CFLAGS) -o tangy -DGITCHASH='"'`git show -s --format=%H`'"' \
-   		a.c tx.o qbb.o alist.o color.o varray.o put.o gv.o -lm
+   		a.c tx.o qbb.o alist.o color.o varray.o put.o finalize.o gv.o epsdraw.o font.o -lm
 
 clean:
 	$(RM) tangy *.o
