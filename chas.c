@@ -1,3 +1,6 @@
+#include "chas.h"
+
+#if 0
 typedef struct {
     int use;
     int max;
@@ -6,6 +9,8 @@ typedef struct {
 
 #ifndef DEF_CHAS_ILEN
 #define DEF_CHAS_ILEN   (32)
+#endif
+
 #endif
 
 int def_chas_ilen=DEF_CHAS_ILEN;

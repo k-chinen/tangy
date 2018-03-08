@@ -1,4 +1,3 @@
-static
 int
 __solve_dir(ns *xns, ob *u, varray_t *opar,
     int X, int *ang)
@@ -28,7 +27,6 @@ __solve_dir(ns *xns, ob *u, varray_t *opar,
     return 0;
 }
 
-static        
 int
 __solve_fandt(ns *xns, ob *u, varray_t *opar,
     int X, int *sx, int *sy, int *ex, int *ey)

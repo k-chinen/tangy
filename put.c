@@ -1,4 +1,20 @@
+
+#include <stdio.h>
+
+#include "alist.h"
+#include "gv.h"
+#include "seg.h"
+#include "chas.h"
+#include "notefile.h"
+#include "a.h"
+
+int xatoi(char *src);
+char* draw_word(char *src, char *dst, int wlen, int sep);
+
+
+#if 0
 char debuglog[BUFSIZ*10]="";
+#endif
 
 #ifndef QLIMIT
 #define QLIMIT  (0.01)

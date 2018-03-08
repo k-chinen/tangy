@@ -1,11 +1,20 @@
 /*** notefile.c ***/
 
+#if 0
 /* note binding */
 typedef struct {
     char *nbkey;
     ob   *nbtarget;
 } nb_rec;
 
+/* notefile */
+typedef struct {
+    char *fn;
+    int   loadcount;
+} nf_rec;
+#endif
+
+#include "notefile.h"
 
 varray_t *gnotebindlist = NULL;
 
@@ -67,12 +76,6 @@ nb_find_ob(char *xkey)
 }
 
 
-
-/* notefile */
-typedef struct {
-    char *fn;
-    int   loadcount;
-} nf_rec;
 
 
 nf_rec*

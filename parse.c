@@ -1,7 +1,9 @@
 
 
+#if 0
 #define SEG_SEP         ','
 #define SEG_SEPS        ","
+#endif
 
 int
 sdump(FILE *fp, char *msg, char *s)
