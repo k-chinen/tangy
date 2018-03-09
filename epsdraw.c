@@ -11,8 +11,8 @@
 #include "notefile.h"
 #include "font.h"
 #include "tx.h"
-#if 0
 #include "a.h"
+#if 0
 #endif
 #include "xns.h"
 #include "put.h"

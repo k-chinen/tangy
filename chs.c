@@ -1,3 +1,14 @@
+
+#include <stdio.h>
+#include "obj.h"
+#include "notefile.h"
+#include "chas.h"
+#include "seg.h"
+
+#include "a.h"
+#include "gv.h"
+
+
 #ifndef CHS_SLOT_LEN
 #define CHS_SLOT_LEN (100)
 #endif
