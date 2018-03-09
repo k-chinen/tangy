@@ -1,4 +1,6 @@
-FILE *fopen(const char *restrict, const char *restrict) __asm("_" "fopen"); int fprintf(FILE *restrict, const char *restrict, ...); int fputc(int, FILE *); int fputs(const char *restrict, FILE *restrict) __asm("_" "fputs"); size_t fread(void *restrict, size_t, size_t, FILE *restrict); FILE *freopen(const char *restrict, const char *restrict, FILE *restrict) __asm("_" "freopen"); int fscanf(FILE *restrict, const char *restrict, ...); int fseek(FILE *, long, int);
+#ifndef _TANGY_A_H_
+#define _TANGY_A_H_
+
 char *skipwhite(char *p);
 char *chomp(char *line);
 int dellastcharif(char *src, int xch);
@@ -264,11 +266,4 @@ int epsdrawchunk_namel(FILE *fp, ob *xch, int gox, int goy, ns *xns);
 int epsdraw_rulerframe(FILE *fp, ob *ych, int yx, int yy);
 int printdefs(FILE *fp);
 int epsdraw(FILE *fp, int wd, int ht, int crt, double csc, ob *xch, int x, int y, ns *xns);
-int print_usage();
-int _print_alistmemkeys(char *pre, int ind, int wmax, apair_t *ap);
-int print_alistmemkeys(char *pre, apair_t *ap);
-int print_hints();
-int print_version();
-int print_param();
-int test0();
-int main(int argc, char *argv[]);
+#endif/*_TANGY_A_H_*/
