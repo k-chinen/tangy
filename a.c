@@ -20,8 +20,9 @@
 #include "gv.h"
 #include "chas.h"
 #include "notefile.h"
-#include "a.h"
 #include "font.h"
+#include "seg.h"
+#include "a.h"
 
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))
