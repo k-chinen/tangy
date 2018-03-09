@@ -1,3 +1,15 @@
+#include <stdio.h>
+
+#include "alist.h"
+#include "varray.h"
+
+#include "word.h"
+#include "seg.h"
+#include "obj.h"
+#include "chas.h"
+#include "notefile.h"
+#include "a.h"
+#include "gv.h"
 
 
 #if 0

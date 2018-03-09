@@ -2,16 +2,21 @@
 #include <stdio.h>
 
 #include "alist.h"
+#include "word.h"
+
 #include "obj.h"
 #include "gv.h"
 #include "seg.h"
 #include "chas.h"
 #include "notefile.h"
-#include "a.h"
-
 #include "font.h"
-
 #include "tx.h"
+#if 0
+#include "a.h"
+#endif
+#include "xns.h"
+#include "put.h"
+#include "epsdraw.h"
 
 int __solve_dir(ns *xns, ob *u, varray_t *opar, int X, int *ang);
 int __solve_fandt(ns *xns, ob *u, varray_t *opar, int X, int *sx, int *sy, int *ex, int *ey);
