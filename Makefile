@@ -5,10 +5,12 @@
 #CFLAGS=-g -O0 -DDO_LINKCHK
 CFLAGS=-g -O0 -DDO_FORKCHK
 
+OBJS=tx.o qbb.o alist.o color.o varray.o put.o finalize.o gv.o epsdraw.o font.o seg.o
+
 all: tangy 
-tangy: a.c tx.o qbb.o alist.o color.o varray.o put.o finalize.o gv.o epsdraw.o font.o
+tangy: a.c $(OBJS)
 	cc $(CFLAGS) -o tangy -DGITCHASH='"'`git show -s --format=%H`'"' \
-   		a.c tx.o qbb.o alist.o color.o varray.o put.o finalize.o gv.o epsdraw.o font.o -lm
+   		a.c $(OBJS) -lm
 
 clean:
 	$(RM) tangy *.o
@@ -25,6 +27,7 @@ gv.o: gv.c
 alist.o: alist.h 
 color.o: color.h varray.h 
 qbb.o: qbb.h 
+seg.o: seg.h
 tx.o: tx.h varray.h 
 varray.o: varray.h 
 

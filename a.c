@@ -17,6 +17,7 @@
 
 #include "qbb.h"
 #include "geom.h"
+#include "obj.h"
 #include "gv.h"
 #include "chas.h"
 #include "notefile.h"
@@ -1896,16 +1897,10 @@ recalcsizeparam()
 
 #include "notefile.c"
 
-#include "seg.c"
 
 #include "parse.c"
 #ifdef DO_FORKCHK
 #include "forkchk.c"
-#endif
-
-#if 0
-#include "put.c"
-#include "finalize.c"
 #endif
 
 #ifdef DO_LINKCHK

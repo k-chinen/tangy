@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "alist.h"
+#include "obj.h"
 #include "gv.h"
 #include "seg.h"
 #include "chas.h"

@@ -1,3 +1,12 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+#include "obj.h"
+#include "gv.h"
+#include "seg.h"
+
 
 seg*
 seg_new()

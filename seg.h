@@ -2,6 +2,9 @@
 #ifndef _TANGY_SEG_H_
 #define _TANGY_SEG_H_
 
+#define SEG_SEP         ','
+#define SEG_SEPS        ","
+
 typedef struct {
     int   cmd;
     char *val;

@@ -4,6 +4,7 @@
  *
  */
 
+#include "obj.h"
 #include "gv.h"
 
 double rf = M_PI/180.0;
