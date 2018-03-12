@@ -4278,53 +4278,15 @@ fprintf(fp, "%% %s: no segar %p use -\n",
     }
 #endif
 
+    if(xu->cob.outlinecolor<0||xu->cob.outlinethick<0) {
+        fprintf(fp, "  %% %s: skip no color or no thickness\n", __func__);
+        goto out;
+    }
+
     fprintf(fp, "    %% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
 
     fprintf(fp, "    newpath\n");
-
-#if 0
-    if(!xu->cob.originalshape) {
-        x1 = xox+xu->csx;
-        y1 = xoy+xu->csy;
-        x2 = xox+xu->cex;
-        y2 = xoy+xu->cey;
-        cdir = (int)(atan2(y2-y1,x2-x1)/rf);
-
-        if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
-            marknode(xu->cob.outlinecolor, x2, y2);
-        }
-
-        fprintf(fp, "  %d %d moveto %d %d lineto\n", x1, y1, x2, y2);
-
-            if(xu->cob.arrowforeheadtype>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowforeheadtype, cdir,
-                    xu->cob.outlinecolor, x2, y2);
-#if 0
-                epsdraw_Xarrowhead(fp,
-                    xu->cob.arrowforeheadtype, dcdir+v,
-                    xu->cob.outlinethick, (double)x2, (double)y2+objunit/2);
-#endif
-                fprintf(fp, "grestore\n");
-            }
-            if(xu->cob.arrowbackheadtype>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowbackheadtype, cdir-180,
-                    xu->cob.outlinecolor, x1, y1);
-                fprintf(fp, "grestore\n");
-            }
-
-
-        goto out;
-    }
-#endif
-#if 0
-#endif
-
 
     if(xu->cob.segar && xu->cob.segar->use>0) {
     }
