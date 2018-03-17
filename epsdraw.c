@@ -14,36 +14,11 @@
 #include "a.h"
 #if 0
 #endif
+#include "bez.h"
 #include "xns.h"
 #include "put.h"
+#include "xcur.h"
 #include "epsdraw.h"
-
-double
-_bez_pos(double *x, double *y, double t,
-double x1, double y1, double x2, double y2,
-double x3, double y3, double x4, double y4);
-int
-_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
-
-int __solve_dir(ns *xns, ob *u, varray_t *opar, int X, int *ang);
-int __solve_fandt(ns *xns, ob *u, varray_t *opar, int X, int *sx, int *sy, int *ex, int *ey);
-
-
-int solve_curve_points(ob *xu, ns *xns,
-    double *pmu, double *pmv,
-    int *p1x, int *p1y,
-    int *p2x, int *p2y,
-    int *p3x, int *p3y,
-    int *p4x, int *p4y);
-
-int solve_curveself_points(ob *xu, ns *xns,
-    double *pmu, double *pmv,
-    int *p1x, int *p1y,
-    int *p2x, int *p2y,
-    int *p3x, int *p3y,
-    int *p4x, int *p4y);
-
-
 
 #ifndef EPSOUTMARGIN
 #define EPSOUTMARGIN    (18)    /* 1/4 inch */

@@ -9,6 +9,8 @@
 #include "notefile.h"
 #include "a.h"
 
+#include "xcur.h"
+
 int xatoi(char *src);
 char* draw_word(char *src, char *dst, int wlen, int sep);
 
