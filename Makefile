@@ -5,7 +5,7 @@
 #CFLAGS=-g -O0 -DDO_LINKCHK
 CFLAGS=-g -O0 -DDO_FORKCHK
 
-OBJS=tx.o qbb.o alist.o color.o varray.o font.o seg.o xns.o word.o put.o finalize.o gv.o epsdraw.o parse.o a.o tangy.o chs.o
+OBJS=tx.o qbb.o alist.o color.o varray.o font.o seg.o xns.o word.o put.o finalize.o gv.o epsdraw.o parse.o a.o tangy.o chs.o bez.o xcur.o
 
 all: tangy 
 tangy: a.c $(OBJS)
