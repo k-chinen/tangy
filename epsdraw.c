@@ -18,10 +18,31 @@
 #include "put.h"
 #include "epsdraw.h"
 
+double
+_bez_pos(double *x, double *y, double t,
+double x1, double y1, double x2, double y2,
+double x3, double y3, double x4, double y4);
+int
+_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+
 int __solve_dir(ns *xns, ob *u, varray_t *opar, int X, int *ang);
 int __solve_fandt(ns *xns, ob *u, varray_t *opar, int X, int *sx, int *sy, int *ex, int *ey);
-int EST_curveself(FILE *fp, ob *xu, ns *xns, int *_lx, int *_by, int *_rx, int *_ty);
-int EST_curve(FILE *fp, ob *xu, ns *xns, int *_lx, int *_by, int *_rx, int *_ty);
+
+
+int solve_curve_points(ob *xu, ns *xns,
+    double *pmu, double *pmv,
+    int *p1x, int *p1y,
+    int *p2x, int *p2y,
+    int *p3x, int *p3y,
+    int *p4x, int *p4y);
+
+int solve_curveself_points(ob *xu, ns *xns,
+    double *pmu, double *pmv,
+    int *p1x, int *p1y,
+    int *p2x, int *p2y,
+    int *p3x, int *p3y,
+    int *p4x, int *p4y);
+
 
 
 #ifndef EPSOUTMARGIN
@@ -123,7 +144,57 @@ int debug_clip = 0;
     fprintf(fp, "      closepath fill\n"); \
     fprintf(fp, "      grestore\n");
 
+double
+solve_pitch(int ty)
+{
+    double rv;
 
+    rv = def_linedecopitch; 
+
+    switch(ty) {
+    case LT_LMUST:          rv = def_linedecopitch;   break;
+    case LT_RMUST:          rv = def_linedecopitch;   break;
+    case LT_DASHED:         rv = def_linedecopitch;     break;
+    case LT_DOTTED:         rv = def_linedecopitch/2;   break;
+    case LT_CHAINED:        rv = def_linedecopitch/2;   break;
+    case LT_DOUBLECHAINED:  rv = def_linedecopitch/2;   break;
+    default:
+    case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
+    }
+
+    Echo("%s: rv %f ty %d def_linedecopitch %d\n",
+        __func__, rv, ty, def_linedecopitch);
+
+    return rv;
+}
+
+int
+solve_dashpart(int ltype, int j)
+{
+    int act;
+
+    act = -1;
+
+    switch(ltype) {
+    case LT_DOTTED:
+    case LT_DASHED:
+            act = 0;
+            if(j%2==0) { act = 1; }
+            break;
+    case LT_CHAINED:
+            act = 1;
+            if(j%7==4||j%7==6) { act = 0; }
+            break;
+    case LT_DOUBLECHAINED:
+            act = 1;
+            if(j%9==4||j%9==6||j%9==8) { act = 0; }
+            break;
+    default:
+            break;
+    }
+    
+    return act;
+}
 
 int
 psescape(char *dst, int dlen, char* src)
@@ -1406,6 +1477,7 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
             }
 #endif
 
+#if 0
             if(ltype==LT_DOTTED||ltype==LT_DASHED) {
                 if(j%2==0) {
                     fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
@@ -1425,6 +1497,17 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
                 }
                 else {
                     fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                        ux, uy, nx, ny);
+                }
+            }
+#endif
+
+            {
+                int act;
+                act = solve_dashpart(ltype, j);
+                if(act) {
+                    fprintf(fp,
+                        "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
                         ux, uy, nx, ny);
                 }
             }
@@ -1474,6 +1557,7 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
                 break;
             }
 
+#if 0
             if(ltype==LT_DOTTED||ltype==LT_DASHED) {
                 if(j%2==0) {
                     fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
@@ -1493,6 +1577,17 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
                 }
                 else {
                     fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
+                        ux, uy, nx, ny);
+                }
+            }
+#endif
+
+            {
+                int act;
+                act = solve_dashpart(ltype, j);
+                if(act) {
+                    fprintf(fp,
+                        "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
                         ux, uy, nx, ny);
                 }
             }
@@ -2972,6 +3067,7 @@ epsdraw_segarcXSEP(FILE *fp,
         nx = arcx + rad*cos(na);
         ny = arcy + rad*sin(na);
 
+#if 0
         switch(ltype) {
         default:
             break;
@@ -3004,6 +3100,8 @@ fprintf(fp, "%% i%%9 %d\n", i%9);
             }
             break;
         }
+#endif
+            
     }
 
     fprintf(fp, "grestore %% arcXSEP\n");
@@ -4762,6 +4860,7 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         run = pt;
         break;
 #endif
+#if 0
     case LT_DASHED:
     case LT_DOTTED:
         if(ty==LT_DASHED) { if(c%2==0) act = 1; }
@@ -4780,6 +4879,17 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         run = pt;
         goto purelinetype;
         break;
+#endif
+
+    case LT_DASHED:
+    case LT_DOTTED:
+    case LT_CHAINED:
+    case LT_DOUBLECHAINED:
+        act = solve_dashpart(ty, c);
+        run = pt;
+        goto purelinetype;
+        
+        break;    
 
     case LT_TRIANGLE:
         
@@ -5026,29 +5136,7 @@ out:
     return 0;
 }
 
-double
-solve_pitch(int ty)
-{
-    double rv;
 
-    rv = def_linedecopitch; 
-
-    switch(ty) {
-    case LT_LMUST:          rv = def_linedecopitch;   break;
-    case LT_RMUST:          rv = def_linedecopitch;   break;
-    case LT_DASHED:         rv = def_linedecopitch;     break;
-    case LT_DOTTED:         rv = def_linedecopitch/2;   break;
-    case LT_CHAINED:        rv = def_linedecopitch/2;   break;
-    case LT_DOUBLECHAINED:  rv = def_linedecopitch/2;   break;
-    default:
-    case LT_CIRCLE:         rv = def_linedecopitch*2;   break;
-    }
-
-    Echo("%s: rv %f ty %d def_linedecopitch %d\n",
-        __func__, rv, ty, def_linedecopitch);
-
-    return rv;
-}
 
 
 int
@@ -6060,333 +6148,421 @@ QQ__solve_fandt(ns *xns, ob *u, varray_t *opar,
     return 0;
 }
 
-int
-Zepsdraw_curveselfarrow(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, ns *xns)
+
+#if 0
+
+double
+_bez_pos(double *x, double *y, double t,
+double x1, double y1, double x2, double y2,
+double x3, double y3, double x4, double y4)
 {
-    int    aw, ah;
-    int    x1, x2, y1, y2;
-    int    cx, cy, tx, ty;
-    int    xxth;
-    double th;
-    double ph;
-    double mu, mv;
+    double tp;
+    tp = 1.0 - t;
+    *x = t*t*t*x4 + 3 *t*t*tp*x3 + 3 *t*tp*tp*x2 + tp*tp*tp*x1;
+    *y = t*t*t*y4 + 3 *t*t*tp*y3 + 3 *t*tp*tp*y2 + tp*tp*tp*y1;
+    return 0;
+}
+
+#endif
+
+#if 0
+int
+_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+    int x, y;
+    double t;
+    double rx, ry;
+    double lx, ly;
+    double dx, dy;
+    double s;
     double d;
-    double r;
-    double q;
-    int    c1;
-    int    c2;
-    int    ux, uy, vx, vy;
-    int    px, py, qx, qy;
+    double sumd, maxd;
+    
+    s = 1.0/50.0;
+    sumd = 0.0;
+    maxd = -1;
+    
+    lx = rx = (double)x1;
+    ly = ry = (double)y1;
 
-    ph = xu->cob.bulge*rf;
-    c1 = c2 = xu->cob.backchop;
+    qbb_reset(qb);
 
-P;
-#if 0
-Echo("%s: enter\n", __func__);
-Echo("%s: ph %f (%f) c1 %d c2 %d\n",
-    __func__, ph, ph/rf, c1, c2);
-#endif
+    for(t=0;t<=1.0;t+=s) {
 
-    if(xu->cob.hasfrom) {
-#if 0
-        varray_fprint(stdout, xu->cob.segopar);
-#endif
+        _bez_pos(&rx, &ry, t,
+            (double)x1, (double)y1, (double)x2, (double)y2,
+            (double)x3, (double)y3, (double)x4, (double)y4);
 
-        __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
-        x2 = x1;
-        y2 = y1;
+        d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
+        if(d>maxd) maxd = d;
+        sumd += d;
 
-Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
-        x1, y1, x2, y2);
+        x = (int)rx;
+        y = (int)ry;
 
-        cx = (x1+x2)/2;
-        cy = (y1+y2)/2;
-Echo(" cx,y %d,%d\n", cx, cy);
+        qbb_mark(qb, x, y);
 
-        d  = xu->cob.rad*2;
-
-        r  = d/2;
-        q  = r/cos(ph);
-Echo(" d %f r %f q %f\n", d, r, q);
-
-        __solve_dir(xns, xu, xu->cob.segopar, 1, &xxth);
-        th = xxth*rf;
-
-        /*
-         *             + tx,ty
-         *            / \
-         *           /   + vx,vy
-         *    ux,uy +     \
-         *         /   ____+ x2,y2
-         *        / __+ cx,cy
-         * x1,y1 +--
-         */
-
-        mu = th + ph;
-        mv = th - ph;
-
-        tx = x1+d*cos(th);
-        ty = y1+d*sin(th);
-        px = x1+q*cos(mu);
-        py = y1+q*sin(mu);
-        qx = x1+q*cos(mv);
-        qy = y1+q*sin(mv);
-        if(c1>0) {
-            ux = x1+c1*cos(mu);
-            uy = y1+c1*sin(mu);
-        }
-        else {
-            ux = x1;
-            uy = y1;
-        }
-        if(c2>0) {
-            vx = x2+c2*cos(mv);
-            vy = y2+c2*sin(mv);
-        }
-        else {
-            vx = x2;
-            vy = y2;
-        }
-
-Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
-    th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
-
-#if 0
-Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
-    ux, uy, tx, ty, vx, vy);
-#endif
-Echo(" ux,y %d,%d px,y %d,%d qx,y %d,%d vx,y %d,%d\n",
-    ux, uy, px, py, qx, qy, vx, vy);
-
-        fprintf(fp, "gsave\n");
-
-        if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
-            marknode(xu->cob.outlinecolor, ux, uy);
-            marknode(xu->cob.outlinecolor, px, py);
-#if 0
-            marknode(xu->cob.outlinecolor, tx, ty);
-#endif
-            marknode(xu->cob.outlinecolor, qx, qy);
-            marknode(xu->cob.outlinecolor, vx, vy);
-            marknode(xu->cob.outlinecolor, x2, y2);
-        }
-
-#if 0
-        fprintf(fp, "  %d setlinewidth\n", objunit/50);
-        fprintf(fp, "  0 0 1 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            x1, y1, x2, y2);
-        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
-            x1, y1, c1);
-        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
-            x2, y2, c2);
-#endif
-#if 0
-        fprintf(fp, "  %d setlinewidth\n", objunit/30);
-        fprintf(fp, "  0 1 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            x1, y1, tx, ty);
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            tx, ty, x2, y2);
-        fprintf(fp, "  1 0 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto stroke\n",
-            ux, uy, tx, ty, vx, vy);
-#endif
-
-#if 0
-        fprintf(fp, "  1 1 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto %d %d lineto %d %d lineto stroke\n",
-            x1, y1, px, py, tx, ty, qx, qy, x2, y2);
-        fprintf(fp, "  1 0 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
-            ux, uy, px, py, px, py, tx, ty);
-        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
-            px, py, tx, ty, tx, ty, qx, qy);
-        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
-            tx, ty, qx, qy, qx, qy, vx, vy);
-#endif
-
-        /* main body */
-        changecolor(fp, xu->cob.outlinecolor);
-        changethick(fp, xu->cob.outlinethick);
-        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
-            ux, uy, px, py, qx, qy, vx, vy);
-
-        if(xu->cob.arrowheadpart & AR_BACK) {
-            epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
-                (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
-        }
-        if(xu->cob.arrowheadpart & AR_FORE) {
-            epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
-                (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
-        }
-
-        fprintf(fp, "grestore\n");
+        lx = rx;
+        ly = ry;
     }
-    else {
-Echo("%s: no FROM\n", __func__);
+
+    return 0;
+}
+#endif
+
+
+
+int
+_bez_solid(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+    int x, y;
+    double t;
+    double rx, ry;
+    double lx, ly;
+    double dx, dy;
+    double s;
+    double d;
+    double sumd, maxd;
+    
+    fprintf(fp, "%% %s: %d %d %d %d %d %d %d %d\n",
+        __func__, x1, y1, x2, y2, x3, y3, x4, y4);
+
+    s = 1.0/50.0;
+    sumd = 0.0;
+    maxd = -1;
+    
+    lx = rx = (double)x1;
+    ly = ry = (double)y1;
+
+    fprintf(fp, "gsave\n");
+    fprintf(fp, "  %d %d moveto\n", x1, y1);
+    for(t=0;t<=1.0;t+=s) {
+
+        _bez_pos(&rx, &ry, t,
+            (double)x1, (double)y1, (double)x2, (double)y2,
+            (double)x3, (double)y3, (double)x4, (double)y4);
+
+        d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
+        if(d>maxd) maxd = d;
+        sumd += d;
+
+        x = (int)rx;
+        y = (int)ry;
+        fprintf(fp, "  %d %d lineto %% d %.2f\n", x, y, d);
+        lx = rx;
+        ly = ry;
     }
+    fprintf(fp, "  %d %d lineto\n", x4, y4);
+    fprintf(fp, "  stroke\n");
+    fprintf(fp, "grestore\n");
 
     return 0;
 }
 
 
 int
-Zepsdraw_curvearrow(FILE *fp,
+_bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+    int x, y;
+    double lastt;
+    double t;
+    double rx, ry;
+    double lx, ly;
+    double dx, dy;
+    double s;
+    double d;
+    double sumd, maxd;
+    double pitch;
+    int i;
+    double u;
+    double upitch, uwidth;
+    double cap;
+    int act;
+    double a;
+    double mx, my;
+
+
+#if 0
+    fprintf(fp, "%% %s\n", __func__);
+
+    fprintf(fp, "gsave\n");
+    SLW_14(fp);
+    fprintf(fp, "1 0 0 setrgbcolor\n");
+    _bez_solid(fp, x1, y1, x2, y2, x3, y3, x4, y4);
+    fprintf(fp, "grestore\n");
+#endif
+
+    fprintf(fp, "%% %s: linetype %d\n", __func__, xu->cob.outlinetype);
+    
+    s = 1.0/50.0;
+    sumd = 0.0;
+    maxd = -1;
+
+    cap = s/100.0;
+
+    upitch = s/50.0;
+    uwidth = s*30.0;
+
+#if 0
+    fprintf(fp, "%% s %.2f\n", s);
+    fprintf(fp, "%% upitch %.2f uwidth %.2f\n", upitch, uwidth);
+#endif
+
+    pitch = solve_pitch(xu->cob.outlinetype);
+#if 0
+    fprintf(fp, "%% pitch %.2f\n", pitch);
+
+    fprintf(fp, "%% pitch range [%.4f .. %.4f]\n", pitch-cap, pitch+cap);
+#endif
+
+    lx = rx = (double)x1;
+    ly = ry = (double)y1;
+
+    lastt = -1;
+    i = 0;
+
+    fprintf(fp, "gsave\n");
+
+#if 0
+    for(t=0;t<=1.0;t+=s) 
+#endif
+
+    for(t=0;t<=1.0;) 
+    {
+        if(t==lastt) {
+            fprintf(fp, "%% OVERRUN ? t %.4f lastt %.4f\n",
+                t, lastt);
+            break;
+        }
+        lastt = t;
+
+        _bez_pos(&rx, &ry, t,
+            (double)x1, (double)y1, (double)x2, (double)y2,
+            (double)x3, (double)y3, (double)x4, (double)y4);
+
+        dx = rx - lx;
+        dy = ry - ly;
+    
+        d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
+        if(d>maxd) maxd = d;
+        sumd += d;
+
+        x = (int)rx;
+        y = (int)ry;
+
+#if 0
+        fprintf(fp, "%% t   %3d %9.4f %9.2f,%-9.2f -> %9.2f,%-9.2f %9.4f\n",
+            i, t, rx, ry, lx, ly, d);
+#endif
+
+
+        for(u=t;u<=t+uwidth;u+=upitch) {
+
+            _bez_pos(&rx, &ry, u,
+                (double)x1, (double)y1, (double)x2, (double)y2,
+                (double)x3, (double)y3, (double)x4, (double)y4);
+
+            dx = rx - lx;
+            dy = ry - ly;
+        
+            d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
+            if(d>maxd) maxd = d;
+            sumd += d;
+
+            x = (int)rx;
+            y = (int)ry;
+
+#if 0
+            fprintf(fp, "%%   u %3d %9.4f %9.2f,%-9.2f -> %9.2f,%-9.2f %9.4f\n",
+                i, u, rx, ry, lx, ly, d);
+#endif
+
+            if(d>=pitch-cap || u>=1.0) {
+#if 0
+                fprintf(fp, "%%  pass\n");
+#endif
+                break;
+            }
+        }
+
+        switch(xu->cob.outlinetype) {
+        case LT_DASHED:
+        case LT_DOTTED:
+        case LT_CHAINED:
+        case LT_DOUBLECHAINED:
+            act = solve_dashpart(xu->cob.outlinetype, i);
+            if(act) {
+                fprintf(fp, "%.2f %.2f moveto %.2f %.2f rlineto stroke\n",
+                    rx, ry, dx, dy);
+            }
+            break;
+        case LT_CIRCLE:
+        case LT_TRIANGLE:
+        case LT_MOUNTAIN:
+        case LT_WAVED:
+        case LT_ZIGZAG:
+            a = atan2(dy,dx)/rf;
+            symdraw(fp, (double)rx, (double)ry, (double)a,
+                (double)d, i, xu->cob.outlinetype, 
+                (double)lx, (double)ly, &mx, &my);
+            break;
+        }
+
+        t = u;
+
+        i++;
+        lx = rx;
+        ly = ry;
+    }
+    fprintf(fp, "grestore\n");
+
+    return 0;
+}
+
+int
+Zepsdraw_bcurveselfarrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
-    int    aw, ah;
-    int    x1, x2, y1, y2;
-    int    cx, cy, tx, ty;
-    double th;
-    double ph;
     double mu, mv;
-    double d;
-    double r;
-    double q;
-    int    c1;
-    int    c2;
-    int    ux, uy, vx, vy;
+    int ux, uy, px, py, qx, qy, vx, vy;
+    int ik;
 
-    ph = xu->cob.bulge*rf;
-    c1 = xu->cob.backchop;
-    c2 = xu->cob.forechop;
+    ik = solve_curveself_points(xu, xns,
+            &mu, &mv, &ux, &uy, &px, &py, &qx, &qy, &vx, &vy);
 
-P;
-#if 0
-Echo("%s: enter\n", __func__);
-Echo("%s: ph %f (%f) c1 %d c2 %d\n",
-    __func__, ph, ph/rf, c1, c2);
-#endif
+    fprintf(fp, "%% cs param %.2f %.2f %d %d %d %d %d %d %d %d\n",
+        mu, mv, ux, uy, px, py, qx, qy, vx, vy);
 
-    if(xu->cob.hasfrom && xu->cob.hasto) {
+    fprintf(fp, "gsave\n");
 
-#if 0
-        varray_fprint(stdout, xu->cob.segopar);
-#endif
+    if(xu->cob.marknode) {
+        marknode(xu->cob.outlinecolor, ux, uy);
+        marknode(xu->cob.outlinecolor, px, py);
+        marknode(xu->cob.outlinecolor, qx, qy);
+        marknode(xu->cob.outlinecolor, vx, vy);
+    }
 
-#if 0
-        int ck;
-        ik = _ns_find_objposP(xns, u, e->val, 1, &mx, &my);
-#endif
-        __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+    /* main body */
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
 
-#if 0
-Echo("%s: - FROM %d,%d TO %d,%d\n", __func__,
-        xu->csx, xu->csy, xu->cex, xu->cey);
-Echo("%s: g FROM %d,%d TO %d,%d\n", __func__,
-        xu->gsx, xu->gsy, xu->gex, xu->gey);
-#endif
-Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
-        x1, y1, x2, y2);
-
-        cx = (x1+x2)/2;
-        cy = (y1+y2)/2;
-Echo(" cx,y %d,%d\n", cx, cy);
-
-
-        d  = SQRT_2DD_I2D(x1,y1,x2,y2);
-        r  = d/2;
-        q  = r/cos(ph);
-Echo(" d %f r %f q %f\n", d, r, q);
-
-        th = (double)(atan2((y2-y1),(x2-x1)));
-
-        /*
-         *             + tx,ty
-         *            / \
-         *           /   + vx,vy
-         *    ux,uy +     \
-         *         /   ____+ x2,y2
-         *        / __+ cx,cy
-         * x1,y1 +--
-         */
-
-        mu = th + ph;
-        mv = th + M_PI - ph;
-
-        tx = x1+q*cos(mu);
-        ty = y1+q*sin(mu);
-#if 1
-        xu->gx = tx;
-        xu->gy = ty;
-#endif
-        if(c1>0) {
-            ux = x1+c1*cos(mu);
-            uy = y1+c1*sin(mu);
-        }
-        else {
-            ux = x1;
-            uy = y1;
-        }
-        if(c2>0) {
-            vx = x2+c2*cos(mv);
-            vy = y2+c2*sin(mv);
-        }
-        else {
-            vx = x2;
-            vy = y2;
-        }
-
-Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
-    th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
-
-Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
-    ux, uy, tx, ty, vx, vy);
-
-        fprintf(fp, "gsave\n");
-
-        if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
-            marknode(xu->cob.outlinecolor, ux, uy);
-            marknode(xu->cob.outlinecolor, tx, ty);
-            marknode(xu->cob.outlinecolor, vx, vy);
-            marknode(xu->cob.outlinecolor, x2, y2);
-        }
-
-#if 0
-        fprintf(fp, "  %d setlinewidth\n", objunit/50);
-        fprintf(fp, "  0 0 1 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            x1, y1, x2, y2);
-        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
-            x1, y1, c1);
-        fprintf(fp, "  newpath %d %d %d 0 360 arc closepath stroke\n",
-            x2, y2, c2);
-        fprintf(fp, "  %d setlinewidth\n", objunit/30);
-        fprintf(fp, "  0 1 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            x1, y1, tx, ty);
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto stroke\n",
-            tx, ty, x2, y2);
-        fprintf(fp, "  1 0 0 setrgbcolor\n");
-        fprintf(fp, "  newpath %d %d moveto %d %d lineto %d %d lineto stroke\n",
-            ux, uy, tx, ty, vx, vy);
-#endif
-
-        /* main body */
-        changecolor(fp, xu->cob.outlinecolor);
-        changethick(fp, xu->cob.outlinethick);
+    if(xu->type==CMD_XCURVESELF) {
         fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
-            ux, uy, tx, ty, tx, ty, vx, vy);
-
-        if(xu->cob.arrowheadpart & AR_BACK) {
-            epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
-                (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
-        }
-        if(xu->cob.arrowheadpart & AR_FORE) {
-            epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
-                (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
-        }
-
-        fprintf(fp, "grestore\n");
+            ux, uy, px, py, qx, qy, vx, vy);
     }
     else {
-Echo("%s: no FROM and TO\n", __func__);
+        if(xu->cob.outlinetype==LT_SOLID) {
+            _bez_solid(fp, xu, ux, uy, px, py, qx, qy, vx, vy);
+        }
+        else {
+            _bez_deco(fp, xu, ux, uy, px, py, qx, qy, vx, vy);
+        }
     }
+
+#if 0
+    {
+        qbb_t bez_bb;
+        _bez_mark(&bez_bb, ux, uy, px, py, qx, qy, vx, vy);
+        qbb_fprint(stdout, &bez_bb);
+
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "   0 0 1 setrgbcolor\n");
+        SLW_14(fp);
+        fprintf(fp, "    %d %d moveto %d %d lineto\n",
+                        bez_bb.lx, bez_bb.by, bez_bb.rx, bez_bb.by);
+        fprintf(fp, "    %d %d lineto %d %d lineto\n",
+                        bez_bb.rx, bez_bb.ty, bez_bb.lx, bez_bb.ty);
+        fprintf(fp, "    closepath stroke\n");
+        fprintf(fp, "  grestore\n");
+    }
+#endif
+
+    if(xu->cob.arrowheadpart & AR_BACK) {
+        epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+            (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+            (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
+    }
+
+    fprintf(fp, "grestore\n");
+
+    return 0;
+}
+
+int
+Zepsdraw_bcurvearrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+    int     ux, uy, t1x, t1y, t2x, t2y, vx, vy;
+    double  mu, mv;
+    int     ik;
+    int     tx, ty;
+
+
+    ik = solve_curve_points(xu, xns,
+            &mu, &mv, &ux, &uy, &t1x, &t1y, &t2x, &t2y, &vx, &vy);
+
+    fprintf(fp, "%% c- param %.2f %.2f %d %d %d %d %d %d %d %d\n",
+        mu, mv, ux, uy, t1x, t1y, t2x, t2y, vx, vy);
+
+    tx = t1x;
+    ty = t1y;
+
+
+    fprintf(fp, "gsave\n");
+
+    if(xu->cob.marknode) {
+        marknode(xu->cob.outlinecolor, ux, uy);
+        marknode(xu->cob.outlinecolor, tx, ty);
+        marknode(xu->cob.outlinecolor, vx, vy);
+    }
+
+    /* main body */
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
+    if(xu->type==CMD_XCURVE) {
+        fprintf(fp, "  newpath %d %d moveto %d %d %d %d %d %d curveto stroke\n",
+            ux, uy, tx, ty, tx, ty, vx, vy);
+    }
+    else {
+        if(xu->cob.outlinetype==LT_SOLID) {
+            _bez_solid(fp, xu, ux, uy, tx, ty, tx, ty, vx, vy);
+        }
+        else {
+            _bez_deco(fp, xu, ux, uy, tx, ty, tx, ty, vx, vy);
+        }
+    }
+
+#if 0
+    {
+        qbb_t bez_bb;
+        _bez_mark(&bez_bb, ux, uy, tx, ty, tx, ty, vx, vy);
+        qbb_fprint(stdout, &bez_bb);
+
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "   0 0 1 setrgbcolor\n");
+        SLW_14(fp);
+        fprintf(fp, "    %d %d moveto %d %d lineto\n",
+                        bez_bb.lx, bez_bb.by, bez_bb.rx, bez_bb.by);
+        fprintf(fp, "    %d %d lineto %d %d lineto\n",
+                        bez_bb.rx, bez_bb.ty, bez_bb.lx, bez_bb.ty);
+        fprintf(fp, "    closepath stroke\n");
+        fprintf(fp, "  grestore\n");
+    }
+#endif
+
+    if(xu->cob.arrowheadpart & AR_BACK) {
+        epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+            (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+            (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
+    }
+
+    fprintf(fp, "grestore\n");
 
     return 0;
 }
@@ -11776,12 +11952,20 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_GATHER) {
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
     }
-    if(u->type==CMD_CURVE) {
-        Zepsdraw_curvearrow(fp, *xdir, ox, oy, u, xns);
+    if(u->type==CMD_BCURVE || u->type==CMD_XCURVE) {
+        Zepsdraw_bcurvearrow(fp, *xdir, ox, oy, u, xns);
     }
-    if(u->type==CMD_CURVESELF) {
-        Zepsdraw_curveselfarrow(fp, *xdir, ox, oy, u, xns);
+    if(u->type==CMD_BCURVESELF || u->type==CMD_XCURVESELF) {
+        Zepsdraw_bcurveselfarrow(fp, *xdir, ox, oy, u, xns);
     }
+#if 0
+    if(u->type==CMD_XCURVE) {
+        Zepsdraw_xcurvearrow(fp, *xdir, ox, oy, u, xns);
+    }
+    if(u->type==CMD_XCURVESELF) {
+        Zepsdraw_xcurveselfarrow(fp, *xdir, ox, oy, u, xns);
+    }
+#endif
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
             (u->type==CMD_ARROW)) {
 P;

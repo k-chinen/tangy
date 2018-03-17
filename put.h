@@ -11,8 +11,6 @@ int OP_LDUMP(const char *pre, char *mid, ob *u);
 int insboxpath(varray_t *xar, int xwd, int xht);
 int __solve_dir(ns *xns, ob *u, varray_t *opar, int X, int *ang);
 int __solve_fandt(ns *xns, ob *u, varray_t *opar, int X, int *sx, int *sy, int *ex, int *ey);
-int EST_curveself(FILE *fp, ob *xu, ns *xns, int *_lx, int *_by, int *_rx, int *_ty);
-int EST_curve(FILE *fp, ob *xu, ns *xns, int *_lx, int *_by, int *_rx, int *_ty);
 int putobj(ob *u, ns *xns, int *gdir);
 int fitobj_LBRT(ob *u, int xxdir, int *x, int *y, int *fx, int *fy, ns *xns);
 int fitobj_wdht(ob *u, int xxdir, int *x, int *y, ns *xns);

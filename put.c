@@ -820,7 +820,9 @@ insboxpath(varray_t *xar, int xwd, int xht)
 #define NNO     {wd = objunit/4;    ht = objunit; }
 #define ZZ      {wd = 0;            ht = 0;       }
 
+#if 0
 #include "xcur.c"
+#endif
 
 int
 putobj(ob *u, ns *xns, int *gdir)
@@ -936,17 +938,25 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
 
-    case CMD_CURVE:
-    case CMD_CURVESELF:
+    case CMD_XCURVE:
+    case CMD_XCURVESELF:
+    case CMD_BCURVE:
+    case CMD_BCURVESELF:
             {
             int ik;
             int lx, by, rx, ty, fx, fy;
-            if(u->type==CMD_CURVE) {
-                ik = EST_curve(stdout, u, xns, &lx, &by, &rx, &ty);
+            if(u->type==CMD_XCURVE || u->type==CMD_BCURVE) {
+#if 0
+                ik = EST_curve(u, xns, &lx, &by, &rx, &ty);
+#endif
+                ik = MARK_bcurve(u, xns, &lx, &by, &rx, &ty);
             }
             else
-            if(u->type==CMD_CURVESELF) {
-                ik = EST_curveself(stdout, u, xns, &lx, &by, &rx, &ty);
+            if(u->type==CMD_XCURVESELF || u->type==CMD_BCURVESELF) {
+#if 0
+                ik = EST_curveself(u, xns, &lx, &by, &rx, &ty);
+#endif
+                ik = MARK_bcurveself(u, xns, &lx, &by, &rx, &ty);
             }
             else {
                 break;

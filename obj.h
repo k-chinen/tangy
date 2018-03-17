@@ -61,8 +61,10 @@
 #define CMD_PING        (401)
 #define CMD_PINGPONG    (402)
 
-#define CMD_CURVE       (501)
-#define CMD_CURVESELF   (502)
+#define CMD_XCURVE       (501)
+#define CMD_XCURVESELF   (502)
+#define CMD_BCURVE      (511)
+#define CMD_BCURVESELF  (512)
 
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
