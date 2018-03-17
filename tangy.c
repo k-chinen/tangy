@@ -147,7 +147,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.040"
+    printf("tangy version 2.042"
 #ifdef GITCHASH
     " " GITCHASH
 #endif
