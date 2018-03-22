@@ -1052,13 +1052,12 @@ Echo("CHECK CHUNK attr\n");
         nob->cob.arrowforeheadtype = AH_NORMAL;
         break;
 
-#if 0
     case CMD_XCURVE:
     case CMD_XCURVESELF:
-        nob->cob.arrowheadpart     = AR_FORE;
-        nob->cob.arrowforeheadtype = AH_NORMAL;
+    case CMD_BCURVE:
+    case CMD_BCURVESELF:
+        nob->cob.bulge              = 20;
         break;
-#endif
 
     case CMD_LINE:
         nob->cob.keepdir = 0;

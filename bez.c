@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#if 0
 #include "alist.h"
+#endif
 #include "qbb.h"
 
 double
@@ -18,7 +20,8 @@ double x3, double y3, double x4, double y4)
 }
 
 int
-_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2,
+    int x3, int y3, int x4, int y4)
 {
     int x, y;
     double t;
@@ -37,6 +40,7 @@ _bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int
     ly = ry = (double)y1;
 
     qbb_reset(qb);
+    qbb_mark(qb, x1, y1);
 
     for(t=0;t<=1.0;t+=s) {
 
@@ -56,6 +60,8 @@ _bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int
         lx = rx;
         ly = ry;
     }
+
+    qbb_mark(qb, x4, y4);
 
     return 0;
 }

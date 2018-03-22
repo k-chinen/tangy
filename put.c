@@ -427,7 +427,12 @@ P;
             if(ik==0) {
 P;
 #if 1
-                MARK("fP", mx, my);
+                if(e->cmd==OA_FROM) {
+                    MARK("fP", mx, my);
+                }
+                if(e->cmd==OA_TO) {
+                    MARK("tP", mx, my);
+                }
 #endif
             }
             else {
@@ -944,27 +949,28 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
     case CMD_XCURVESELF:
     case CMD_BCURVE:
     case CMD_BCURVESELF:
+        if(u->cob.originalshape) {
+        }
+        else {
+            WO;     
+            break;
+        }
             {
             int ik;
             int lx, by, rx, ty, fx, fy;
             if(u->type==CMD_XCURVE || u->type==CMD_BCURVE) {
-#if 0
-                ik = EST_curve(u, xns, &lx, &by, &rx, &ty);
-#endif
                 ik = MARK_bcurve(u, xns, &lx, &by, &rx, &ty);
             }
             else
             if(u->type==CMD_XCURVESELF || u->type==CMD_BCURVESELF) {
-#if 0
-                ik = EST_curveself(u, xns, &lx, &by, &rx, &ty);
-#endif
                 ik = MARK_bcurveself(u, xns, &lx, &by, &rx, &ty);
             }
             else {
                 break;
             }
+P;
 #if 1
-Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
+Echo("\tcurve original oid %d bb (%d %d %d %d) fxy %d,%d\n",
         u->oid, lx, by, rx, ty, fx, fy);
 #endif
             u->clx = lx;
@@ -979,7 +985,16 @@ Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
             u->fx = wd;
             u->fy = ht;
 #endif
+#if 0
+            u->fx = fx - lx;
+            u->fy = fy - by;
+#endif
+#if 0
+            u->ox = -wd/2;
+            u->oy = -ht/2;
+#endif
 
+            re = 1;
             }
             break;
 

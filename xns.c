@@ -1093,11 +1093,11 @@ P;
     q = NULL;
     p = xname;
     while(*p) {
-        q = p;
         p = draw_word(p, token, BUFSIZ, '.');
         if((token[0]>='A'&&token[0]<='Z')||token[0]=='_') {
             strcat(yname, token);
             strcat(yname, ".");
+            q = p;
         }
         else {
             break;
@@ -1105,11 +1105,14 @@ P;
     }
 
 
-#if 1
+#if 0
+        Echo("  xname '%s' 1\n", xname);
+#endif
+#if 0
         Echo("  yname '%s' 1\n", yname);
 #endif
     dellastcharif(yname, '.');
-#if 1
+#if 0
         Echo("  yname '%s' 2\n", yname);
     if(q) {
         Echo("  q     '%s'\n", q);
@@ -1123,29 +1126,33 @@ P;
 
     u = _ns_find_objP(xns, yname, &ux, &uy);
     if(u) {
-#if 1
+#if 0
         Echo("  u %p gx,gy = %d,%d solved? %d drawed? %d finalized? %d\n",
             u, u->gx, u->gy, u->sizesolved, u->drawed, u->finalized);
         Echo("  u %p ux,uy = %d, %d\n", u, ux, uy);
 #endif
 
-#if 1
+#if 0
         {
             int ik;
             ik = revch(u, b->behas, &ux, &uy);
         }
 #endif
 
-        if(q) {
+        if(q && *q) {
             pos = assoc(pos_ial, q);
-#if 1
+#if 0
             Echo("  pos %d q '%s'\n", pos, q);
 #endif
+            if(pos<0) {
+                printf("ERROR ignore position '%s' of '%s'\n", q, yname);
+                pos = PO_CENTER;
+            }
         }
         else {
             pos = PO_CENTER;
         }
-#if 1
+#if 0
         Echo("  pos %d\n", pos);
 #endif
         int x, y;
@@ -1153,7 +1160,7 @@ P;
         if(pmode==PPOS) { x = u->cgx;   y = u->cgy; }
         else            { x = u->cx;    y = u->cy; }
 
-#if 1
+#if 0
         Echo("  original x,y = %d,%d ; %s\n", x, y, __func__);
         Echo("     guess x,y = %d,%d\n", ux, uy);
 #endif
@@ -1161,20 +1168,20 @@ P;
         *ry = uy;
 
         switch(pos) {
-        case PO_CENTER:    *rx += 0;          *ry += 0;           break;
+        case PO_CENTER:    *rx += 0;          *ry += 0;         break;
         case PO_NORTH:     *rx += 0;          *ry += u->cht/2;  break;
         case PO_NORTHEAST: *rx += u->cwd/2;   *ry += u->cht/2;  break;
-        case PO_EAST:      *rx += u->cwd/2;   *ry += 0;           break;
-        case PO_SOUTHEAST: *rx += u->cwd/2;   *ry += -u->cht/2;  break;
-        case PO_SOUTH:     *rx += 0;          *ry += -u->cht/2;  break;
-        case PO_SOUTHWEST: *rx += -u->cwd/2;  *ry += -u->cht/2;  break;
-        case PO_WEST:      *rx += -u->cwd/2;  *ry += 0;           break;
+        case PO_EAST:      *rx += u->cwd/2;   *ry += 0;         break;
+        case PO_SOUTHEAST: *rx += u->cwd/2;   *ry += -u->cht/2; break;
+        case PO_SOUTH:     *rx += 0;          *ry += -u->cht/2; break;
+        case PO_SOUTHWEST: *rx += -u->cwd/2;  *ry += -u->cht/2; break;
+        case PO_WEST:      *rx += -u->cwd/2;  *ry += 0;         break;
         case PO_NORTHWEST: *rx += -u->cwd/2;  *ry += u->cht/2;  break;
         default:
-            printf("ERROR ignore position '%s' of '%s'\n", p, xname);
+            printf("ERROR ignore position '%s' of '%s' -\n", q, yname);
         }
 
-#if 1
+#if 0
         Echo("  cooked  rx,y = %d,%d\n", *rx, *ry);
 #endif
 

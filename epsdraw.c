@@ -4300,6 +4300,12 @@ out:
     fprintf(fp, "      newpath %d %d %d 0 360 arc fill grestore\n", x, y, def_marknoderad);
 
 
+#define markcross(c,x,y) \
+    fprintf(fp, "    %% markcross %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
+    fprintf(fp, "      newpath %d %d translate %d 0 moveto %d 0 rlineto 0 %d moveto 0 %d rlineto stroke grestore\n", (int)x, (int)y, -def_marknoderad, 2*def_marknoderad, -def_marknoderad, 2*def_marknoderad);
+
 int
 _line_patharrow(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
@@ -6124,68 +6130,6 @@ QQ__solve_fandt(ns *xns, ob *u, varray_t *opar,
 }
 
 
-#if 0
-
-double
-_bez_pos(double *x, double *y, double t,
-double x1, double y1, double x2, double y2,
-double x3, double y3, double x4, double y4)
-{
-    double tp;
-    tp = 1.0 - t;
-    *x = t*t*t*x4 + 3 *t*t*tp*x3 + 3 *t*tp*tp*x2 + tp*tp*tp*x1;
-    *y = t*t*t*y4 + 3 *t*t*tp*y3 + 3 *t*tp*tp*y2 + tp*tp*tp*y1;
-    return 0;
-}
-
-#endif
-
-#if 0
-int
-_bez_mark(qbb_t *qb, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
-{
-    int x, y;
-    double t;
-    double rx, ry;
-    double lx, ly;
-    double dx, dy;
-    double s;
-    double d;
-    double sumd, maxd;
-    
-    s = 1.0/50.0;
-    sumd = 0.0;
-    maxd = -1;
-    
-    lx = rx = (double)x1;
-    ly = ry = (double)y1;
-
-    qbb_reset(qb);
-
-    for(t=0;t<=1.0;t+=s) {
-
-        _bez_pos(&rx, &ry, t,
-            (double)x1, (double)y1, (double)x2, (double)y2,
-            (double)x3, (double)y3, (double)x4, (double)y4);
-
-        d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
-        if(d>maxd) maxd = d;
-        sumd += d;
-
-        x = (int)rx;
-        y = (int)ry;
-
-        qbb_mark(qb, x, y);
-
-        lx = rx;
-        ly = ry;
-    }
-
-    return 0;
-}
-#endif
-
-
 
 int
 _bez_solid(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
@@ -6224,6 +6168,10 @@ _bez_solid(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int
         x = (int)rx;
         y = (int)ry;
         fprintf(fp, "  %d %d lineto %% d %.2f\n", x, y, d);
+#if 0
+        markcross(2,x,y);
+#endif
+
         lx = rx;
         ly = ry;
     }
@@ -6255,6 +6203,7 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     int act;
     double a;
     double mx, my;
+    double nx, ny;
 
 
 #if 0
@@ -6263,7 +6212,7 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     fprintf(fp, "gsave\n");
     SLW_14(fp);
     fprintf(fp, "1 0 0 setrgbcolor\n");
-    _bez_solid(fp, x1, y1, x2, y2, x3, y3, x4, y4);
+    _bez_solid(fp, xu, x1, y1, x2, y2, x3, y3, x4, y4);
     fprintf(fp, "grestore\n");
 #endif
 
@@ -6302,8 +6251,7 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     for(t=0;t<=1.0;t+=s) 
 #endif
 
-    for(t=0;t<=1.0;) 
-    {
+    for(t=0;t<=1.0;) {
         if(t==lastt) {
             fprintf(fp, "%% OVERRUN ? t %.4f lastt %.4f\n",
                 t, lastt);
@@ -6330,22 +6278,26 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
             i, t, rx, ry, lx, ly, d);
 #endif
 
+#if 0
+        marknode(1, x, y);
+#endif
 
         for(u=t;u<=t+uwidth;u+=upitch) {
 
-            _bez_pos(&rx, &ry, u,
+            _bez_pos(&nx, &ny, u,
                 (double)x1, (double)y1, (double)x2, (double)y2,
                 (double)x3, (double)y3, (double)x4, (double)y4);
 
-            dx = rx - lx;
-            dy = ry - ly;
+            dx = nx - rx;
+            dy = ny - ry;
         
-            d  = sqrt((rx-lx)*(rx-lx)+(ry-ly)*(ry-ly));
+            d  = sqrt((nx-rx)*(nx-rx)+(ny-ry)*(ny-ry));
             if(d>maxd) maxd = d;
             sumd += d;
 
-            x = (int)rx;
-            y = (int)ry;
+            x = (int)nx;
+            y = (int)ny;
+
 
 #if 0
             fprintf(fp, "%%   u %3d %9.4f %9.2f,%-9.2f -> %9.2f,%-9.2f %9.4f\n",
@@ -6369,6 +6321,12 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
             if(act) {
                 fprintf(fp, "%.2f %.2f moveto %.2f %.2f rlineto stroke\n",
                     rx, ry, dx, dy);
+
+#if 0
+                markcross(1,rx,ry);
+                markcross(2,nx,ny);
+#endif
+
             }
             break;
         case LT_CIRCLE:
@@ -6428,9 +6386,15 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
     else {
         if(xu->cob.outlinetype==LT_SOLID) {
             _bez_solid(fp, xu, ux, uy, px, py, qx, qy, vx, vy);
+#if 0
+            _bez_solid(fp, xu, xox+ux, xoy+uy, xox+px, xoy+py, xox+qx, xoy+qy, xox+vx, xoy+vy);
+#endif
         }
         else {
             _bez_deco(fp, xu, ux, uy, px, py, qx, qy, vx, vy);
+#if 0
+            _bez_deco(fp, xu, xox+ux, xoy+uy, xox+px, xoy+py, xox+qx, xoy+qy, xox+vx, xoy+vy);
+#endif
         }
     }
 
@@ -6475,6 +6439,24 @@ Zepsdraw_bcurvearrow(FILE *fp,
     int     ik;
     int     tx, ty;
 
+#if 0
+    if(!xu->cob.originalshape) {
+
+        marknode(1, xu->gsx, xu->gsy);
+        markcross(2, xu->sx, xu->sy);
+        marknode(1, xu->gex, xu->gey);
+        markcross(2, xu->ex, xu->ey);
+
+        ux = xu->gsx;
+        uy = xu->gsy;
+        vx = xu->gex;
+        vy = xu->gey;
+        tx = (ux+vx)/2;
+        ty = (uy+vy)/2+xu->ht/2;
+
+        goto pos_done;
+    }
+#endif
 
     ik = solve_curve_points(xu, xns,
             &mu, &mv, &ux, &uy, &t1x, &t1y, &t2x, &t2y, &vx, &vy);
@@ -6485,6 +6467,7 @@ Zepsdraw_bcurvearrow(FILE *fp,
     tx = t1x;
     ty = t1y;
 
+pos_done:
 
     fprintf(fp, "gsave\n");
 
@@ -6527,6 +6510,8 @@ Zepsdraw_bcurvearrow(FILE *fp,
         fprintf(fp, "  grestore\n");
     }
 #endif
+
+body_done:
 
     if(xu->cob.arrowheadpart & AR_BACK) {
         epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
@@ -12255,7 +12240,12 @@ PP;
 #endif
 #if 1
             if(bbox_mode) {
-                epsdraw_bbox(fp, u);
+                if(VISIBLE(u->type)) {
+                    epsdraw_bbox(fp, u);
+                }
+                else {
+                    fprintf(stderr, "; bbox invisible oid %d\n", u->oid);
+                }
             }
 #endif
     

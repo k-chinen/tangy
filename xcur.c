@@ -56,8 +56,17 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
     segop *e;
     int    ik;
 
-    Echo("%s: enter\n", __func__);
-    Echo("%s: sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+    Echo("%s: enter oid %d\n", __func__, u->oid);
+    Echo("%s: 0 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+
+#if 1
+    *sx = u->gsx;
+    *sy = u->gsy;
+    *ex = u->gex;
+    *ey = u->gey;
+
+    Echo("%s: 1 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+#endif
 
     for(i=0;i<opar->use;i++) {
         e = (segop*)opar->slot[i];
@@ -86,7 +95,7 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
         }
     }
 
-    Echo("%s: sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+    Echo("%s: 9 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
     Echo("%s: leave\n", __func__);
 
     return 0;
@@ -255,12 +264,14 @@ Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
 #endif
 
+#if 0
     if(xu->cob.hasfrom && xu->cob.hasto) {
     }
     else {
         Echo("%s: no FROM and TO\n", __func__);
         return -1;
     }
+#endif
 
     __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
 
@@ -367,7 +378,9 @@ MARK_bcurveself(ob *xu, ns *xns,
         &mu, &mv, &ux, &uy, &px, &py, &qx, &qy, &vx, &vy);
 
     _bez_mark(&bez_bb, ux, uy, px, py, qx, qy, vx, vy);
+#if 0
     qbb_fprint(stdout, &bez_bb);
+#endif
 
     *_lx = bez_bb.lx;
     *_by = bez_bb.by;
@@ -391,7 +404,9 @@ MARK_bcurve(ob *xu, ns *xns,
         &mu, &mv, &ux, &uy, &tx1, &ty1, &tx2, &ty2, &vx, &vy);
 
     _bez_mark(&bez_bb, ux, uy, tx1, ty1, tx2, ty2, vx, vy);
+#if 0
     qbb_fprint(stdout, &bez_bb);
+#endif
 
     *_lx = bez_bb.lx;
     *_by = bez_bb.by;

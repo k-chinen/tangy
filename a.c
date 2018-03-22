@@ -60,7 +60,7 @@ confirm_attr(ob *xo)
     }
 #endif
 #if 1
-    if(xoa->hasto && xoa->hasfrom) {
+    if(xoa->hasto || xoa->hasfrom) {
         xo->floated = 1;
     }
 #endif

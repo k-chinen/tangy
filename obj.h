@@ -69,6 +69,7 @@
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
 
+
 #define CMD_DIR         (1000)
 #define CMD_INCDIR      (1001)
 #define CMD_DECDIR      (1002)
@@ -121,7 +122,10 @@ extern apair_t cmd_ial[];
 #define ISCHUNK(x)  ((x)==CMD_CHUNK)
 #define ISGLUE(x)   \
     ((x)==CMD_LINE||(x)==CMD_LINK||(x)==CMD_ARROW||\
-     (x)==CMD_WLINE||(x)==CMD_WARROW|(x)==CMD_PING||(x)==CMD_PINGPONG|| \
+     (x)==CMD_WLINE||(x)==CMD_WARROW||\
+     (x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
+     (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||\
+     (x)==CMD_PING||(x)==CMD_PINGPONG|| \
      (x)==CMD_BARROW||(x)==CMD_PLINE \
     )
 #define ISATOM(x)   \
@@ -140,6 +144,15 @@ extern apair_t cmd_ial[];
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
     )
+
+#define VISIBLE(x) \
+((x)==CMD_BOX||(x)==CMD_DOTS||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||\
+ (x)==CMD_POLYGON||(x)==CMD_CLINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
+ (x)==CMD_CLOUD||\
+ (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\
+ (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||(x)==CMD_SEP||\
+ (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\
+ (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF)
 
 
 #define PO_CENTER           (0)
