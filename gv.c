@@ -307,6 +307,7 @@ apair_t objattr_ial[] = {
     {"centhead",            OA_CENTHEAD},
     {"backhead",            OA_BACKHEAD},
     {"bothhead",            OA_BOTHHEAD},
+    {"centheadpos",         OA_CENTHEADPOS},
     {"arrowevery",          OA_ARROWEVERY},
     {"arrowedge",           OA_ARROWEDGE},
 

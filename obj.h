@@ -279,6 +279,7 @@ extern apair_t lo_ial[];
 #define OA_ALLHEAD          (207)
 #define OA_ARROWEVERY       (211)
 #define OA_ARROWEDGE        (212)
+#define OA_CENTHEADPOS      (215)
 
 #define OA_CHOP             (221)
 #define OA_FORECHOP         (222)
@@ -383,6 +384,7 @@ struct obattr {
     int   arrowforeheadtype;
     int   arrowcentheadtype;
     int   arrowbackheadtype;
+    double arrowcentheadpos;
 
     int   fillcolor;
     int   fillhatch;

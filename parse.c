@@ -423,6 +423,7 @@ parseobjattr(ob *rob, char *src)
     char  tmp[BUFSIZ];
     char *q;
     int   x;
+    double dv;
     int   oak;
     sstr *ns;
     int   k1;
@@ -836,6 +837,7 @@ P;
         }
         uc++;
     }
+
     else if(strcasecmp(name, "centhead")==0) {
         rob->cob.arrowheadpart |= AR_CENT;
         p = draw_wordW(p, value, BUFSIZ);
@@ -878,6 +880,22 @@ P;
             rob->cob.arrowcentheadtype = atoi(value);
             rob->cob.arrowbackheadtype = atoi(value);
         }
+        uc++;
+    }
+
+    else if(strcasecmp(name, "centheadpos")==0) {
+        rob->cob.arrowheadpart |= AR_CENT;
+        p = draw_wordW(p, value, BUFSIZ);
+        dv = atof(value);
+        rob->cob.arrowcentheadpos = dv;
+#if 0
+        if(dv>=0.0) {
+            rob->cob.arrowcentheadpos = dv;
+        }
+        else {
+            rob->cob.arrowcentheadpos = atoi(value);
+        }
+#endif
         uc++;
     }
 

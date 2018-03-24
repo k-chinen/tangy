@@ -6205,13 +6205,12 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     double mx, my;
     double nx, ny;
 
-
 #if 0
     fprintf(fp, "%% %s\n", __func__);
 
     fprintf(fp, "gsave\n");
     SLW_14(fp);
-    fprintf(fp, "1 0 0 setrgbcolor\n");
+    fprintf(fp, "0 0 1 setrgbcolor\n");
     _bez_solid(fp, xu, x1, y1, x2, y2, x3, y3, x4, y4);
     fprintf(fp, "grestore\n");
 #endif
@@ -6239,13 +6238,13 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     fprintf(fp, "%% pitch range [%.4f .. %.4f]\n", pitch-cap, pitch+cap);
 #endif
 
+    fprintf(fp, "gsave\n");
+
     lx = rx = (double)x1;
     ly = ry = (double)y1;
 
     lastt = -1;
     i = 0;
-
-    fprintf(fp, "gsave\n");
 
 #if 0
     for(t=0;t<=1.0;t+=s) 
@@ -6363,7 +6362,7 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
     ik = solve_curveself_points(xu, xns,
             &mu, &mv, &ux, &uy, &px, &py, &qx, &qy, &vx, &vy);
 
-    fprintf(fp, "%% cs param %.2f %.2f %d %d %d %d %d %d %d %d\n",
+    fprintf(fp, "%% cs param %.2f %.2f ; %d,%d %d,%d %d,%d %d,%d\n",
         mu, mv, ux, uy, px, py, qx, qy, vx, vy);
 
     fprintf(fp, "gsave\n");
@@ -6424,6 +6423,23 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
         epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
             (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
     }
+#if 1
+    if(xu->cob.arrowheadpart & AR_CENT) {
+        double na, nx, ny;
+        double nt;
+        
+        if(xu->cob.arrowcentheadpos>0.0) {
+            nt = xu->cob.arrowcentheadpos;
+        }
+        else {
+            nt = 0.5;
+        }
+        _bez_posdir(&nx, &ny, &na, nt, ux, uy, px, py, qx, qy, vx, vy);
+
+        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+            (int)(na/rf), xu->cob.outlinecolor, nx, ny);
+    }
+#endif
 
     fprintf(fp, "grestore\n");
 
@@ -6439,7 +6455,7 @@ Zepsdraw_bcurvearrow(FILE *fp,
     int     ik;
     int     tx, ty;
 
-#if 0
+#if 1
     if(!xu->cob.originalshape) {
 
         marknode(1, xu->gsx, xu->gsy);
@@ -6521,6 +6537,24 @@ body_done:
         epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
             (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
     }
+
+#if 1
+    if(xu->cob.arrowheadpart & AR_CENT) {
+        double na, nx, ny;
+        double nt;
+        
+        if(xu->cob.arrowcentheadpos>0.0) {
+            nt = xu->cob.arrowcentheadpos;
+        }
+        else {
+            nt = 0.5;
+        }
+        _bez_posdir(&nx, &ny, &na, nt, ux, uy, tx, ty, tx, ty, vx, vy);
+
+        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+            (int)(na/rf), xu->cob.outlinecolor, nx, ny);
+    }
+#endif
 
     fprintf(fp, "grestore\n");
 
