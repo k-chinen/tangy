@@ -323,6 +323,7 @@ extern apair_t lo_ial[];
 #define OA_MARKPATH         (712)
 #define OA_MARKNODE         (713)
 #define OA_MARKPITCH        (714)
+#define OA_MARKGUIDE        (715)
 
 #define OA_LANEORDER        (800)
 #define OA_LANENUM          (801)
@@ -458,6 +459,7 @@ struct obattr {
     int    markpath;
     int    marknode;
     int    markpitch;
+    int    markguide;
     int    hollow;
 
 #if 1

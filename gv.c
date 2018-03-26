@@ -331,6 +331,7 @@ apair_t objattr_ial[] = {
     {"markpath",            OA_MARKPATH},
     {"marknode",            OA_MARKNODE},
     {"markpitch",           OA_MARKPITCH},
+    {"markguide",           OA_MARKGUIDE},
 
     {"hollow",              OA_HOLLOW},
     

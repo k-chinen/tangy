@@ -32,7 +32,11 @@ int epsdraftfontsize    = 10;
 int epsdraftgap         =  5;
 
 char *def_fontname      = "Times-Roman";
+
 int   def_markcolor     = 5;
+int   def_guide1color    = 4;
+int   def_guide2color    = 2;
+#define     def_guidecolor  def_guide1color
 
 int debug_clip = 0;
 
@@ -1445,38 +1449,6 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
                 break;
             }
 
-#if 0
-            if(j%2==0) {
-                fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                    ux, uy, nx, ny);
-            }
-#endif
-
-#if 0
-            if(ltype==LT_DOTTED||ltype==LT_DASHED) {
-                if(j%2==0) {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-            if(ltype==LT_CHAINED) {
-                if(j%7==4||j%7==6) {
-                }
-                else {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-            if(ltype==LT_DOUBLECHAINED) {
-                if(j%9==4||j%9==6||j%9==8) {
-                }
-                else {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-#endif
-
             {
                 int act;
                 act = solve_dashpart(ltype, j);
@@ -1531,31 +1503,6 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
             if(nx>=x2) {
                 break;
             }
-
-#if 0
-            if(ltype==LT_DOTTED||ltype==LT_DASHED) {
-                if(j%2==0) {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-            if(ltype==LT_CHAINED) {
-                if(j%7==4||j%7==6) {
-                }
-                else {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-            if(ltype==LT_DOUBLECHAINED) {
-                if(j%9==4||j%9==6||j%9==8) {
-                }
-                else {
-                    fprintf(fp, "%.2f %.2f moveto %.2f %.2f lineto stroke\n",
-                        ux, uy, nx, ny);
-                }
-            }
-#endif
 
             {
                 int act;
@@ -4293,18 +4240,25 @@ out:
 #define _line_Rpath(f,d,x,y,u,n)    _line_pathMM(f,d,x,y,u,1,n,1,1)
 
 
-#define marknode(c,x,y) \
-    fprintf(fp, "    %% marknode %d\n", __LINE__); \
+#define markfdot(c,x,y) \
+    fprintf(fp, "    %% markfdot %d\n", __LINE__); \
     fprintf(fp, "      gsave"); changecolor(fp, c); \
-    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "      newpath %d %d %d 0 360 arc fill grestore\n", x, y, def_marknoderad);
 
+#define markwdot(c,x,y) \
+    fprintf(fp, "    %% markwdot %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      newpath %d %d %d 0 360 arc stroke grestore\n", x, y, def_marknoderad);
 
 #define markcross(c,x,y) \
     fprintf(fp, "    %% markcross %d\n", __LINE__); \
     fprintf(fp, "      gsave"); changecolor(fp, c); \
-    fprintf(fp, "      currentlinewidth 4 div setlinewidth\n"); \
     fprintf(fp, "      newpath %d %d translate %d 0 moveto %d 0 rlineto 0 %d moveto 0 %d rlineto stroke grestore\n", (int)x, (int)y, -def_marknoderad, 2*def_marknoderad, -def_marknoderad, 2*def_marknoderad);
+
+#define markxross(c,x,y) \
+    fprintf(fp, "    %% markcross %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      newpath %d %d translate 45 rotate %d 0 moveto %d 0 rlineto 0 %d moveto 0 %d rlineto stroke grestore\n", (int)x, (int)y, -def_marknoderad, 2*def_marknoderad, -def_marknoderad, 2*def_marknoderad);
 
 int
 _line_patharrow(FILE *fp,
@@ -4438,7 +4392,7 @@ Echo("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
     xu->oid, __func__, actbh, actch, actfh);
 
         if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
+            markfdot(xu->cob.outlinecolor, x1, y1);
         }
 
         switch(s->ptype) {
@@ -4780,7 +4734,7 @@ next:
     }
 
     if(xu->cob.marknode) {
-        marknode(xu->cob.outlinecolor, x1, y1);
+        markfdot(xu->cob.outlinecolor, x1, y1);
     }
 
     if(xu->type==CMD_CLINE) {
@@ -4827,7 +4781,6 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
     ww = def_linedecothick;
 
     switch(ty){ 
-#if 1
     case LT_LMUST:
         mact = 1;
         mangle = 90;
@@ -4840,27 +4793,6 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
         act = 0;
         run = pt;
         break;
-#endif
-#if 0
-    case LT_DASHED:
-    case LT_DOTTED:
-        if(ty==LT_DASHED) { if(c%2==0) act = 1; }
-        if(ty==LT_DOTTED) { if(c%2==0) act = 1; }
-
-        run = pt;
-        goto purelinetype;
-        break;
-
-    case LT_CHAINED:
-    case LT_DOUBLECHAINED:
-        act = 1;
-        if(ty==LT_CHAINED)          { if(c%7==4||c%7==6) act = 0; }
-        if(ty==LT_DOUBLECHAINED)    { if(c%9==4||c%9==6||c%9==8) act = 0; }
-
-        run = pt;
-        goto purelinetype;
-        break;
-#endif
 
     case LT_DASHED:
     case LT_DOTTED:
@@ -5964,7 +5896,7 @@ P;
         
 next:
         if(xu->cob.marknode) {
-            marknode(xu->cob.outlinecolor, x1, y1);
+            markfdot(xu->cob.outlinecolor, x1, y1);
         }
 
 #if 0
@@ -5991,7 +5923,7 @@ next:
 #endif
 
     if(xu->cob.marknode) {
-        marknode(xu->cob.outlinecolor, x1, y1);
+        markfdot(xu->cob.outlinecolor, x1, y1);
     }
 
     if(xu->type==CMD_CLINE) {
@@ -6022,7 +5954,7 @@ _line_deco2(FILE *fp,
 #if 1
     if(xu->cob.markpath) {
         fprintf(fp, " gsave\n");
-        changecolor(fp, 10);
+        changecolor(fp, def_markcolor);
         changethick(fp, xu->cob.outlinethick);
         ik = _line_path(fp, ydir, xox, xoy, xu, xns);
         fprintf(fp, "  stroke\n");
@@ -6205,14 +6137,18 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
     double mx, my;
     double nx, ny;
 
-#if 0
     fprintf(fp, "%% %s\n", __func__);
 
-    fprintf(fp, "gsave\n");
-    SLW_14(fp);
-    fprintf(fp, "0 0 1 setrgbcolor\n");
-    _bez_solid(fp, xu, x1, y1, x2, y2, x3, y3, x4, y4);
-    fprintf(fp, "grestore\n");
+#if 1
+    if(xu->cob.markpath) {
+        fprintf(fp, "gsave\n");
+        changecolor(fp, def_markcolor);
+        changethick(fp, xu->cob.outlinethick);
+        SLW_14(fp);
+        fprintf(fp, "0 0 1 setrgbcolor\n");
+        _bez_solid(fp, xu, x1, y1, x2, y2, x3, y3, x4, y4);
+        fprintf(fp, "grestore\n");
+    }
 #endif
 
     fprintf(fp, "%% %s: linetype %d\n", __func__, xu->cob.outlinetype);
@@ -6278,7 +6214,7 @@ _bez_deco(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int 
 #endif
 
 #if 0
-        marknode(1, x, y);
+        markfdot(1, x, y);
 #endif
 
         for(u=t;u<=t+uwidth;u+=upitch) {
@@ -6367,12 +6303,37 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
 
     fprintf(fp, "gsave\n");
 
-    if(xu->cob.marknode) {
-        marknode(xu->cob.outlinecolor, ux, uy);
-        marknode(xu->cob.outlinecolor, px, py);
-        marknode(xu->cob.outlinecolor, qx, qy);
-        marknode(xu->cob.outlinecolor, vx, vy);
+    if(xu->cob.markguide) {
+        fprintf(fp, "%% guide\n");
+        fprintf(fp, "gsave\n");
+        changethick(fp, xu->cob.outlinethick);
+        SLW_12(fp);
+        changecolor(fp, def_guide1color);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            ux, uy, px, py);
+        markcross(def_guide1color, ux, uy);
+        markcross(def_guide1color, px, py);
+
+        changecolor(fp, def_guide2color);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            qx, qy, vx, vy);
+        markxross(def_guide2color, qx, qy);
+        markxross(def_guide2color, vx, vy);
+
+        fprintf(fp, "grestore\n");
     }
+
+#if 0
+    if(xu->cob.marknode) {
+        fprintf(fp, "%% guide\n");
+        fprintf(fp, "gsave\n");
+        changethick(fp, xu->cob.outlinethick);
+        SLW_12(fp);
+        markfdot(xu->cob.outlinecolor, ux, uy);
+        markwdot(xu->cob.outlinecolor, vx, vy);
+        fprintf(fp, "grestore\n");
+    }
+#endif
 
     /* main body */
     changecolor(fp, xu->cob.outlinecolor);
@@ -6458,10 +6419,12 @@ Zepsdraw_bcurvearrow(FILE *fp,
 #if 1
     if(!xu->cob.originalshape) {
 
-        marknode(1, xu->gsx, xu->gsy);
+#if 0
+        markfdot(1, xu->gsx, xu->gsy);
         markcross(2, xu->sx, xu->sy);
-        marknode(1, xu->gex, xu->gey);
+        markfdot(1, xu->gex, xu->gey);
         markcross(2, xu->ex, xu->ey);
+#endif
 
         ux = xu->gsx;
         uy = xu->gsy;
@@ -6469,6 +6432,9 @@ Zepsdraw_bcurvearrow(FILE *fp,
         vy = xu->gey;
         tx = (ux+vx)/2;
         ty = (uy+vy)/2+xu->ht/2;
+
+        mu = xu->cob.bulge*rf;
+        mv = (-xu->cob.bulge+180)*rf;
 
         goto pos_done;
     }
@@ -6487,11 +6453,37 @@ pos_done:
 
     fprintf(fp, "gsave\n");
 
-    if(xu->cob.marknode) {
-        marknode(xu->cob.outlinecolor, ux, uy);
-        marknode(xu->cob.outlinecolor, tx, ty);
-        marknode(xu->cob.outlinecolor, vx, vy);
+    if(xu->cob.markguide) {
+        fprintf(fp, "%% guide\n");
+        fprintf(fp, "gsave\n");
+        changethick(fp, xu->cob.outlinethick);
+        SLW_12(fp);
+        changecolor(fp, def_guide1color);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            ux, uy, tx, ty);
+        markcross(def_guide1color, ux, uy);
+        markcross(def_guide1color, tx, ty);
+
+        changecolor(fp, def_guide2color);
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            tx, ty, vx, vy);
+        markxross(def_guide2color, tx, ty);
+        markxross(def_guide2color, vx, vy);
+
+        fprintf(fp, "grestore\n");
     }
+
+#if 0
+    if(xu->cob.marknode) {
+        fprintf(fp, "%% guide\n");
+        fprintf(fp, "gsave\n");
+        changethick(fp, xu->cob.outlinethick);
+        SLW_12(fp);
+        markfdot(xu->cob.outlinecolor, ux, uy);
+        markwdot(xu->cob.outlinecolor, vx, vy);
+        fprintf(fp, "grestore\n");
+    }
+#endif
 
     /* main body */
     changecolor(fp, xu->cob.outlinecolor);

@@ -578,6 +578,20 @@ skip_note:
         rob->cob.arrowbackheadtype = AH_NORMAL;
         goto out;
     }
+    if(strcasecmp(name, "->-")==0)     {
+        rob->cob.arrowheadpart     = AR_CENT;
+        rob->cob.arrowforeheadtype = AH_NONE;
+        rob->cob.arrowcentheadtype = AH_NORMAL;
+        rob->cob.arrowbackheadtype = AH_NONE;
+        goto out;
+    }
+    if(strcasecmp(name, "-<-")==0)     {
+        rob->cob.arrowheadpart     = AR_CENT;
+        rob->cob.arrowforeheadtype = AH_NONE;
+        rob->cob.arrowcentheadtype = AH_REVNORMAL;
+        rob->cob.arrowbackheadtype = AH_NONE;
+        goto out;
+    }
 
     oak = assoc(objattr_ial, name);
     if(oak<0) {
@@ -888,14 +902,6 @@ P;
         p = draw_wordW(p, value, BUFSIZ);
         dv = atof(value);
         rob->cob.arrowcentheadpos = dv;
-#if 0
-        if(dv>=0.0) {
-            rob->cob.arrowcentheadpos = dv;
-        }
-        else {
-            rob->cob.arrowcentheadpos = atoi(value);
-        }
-#endif
         uc++;
     }
 
@@ -962,6 +968,10 @@ Info("sub-command '%s' argument skip\n", name);
     }
     else if(oak==OA_MARKPATH) {
         rob->cob.markpath = 1;
+        uc++;
+    }
+    else if(oak==OA_MARKGUIDE) {
+        rob->cob.markguide = 1;
         uc++;
     }
     else if(oak==OA_HOLLOW) {
@@ -1075,6 +1085,14 @@ Echo("CHECK CHUNK attr\n");
     case CMD_BCURVE:
     case CMD_BCURVESELF:
         nob->cob.bulge              = 20;
+        if(ot==CMD_XCURVESELF||
+            ot==CMD_BCURVESELF) {
+            nob->cob.arrowcentheadpos   = 0.98;
+            nob->cob.rad = (objunit*3)/2;
+        }
+        else {
+            nob->cob.arrowcentheadpos   = 0.9;
+        }
         break;
 
     case CMD_LINE:
