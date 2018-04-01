@@ -58,6 +58,21 @@ rewindcenter(ob *u, int qdir, int *rx, int *ry)
 }
 
 int
+_obj_shift(ob *u, int dx, int dy)
+{
+/*
+PK;
+*/
+    u->x    += dx;      u->y    += dy;
+    u->sx   += dx;      u->sy   += dy;
+    u->ex   += dx;      u->ey   += dy;
+    u->lx   += dx;      u->by   += dy;
+    u->rx   += dx;      u->ty   += dy;
+
+    return 0;
+}
+
+int
 applywith(ob *u, char *xpos, int *rx, int *ry)
 {
     char *ypos;
@@ -900,6 +915,15 @@ P;
     wd = ht = 0;
 
     switch(u->type) {
+    case CMD_TRACEON:
+        _p_ = 1;
+        _t_ ++;
+        break;
+    case CMD_TRACEOFF:
+        _p_ = 0;
+        _t_ --;
+        break;
+
     case CMD_NOP:
         break;
 
@@ -957,29 +981,40 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
         }
             {
             int ik;
-            int lx, by, rx, ty, fx, fy;
+            int _sx, _sy, _ex, _ey;
+            int _lx, _by, _rx, _ty, fx, fy;
             if(u->type==CMD_XCURVE || u->type==CMD_BCURVE) {
-                ik = MARK_bcurve(u, xns, &lx, &by, &rx, &ty);
+                ik = MARK_bcurveX(u, xns,
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
             }
             else
             if(u->type==CMD_XCURVESELF || u->type==CMD_BCURVESELF) {
-                ik = MARK_bcurveself(u, xns, &lx, &by, &rx, &ty);
+                ik = MARK_bcurveself(u, xns,
+#if 0
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+#endif
+                        &_lx, &_by, &_rx, &_ty);
             }
             else {
                 break;
             }
 P;
 #if 1
-Echo("\tcurve original oid %d bb (%d %d %d %d) fxy %d,%d\n",
-        u->oid, lx, by, rx, ty, fx, fy);
+Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
 #endif
-            u->clx = lx;
-            u->cby = by;
-            u->crx = rx;
-            u->cty = ty;
+            u->csx = _sx;
+            u->csy = _sy;
+            u->cex = _ex;
+            u->cey = _ey;
 
-            wd = rx - lx;
-            ht = ty - by;
+            u->clx = _lx;
+            u->cby = _by;
+            u->crx = _rx;
+            u->cty = _ty;
+
+            wd = _rx - _lx;
+            ht = _ty - _by;
 
 #if 0
             u->fx = wd;
@@ -1151,7 +1186,11 @@ E;
         return -1;
     }
 
+#if 0
     Echo("%s: oid %d START\n", __func__, u->oid);
+#endif
+Echo("%s: oid %d START dir %d x,y %d,%d fx,y %d,%d\n",
+    __func__, u->oid, xxdir, *x, *y, *fx, *fy);
 
 #if 1
     Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy %6d,%-6d xns %p\n",
@@ -1261,7 +1300,7 @@ fitobj_wdht(ob *u, int xxdir, int *x, int *y, ns *xns)
         return -1;
     }
 
-Echo("%s: oid %d START\n", __func__, u->oid);
+Echo("%s: oid %d START dir %d x,y %d,%d\n", __func__, u->oid, xxdir, *x, *y);
 
 #if 1
     Echo("%s: b %p oid %-3d xxdir %-4d *xy %6d,%-6d *fxy ------,------ xns %p\n",
@@ -1936,7 +1975,9 @@ _putchunk(ob *xch, int *x, int *y, ns *xns)
     ns *curns;
 
     int isx, isy;
+    int iex, iey;
     int ckfrom;
+    int ckto;
 
     int   ldir;
 
@@ -2125,6 +2166,13 @@ Echo("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
         oldy = ny;
 
 
+#define PK(m,d) \
+  Echo("PK %s oid %d %d,%d %d,%d %d,%d->%d,%d %dx%d (%d,%d,%d,%d)\n", \
+  (m), (d)->oid, \
+  (d)->x, (d)->y, (d)->ox, (d)->oy, (d)->sx, (d)->sy, (d)->ex, (d)->ey, \
+  (d)->wd, (d)->ht, (d)->lx, (d)->by, (d)->rx, (d)->ty);
+
+
 #define C(d,s) \
             (d)->wd = (s)->wd; \
             (d)->ht = (s)->ht; \
@@ -2133,10 +2181,9 @@ Echo("  oid %d again %d,%d %d\n", u->oid, nx, ny, xch->cch.dir);
             (d)->ox = (s)->ox; \
             (d)->oy = (s)->oy; \
             (d)->lx = (s)->lx; \
+            (d)->by = (s)->by; \
             (d)->rx = (s)->rx; \
-            (d)->ty = (s)->ty; \
-            (d)->by = (s)->by; 
-
+            (d)->ty = (s)->ty; 
 
         g = eval_dir(u, &(xch->cch.dir));
         if(g>0) {
@@ -2338,46 +2385,58 @@ skip_at_with:
         u->pst += 10000;
     }
 
+    ckto = -1;
+    if(u->cob.hasto) {
+        ckto = find_to_last(u, &iex, &iey);
+        Echo("oid %d ckto %d\n", u->oid, ckto);
+        Echo("  iex,iey %d,%d\n", iex, iey);
+        u->pst += 10000;
+    }
+
+PK("b",u);
 #if 1
-    if(u->floated) {
-            int zx1, zy1;
-            int zx2, zy2;
-
-            zx1 = nx;
-            zy1 = ny;
-            zx2 = fx;
-            zy2 = fy;
-
-Echo("fit fl 1: zx1,zy1 %d,%d zx2,zy2 %d,%d\n", zx1, zy1, zx2, zy2);
-            if(ckfrom==1) {
-                zx1 = isx;
-                zy1 = isy;
-            }
-Echo("fit fl 2: zx1,zy1 %d,%d zx2,zy2 %d,%d\n", zx1, zy1, zx2, zy2);
+    if(u->floated) {    /* fitting is not require */
 #if 0
+            _obj_shift(u, (u->lx),  (u->by));
+
+            _obj_shift(u, nx - (u->lx),  ny - (u->by));
+            _obj_shift(u, u->wd/2, u->ht/2);
 #endif
-
-P;
-            fitobj_LBRT(u, ldir, &zx1, &zy1, &zx2, &zy2, curns);
+PK("m",u);
 #if 0
+            fitobj_LBRT(u, ldir, &zx1, &zy1, &zx2, &zy2, curns);
             fitobj_wdht(u, ldir, &zx1, &zy1, curns);
 #endif
     }
     else
 #endif
-    if(uniqpoint && ISGLUE(u->type)) {
-            int gfx, gfy;
+    if(uniqpoint) {
+        int gfx, gfy;
 
-            gfx = fx;
-            gfy = fy;
+        gfx = fx;
+        gfy = fy;
 
-            if(ckfrom==1) {
-                nx = isx;
-                ny = isy;
-            }
+        if(ckfrom==1) {
+            nx = isx;
+            ny = isy;
+        }
 
 P;
-            fitobj_LBRT(u, ldir, &nx, &ny, &gfx, &gfy, curns);
+        fitobj_LBRT(u, ldir, &nx, &ny, &gfx, &gfy, curns);
+    }
+    else if(ISGLUE(u->type)) {
+        int gfx, gfy;
+
+        gfx = fx;
+        gfy = fy;
+
+        if(ckfrom==1) {
+            nx = isx;
+            ny = isy;
+        }
+
+P;
+        fitobj_LBRT(u, ldir, &nx, &ny, &gfx, &gfy, curns);
     }
     else {
 
@@ -2406,6 +2465,7 @@ P;
         }
 
     }
+PK("a",u);
 
 #if 0
 Echo("\tnx,ny = %d,%d\n", nx, ny);

@@ -93,6 +93,8 @@ apair_t cmd_ial[] = {
     {"ruler",           CMD_RULER},
     {"gather",          CMD_GATHER},
     {"scatter",         CMD_SCATTER},
+    {"traceon",         CMD_TRACEON},
+    {"traceoff",        CMD_TRACEOFF},
     {NULL,              -1},
 };
 

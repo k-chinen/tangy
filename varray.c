@@ -5,6 +5,9 @@
 #include "varray.h"
 
 
+#define PASS    printf("%s:%d:%s PASS\n", __FILE__,__LINE__,__func__);\
+                fflush(stdout);
+
 #define Error   printf
 
 
@@ -13,6 +16,49 @@
 #endif
 
 int varray_ilen=VARRAY_ILEN;
+
+int
+_varray_delmem(varray_t *ar)
+{
+    int i;
+    for(i=0;i<ar->use;i++) {
+        if(ar->slot[i]) {
+            if(ar->mempurgefunc) {
+PASS;
+                ar->mempurgefunc(ar->slot[i]);
+PASS;
+            }
+            else {
+PASS;
+                free(ar->slot[i]);
+PASS;
+            }
+PASS;
+            ar->slot[i] = NULL;
+PASS;
+        }
+    }
+    return 0;
+}
+
+int
+varray_delmem(varray_t *ar)
+{
+    _varray_delmem(ar);
+    free(ar->slot);
+    ar->slot = NULL;
+    free(ar);
+    return 0;
+}
+
+int
+varray_del(varray_t *ar)
+{
+    free(ar->slot);
+    ar->slot = NULL;
+    free(ar);
+    return 0;
+}
 
 int
 varray_clear(varray_t *ar)
@@ -166,6 +212,50 @@ printf("%s: called\n", __func__);
 
     for(i=0;i<ar->use;i++) {
         newslot[i] = oldslot[i];
+    }
+    free(oldslot);
+
+#if 0
+printf("  oldlen %d newlen %d\n", oldlen, newlen);
+#endif
+    return 0;
+}
+
+int
+varray_reverse(varray_t *ar)
+{
+    void**newslot;
+    int newlen;
+    int i;
+    int j;
+    void**oldslot;
+    int oldlen;
+
+#if 0
+printf("%s: called\n", __func__);
+#endif
+    if(!ar) {
+        Error("null array\n");
+        return -1;
+    }
+    newlen = ar->len;
+    if(newlen<ar->len) {
+        Error("new length smaller than current\n");
+        return -1;
+    }
+
+    oldslot = ar->slot;
+    oldlen  = ar->len;
+
+    newslot = (void**)malloc(sizeof(void*)*newlen);
+    memset(newslot, 0, sizeof(void*)*newlen);
+
+    ar->slot = newslot;
+    ar->len  = newlen;
+
+    for(i=0;i<ar->use;i++) {
+        j = ar->use-i-1;
+        newslot[i] = oldslot[j];
     }
     free(oldslot);
 

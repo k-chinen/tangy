@@ -1118,6 +1118,11 @@ Echo("CHECK CHUNK attr\n");
         nob->ignore = 1;
         break;
 
+    case CMD_TRACEON:
+    case CMD_TRACEOFF:
+        nob->ignore = 1;
+        break;
+
     default:
         break;
     }

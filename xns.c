@@ -6,6 +6,11 @@
 #include "seg.h"
 #include "gv.h"
 
+/*
+#define P   fprintf(stderr, "PASS %s:%d\n", __FILE__, __LINE__); fflush(stderr);
+*/
+
+
 #if 0
 int dumptabstop=2;
 int dumplabel=26;
@@ -966,6 +971,19 @@ ch_sprintf(char*dst, int dlen, void* xv, int opt)
     return ik;
 }
 
+int
+ch_sprintfoid(char*dst, int dlen, void* xv, int opt)
+{
+    int ik;
+    ch *xch;
+
+    xch = (ch*)xv;
+    ik = sprintf(dst, "ch(oid %d)-'%s'",
+            xch->qob->oid, xch->name);
+
+    return ik;
+}
+
 
 int
 revch(ob *x, ch* ref, int *rx, int *ry)
@@ -977,11 +995,17 @@ revch(ob *x, ch* ref, int *rx, int *ry)
     varray_t *chpath;
     ob  *u;
     int  mx, my;
+    char hep[BUFSIZ];
+    char hdp[BUFSIZ];
+    char mp[BUFSIZ];
 
-    Echo("%s: x %p ref %p START\n", __func__, x, ref);
+    Echo("%s: enter x %p ref %p START\n", __func__, x, ref);
     if(x) {
         Echo("  x->oid %d\n", x->oid);
     }
+
+    hep[0] = '\0';
+    hdp[0] = '\0';
 
     mx = my = 0;
     qch = NULL;
@@ -1009,6 +1033,8 @@ revch(ob *x, ch* ref, int *rx, int *ry)
             u = c->qob;
             if(u) {
                 Echo("    qob %p oid %d\n", u, u->oid);
+                sprintf(mp, "%d,", u->oid);
+                strcat(hep, mp);
             }
 
             varray_push(chpath, (void*)c);
@@ -1023,11 +1049,15 @@ revch(ob *x, ch* ref, int *rx, int *ry)
 #if 0
         varray_fprint(stdout, chpath);
 #endif
+        Echo("hep |%s|\n", hep);
 
         Echo("chpath\n");
         for(i=0;i<chpath->use;i++) {
             c = (ch*)chpath->slot[i];
             Echo("  %2d: %p qob %p\n", i, c, c->qob);
+
+            sprintf(mp, "%d,", c->qob->oid);
+            strcat(hdp, mp);
 
             u = c->qob;
             if(u) {
@@ -1038,14 +1068,19 @@ revch(ob *x, ch* ref, int *rx, int *ry)
             }
 
             Echo("    mx,my %d,%d\n", mx, my);
+            fflush(stdout);
 
             if(c==ref) {
                 r = 1;
                 qch = c;
                 break;
             }
+
         }
 
+        Echo("hdp |%s|\n", hdp);
+
+        varray_del(chpath);     
     }
     
 out:
@@ -1054,11 +1089,11 @@ out:
         *ry = my;
     }
     if(x) {
-        Echo("%s: x %p oid %d; r %d rx,ry %d,%d\n",
+        Echo("%s: out1 x %p oid %d; r %d rx,ry %d,%d\n",
             __func__, x, x->oid, r, *rx, *ry);
     }
     else {
-        Echo("%s: x %p; r %d rx,ry %d,%d\n", __func__, x, r, *rx, *ry);
+        Echo("%s: out2 x %p; r %d rx,ry %d,%d\n", __func__, x, r, *rx, *ry);
     }
     fflush(stdout);
 
@@ -1132,7 +1167,12 @@ P;
         Echo("  u %p ux,uy = %d, %d\n", u, ux, uy);
 #endif
 
+#if 1
+        Echo("  u behas %p oid %d vs b behas %p oid %d\n",
+            u->behas, u->oid, b->behas, b->oid);
 #if 0
+        if(u->behas != b->behas) 
+#endif
         {
             int ik;
             ik = revch(u, b->behas, &ux, &uy);

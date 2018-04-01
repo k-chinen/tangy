@@ -6099,8 +6099,9 @@ _bez_solid(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int
 
         x = (int)rx;
         y = (int)ry;
-        fprintf(fp, "  %d %d lineto %% d %.2f\n", x, y, d);
+        fprintf(fp, "  %d %d lineto\n", x, y);
 #if 0
+        fprintf(fp, "  %d %d lineto %% d %.2f\n", x, y, d);
         markcross(2,x,y);
 #endif
 

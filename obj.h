@@ -113,6 +113,9 @@
 
 #define CMD_RULER               (20001)
 
+#define CMD_TRACEON             (30001)
+#define CMD_TRACEOFF            (30002)
+
 extern apair_t cmd_ial[];
 
 #if 0

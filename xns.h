@@ -52,6 +52,7 @@ int splitdot(char *h, int hlen, char *r, int rlen, char *full);
 ob *_ns_find_objP(ns *xns, char *xname, int *xx, int *xy);
 ob *ns_find_obj(ns *xns, char *xname);
 int ch_sprintf(char *dst, int dlen, void *xv, int opt);
+int ch_sprintfoid(char *dst, int dlen, void *xv, int opt);
 int revch(ob *x, ch *ref, int *rx, int *ry);
 int _ns_find_objposP(ns *xns, ob *b, char *xname, int pmode, int *rx, int *ry);
 int _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode);

@@ -48,6 +48,107 @@ __solve_dir(ns *xns, ob *u, varray_t *opar,
     return 0;
 }
 
+
+int
+_extract_chchain(varray_t *la, ns *xns, ob *oa)
+{
+    ch *ca;
+    ch *pca;
+
+#if 0
+    Echo("%s: xns %p oa %p\n", __func__, xns, oa);
+#endif
+
+    if(oa) {
+        varray_entrysprintfunc(la, ch_sprintfoid);
+
+        ca = oa->behas;
+
+        while(1) {
+            varray_push(la, ca);
+            pca = ca->parent;
+#if 0
+            Echo("  ca %p pca %p\n", ca, pca);
+#endif
+            if(pca==NULL) {
+                break;
+            }
+#if 0
+            Echo("         ca %p %d\n",  ca,  ca->qob->oid);
+            Echo("        pca %p %d\n", pca, pca->qob->oid);
+#endif
+            ca = pca;
+        }
+
+#if 0
+        varray_fprint(stdout, la);
+#endif
+
+    }
+
+    return 0;
+}
+
+int
+_maxcommon(ns *xns, ob *oa, ob *ob)
+{
+    varray_t *la, *lb;
+    int       i;
+    ch       *cmch;
+    ch       *xa, *xb;
+
+    Echo("%s: xns %p oa %p ob %p\n", __func__, xns, oa, ob);
+
+    la = lb = NULL;
+    cmch = NULL;
+
+    if(oa) {
+        la = varray_new();
+        varray_entrysprintfunc(la, ch_sprintfoid);
+        _extract_chchain(la, xns, oa);
+        varray_reverse(la);
+    }
+    if(ob) {
+        lb = varray_new();
+        varray_entrysprintfunc(lb, ch_sprintfoid);
+        _extract_chchain(lb, xns, ob);
+        varray_reverse(lb);
+    }
+
+    Echo("    la ");
+    for(i=0;i<la->use;i++) { Echo(" %d", ((ch*)la->slot[i])->qob->oid); }
+    Echo("\n");
+
+    Echo("    lb ");
+    for(i=0;i<lb->use;i++) { Echo(" %d", ((ch*)lb->slot[i])->qob->oid); }
+    Echo("\n");
+
+    Echo("    use a %d b %d\n", la->use, lb->use);
+    i = 0;
+    while(1) {
+        if(i>=la->use) {
+            break;
+        }
+        if(i>=lb->use) {
+            break;
+        }
+        xa = la->slot[i];
+        xb = lb->slot[i];
+        Echo("      i %d | a addr %p oid %d | b addr %p oid %d\n",
+            i, xa, xa->qob->oid, xb, xb->qob->oid);
+        if(xa->qob->oid != xb->qob->oid) {
+            break;
+        }
+        cmch = xa;
+        
+        i++;
+    }
+
+    Echo(" cmch %p %d\n", cmch, cmch->qob->oid);
+    return cmch->qob->oid;
+}
+
+
 int
 __solve_fandt(ns *xns, ob *u, varray_t *opar,
     int X, int *sx, int *sy, int *ex, int *ey)
@@ -55,9 +156,12 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
     int    i;
     segop *e;
     int    ik;
+    ob    *obf, *obt;
 
     Echo("%s: enter oid %d\n", __func__, u->oid);
     Echo("%s: 0 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+
+    obf = obt = NULL;
 
 #if 1
     *sx = u->gsx;
@@ -83,6 +187,12 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
                 printf("ERROR not found label-'%s' as FROM\n", e->val);
                 exit(11);
             }
+#if 1
+            {
+            int dx, dy;
+            obf = _ns_find_objP(xns, e->val, &dx, &dy);
+            }
+#endif
             break;
         case OA_TO:
             ik = _ns_find_objposP(xns, u, e->val, X, ex, ey);
@@ -91,9 +201,22 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
                 printf("ERROR not found label-'%s' as TO\n", e->val);
                 exit(11);
             }
+#if 1
+            {
+            int dx, dy;
+            obt = _ns_find_objP(xns, e->val, &dx, &dy);
+            }
+#endif
             break;
         }
     }
+
+#if 1
+    Echo(" obf %p obt %p\n", obf, obt);
+    if(obf && obt) {
+        _maxcommon(xns, obf, obt);
+    }
+#endif
 
     Echo("%s: 9 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
     Echo("%s: leave\n", __func__);
@@ -136,11 +259,6 @@ Echo("%s: enter\n", __func__);
 Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
 #endif
-
-    if(!xu->cob.hasfrom) {
-        Echo("%s: no FROM\n", __func__);
-        return -1;
-    }
 
     __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
     x2 = x1;
@@ -264,15 +382,6 @@ Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
 #endif
 
-#if 0
-    if(xu->cob.hasfrom && xu->cob.hasto) {
-    }
-    else {
-        Echo("%s: no FROM and TO\n", __func__);
-        return -1;
-    }
-#endif
-
     __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
 
 #if 0
@@ -362,6 +471,39 @@ ux, uy, tx, ty, vx, vy);
     return 0;
 }
 
+int
+MARK_bcurveselfX(ob *xu, ns *xns,
+    int *_sx, int *_sy, int *_ex, int *_ey,
+    int *_lx, int *_by, int *_rx, int *_ty)
+{
+
+    int     ux, uy, vx, vy;
+    int     px, py, qx, qy;
+    double  mu, mv;
+    int     ik;
+    qbb_t   bez_bb;
+
+    ik = solve_curveself_points(xu, xns,
+        &mu, &mv, &ux, &uy, &px, &py, &qx, &qy, &vx, &vy);
+
+    _bez_mark(&bez_bb, ux, uy, px, py, qx, qy, vx, vy);
+#if 0
+    qbb_fprint(stdout, &bez_bb);
+#endif
+    
+    *_sx = ux;
+    *_sy = uy;
+    *_ex = vx;
+    *_ey = vy;
+
+    *_lx = bez_bb.lx;
+    *_by = bez_bb.by;
+    *_rx = bez_bb.rx;
+    *_ty = bez_bb.ty;
+
+    return 0;
+}
+
 
 int
 MARK_bcurveself(ob *xu, ns *xns,
@@ -390,6 +532,7 @@ MARK_bcurveself(ob *xu, ns *xns,
     return 0;
 }
 
+
 int
 MARK_bcurve(ob *xu, ns *xns,
     int *_lx, int *_by, int *_rx, int *_ty)
@@ -407,6 +550,39 @@ MARK_bcurve(ob *xu, ns *xns,
 #if 0
     qbb_fprint(stdout, &bez_bb);
 #endif
+
+    *_lx = bez_bb.lx;
+    *_by = bez_bb.by;
+    *_rx = bez_bb.rx;
+    *_ty = bez_bb.ty;
+
+    return 0;
+}
+
+
+int
+MARK_bcurveX(ob *xu, ns *xns,
+    int *_sx, int *_sy, int *_ex, int *_ey,
+    int *_lx, int *_by, int *_rx, int *_ty)
+{
+    int     ux, uy, vx, vy;
+    int     tx1, ty1, tx2, ty2;
+    double  mu, mv;
+    int     ik;
+    qbb_t   bez_bb;
+
+    ik = solve_curve_points(xu, xns,
+        &mu, &mv, &ux, &uy, &tx1, &ty1, &tx2, &ty2, &vx, &vy);
+
+    _bez_mark(&bez_bb, ux, uy, tx1, ty1, tx2, ty2, vx, vy);
+#if 0
+    qbb_fprint(stdout, &bez_bb);
+#endif
+    
+    *_sx = ux;
+    *_sy = uy;
+    *_ex = vx;
+    *_ey = vy;
 
     *_lx = bez_bb.lx;
     *_by = bez_bb.by;
