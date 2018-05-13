@@ -5847,11 +5847,15 @@ double xd, yd;
 
                 switch(fsegtype) {
                 case FIN_LINE:
+ if(count>0) {
                     fprintf(fp, "%f %f lineto %% line-to-end\n", px, py);
+ }
                     break;
                 case FIN_ELINE:
+ if(count>0) {
                     fprintf(fp, "%f %f lineto %% final-seg\n", cx, cy);
                     fprintf(fp, "%f %f lineto %% line-to-end\n", px, py);
+ }
                     break;
                 case FIN_SYM:
                     symdraw(fp, px, py, v, pitch, count, gsym, lx, ly, &cx, &cy);
