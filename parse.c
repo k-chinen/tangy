@@ -1714,3 +1714,17 @@ skip_specialforms:
 
     return 0;
 }
+
+
+int
+fparse(char *fn, ob* ch0, ns *ns0) 
+{
+    FILE *fp;
+    int   ik;
+    
+    fp = fopen(fn, "r");
+    ik = parse(fp, ch0, ns0);
+    fclose(fp);
+    return ik;
+}
+

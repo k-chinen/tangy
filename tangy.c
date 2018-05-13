@@ -253,6 +253,7 @@ main(int argc, char *argv[])
     int   do_colorlist, do_objlist;
     FILE *fp;
     int x, y;
+    int   i;
 
     do_objlist = 0;
     do_colorlist = 0;
@@ -387,7 +388,19 @@ main(int argc, char *argv[])
 
     recalcsizeparam();
 
-    ik = parse(stdin, ch0, ns0);
+	/*** parse files ***/
+#if 0
+	ik = parse(stdin, ch0, ns0);
+#endif
+    for(i=optind;i<argc;i++) {
+#if 0
+        printf("%d %s\n", i, argv[i]);
+#endif
+        ik = fparse(argv[i], ch0, ns0);
+        if(ik) {
+        }
+    }
+
     if(INTRACE) {
         ob_cndump(ch0);
     }

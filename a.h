@@ -111,6 +111,7 @@ int alias_add(varray_t *ar, char *xsrc, char *xdst);
 char *alias_find(varray_t *ar, char *xsrc);
 int try_alias(varray_t *ar, char *orig, char *ns, int nlen);
 int parse(FILE *fp, ob *ch0, ns *ns0);
+int fparse(char *fn, ob *ch0, ns *ns0);
 int dirnormalize(int xxdir);
 int rewindcenter(ob *u, int qdir, int *rx, int *ry);
 int applywith(ob *u, char *xpos, int *rx, int *ry);
