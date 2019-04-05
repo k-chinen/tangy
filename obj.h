@@ -46,7 +46,10 @@
 #define CMD_CLINE       (44)
 #define CMD_DRUM        (50)
 #define CMD_PAPER       (51)
-#define CMD_CLOUD       (52)
+#define CMD_CARD        (52)
+#define CMD_DIAMOND     (53)
+#define CMD_HOUSE       (54)
+#define CMD_CLOUD       (60)
 
 #define CMD_LINE        (101)
 #define CMD_ARROW       (103)

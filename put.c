@@ -1030,6 +1030,9 @@ P;
     case CMD_MOVE:      WO;     break;
 
     case CMD_PAPER:     WO;     break;
+    case CMD_CARD:      WO;     break;
+    case CMD_DIAMOND:   WO;     break;
+    case CMD_HOUSE:     WO;     break;
     case CMD_CLOUD:     WO;     break;
     case CMD_DRUM:      WO;     break;
 

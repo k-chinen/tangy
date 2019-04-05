@@ -10031,19 +10031,303 @@ out:
 }
 
 int
-epsdraw_paper(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+epsdraw_diamond(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
     ob* pf;
     ob* pt;
     int x1, y1;
-    int r;
-    double a;
     int aw, ah;
 
     x1 = xox+xu->cx;
     y1 = xoy+xu->cy;
-    r  = (xu->wd/2);
-    a  = ((double)xu->wd)/((double)xu->ht);
+
+    if(xu->cob.imargin>0) {
+        aw = xu->wd - xu->cob.imargin*2;
+        ah = xu->ht - xu->cob.imargin*2;
+    }
+    else {
+        aw = xu->wd;
+        ah = xu->ht;
+    }
+
+apply:
+
+    fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
+    fprintf(fp, "gsave %% for box\n");
+
+    fprintf(fp, "%% inside\n");
+    fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
+        xu->cob.outlinecolor, xu->cob.fillhatch,
+        xu->cob.hatchthick, xu->cob.hatchpitch);
+
+    fprintf(fp, "gsave %% for inside\n");
+
+    /***
+     *** CLIP and HATCH
+     ***/
+
+    if(xu->cob.fillcolor>=0) {
+        changecolor(fp, xu->cob.fillcolor);
+
+        if(xu->cob.fillhatch==HT_NONE) {
+            /* nothing */
+        }
+        else
+        if(xu->cob.fillhatch==HT_SOLID) {
+            if(xu->cob.fillcolor>=0) {
+                fprintf(fp, "  %% solid fill\n");
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d translate\n", x1, y1);
+                fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+                fprintf(fp, "    newpath\n");
+
+                fprintf(fp, "    %d %d moveto\n",  0, -ah/2);
+                fprintf(fp, "    %d %d rlineto\n", aw/2, ah/2);
+                fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/2);
+                fprintf(fp, "    %d %d rlineto\n", -aw/2, -ah/2);
+                fprintf(fp, "    %d %d rlineto\n", aw/2, -ah/2);
+
+                fprintf(fp, "    closepath\n");
+                fprintf(fp, "    fill\n");
+                fprintf(fp, "  grestore\n");
+
+            }
+
+        }
+        else {
+
+            fprintf(fp, "  %% clip & hatch\n");
+            fprintf(fp, "  gsave\n");
+            fprintf(fp, "    %d %d translate\n", x1, y1);
+            fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    0 setlinewidth\n");
+
+            fprintf(fp, "    %d %d moveto\n",  0, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw/2, ah/2);
+            fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/2);
+            fprintf(fp, "    %d %d rlineto\n", -aw/2, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw/2, -ah/2);
+
+            fprintf(fp, "    closepath\n");
+            if(debug_clip) {
+                fprintf(fp, "  stroke %% debug\n");
+            }
+            else {
+                fprintf(fp, "  clip\n");
+            }
+
+            changethick(fp, xu->cob.hatchthick);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, "  grestore\n");
+
+        }
+
+    }
+
+    fprintf(fp, "grestore %% for inside\n");
+
+
+    fprintf(fp, "%% frame\n");
+    fprintf(fp, "%%     outline color %d thick %d\n",
+        xu->cob.outlinecolor, xu->cob.outlinethick);
+
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+        fprintf(fp, "gsave\n");
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+        fprintf(fp, "  %d %d translate\n", x1, y1);
+        fprintf(fp, "  newpath\n");
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+        fprintf(fp, "    newpath\n");
+
+        fprintf(fp, "    %d %d moveto\n",  0, -ah/2);
+        fprintf(fp, "    %d %d rlineto\n", aw/2, ah/2);
+        fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/2);
+        fprintf(fp, "    %d %d rlineto\n", -aw/2, -ah/2);
+        fprintf(fp, "    %d %d rlineto\n", aw/2, -ah/2);
+
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    stroke\n");
+        fprintf(fp, "  grestore\n");
+        fprintf(fp, "grestore\n");
+    }
+
+#if 0
+    epsdraw_sstr(fp, xu->gx, xu->gy, xu->wd, xu->ht, xu->cob.ssar);
+#endif
+
+    fprintf(fp, "grestore %% end of box\n");
+
+out:
+    return 0;
+}
+
+int
+epsdraw_house(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob* pf;
+    ob* pt;
+    int x1, y1;
+    int aw, ah;
+
+    x1 = xox+xu->cx;
+    y1 = xoy+xu->cy;
+
+    if(xu->cob.imargin>0) {
+        aw = xu->wd - xu->cob.imargin*2;
+        ah = xu->ht - xu->cob.imargin*2;
+    }
+    else {
+        aw = xu->wd;
+        ah = xu->ht;
+    }
+
+apply:
+
+    fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
+    fprintf(fp, "gsave %% for box\n");
+
+    fprintf(fp, "%% inside\n");
+    fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
+        xu->cob.outlinecolor, xu->cob.fillhatch,
+        xu->cob.hatchthick, xu->cob.hatchpitch);
+
+    fprintf(fp, "gsave %% for inside\n");
+
+    /***
+     *** CLIP and HATCH
+     ***/
+
+    if(xu->cob.fillcolor>=0) {
+        changecolor(fp, xu->cob.fillcolor);
+
+        if(xu->cob.fillhatch==HT_NONE) {
+            /* nothing */
+        }
+        else
+        if(xu->cob.fillhatch==HT_SOLID) {
+            if(xu->cob.fillcolor>=0) {
+                fprintf(fp, "  %% solid fill\n");
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d translate\n", x1, y1);
+                fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+                fprintf(fp, "    newpath\n");
+
+                fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+                fprintf(fp, "    %d %d rlineto\n", aw, 0);
+                fprintf(fp, "    %d %d rlineto\n", 0, ah-ah/4);
+                fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/4);
+                fprintf(fp, "    %d %d rlineto\n", -aw+aw/2, -ah/4);
+                fprintf(fp, "    %d %d rlineto\n", 0, -ah+ah/4);
+
+                fprintf(fp, "    closepath\n");
+                fprintf(fp, "    fill\n");
+                fprintf(fp, "  grestore\n");
+
+            }
+
+        }
+        else {
+
+            fprintf(fp, "  %% clip & hatch\n");
+            fprintf(fp, "  gsave\n");
+            fprintf(fp, "    %d %d translate\n", x1, y1);
+            fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    0 setlinewidth\n");
+
+            fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, ah-ah/4);
+            fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/4);
+            fprintf(fp, "    %d %d rlineto\n", -aw+aw/2, -ah/4);
+            fprintf(fp, "    %d %d rlineto\n", 0, -ah+ah/4);
+
+            fprintf(fp, "    closepath\n");
+            if(debug_clip) {
+                fprintf(fp, "  stroke %% debug\n");
+            }
+            else {
+                fprintf(fp, "  clip\n");
+            }
+
+            changethick(fp, xu->cob.hatchthick);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, "  grestore\n");
+
+#if 0
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, ah);
+            fprintf(fp, "    %d %d rlineto\n", -aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, -ah);
+            fprintf(fp, "    closepath\n");
+            fprintf(fp, "    stroke\n");
+
+#endif
+
+        }
+
+    }
+
+    fprintf(fp, "grestore %% for inside\n");
+
+
+    fprintf(fp, "%% frame\n");
+    fprintf(fp, "%%     outline color %d thick %d\n",
+        xu->cob.outlinecolor, xu->cob.outlinethick);
+
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+        fprintf(fp, "gsave\n");
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+        fprintf(fp, "  %d %d translate\n", x1, y1);
+        fprintf(fp, "  newpath\n");
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+        fprintf(fp, "    newpath\n");
+
+        fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+        fprintf(fp, "    %d %d rlineto\n", aw, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, ah-ah/4);
+        fprintf(fp, "    %d %d rlineto\n", -aw/2, ah/4);
+        fprintf(fp, "    %d %d rlineto\n", -aw+aw/2, -ah/4);
+        fprintf(fp, "    %d %d rlineto\n", 0, -ah+ah/4);
+
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    stroke\n");
+        fprintf(fp, "  grestore\n");
+        fprintf(fp, "grestore\n");
+    }
+
+#if 0
+    epsdraw_sstr(fp, xu->gx, xu->gy, xu->wd, xu->ht, xu->cob.ssar);
+#endif
+
+    fprintf(fp, "grestore %% end of box\n");
+
+out:
+    return 0;
+}
+
+
+int
+epsdraw_card(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob* pf;
+    ob* pt;
+    int x1, y1;
+    int aw, ah;
+
+    x1 = xox+xu->cx;
+    y1 = xoy+xu->cy;
 
     if(xu->cob.imargin>0) {
         aw = xu->wd - xu->cob.imargin*2;
@@ -10086,7 +10370,160 @@ apply:
                 fprintf(fp, "    newpath\n");
                 fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
                 fprintf(fp, "    %d %d rlineto\n", aw, 0);
-                fprintf(fp, "    %d %d rlineto\n", 0, ah);
+                fprintf(fp, "    %d %d rlineto\n", 0, ah-aw/8);
+                fprintf(fp, "    %d %d rlineto\n", -aw/4, aw/8);
+                fprintf(fp, "    %d %d rlineto\n", -aw+aw/4, 0);
+                fprintf(fp, "    %d %d rlineto\n", 0, -ah);
+                fprintf(fp, "    closepath\n");
+                fprintf(fp, "    fill\n");
+                fprintf(fp, "  grestore\n");
+
+            }
+
+        }
+        else {
+
+            fprintf(fp, "  %% clip & hatch\n");
+            fprintf(fp, "  gsave\n");
+            fprintf(fp, "    %d %d translate\n", x1, y1);
+            fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    0 setlinewidth\n");
+            fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, ah-aw/8);
+            fprintf(fp, "    %d %d rlineto\n", -aw/4, aw/8);
+            fprintf(fp, "    %d %d rlineto\n", -aw+aw/4, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, -ah);
+            fprintf(fp, "    closepath\n");
+            if(debug_clip) {
+                fprintf(fp, "  stroke %% debug\n");
+            }
+            else {
+                fprintf(fp, "  clip\n");
+            }
+
+            changethick(fp, xu->cob.hatchthick);
+            epsdraw_hatch(fp, aw, ah,
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, "  grestore\n");
+
+#if 0
+            fprintf(fp, "    newpath\n");
+            fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+            fprintf(fp, "    %d %d rlineto\n", aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, ah);
+            fprintf(fp, "    %d %d rlineto\n", -aw, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, -ah);
+            fprintf(fp, "    closepath\n");
+            fprintf(fp, "    stroke\n");
+
+#endif
+
+        }
+
+    }
+
+    fprintf(fp, "grestore %% for inside\n");
+
+
+    fprintf(fp, "%% frame\n");
+    fprintf(fp, "%%     outline color %d thick %d\n",
+        xu->cob.outlinecolor, xu->cob.outlinethick);
+
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+        fprintf(fp, "gsave\n");
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+        fprintf(fp, "  %d %d translate\n", x1, y1);
+        fprintf(fp, "  newpath\n");
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+        fprintf(fp, "    %d %d rlineto\n", aw, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, ah-aw/8);
+        fprintf(fp, "    %d %d rlineto\n", -aw/4, aw/8);
+        fprintf(fp, "    %d %d rlineto\n", -aw+aw/4, 0);
+        fprintf(fp, "    %d %d rlineto\n", 0, -ah);
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    stroke\n");
+#if 0
+        fprintf(fp, "    %d %d moveto\n", aw/4, -ah/2);
+        fprintf(fp, "    %d %d rlineto\n", aw/8, ah/3);
+        fprintf(fp, "    %d %d rlineto\n", aw/8, -(ah/3-aw/8));
+        fprintf(fp, "    closepath\n");
+        fprintf(fp, "    fill\n");
+#endif
+        fprintf(fp, "  grestore\n");
+        fprintf(fp, "grestore\n");
+    }
+
+#if 0
+    epsdraw_sstr(fp, xu->gx, xu->gy, xu->wd, xu->ht, xu->cob.ssar);
+#endif
+
+    fprintf(fp, "grestore %% end of box\n");
+
+out:
+    return 0;
+}
+
+int
+epsdraw_paper(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob* pf;
+    ob* pt;
+    int x1, y1;
+    int aw, ah;
+
+    x1 = xox+xu->cx;
+    y1 = xoy+xu->cy;
+
+    if(xu->cob.imargin>0) {
+        aw = xu->wd - xu->cob.imargin*2;
+        ah = xu->ht - xu->cob.imargin*2;
+    }
+    else {
+        aw = xu->wd;
+        ah = xu->ht;
+    }
+
+apply:
+
+    fprintf(fp, "%% box xy %d,%d wh %dx%d\n", x1, y1, aw, ah);
+    fprintf(fp, "gsave %% for box\n");
+
+    fprintf(fp, "%% inside\n");
+    fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
+        xu->cob.outlinecolor, xu->cob.fillhatch,
+        xu->cob.hatchthick, xu->cob.hatchpitch);
+
+    fprintf(fp, "gsave %% for inside\n");
+
+    /***
+     *** CLIP and HATCH
+     ***/
+
+    if(xu->cob.fillcolor>=0) {
+        changecolor(fp, xu->cob.fillcolor);
+
+        if(xu->cob.fillhatch==HT_NONE) {
+            /* nothing */
+        }
+        else
+        if(xu->cob.fillhatch==HT_SOLID) {
+            if(xu->cob.fillcolor>=0) {
+                fprintf(fp, "  %% solid fill\n");
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d translate\n", x1, y1);
+                fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+                fprintf(fp, "    newpath\n");
+                fprintf(fp, "    %d %d moveto\n", -aw/2, -ah/2);
+                fprintf(fp, "    %d %d rlineto\n", aw-aw/4, 0);
+                fprintf(fp, "    %d %d rlineto\n", aw/4, aw/8);
+                fprintf(fp, "    %d %d rlineto\n", 0, ah-aw/8);
                 fprintf(fp, "    %d %d rlineto\n", -aw, 0);
                 fprintf(fp, "    %d %d rlineto\n", 0, -ah);
                 fprintf(fp, "    closepath\n");
@@ -10182,6 +10619,8 @@ apply:
 out:
     return 0;
 }
+
+
 
 int
 Xepsdraw_scatter(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
@@ -12077,6 +12516,15 @@ P;
     changenormal(fp); /* for faill safe */
     if(u->type==CMD_PAPER) {
         epsdraw_paper(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_CARD) {
+        epsdraw_card(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_DIAMOND) {
+        epsdraw_diamond(fp, ox, oy, u, xns);
+    }
+    if(u->type==CMD_HOUSE) {
+        epsdraw_house(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_CLOUD) {
         epsdraw_cloud(fp, ox, oy, u, xns);

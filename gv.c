@@ -27,6 +27,9 @@ apair_t cmd_ial[] = {
     {"dots",            CMD_DOTS},
     {"drum",            CMD_DRUM},
     {"paper",           CMD_PAPER},
+    {"card",            CMD_CARD},
+    {"diamond",         CMD_DIAMOND},
+    {"house",           CMD_HOUSE},
     {"cloud",           CMD_CLOUD},
 #if 0
     {"cylinder",        CMD_DRUM},
