@@ -305,12 +305,14 @@ _ob_adump(ob* s, int w)
 
     rest = dumplabel - w - dumptabstop;
 
-    printf("%3d:", s->oid);
+    printf("%3d: ", s->oid);
     W;
-    printf("%-*s %6d,%-6d %6dx%-6d %d %6d,%-6d %6d,%-6d %6d,%-6d\n",
+    printf("%-*s %6d,%-6d %6dx%-6d %d %d %6d,%-6d %6d,%-6d %6d,%-6d\n",
         rest, tm,
         s->ox, s->oy, s->wd, s->ht,
-        s->fixed, s->gx, s->gy, s->gsx, s->gsy, s->gex, s->gey);
+        s->fixed, 
+        s->cob.originalshape,
+        s->gx, s->gy, s->gsx, s->gsy, s->gex, s->gey);
 
 #if 0
     if(s->type==CMD_CHUNK) 
@@ -335,7 +337,7 @@ ob_adump(ob* s)
     int r;
     printf("=== ADUMP\n");
     printf(
-"oid:type                         ox,oy          wxh      f     gx,y        gsx,sy         gex,ey\n");
+"oid: type                         ox,oy          wxh      f o     gx,y        gsx,sy         gex,ey\n");
 
 
     r = _ob_adump(s, 0);
@@ -624,16 +626,77 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
 {
     int ik;
     seg* s;
+    char *mcr="E";
+    char *mft="E";
+
+    char tmp1[32];
+    char tmp2[32];
 
     s = (seg*)xv;
+
+    if(!s) {
+#if 0
+    ik = sprintf(dst, "<%-12.12s,%s(%d),%d,%d;%6d,%6d,%6d,%6d;%6d,%4d>",
+#endif
+    ik = sprintf(dst, "<%-12s,%-7s,%1s,%1s;%6s,%6s,%6s,%6s;%6s,%4s>",
+            "type", "join", "c", "f", "x1", "y1", "x2", "y2",
+            "rad", "ang");
+    return 0;
+    }
+
+    memset(tmp1, 0, sizeof(tmp1));
+    sprintf(tmp1, "%s(%d)", rassoc(objattr_ial, s->ptype), s->ptype);
+    memset(tmp2, 0, sizeof(tmp2));
+    sprintf(tmp2, "%s(%d)", s->jtype>0 ? "JOIN" : "-", s->jtype);
+
+    mcr = rassoc(coord_isal, s->coordtype);
+    mft = rassoc(ftcoord_isal, s->ftflag);
+
+#if 0
     ik = sprintf(dst, "(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)",
-        rassoc(objattr_ial, s->ptype), s->ptype,
-        s->jtype>0 ? "JOIN" : "-",
-        s->jtype,
-        s->coordtype, s->ftflag,
+#endif
+    ik = sprintf(dst, "<%-12.12s,%-7.7s,%s,%s;%6d,%6d,%6d,%6d;%6d,%4d>",
+        tmp1, tmp2,
+        mcr, mft,
         s->x1, s->y1, s->x2, s->y2,
         s->rad, s->ang);
 
+    return 0;
+}
+
+
+int
+varray_fprintv(FILE *fp, varray_t *ar)
+{
+    int i;
+    int ik;
+    char tmp[BUFSIZ];
+
+    if(!ar) {
+        return -1;
+    }
+    if(!ar->sprintfunc) {
+        Error("sprintfunc is not registered\n");
+    }
+
+    fprintf(fp, "varray %p; %d/%d\n",
+        ar, ar->use, ar->len);
+
+    tmp[0] = '\0';
+    ik = ar->sprintfunc(tmp, BUFSIZ, NULL, 0);
+    if(ik == 0 && tmp[0]) {
+        fprintf(fp, "num : %s\n", tmp);
+    }
+
+    for(i=0;i<ar->use;i++) {
+        if(!ar->sprintfunc) {
+            strcpy(tmp, "---");
+        }
+        else {
+            ik = ar->sprintfunc(tmp, BUFSIZ, ar->slot[i], 0);
+        }
+        fprintf(fp, "%4d: %s\n", i, tmp);
+    }
     return 0;
 }
 

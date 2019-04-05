@@ -153,6 +153,7 @@ int
 __solve_fandt(ns *xns, ob *u, varray_t *opar,
     int X, int *sx, int *sy, int *ex, int *ey)
 {
+    int    rv;
     int    i;
     segop *e;
     int    ik;
@@ -160,6 +161,8 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
 
     Echo("%s: enter oid %d\n", __func__, u->oid);
     Echo("%s: 0 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
+
+    rv  = 0;
 
     obf = obt = NULL;
 
@@ -193,6 +196,7 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
             obf = _ns_find_objP(xns, e->val, &dx, &dy);
             }
 #endif
+            rv += 10;
             break;
         case OA_TO:
             ik = _ns_find_objposP(xns, u, e->val, X, ex, ey);
@@ -207,6 +211,7 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
             obt = _ns_find_objP(xns, e->val, &dx, &dy);
             }
 #endif
+            rv += 100;
             break;
         }
     }
@@ -221,7 +226,7 @@ __solve_fandt(ns *xns, ob *u, varray_t *opar,
     Echo("%s: 9 sx,y %d,%d ex,y %d,%d\n", __func__, *sx, *sy, *ex, *ey);
     Echo("%s: leave\n", __func__);
 
-    return 0;
+    return rv;
 }
 
 
@@ -254,8 +259,9 @@ solve_curveself_points(ob *xu, ns *xns,
     c1 = c2 = xu->cob.backchop;
 
 P;
-#if 0
+#if 1
 Echo("%s: enter\n", __func__);
+Echo("%s: enter segopar %p\n", __func__, xu->cob.segopar);
 Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
 #endif

@@ -989,17 +989,20 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
     case AH_WIRE:
         r = def_arrowsize;
 
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  0 setlinejoin\n");
+
         dx =  (int)(r*cos((xdir+180+def_arrowangle/2)*rf));
         dy =  (int)(r*sin((xdir+180+def_arrowangle/2)*rf));
-        fprintf(fp, "%d %d moveto\n",   x,  y);
-        fprintf(fp, "%d %d rlineto\n", dx, dy);
-        fprintf(fp, "stroke\n");
+        fprintf(fp, "  %d %d moveto\n", x+dx, y+dy);
+        fprintf(fp, "  %d %d lineto\n", x, y);
 
         dx =  (int)(r*cos((xdir+180-def_arrowangle/2)*rf));
         dy =  (int)(r*sin((xdir+180-def_arrowangle/2)*rf));
-        fprintf(fp, "%d %d moveto\n",   x,  y);
-        fprintf(fp, "%d %d rlineto\n", dx, dy);
-        fprintf(fp, "stroke\n");
+        fprintf(fp, "  %d %d lineto\n", x+dx, y+dy);
+        fprintf(fp, "  stroke\n");
+
+        fprintf(fp, "grestore\n");
 
         break;
 
@@ -4279,19 +4282,18 @@ _line_patharrow(FILE *fp,
 
     int actfh, actch, actbh;
 
-#if 1
-Echo("%s: oid %d ydir %d xox %d xoy %d \n",
-    __func__, xu->oid, ydir, xox, xoy);
-#endif
-    Echo("%s: enter\n", __func__);
+    Echo("%s: oid %d enter ydir %d xox %d xoy %d \n",
+        __func__, xu->oid, ydir, xox, xoy);
     if(xu->cob.segar) {
         if(xu->cob.segar->use>0) {
 fprintf(fp, "%% %s: segar %p use %d\n",
     __func__, xu->cob.segar, xu->cob.segar->use);
+            fprintf(stdout, "segar oid %d ", xu->oid);
+            varray_fprintv(stdout, xu->cob.segar);
         }
         else {
-fprintf(fp, "%% %s: segar %p use %d\n",
-    __func__, xu->cob.segar, xu->cob.segar->use);
+fprintf(fp, "%% %s: segar %p use -\n",
+    __func__, xu->cob.segar);
         }
     }
     else {
@@ -4366,8 +4368,8 @@ fprintf(fp, "%% %s: no segar %p use -\n",
             continue;
         }
 
-#if 0
-Echo("%s: ptype %d\n", __func__, s->ptype);
+#if 1
+Echo("%s: i %d ptype %d\n", __func__, i, s->ptype);
 #endif
 
 
@@ -4388,8 +4390,13 @@ Echo("%s: ptype %d\n", __func__, s->ptype);
                 actfh = xu->cob.arrowforeheadtype;
             }
         }
-Echo("oid %d %s seg-arrow actbh %d actch %d achbh %d\n",
-    xu->oid, __func__, actbh, actch, actfh);
+
+Echo("%s: oid %d i %d seg-arrow actbh %d actch %d achbh %d\n",
+    __func__, xu->oid, i, actbh, actch, actfh);
+Echo("%s: oid %d i %d s ptype %d x1,y1 %d,%d x2,y2 %d,%d\n",
+    __func__, xu->oid, i, s->ptype, s->x1, s->y1, s->x2, s->y2);
+
+
 
         if(xu->cob.marknode) {
             markfdot(xu->cob.outlinecolor, x1, y1);
@@ -4656,7 +4663,17 @@ P;
                     i, s->ftflag, s->x1, s->y1);
             
 #if 1
+#if 0
+                fprintf(fp, "    %d %d moveto %% start-point\n",
+                    s->x1, s->y1);
+#endif
+                x1 = s->x1 + xox;
+                y1 = s->y1 + xoy;
+                fprintf(fp, "    %d %d moveto %% start-point by FROM\n",
+                    x1, y1);
+
                 /* skip */
+                Echo("    set position and skip; FROM\n");
                 continue;
 #endif
 #if 0
@@ -4670,8 +4687,13 @@ P;
                 goto coord_done;
             }
 
+P;
             x2 = x1+s->x1;
             y2 = y1+s->y1;
+#if 0
+            x2 = x1 + s->x1 + xox;
+            y2 = y1 + s->y1 + xoy;
+#endif
 
 coord_done:
 
@@ -4681,12 +4703,13 @@ fprintf(stderr, "%% m atan2 %f\n", atan2(y2-y1,x2-x1)/rf);
 fprintf(stderr, "%% m cdir %d\n", cdir);
 #endif
 
-            fprintf(fp, "  %d %d lineto\n", x2, y2);
+            fprintf(fp, "    %d %d lineto %% forward\n", x2, y2);
 
 confirm_arrow:
-#if 0
-fprintf(fp, "%% arrow f %d c %d b %d\n", actfh, actch, actbh);
+#if 1
+fprintf(fp, "%% arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
 #endif
+Echo("    arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
 
             if(actch) {
                 fprintf(fp, "gsave\n");
@@ -5771,6 +5794,7 @@ double xd, yd;
                 lpy = py;
 
                 if(count<10 || count>nd-10) {
+                  if(_p_) {
 #if 0
                     printf("%s:%d oid %d count %d\n",
                         __func__, __LINE__, xu->oid, count);
@@ -5783,6 +5807,7 @@ double xd, yd;
                         __func__, __LINE__, xu->oid, count,
                         px, py, xd, yd);
                     fflush(stdout);
+                  }
                 }
 
 #if 0
@@ -9651,6 +9676,43 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         MX(0, 0, 0);
     }
 
+    if(xu->cob.backhatch != HT_NONE && xu->cob.backcolor>=0) {
+        if(0 && xu->cob.hollow && xu->cob.seghar) {
+            fprintf(fp, " gsave %% for hollow+clip+back\n");
+
+            changecolor(fp, xu->cob.backcolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
+
+            fprintf(fp, "     0.8 0.8 scale\n");
+            ik = _line_pathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
+            fprintf(fp, "  clip\n");
+
+            fprintf(fp, "     1.25 1.25 scale\n");
+
+            epsdraw_hatch(fp, xu->wd, xu->ht,
+              xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, " grestore\n");
+         }
+         else {
+            fprintf(fp, " gsave %% for clip+back\n");
+            changecolor(fp, xu->cob.backcolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_path(fp, 0, 0, 0, xu, xns);
+            fprintf(fp, "  clip\n");
+
+            epsdraw_hatch(fp, xu->wd, xu->ht,
+              xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+
+            fprintf(fp, " grestore\n");
+        }
+
+    }
+    else {
+        fprintf(fp, "%% skip clip+back\n");
+    }
+
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         if(xu->cob.hollow && xu->cob.seghar) {
             fprintf(fp, " gsave %% for hollow+clip+fill\n");
@@ -11935,6 +11997,13 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         changethick(fp, def_markbbthick);
         drawCRrect(fp, u->gx, u->gy, u->wd, u->ht, u->cob.rotateval);
         fprintf(fp, "  grestore\n");
+
+#if 0
+        epsdraw_bbox(fp, u);
+
+        epsdraw_bbox_lbrt(fp, u->ox, u->oy, u);
+        epsdraw_bbox_lbrtR(fp, u->x, u->y, u);
+#endif
     }
 
     if(u->type==CMD_SCATTER) {
@@ -12710,9 +12779,15 @@ P;
 
         gp = def_gridpitch;
 
+/*
 #define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/8);
 #define GGM fprintf(fp, "  0.6 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/2);
 #define GGL fprintf(fp, "  0.8 0.6 1.0 setrgbcolor %d setlinewidth\n", def_linethick/1);
+*/
+
+#define GGH fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/8);
+#define GGM fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/4);
+#define GGL fprintf(fp, "  0.6 1.0 1.0 setrgbcolor %d setlinewidth\n", def_linethick/2);
 
         fprintf(fp, "%%\n%% grid\n");
         fprintf(fp, "gsave\n");
@@ -12720,8 +12795,10 @@ P;
         GGH;
 
         for(x=-def_gridrange;x<=def_gridrange;x++) {
-            if(x%5==0) GGM;
-            if(x%10==0) GGL;
+            if(x%5==0) {
+                if(x%10==0) { GGL; }
+                else        { GGM; }
+            }
             fprintf(fp, "  %d -%d moveto 0 %d rlineto stroke\n",
                 x*gp, def_gridrange*gp, (2*def_gridrange)*gp);
             if(x%5==0) GGH;

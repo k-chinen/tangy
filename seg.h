@@ -33,6 +33,10 @@ typedef struct {
     int ahbtype;
 } seg;
 
+extern apair_t coord_ial[];
+extern apair_t coord_isal[];
+extern apair_t ftcoord_ial[];
+extern apair_t ftcoord_isal[];
 
 seg *seg_new();
 int try_regsegclose(varray_t *segar);

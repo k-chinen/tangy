@@ -43,8 +43,8 @@ int
 print_usage()
 {
     printf("tangy - picture generator according to special language\n");
-    printf("usage: tangy [option]\n");
-    printf("option:     ### bp is bigpoint = 1/72inch (c.f. 1cm=28.34bp)\n");
+    printf("usage: tangy [option] [files]\n");
+    printf("option:     # unit of length is bigpoint = 1/72inch = 0.3527mm\n");
     printf("    -h      print this message\n");
     printf("    -m      print hints for language\n");
     printf("    -V      print version\n");
@@ -388,16 +388,23 @@ main(int argc, char *argv[])
 
     recalcsizeparam();
 
-	/*** parse files ***/
+    /*** parse files ***/
 #if 0
-	ik = parse(stdin, ch0, ns0);
+fprintf(stderr, "optind %d/argc %d\n", optind, argc);
 #endif
-    for(i=optind;i<argc;i++) {
-#if 0
-        printf("%d %s\n", i, argv[i]);
-#endif
-        ik = fparse(argv[i], ch0, ns0);
+    if(optind==argc) {
+        ik = parse(stdin, ch0, ns0);
         if(ik) {
+        }
+    }
+    else {
+        for(i=optind;i<argc;i++) {
+#if 0
+            fprintf(stderr, "file %d; %s\n", i, argv[i]);
+#endif
+            ik = fparse(argv[i], ch0, ns0);
+            if(ik) {
+            }
         }
     }
 

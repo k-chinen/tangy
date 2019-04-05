@@ -87,10 +87,12 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     u->cob.gsepx2 = ox + u->cob.sepx2;
     u->cob.gsepy2 = oy + u->cob.sepy2;
 
-    Echo("    c  %5d %5d : %5d %5d -> %5d %5d\n",
+    Echo("    c  %6d %6d : %6d %6d -> %6d %6d\n",
             u->cx, u->cy, u->csx, u->csy, u->cex, u->cey);
-    Echo("    cg %5d %5d : %5d %5d -> %5d %5d\n",
+    Echo("    cg %6d %6d : %6d %6d -> %6d %6d\n",
             u->cgx, u->cgy, u->cgsx, u->cgsy, u->cgex, u->cgey);
+    Echo("    bb %6d %6d %6d %6d\n",
+            u->lx, u->by, u->rx, u->ty);
 
     Echo("= oid %d type %d x,y %d,%d: gx,gy %d,%d\n",
         u->oid, u->type, u->cx, u->cy, u->cgx, u->cgy);
@@ -108,12 +110,20 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     MARK("objcRT",  ox+u->cx+u->wd/2, oy+u->cy+u->ht/2);
 #endif
 
-#if 1
+#if 0
     MARK("objcgx ", u->cgx,       u->cgy);
     MARK("objcgsx", u->cgsx,      u->cgey);
     MARK("objcgex", u->cgex,      u->cgey);
     MARK("objcLB",  ox+u->cx-u->wd/2, oy+u->cy-u->ht/2);
     MARK("objcRT",  ox+u->cx+u->wd/2, oy+u->cy+u->ht/2);
+#endif
+
+#if 1
+    MARK("objcgx ", u->cgx,     u->cgy);
+    MARK("objcgsx", u->cgsx,    u->cgey);
+    MARK("objcgex", u->cgex,    u->cgey);
+    MARK("objcLB",  ox+u->lx,   oy+u->by);
+    MARK("objcRT",  ox+u->rx,   oy+u->ty);
 #endif
 
     Echo("obb oid %-4d s2 %6d %6d %6d %6d ; %6d x %6d\n",

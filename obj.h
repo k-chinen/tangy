@@ -250,6 +250,8 @@ extern apair_t lo_ial[];
 
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
+#define OA_BACKCOLOR        (15)
+#define OA_BACKHATCH        (16)
 #define OA_TEXTCOLOR        (21)
 #define OA_TEXTBGCOLOR      (22)
 #define OA_HATCHTHICK       (31)
@@ -389,6 +391,9 @@ struct obattr {
     int   arrowcentheadtype;
     int   arrowbackheadtype;
     double arrowcentheadpos;
+
+    int   backcolor;
+    int   backhatch;
 
     int   fillcolor;
     int   fillhatch;

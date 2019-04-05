@@ -732,6 +732,9 @@ P;
     ISET(OA_LINETHICK,      outlinethick);
     AISETN(OA_LINETYPE, linetype_ial, outlinetype);
 
+    ISET(OA_BACKCOLOR,      backcolor);
+    AISETX(OA_BACKHATCH, hatchtype_ial, backhatch, HT_XCROSSED);
+
     ISET(OA_FILLCOLOR,      fillcolor);
     AISETX(OA_FILLHATCH, hatchtype_ial, fillhatch, HT_XCROSSED);
     ISET(OA_HATCHTHICK,     hatchthick);
@@ -1043,6 +1046,8 @@ parseobj(char *p)
     nob->cob.outlinethick   = def_linethick;
     nob->cob.hatchpitch     = def_hatchpitch;
     nob->cob.hatchthick     = def_hatchthick;
+    nob->cob.backcolor      = 0;
+    nob->cob.backhatch      = HT_NONE;
     nob->cob.fillcolor      = 0;
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.textcolor      = def_fgcolor;

@@ -255,6 +255,8 @@ apair_t objattr_ial[] = {
     {"linethick",           OA_LINETHICK},
     {"linedecothick",       OA_LINEDECOTHICK},
     {"wlinethick",          OA_WLINETHICK},
+    {"backcolor",           OA_BACKCOLOR},
+    {"backhatch",           OA_BACKHATCH},
     {"fillcolor",           OA_FILLCOLOR},
     {"fillhatch",           OA_FILLHATCH},
     {"hatchthick",          OA_HATCHTHICK},
@@ -359,6 +361,36 @@ apair_t objattr_ial[] = {
 
     {NULL,                  -1},
 };
+
+#if 0
+apair_t coord_ial[] = {
+    {"nul",     NUL_COORD},
+    {"rel",     REL_COORD},
+    {"abs",     ABS_COORD},
+    {NULL,      -1},
+};
+
+apair_t coord_isal[] = {
+    {"N",   NUL_COORD},
+    {"R",   REL_COORD},
+    {"A",   ABS_COORD},
+    {NULL,      -1},
+};
+
+apair_t ftcoord_ial[] = {
+    {"nul ",    NUL_COORD},
+    {"from",    COORD_FROM},
+    {"to  ",    COORD_TO},
+    {NULL,      -1},
+};
+
+apair_t ftcoord_isal[] = {
+    {"N",       NUL_COORD},
+    {"F",       COORD_FROM},
+    {"T",       COORD_TO},
+    {NULL,      -1},
+};
+#endif
 
 
 int objunit = OBJUNIT;

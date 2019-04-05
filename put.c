@@ -311,10 +311,12 @@ P;
     jc = 0;
     for(i=0;i<opar->use;i++) {
         mstr[0] = '\0';
-        dm = 0;
-        m = 0;
-        qc = 0;
+        dm   = 0;
+        m    = 0;
+        qc   = 0;
         actf = 0;
+        rad  = 0;
+        an   = 0;
 
         e = (segop*)opar->slot[i];
         if(!e)
@@ -726,6 +728,95 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 }
 
 
+int
+est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
+    int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
+    int *rfx, int *rfy)
+{
+    int     x, y;
+    int     _lx, _by, _rx, _ty;
+    int     i;
+    segop  *e;
+    seg    *r;
+    int     m;
+    double  dm;
+    char    mstr[BUFSIZ];
+    char   *p, *q;
+    int     lx, ly;
+    double  ldir;
+    double  lldir;
+    
+    int     mx, my;
+    int     ik;
+    int     rad, an;
+
+    int     rv;
+    int     qc;
+    int     actf;
+    int     arcx, arcy;
+
+    int     c;
+    int     jc;
+
+    int     isset_final;
+
+    int     isx, isy, iex, iey; /* from and to */
+
+    int     Uwd, Uht;
+    int     ddir;
+
+    rv = 0;
+
+Echo("%s:\n", __func__);
+    ddir = (*zdir+360)%360;
+Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
+
+    Uwd = objunit*3/2;
+    Uht = objunit;
+    
+
+    if(ddir==270) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = 0;
+        *rty = -Uht;
+        *rfx = 0;
+        *rfy = -Uht;
+    }
+    else if(ddir==180) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = -Uwd;
+        *rty = 0;
+        *rfx = -Uwd;
+        *rfy = 0;
+    }
+    else if(ddir==90) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = 0;
+        *rty = Uht;
+        *rfx = 0;
+        *rfy = Uht;
+    }
+    else {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = Uwd;
+        *rty = 0;
+        *rfx = Uwd;
+        *rfy = 0;
+    }
+
+#if 1
+Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
+#endif
+    return rv;
+
+#undef FREG
+}
+
+
 #undef MARK
 
 /*
@@ -957,10 +1048,12 @@ P;
     case CMD_PING:
     case CMD_PINGPONG:  WO;     break;
 
+#if 0
     case CMD_SCATTER: 
     case CMD_GATHER: 
             RO;     
             break;
+#endif
 
     case CMD_PLINE:
     case CMD_SEP:     
@@ -1033,6 +1126,9 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             }
             break;
 
+
+    case CMD_SCATTER: 
+    case CMD_GATHER: 
     case CMD_CLINE:
     case CMD_LINE:     
     case CMD_ARROW:
@@ -1040,12 +1136,28 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
     case CMD_WARROW:
     case CMD_BARROW:
     case CMD_LINK: 
-        if(u->cob.originalshape) {
+        {
             int ik;
             int lx, by, rx, ty, fx, fy;
 
+        if(u->cob.originalshape) {
             ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+        }
+        else {
+            ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+        }
+#if 0
+ {
+    int ax, ay;
+    int bx, by;
+    int ik;
+    ik = __solve_fandt(xns, u, u->cob.segopar, 1, &ax, &ay, &bx, &by);
+    Echo(" oid %-3d ; ik %4d F? %2d T? %2d fandt %d,%d %d,%d\n",
+        u->oid, ik, (ik%100)/10, ik/100, ax, ay, bx, by);
+ }
+#endif
 
 #if 1
 Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
@@ -1096,16 +1208,6 @@ Echo("\tseg original 1 u; ox,oy %d,%d fx,fy %d,%d\n",
 #endif
 
             re = 1;
-        }
-        else {
-#if 1
-Echo("\tseg not-orig oid %d\n", u->oid);
-#endif
-            WO;     
-#if 1
-Echo("\tseg not-orig u; ox,oy %d,%d fx,fy %d,%d\n",
-    u->ox, u->oy, u->fx, u->fy);
-#endif
         }
         break;
     default:

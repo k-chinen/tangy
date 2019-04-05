@@ -7,6 +7,36 @@
 #include "gv.h"
 #include "seg.h"
 
+apair_t coord_ial[] = {
+    {"nul",     NUL_COORD},
+    {"rel",     REL_COORD},
+    {"abs",     ABS_COORD},
+    {NULL,      -1},
+};
+
+apair_t coord_isal[] = {
+    {"n",   NUL_COORD},
+    {"R",   REL_COORD},
+    {"A",   ABS_COORD},
+    {NULL,      -1},
+};
+
+apair_t ftcoord_ial[] = {
+    {"nul ",    NUL_COORD},
+    {"from",    COORD_FROM},
+    {"to  ",    COORD_TO},
+    {NULL,      -1},
+};
+
+apair_t ftcoord_isal[] = {
+    {"n",       NUL_COORD},
+    {"F",       COORD_FROM},
+    {"T",       COORD_TO},
+    {NULL,      -1},
+};
+
+
+
 
 seg*
 seg_new()
