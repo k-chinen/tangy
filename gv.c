@@ -277,6 +277,7 @@ apair_t objattr_ial[] = {
     {"gimargin",            OA_GIMARGIN},
     {"peak",                OA_PEAK},
     {"peakrotate",          OA_PEAKROTATE},
+    {"concave",             OA_CONCAVE},
     {"textrotate",          OA_TEXTROTATE},
     {"rotate",              OA_ROTATE},
     {"rad",                 OA_RAD},

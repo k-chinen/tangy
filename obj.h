@@ -268,6 +268,7 @@ extern apair_t lo_ial[];
 
 #define OA_PEAK             (70)
 #define OA_PEAKROTATE       (71)
+#define OA_CONCAVE          (72)
 #define OA_RAD              (75)
 #define OA_IMARGIN          (77)
 #define OA_GIMARGIN         (78)
@@ -413,6 +414,7 @@ struct obattr {
 
     int   polypeak;
     int   polyrotate;
+    int   concave;
     int   rotateval;
     int   rad;
 

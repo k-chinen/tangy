@@ -614,6 +614,11 @@ skip_note:
 
 
     /* integer setting */
+#define ONSET(x,y) \
+    if(oak==(x)) { \
+        rob->cob.y = 1; \
+        uc++; \
+    }
 #define ISET(x,y) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
@@ -748,6 +753,7 @@ P;
     ISET(OA_RAD,            rad);
     ISET(OA_PEAK,           polypeak);
     ISET(OA_PEAKROTATE,     polyrotate);
+    ONSET(OA_CONCAVE,       concave);
     ISET(OA_IMARGIN,        imargin);
     ISET(OA_GIMARGIN,       gimargin);
     ISET(OA_ROTATE,         rotateval);

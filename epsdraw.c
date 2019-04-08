@@ -8835,37 +8835,70 @@ out:
     return 0;
 }
 
+static
 int
-epsdraw_polygon(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+Gpolygon(FILE *fp, int n, double ar, int cc, double aoff)
 {
-    ob* pf;
-    ob* pt;
-    int x1, y1;
-    int r;
-    double a;
+    double br;
+    int i;
     double x2, y2;
-    int    i;
+    double x3, y3;
+    double x4, y4;
+
+    br = ar*cos(M_PI*2/(double)n)/cos(M_PI*2/(double)n/2.0);
+
+        fprintf(fp, "  newpath\n");
+        for(i=0;i<n;i++) {
+            x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
+            y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
+            x3 = br*cos(M_PI*2/(double)n*((double)i+0.5)+aoff);
+            y3 = br*sin(M_PI*2/(double)n*((double)i+0.5)+aoff);
+            x4 = ar*cos(M_PI*2/(double)n*((double)i+1.0)+aoff);
+            y4 = ar*sin(M_PI*2/(double)n*((double)i+1.0)+aoff);
+            if(i==0) {
+                fprintf(fp, "  %.3f %.3f moveto\n", x2, y2);
+            }
+            else {
+            }
+            if(cc) {
+                fprintf(fp, "  %.3f %.3f lineto\n", x3, y3);
+            }
+                fprintf(fp, "  %.3f %.3f lineto\n", x4, y4);
+        }
+        fprintf(fp, "  closepath\n");
+
+    return 0;
+}
+
+
+int
+epsdraw_polygonX(FILE *fp, int xox, int xoy, ob *xu, ns *xns, int cc)
+{
+    int    x1, y1, r;
     int    n;
     double aoff;
-
-    int aw, ah, ar;
+    int    aw, ah, ar;
 
     x1 = xox+xu->cx;
     y1 = xoy+xu->cy;
     r  = (xu->wd/2);
 
-
     if(xu->cob.imargin>0) {
+        fprintf(fp, "%% polygon w/ imagin\n");
         aw = xu->wd - xu->cob.imargin*2;
         ah = xu->ht - xu->cob.imargin*2;
-        ar  = aw/2;
+        if(aw<ah) {
+            ar = aw/2;
+        }
+        else {
+            ar = ah/2;
+        }
     }
     else {
         aw = xu->wd;
         ah = xu->ht;
         ar = r;
     }
-
 
     aoff = 0;
     if(xu->cob.polyrotate) {
@@ -8878,10 +8911,12 @@ epsdraw_polygon(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     else {
         n = 3;
     }
+    if(cc) {
+        if(n<=4) {
+            cc = 0;
+        }
+    }
 
-apply:
-
-    fprintf(fp, "%% polygon no imagin\n");
 
     fprintf(fp, "gsave %% for polygon\n");
 
@@ -8893,18 +8928,7 @@ apply:
             fprintf(fp, "gsave\n");
             fprintf(fp, "  %d %d translate\n", x1, y1);
             changecolor(fp, xu->cob.fillcolor);
-            fprintf(fp, "  newpath\n");
-            for(i=0;i<n;i++) {
-                x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
-                y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
-                if(i==0) {
-                    fprintf(fp, "  %.3f %.3f moveto\n", x2, y2);
-                }
-                else {
-                }
-                    fprintf(fp, "  %.3f %.3f lineto\n", x2, y2);
-            }
-            fprintf(fp, "  closepath\n");
+            Gpolygon(fp, n, ar, cc, aoff);
             fprintf(fp, "  fill\n");
             fprintf(fp, "grestore\n");
         }
@@ -8913,18 +8937,7 @@ apply:
             fprintf(fp, "gsave\n");
             fprintf(fp, "  %d %d translate\n", x1, y1);
             changecolor(fp, xu->cob.fillcolor);
-            fprintf(fp, "  newpath\n");
-            for(i=0;i<n;i++) {
-                x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
-                y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
-                if(i==0) {
-                    fprintf(fp, "  %.3f %.3f moveto\n", x2, y2);
-                }
-                else {
-                }
-                    fprintf(fp, "  %.3f %.3f lineto\n", x2, y2);
-            }
-            fprintf(fp, "  closepath\n");
+            Gpolygon(fp, n, ar, cc, aoff);
             if(debug_clip) {
                 fprintf(fp, "  stroke %% debug\n");
             }
@@ -8940,27 +8953,12 @@ apply:
         }
     }
 
-
-
-
     if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
-
         fprintf(fp, "gsave\n");
         fprintf(fp, "  %d %d translate\n", x1, y1);
         changethick(fp, xu->cob.outlinethick);
         changecolor(fp, xu->cob.outlinecolor);
-        fprintf(fp, "  newpath\n");
-        for(i=0;i<n;i++) {
-            x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
-            y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
-            if(i==0) {
-                fprintf(fp, "  %.3f %.3f moveto\n", x2, y2);
-            }
-            else {
-            }
-                fprintf(fp, "  %.3f %.3f lineto\n", x2, y2);
-        }
-        fprintf(fp, "  closepath\n");
+        Gpolygon(fp, n, ar, cc, aoff);
         fprintf(fp, "  stroke\n");
         fprintf(fp, "grestore\n");
     }
@@ -12536,7 +12534,12 @@ P;
         epsdraw_dots(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_POLYGON) {
-        epsdraw_polygon(fp, ox, oy, u, xns);
+        if(u->cob.concave) {
+        epsdraw_polygonX(fp, ox, oy, u, xns, 1);
+        }
+        else {
+        epsdraw_polygonX(fp, ox, oy, u, xns, 0);
+        }
     }
     if(u->type==CMD_RULER) {
         epsdraw_ruler(fp, ox, oy, u, xns);
