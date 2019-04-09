@@ -68,8 +68,8 @@ apair_t cmd_ial[] = {
     {"again",           CMD_AGAIN},
     {"back",            CMD_BACK},
     {"hback",           CMD_HBACK},
-#if 0
     {"dmy1",            CMD_DMY1},
+#if 0
     {"dmy2",            CMD_DMY2},
     {"dmy3",            CMD_DMY3},
 #endif
@@ -306,9 +306,10 @@ apair_t objattr_ial[] = {
     {"skip",                OA_SKIP},
 
     {"line",                OA_LINE},
-    {"move",                OA_MOVE},
-    {"rmove",               OA_RMOVE},
-    {"rline",               OA_RLINE},
+    {"moveto",              OA_MOVETO},
+    {"rmoveto",             OA_RMOVETO},
+    {"lineto",              OA_LINETO},
+    {"rlineto",             OA_RLINETO},
     {"close",               OA_CLOSE},
 
     {"forehead",            OA_FOREHEAD},

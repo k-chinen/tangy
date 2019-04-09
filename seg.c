@@ -111,37 +111,30 @@ out:
 
 
 int
-try_regsegmove(varray_t *segar, int x1, int y1)
+try_regsegmoveto(varray_t *segar, int x1, int y1)
 {
     int  ik;
     seg *e;
 
-#if 0
     Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
-    Echo("b use %d\n", segar->use);
-#endif
 
     e = seg_new();
     if(!e) {
         return -1;
     }
-    e->ptype        = OA_MOVE;
+    e->ptype        = OA_MOVETO;
     e->coordtype    = REL_COORD;
     e->x1           = x1;
     e->y1           = y1;
     ik = varray_push(segar, e);
 
 out:
-#if 0
-    Echo("ik %d\n", ik);
-    Echo("a use %d\n", segar->use);
-#endif
 
     return 0;
 }
 
 int
-try_regsegrmove(varray_t *segar, int x1, int y1)
+try_regsegrmoveto(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -151,7 +144,7 @@ try_regsegrmove(varray_t *segar, int x1, int y1)
     if(!e) {
         return -1;
     }
-    e->ptype        = OA_RMOVE;
+    e->ptype        = OA_RMOVETO;
     e->coordtype    = REL_COORD;
     e->x1           = x1;
     e->y1           = y1;
@@ -163,7 +156,7 @@ out:
 }
 
 int
-try_regsegrline(varray_t *segar, int x1, int y1)
+try_regseglineto(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -173,7 +166,29 @@ try_regsegrline(varray_t *segar, int x1, int y1)
     if(!e) {
         return -1;
     }
-    e->ptype        = OA_RLINE;
+    e->ptype        = OA_LINETO;
+    e->coordtype    = REL_COORD;
+    e->x1           = x1;
+    e->y1           = y1;
+    varray_push(segar, e);
+
+out:
+
+    return 0;
+}
+
+int
+try_regsegrlineto(varray_t *segar, int x1, int y1)
+{
+    seg *e;
+
+    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_RLINETO;
     e->coordtype    = REL_COORD;
     e->x1           = x1;
     e->y1           = y1;

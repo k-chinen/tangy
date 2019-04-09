@@ -3882,6 +3882,9 @@ _line_pathMM(FILE *fp,
 #if 1
 Echo("%s: ydir %d xox %d xoy %d MM %d f_new %d f_close %d\n",
     __func__, ydir, xox, xoy, MM, f_new, f_close);
+fprintf(fp, "%% %s: ydir %d xox %d xoy %d MM %d f_new %d f_close %d\n",
+    __func__, ydir, xox, xoy, MM, f_new, f_close);
+
 #endif
 
     if(MM==1) {
@@ -4117,21 +4120,27 @@ PP;
             goto next;
             break;
 
-        case OA_MOVE:
+        case OA_MOVETO:
             x2 = s->x1 + xox;
             y2 = s->y1 + xoy;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
             break;
 
-        case OA_RMOVE:
+        case OA_RMOVETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + x2;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
             break;
 
-        case OA_RLINE:
+        case OA_LINETO:
+            x2 = s->x1;
+            y2 = s->y1;
+            fprintf(fp, "  %d %d lineto\n", x2, y2);
+            break;
+
+        case OA_RLINETO:
             x2 = s->x1;
             y2 = s->y1;
             fprintf(fp, "  %d %d rlineto\n", x2, y2);
@@ -4286,14 +4295,14 @@ _line_patharrow(FILE *fp,
         __func__, xu->oid, ydir, xox, xoy);
     if(xu->cob.segar) {
         if(xu->cob.segar->use>0) {
-fprintf(fp, "%% %s: segar %p use %d\n",
-    __func__, xu->cob.segar, xu->cob.segar->use);
+fprintf(fp, "%% %s: oid %d segar %p use %d\n",
+    __func__, xu->oid, xu->cob.segar, xu->cob.segar->use);
             fprintf(stdout, "segar oid %d ", xu->oid);
             varray_fprintv(stdout, xu->cob.segar);
         }
         else {
-fprintf(fp, "%% %s: segar %p use -\n",
-    __func__, xu->cob.segar);
+fprintf(fp, "%% %s: oid %d segar %p use -\n",
+    __func__, xu->oid, xu->cob.segar);
         }
     }
     else {
@@ -4330,7 +4339,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
     }
 
 #if 0
-    varray_fprint(stdout, xu->cob.segar);
+    varray_fprintv(stdout, xu->cob.segar);
 #endif
 #if 0
     fprintf(fp, " gsave %% %s\n", __func__);
@@ -4619,26 +4628,28 @@ PP;
             goto next;
             break;
 
-        case OA_MOVE:
+        case OA_MOVETO:
             x2 = s->x1+xox;
             y2 = s->y1+xoy;
-            fprintf(fp, "  %d %d moveto %% MOVE\n", x2, y2);
+            fprintf(fp, "  %d %d moveto %% MOVETO\n", x2, y2);
             break;
 
-        case OA_RMOVE:
+        case OA_RMOVETO:
             x2 = s->x1;
             y2 = s->y1;
-            fprintf(fp, "  %d %d rmoveto %% RMOVE\n", x2, y2);
-
+            fprintf(fp, "  %d %d rmoveto %% RMOVETO\n", x2, y2);
             break;
 
-        case OA_RLINE:
-            x2 = x1+s->x1;
-            y2 = y1+s->y1;
-#if 0
-            fprintf(fp, "  %d %d rlineto\n", x2, y2);
-#endif
-            goto coord_done;
+        case OA_LINETO:
+            x2 = s->x1+xox;
+            y2 = s->y1+xoy;
+            fprintf(fp, "  %d %d lineto %% LINETO\n", x2, y2);
+            break;
+
+        case OA_RLINETO:
+            x2 = s->x1;
+            y2 = s->y1;
+            fprintf(fp, "  %d %d rlineto %% RLINETO\n", x2, y2);
             break;
 
         case OA_LINE:
@@ -4751,7 +4762,9 @@ P;
         }
         
 next:
+#if 0
         fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
+#endif
         x1 = x2;
         y1 = y2;
     }
@@ -5640,21 +5653,21 @@ skip_arcn:
             goto next;
             break;
 
-        case OA_MOVE:
+        case OA_MOVETO:
             x2 = s->x1 + xox;
             y2 = s->y1 + xoy;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
             break;
 
-        case OA_RMOVE:
+        case OA_RMOVETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
             goto next;
             break;
 
-        case OA_RLINE:
+        case OA_RLINETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
 #if 0
@@ -8835,6 +8848,7 @@ out:
     return 0;
 }
 
+#if 1
 static
 int
 Gpolygon(FILE *fp, int n, double ar, int cc, double aoff)
@@ -8968,6 +8982,7 @@ epsdraw_polygonX(FILE *fp, int xox, int xoy, ob *xu, ns *xns, int cc)
 out:
     return 0;
 }
+#endif
 
         
 int
@@ -9402,19 +9417,21 @@ out:
     return 0;
 }
 
+
+
 int
 mkpath_box(varray_t *sar, int wd, int ht, int rad)
 {
 P;
-    if(rad==0) {
-        try_regsegmove(sar,  -wd/2, -ht/2);
-        try_regsegrline(sar,    wd,     0);
-        try_regsegrline(sar,     0,    ht);
-        try_regsegrline(sar,   -wd,     0);
-        try_regsegrline(sar,     0,   -ht);
+    if(rad<=0) {
+        try_regsegmoveto(sar,  -wd/2, -ht/2);
+        try_regsegrlineto(sar,    wd,     0);
+        try_regsegrlineto(sar,     0,    ht);
+        try_regsegrlineto(sar,   -wd,     0);
+        try_regsegrlineto(sar,     0,   -ht);
     }
     else {
-        try_regsegmove(sar,     -wd/2+rad,        -ht/2);
+        try_regsegmoveto(sar,     -wd/2+rad,        -ht/2);
         try_regsegforward(sar,   wd-2*rad,            0);
         try_regsegarc(sar,            rad,           90);
         try_regsegforward(sar,          0,     ht-2*rad);
@@ -9429,19 +9446,20 @@ P;
     return 0;
 }
 
+
 int
 mkpath_Rbox(varray_t *sar, int wd, int ht, int rad)
 {
 P;
-    if(rad==0) {
-        try_regsegmove(sar,   wd/2, -ht/2);
-        try_regsegrline(sar,   -wd,     0);
-        try_regsegrline(sar,     0,    ht);
-        try_regsegrline(sar,    wd,     0);
-        try_regsegrline(sar,     0,   -ht);
+    if(rad<=0) {
+        try_regsegmoveto(sar,   wd/2, -ht/2);
+        try_regsegrlineto(sar,   -wd,     0);
+        try_regsegrlineto(sar,     0,    ht);
+        try_regsegrlineto(sar,    wd,     0);
+        try_regsegrlineto(sar,     0,   -ht);
     }
     else {
-        try_regsegmove(sar,      wd/2-rad,        -ht/2);
+        try_regsegmoveto(sar,      wd/2-rad,        -ht/2);
         try_regsegforward(sar,-(wd-2*rad),            0);
         try_regsegarcn(sar,           rad,           90);
         try_regsegforward(sar,          0,     ht-2*rad);
@@ -9460,13 +9478,8 @@ int
 mkpath_circle(varray_t *sar, int wd, int ht, int rad)
 {
 P;
-#if 0
-    try_regsegmove(sar,     0, -ht/2);
-    try_regsegarc(sar,   ht/2,   360);
-    try_regsegclose(sar);
-#endif
     if(rad>0) {
-        try_regsegmove(sar,     0,  -rad);
+        try_regsegmoveto(sar,     0,  -rad);
         try_regsegarc(sar,    rad,   360);
         try_regsegclose(sar);
     }
@@ -9475,7 +9488,7 @@ P;
         /* skip */
     }
     else {
-        try_regsegmove(sar,     0, -ht/2);
+        try_regsegmoveto(sar,     0, -ht/2);
         try_regsegarc(sar,   ht/2,   360);
         try_regsegclose(sar);
     }
@@ -9489,7 +9502,7 @@ mkpath_Rcircle(varray_t *sar, int wd, int ht, int rad)
 {
 P;
     if(rad>0) {
-        try_regsegmove(sar,     0,    rad);
+        try_regsegmoveto(sar,     0,    rad);
         try_regsegarcn(sar,    rad,   360);
         try_regsegclose(sar);
     }
@@ -9498,13 +9511,111 @@ P;
         /* skip */
     }
     else {
-        try_regsegmove(sar,     0,   ht/2);
+        try_regsegmoveto(sar,     0,   ht/2);
         try_regsegarcn(sar,   ht/2,   360);
         try_regsegclose(sar);
     }
 
     return 0;
 }
+
+
+int
+mkpath_polygon(varray_t *sar, int wd, int ht, int rad, int aoff, int n, int cc)
+{
+    double ar, br;
+    int i;
+    double x2, y2;
+    double x3, y3;
+    double x4, y4;
+P;
+
+    if(rad==0) {
+        goto out;
+    }
+    if(rad<0) {
+        ar = ht/2;
+    }
+    if(rad>0) {
+        ar = rad;
+    }
+
+    br = ar*cos(M_PI*2/(double)n)/cos(M_PI*2/(double)n/2.0);
+
+Echo("polygon:  ar %f, br %f, aoff %d, n %d, cc %d\n", ar, br, aoff, n, cc);
+
+    for(i=0;i<n;i++) {
+        x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
+        y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
+        x3 = br*cos(M_PI*2/(double)n*((double)i+0.5)+aoff);
+        y3 = br*sin(M_PI*2/(double)n*((double)i+0.5)+aoff);
+        x4 = ar*cos(M_PI*2/(double)n*((double)i+1.0)+aoff);
+        y4 = ar*sin(M_PI*2/(double)n*((double)i+1.0)+aoff);
+        if(i==0) {
+            try_regsegmoveto(sar,     x2, y2);
+        }
+        else {
+        }
+        if(cc) {
+            try_regseglineto(sar,    x3, y3);
+        }
+            try_regseglineto(sar,    x4, y4);
+    }
+    try_regsegclose(sar);
+
+out:
+    return 0;
+}
+
+
+int
+mkpath_Rpolygon(varray_t *sar, int wd, int ht, int rad, int aoff, int n, int cc)
+{
+    double ar, br;
+    int i;
+    double x2, y2;
+    double x3, y3;
+    double x4, y4;
+P;
+
+    if(rad==0) {
+        goto out;
+    }
+    if(rad<0) {
+        ar = ht/2;
+    }
+    if(rad>0) {
+        ar = rad;
+    }
+
+    br = ar*cos(M_PI*2/(double)n)/cos(M_PI*2/(double)n/2.0);
+
+Echo("Rpolygon: ar %f, br %f, aoff %d, n %d, cc %d\n", ar, br, aoff, n, cc);
+
+    for(i=0;i<n;i++) {
+        x2 = ar*cos(M_PI*2/(double)n*(double)-i+aoff);
+        y2 = ar*sin(M_PI*2/(double)n*(double)-i+aoff);
+        x3 = br*cos(M_PI*2/(double)n*((double)-i-0.5)+aoff);
+        y3 = br*sin(M_PI*2/(double)n*((double)-i-0.5)+aoff);
+        x4 = ar*cos(M_PI*2/(double)n*((double)-i-1.0)+aoff);
+        y4 = ar*sin(M_PI*2/(double)n*((double)-i-1.0)+aoff);
+        if(i==0) {
+            try_regsegmoveto(sar,     x2, y2);
+        }
+        else {
+        }
+        if(cc) {
+            try_regseglineto(sar,    x3, y3);
+        }
+            try_regseglineto(sar,    x4, y4);
+    }
+    try_regsegclose(sar);
+
+out:
+    return 0;
+}
+
+
 
 int
 mkpath_ellipseXXX(varray_t *sar, int wd, int ht, int rad, int dir)
@@ -9516,13 +9627,13 @@ mkpath_ellipseXXX(varray_t *sar, int wd, int ht, int rad, int dir)
     double ep = 0.01*objunit;
 P;
 #if 0
-    try_regsegmove(sar,     0, -ht/2);
+    try_regsegmoveto(sar,     0, -ht/2);
     try_regsegarc(sar,   ht/2,   360);
 #endif
     a = ((double)wd/ht);
 Echo("a %9.2f\n", a);
     r = ((double)ht)/2;
-    try_regsegmove(sar,     0, -r);
+    try_regsegmoveto(sar,     0, -r);
     lx = 0;
     ly = -r;
     for(y=-r;y<=r;y+=ep) {
@@ -9565,13 +9676,13 @@ XXXmkpath_ellipse(varray_t *sar, int wd, int ht, int rad)
     double ep = 0.01*objunit;
 P;
 #if 0
-    try_regsegmove(sar,     0, -ht/2);
+    try_regsegmoveto(sar,     0, -ht/2);
     try_regsegarc(sar,   ht/2,   360);
 #endif
     a = ((double)wd/ht);
 Echo("a %9.2f\n", a);
     r = ((double)ht)/2;
-    try_regsegmove(sar,     0, -r);
+    try_regsegmoveto(sar,     0, -r);
     lx = 0;
     ly = -r;
     for(y=-r;y<=r;y+=ep) {
@@ -9602,7 +9713,102 @@ fprintf(stderr, "d y %9.2f x %9.2f\n", y-ly, x-lx);
 
 
 int
-epsdraw_dmyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+mkpath_paper(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,  -wd/2, -ht/2);
+    try_regsegrlineto(sar,    wd-ht/4,     0);
+    try_regsegrlineto(sar,    ht/4, ht/4);
+    try_regsegrlineto(sar,     0,    ht-ht/4);
+    try_regsegrlineto(sar,   -wd,     0);
+    try_regsegrlineto(sar,     0,   -ht);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
+Gpaper_surface(FILE *fp, int wd, int ht)
+{
+    fprintf(fp, 
+"  newpath %d %d moveto %d %d rlineto %d %d rlineto closepath fill %% paper-surface\n",
+        wd/2-ht/4, -ht/2, ht/4, ht/4, -ht/4, 0);
+}
+
+int
+mkpath_card(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,  -wd/2,   -ht/2);
+    try_regsegrlineto(sar,    wd,       0);
+    try_regsegrlineto(sar,     0, ht-ht/4);
+    try_regsegrlineto(sar, -ht/4,    ht/4);
+    try_regsegrlineto(sar, -wd+ht/4,    0);
+    try_regsegrlineto(sar,     0,    -ht);
+    try_regsegclose(sar);
+
+    return 0;
+
+}
+
+int
+mkpath_diamond(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,      0,   -ht/2);
+    try_regsegrlineto(sar,  wd/2,    ht/2);
+    try_regsegrlineto(sar, -wd/2,    ht/2);
+    try_regsegrlineto(sar, -wd/2,   -ht/2);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
+mkpath_Rdiamond(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,      0,   -ht/2);
+    try_regsegrlineto(sar, -wd/2,    ht/2);
+    try_regsegrlineto(sar,  wd/2,    ht/2);
+    try_regsegrlineto(sar,  wd/2,   -ht/2);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
+mkpath_house(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,  -wd/2,   -ht/2);
+    try_regsegrlineto(sar,    wd,       0);
+    try_regsegrlineto(sar,     0, ht-ht/4);
+    try_regsegrlineto(sar, -wd/2,    ht/4);
+    try_regsegrlineto(sar, -wd/2,   -ht/4);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
+mkpath_Rhouse(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,  -wd/2,   -ht/2);
+    try_regsegrlineto(sar,     0, ht-ht/4);
+    try_regsegrlineto(sar,  wd/2,    ht/4);
+    try_regsegrlineto(sar,  wd/2,   -ht/4);
+    try_regsegrlineto(sar,     0, -ht+ht/4);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+
+
+int
+epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
     int ik;
     int mx, my;
@@ -9617,33 +9823,42 @@ fprintf(fp, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
 Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     saved_segar = xu->cob.segar;
-#if 0
-    fprintf(stdout, "b ");
-    varray_fprint(stdout, xu->cob.segar);
-#endif
 
     a = 1.0;
     
     switch(xu->type) {
     case CMD_CHUNK:
     case CMD_BOX:
-#if 0
-    case CMD_DMY1:
-#endif
         ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
+    case CMD_PAPER:
+        ik = mkpath_paper(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        break;
+    case CMD_CARD:
+        ik = mkpath_card(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        break;
+    case CMD_DIAMOND:
+        ik = mkpath_diamond(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rdiamond(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        break;
+    case CMD_HOUSE:
+        ik = mkpath_house(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rhouse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        break;
     case CMD_CIRCLE:
-#if 0
-    case CMD_DMY2:
-#endif
         ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
         ik = mkpath_Rcircle(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
+    case CMD_POLYGON:
+        ik = mkpath_polygon(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad,
+                xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
+        ik = mkpath_Rpolygon(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad,
+                xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
+        break;
     case CMD_ELLIPSE:
-#if 0
-    case CMD_DMY3:
-#endif
         ik = mkpath_ellipse(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
         ik = mkpath_Rellipse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
@@ -9651,49 +9866,25 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         fprintf(fp, "%% unknown type %d\n", xu->type);
         break;
     }
-#if 0
-    try_regsegmove(xu->cob.segar,         0, -xu->ht/2);
-    try_regsegarc(xu->cob.segar,   xu->ht/2, 360);
-#endif
+
+    fprintf(fp, "gsave %% bodyX\n");
 
 #if 0
-    fprintf(stdout, "a ");
-    varray_fprint(stdout, xu->cob.segar);
-#endif
-
-    fprintf(fp, "gsave %% dmyX\n");
-
-
     changecolor(fp, xu->cob.outlinecolor);
     changethick(fp, xu->cob.outlinethick);
+#endif
     fprintf(fp, "  %d %d translate 0 0 moveto %d rotate\n",
         xu->x+xox, xu->y+xoy, xu->cob.rotateval);
-    fprintf(fp, "  %f %f scale\n", a, 1.0);
+    fprintf(fp, "  %.3f %.3f scale\n", a, 1.0);
 
     if(xu->cob.marknode) {
         MX(0, 0, 0);
     }
 
+    /*****
+     ***** BACK
+     *****/
     if(xu->cob.backhatch != HT_NONE && xu->cob.backcolor>=0) {
-        if(0 && xu->cob.hollow && xu->cob.seghar) {
-            fprintf(fp, " gsave %% for hollow+clip+back\n");
-
-            changecolor(fp, xu->cob.backcolor);
-            changethick(fp, xu->cob.hatchthick);
-            ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
-
-            fprintf(fp, "     0.8 0.8 scale\n");
-            ik = _line_pathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
-            fprintf(fp, "  clip\n");
-
-            fprintf(fp, "     1.25 1.25 scale\n");
-
-            epsdraw_hatch(fp, xu->wd, xu->ht,
-              xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
-
-            fprintf(fp, " grestore\n");
-         }
-         else {
             fprintf(fp, " gsave %% for clip+back\n");
             changecolor(fp, xu->cob.backcolor);
             changethick(fp, xu->cob.hatchthick);
@@ -9704,18 +9895,18 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
               xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
 
             fprintf(fp, " grestore\n");
-        }
-
     }
     else {
         fprintf(fp, "%% skip clip+back\n");
     }
 
+    /*****
+     ***** FILL
+     *****/
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         if(xu->cob.hollow && xu->cob.seghar) {
             fprintf(fp, " gsave %% for hollow+clip+fill\n");
 
-#if 1
             changecolor(fp, xu->cob.fillcolor);
             changethick(fp, xu->cob.hatchthick);
             ik = _line_pathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
@@ -9728,24 +9919,6 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
-
-#endif
-
-#if 0
-            changecolor(fp, xu->cob.fillcolor);
-            changethick(fp, xu->cob.hatchthick);
-            ik = _line_path(fp, 0, 0, 0, xu, xns);
-            fprintf(fp, "  clip\n");
-
-            epsdraw_hatch(fp, xu->wd, xu->ht,
-              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
-
-            fprintf(fp, "     0.8 0.8 scale\n");
-            fprintf(fp, "     1 0 0 setrgbcolor\n");
-            ik = _line_Rpath(fp, 0, 0, 0, xu, xns);
-            fprintf(fp, "  stroke\n");
-
-#endif
 
             fprintf(fp, " grestore\n");
          }
@@ -9767,39 +9940,51 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         fprintf(fp, "%% skip clip+fill\n");
     }
 
+    /*****
+     ***** DECO
+     *****/
     if(xu->cob.deco) {
         fprintf(fp, " %% deco |%s|\n", xu->cob.deco);
-#if 0
-            _box_path(fp, x1, y1, aw, ah, r, EPSOP_CLIP);
-#endif
         fprintf(fp, " gsave %% for clip+fill\n");
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
         ik = _line_path(fp, 0, 0, 0, xu, xns);
+#if 0
         fprintf(fp, "  closepath\n");
+#endif
         fprintf(fp, "  clip\n");
         epsdraw_deco(fp, xu->wd, xu->ht,
             xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
         fprintf(fp, " grestore\n");
     }
     else {
-        fprintf(fp, "%% no-deco\n");
+        fprintf(fp, "%% skip deco\n");
     }
 
+    /*****
+     ***** OUTLINE
+     *****/
     if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
-        fprintf(fp, " gsave %% for drawing\n");
+        fprintf(fp, " gsave %% for outline\n");
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
         ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+
+        /*** SURFACE ***/
+        if(xu->type==CMD_PAPER) {
+            fprintf(fp, "  %% surface\n");
+            ik = Gpaper_surface(fp,  xu->wd, xu->ht);
+        }
         fprintf(fp, " grestore\n");
     }
     else {
-        fprintf(fp, "%% skip drawing\n");
+        fprintf(fp, "%% skip outline\n");
     }
 
-    fprintf(fp, "grestore %% dmyX\n");
+    fprintf(fp, "grestore %% bodyX\n");
 
     return 0;
 }
-
 
 
 int
@@ -12443,6 +12628,8 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 #endif
     }
 
+    changenormal(fp); /* for faill safe */
+
     if(u->type==CMD_SCATTER) {
         epsdraw_scatter(fp, *xdir, ox, oy, u, xns);
     }
@@ -12510,20 +12697,6 @@ P;
 #endif
     }
 
-
-    changenormal(fp); /* for faill safe */
-    if(u->type==CMD_PAPER) {
-        epsdraw_paper(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_CARD) {
-        epsdraw_card(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DIAMOND) {
-        epsdraw_diamond(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_HOUSE) {
-        epsdraw_house(fp, ox, oy, u, xns);
-    }
     if(u->type==CMD_CLOUD) {
         epsdraw_cloud(fp, ox, oy, u, xns);
     }
@@ -12533,7 +12706,8 @@ P;
     if(u->type==CMD_DOTS) {
         epsdraw_dots(fp, ox, oy, u, xns);
     }
-    if(u->type==CMD_POLYGON) {
+#if 1
+    if(u->type==CMD_DMY1) {
         if(u->cob.concave) {
         epsdraw_polygonX(fp, ox, oy, u, xns, 1);
         }
@@ -12541,37 +12715,15 @@ P;
         epsdraw_polygonX(fp, ox, oy, u, xns, 0);
         }
     }
+#endif
     if(u->type==CMD_RULER) {
         epsdraw_ruler(fp, ox, oy, u, xns);
     }
-#if 0
-    if(u->type==CMD_BOX) {
-        epsdraw_box(fp, ox, oy, u, xns);
+    if(u->type==CMD_BOX || u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE ||
+        u->type==CMD_PAPER || u->type==CMD_CARD || u->type==CMD_DIAMOND ||
+        u->type==CMD_HOUSE || u->type==CMD_POLYGON) {
+        epsdraw_bodyX(fp, ox, oy, u, xns);
     }
-    if(u->type==CMD_CIRCLE) {
-        epsdraw_circle(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_ELLIPSE) {
-        epsdraw_ellipse(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DMY1) {
-        epsdraw_dmy1(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DMY2) {
-        epsdraw_dmy2(fp, ox, oy, u, xns);
-    }
-    if(u->type==CMD_DMY3) {
-        epsdraw_dmy3(fp, ox, oy, u, xns);
-    }
-#endif
-    if(u->type==CMD_BOX|| u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE) {
-        epsdraw_dmyX(fp, ox, oy, u, xns);
-    }
-#if 0
-    if(u->type==CMD_DMY1|| u->type==CMD_DMY2 || u->type==CMD_DMY3) {
-        epsdraw_dmyX(fp, ox, oy, u, xns);
-    }
-#endif
 
     if(u->cob.ssar) {
         int _tbgc = -1;
@@ -12706,7 +12858,7 @@ PP;
 #if 0
             ik = epsdraw_box(fp, gox, goy, xch, xns);
 #endif
-            ik = epsdraw_dmyX(fp, gox, goy, xch, xns);
+            ik = epsdraw_bodyX(fp, gox, goy, xch, xns);
         }
 
         fprintf(fp, "%% chunk itself END\n");

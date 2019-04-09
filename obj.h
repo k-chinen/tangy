@@ -312,11 +312,12 @@ extern apair_t lo_ial[];
 #define OA_JOIN             (321)
 #define OA_SKIP             (322)
 
-#define OA_MOVE             (350)
-#define OA_RMOVE            (351)
-#define OA_LINE             (352)
-#define OA_RLINE            (353)
+#define OA_MOVETO           (350)
+#define OA_RMOVETO          (351)
+#define OA_LINETO           (352)
+#define OA_RLINETO          (353)
 #define OA_CLOSE            (354)
+#define OA_LINE             (360)
 
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)

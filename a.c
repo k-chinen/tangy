@@ -64,6 +64,33 @@ confirm_attr(ob *xo)
         xo->floated = 1;
     }
 #endif
+    
+    if(xo->type==CMD_CIRCLE) {
+#if 1
+fprintf(stderr, "circle rad %d\n", xoa->rad);
+#endif
+    }
+    
+    if(xo->type==CMD_POLYGON) {
+#if 1
+fprintf(stderr, "polygon rad %d\n", xoa->rad);
+#endif
+    }
+
+    if(xo->type==CMD_POLYGON) {
+        if(xoa->polypeak<3) {
+            int nv;
+#if 0
+fprintf(stderr, "polygon peak %d\n", xoa->polypeak);
+#endif
+            nv = 3;
+#if 1
+fprintf(stderr, "%s: FIX polygon peak %d -> %d\n",
+        __func__, xoa->polypeak, nv);
+#endif
+            xoa->polypeak = nv;
+        }
+    }
 
     return 0;
 }

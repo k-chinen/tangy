@@ -1234,7 +1234,8 @@ Echo("\t  2   wd %d ht %d\n", wd, ht);
     if(u->ht<0) u->ht = ht;
 
 #if 1
-    if(u->type==CMD_CIRCLE) {
+    /*** FIX ***/
+    if(u->type==CMD_CIRCLE || u->type==CMD_POLYGON) {
         if(u->cob.rad>0) {
             u->wd = u->cob.rad*2;
             u->ht = u->cob.rad*2;
