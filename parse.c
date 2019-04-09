@@ -1054,14 +1054,14 @@ parseobj(char *p)
 
     nob->type = ot;
 
-    /* common */
+    /* common init */
     nob->cob.outlinecolor   = def_fgcolor;
     nob->cob.outlinethick   = def_linethick;
     nob->cob.hatchpitch     = def_hatchpitch;
     nob->cob.hatchthick     = def_hatchthick;
-    nob->cob.backcolor      = 0;
+    nob->cob.backcolor      = def_bgcolor;
     nob->cob.backhatch      = HT_NONE;
-    nob->cob.fillcolor      = 0;
+    nob->cob.fillcolor      = def_fgcolor;
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
@@ -1178,7 +1178,7 @@ fflush(stdout);
     dump_objattr(nob->cob);
 #endif
 
-    confirm_objattr(nob->cob);
+    confirm_objattr(&nob->cob);
     confirm_attr(nob);
 
 #if 0

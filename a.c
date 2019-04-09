@@ -31,8 +31,9 @@
 #endif
 
 int
-confirm_objattr(struct obattr xoa) 
+confirm_objattr(struct obattr *xoa) 
 {
+#if 0
     if(xoa.fillhatch==HT_SOLID) {
         if(xoa.fillcolor<0) {
             xoa.fillcolor = def_color;
@@ -44,6 +45,15 @@ confirm_objattr(struct obattr xoa)
         }
     }
             xoa.textbgcolor = def_bgcolor;
+
+#endif
+
+    if(xoa->shadow) {
+        if(xoa->backhatch==HT_NONE) {
+            xoa->backcolor = def_bgcolor;
+            xoa->backhatch = HT_SOLID;
+        }
+    }
 
     return 0;
 }
@@ -65,18 +75,6 @@ confirm_attr(ob *xo)
     }
 #endif
     
-    if(xo->type==CMD_CIRCLE) {
-#if 1
-fprintf(stderr, "circle rad %d\n", xoa->rad);
-#endif
-    }
-    
-    if(xo->type==CMD_POLYGON) {
-#if 1
-fprintf(stderr, "polygon rad %d\n", xoa->rad);
-#endif
-    }
-
     if(xo->type==CMD_POLYGON) {
         if(xoa->polypeak<3) {
             int nv;

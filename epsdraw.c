@@ -1,3 +1,6 @@
+/***
+ *** EPS output routines
+ ***/
 
 #include <stdio.h>
 
@@ -3880,20 +3883,19 @@ _line_pathMM(FILE *fp,
 #if 1
 Echo("%s: ydir %d xox %d xoy %d MM %d f_new %d f_close %d\n",
     __func__, ydir, xox, xoy, MM, f_new, f_close);
-fprintf(fp, "%% %s: ydir %d xox %d xoy %d MM %d f_new %d f_close %d\n",
-    __func__, ydir, xox, xoy, MM, f_new, f_close);
-
 #endif
 
-    if(MM==1) {
+    if(MM==0) {
         qar = xu->cob.seghar;
     }
     else {
         qar = xu->cob.segar;
     }
 
+#if 0
     Echo("%s: enter MM %d qar %p %d\n",
         __func__, MM, qar, ((qar)? qar->use : -1));
+#endif
 
     cdir = ydir;
 
@@ -4289,14 +4291,18 @@ _line_patharrow(FILE *fp,
 
     int actfh, actch, actbh;
 
+#if 0
     Echo("%s: oid %d enter ydir %d xox %d xoy %d \n",
         __func__, xu->oid, ydir, xox, xoy);
+#endif
     if(xu->cob.segar) {
         if(xu->cob.segar->use>0) {
 fprintf(fp, "%% %s: oid %d segar %p use %d\n",
     __func__, xu->oid, xu->cob.segar, xu->cob.segar->use);
-            fprintf(stdout, "segar oid %d ", xu->oid);
-            varray_fprintv(stdout, xu->cob.segar);
+            if(INTRACE) {
+                fprintf(stdout, "segar oid %d ", xu->oid);
+                varray_fprintv(stdout, xu->cob.segar);
+            }
         }
         else {
 fprintf(fp, "%% %s: oid %d segar %p use -\n",
@@ -4375,7 +4381,7 @@ fprintf(fp, "%% %s: no segar %p use -\n",
             continue;
         }
 
-#if 1
+#if 0
 Echo("%s: i %d ptype %d\n", __func__, i, s->ptype);
 #endif
 
@@ -4398,12 +4404,12 @@ Echo("%s: i %d ptype %d\n", __func__, i, s->ptype);
             }
         }
 
+#if 0
 Echo("%s: oid %d i %d seg-arrow actbh %d actch %d achbh %d\n",
     __func__, xu->oid, i, actbh, actch, actfh);
 Echo("%s: oid %d i %d s ptype %d x1,y1 %d,%d x2,y2 %d,%d\n",
     __func__, xu->oid, i, s->ptype, s->x1, s->y1, s->x2, s->y2);
-
-
+#endif
 
         if(xu->cob.marknode) {
             markfdot(xu->cob.outlinecolor, x1, y1);
@@ -5260,11 +5266,13 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     for(i=0;i<xu->cob.segar->use;i++) {
 P;
 
+#if 0
         if(count>10) {
             printf("%s:%d oid %d count %d\n",
                 __func__, __LINE__, xu->oid, count);
             fflush(stdout);
         }
+#endif
 
         isfseg = 0;
         if(i>=xu->cob.segar->use-1) {
@@ -9076,6 +9084,7 @@ out:
     return 0;
 }
 
+#if 0
 int
 epsdraw_drum(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -9209,6 +9218,7 @@ apply:
 out:
     return 0;
 }
+#endif
 
 int
 epsdraw_ruler(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -9803,7 +9813,107 @@ P;
     return 0;
 }
 
+int
+Gdrum_surface(FILE *fp, int wd, int ht)
+{
+    int i;
+    int p=10;
+    double x, y;
 
+P;
+    fprintf(fp, "%% drum-surface\n");
+    fprintf(fp, "  gsave\n");
+    fprintf(fp, "  2 setlinejoin\n");
+    fprintf(fp, "  newpath\n");
+    fprintf(fp, "  %d %d moveto\n", -wd/2, 3*ht/8);
+    for(i=180;i<=360;i+=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/8*sin(M_PI/180*i);
+        fprintf(fp, "  %d %d lineto\n", (int)x, (int)(3*ht/8+y));
+    }
+    fprintf(fp, "  stroke\n");
+    fprintf(fp, "  grestore\n");
+
+    return 0;
+}
+
+int
+mkpath_drum(varray_t *sar, int wd, int ht, int rad)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    try_regsegmoveto(sar,  -wd/2,   -3*ht/8);
+    for(i=180;i<=360;i+=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/8*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,   -3*ht/8+y);
+    }
+    try_regsegrlineto(sar,     0,    6*ht/8);
+    for(i=0;i<=180;i+=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/8*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,    3*ht/8+y);
+    }
+    try_regseglineto(sar,  -wd/2,   -3*ht/8);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+
+int
+Omkpath_drum(varray_t *sar, int wd, int ht, int rad)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    try_regsegmoveto(sar,  -wd/2,   -ht/4);
+    for(i=180;i<=360;i+=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/4*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,   -ht/4+y);
+    }
+    try_regsegrlineto(sar,     0,    ht/2);
+    for(i=0;i<=180;i+=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/4*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,    ht/4+y);
+    }
+    try_regseglineto(sar,  -wd/2,   -ht/4);
+    try_regsegclose(sar);
+
+    return 0;
+}
+
+int
+mkpath_Rdrum(varray_t *sar, int wd, int ht, int rad)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    try_regsegmoveto(sar,  -wd/2,   -3*ht/8);
+    try_regsegrlineto(sar,     0,    6*ht/8);
+    for(i=180;i>=0;i-=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/8*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,   3*ht/8+y);
+    }
+    for(i=0;i>=-180;i-=p) {
+        x = wd/2*cos(M_PI/180*i);
+        y = ht/8*sin(M_PI/180*i);
+        try_regseglineto(sar,  x,   -3*ht/8+y);
+    }
+    try_regsegclose(sar);
+
+    return 0;
+}
 
 int
 epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -9860,6 +9970,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         ik = mkpath_ellipse(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
         ik = mkpath_Rellipse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
         break;
+    case CMD_DRUM:
+        ik = mkpath_drum(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_Rdrum(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        break;
     default:
         fprintf(fp, "%% unknown type %d\n", xu->type);
         break;
@@ -9879,35 +9993,33 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         MX(0, 0, 0);
     }
 
-#if 1
     /*****
      ***** SHADE
      *****/
     if(xu->cob.shadow) {
-            fprintf(fp, "  gsave    %% for shadow\n");
-            fprintf(fp, "    %d -%d translate\n", objunit/10, objunit/10);
-            changecolor(fp, xu->cob.outlinecolor);
-            changethick(fp, xu->cob.hatchthick);
-            ik = _line_path(fp, 0, 0, 0, xu, xns);
-            fprintf(fp, "  fill     %% for shadow\n");
-            fprintf(fp, "  grestore %% for shadow\n");
+        fprintf(fp, "  gsave    %% for shadow\n");
+        fprintf(fp, "    %d -%d translate\n", objunit/10, objunit/10);
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.hatchthick);
+        ik = _line_path(fp, 0, 0, 0, xu, xns);
+        fprintf(fp, "  fill     %% for shadow\n");
+        fprintf(fp, "  grestore %% for shadow\n");
     }
-#endif
 
     /*****
      ***** BACK
      *****/
     if(xu->cob.backhatch != HT_NONE && xu->cob.backcolor>=0) {
-            fprintf(fp, "  gsave %% for clip+back\n");
-            changecolor(fp, xu->cob.backcolor);
-            changethick(fp, xu->cob.hatchthick);
-            ik = _line_path(fp, 0, 0, 0, xu, xns);
-            fprintf(fp, "  clip\n");
+        fprintf(fp, "  gsave %% for clip+back\n");
+        changecolor(fp, xu->cob.backcolor);
+        changethick(fp, xu->cob.hatchthick);
+        ik = _line_path(fp, 0, 0, 0, xu, xns);
+        fprintf(fp, "  clip\n");
 
-            epsdraw_hatch(fp, xu->wd, xu->ht,
-              xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+        epsdraw_hatch(fp, xu->wd, xu->ht,
+          xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
 
-            fprintf(fp, "  grestore\n");
+        fprintf(fp, "  grestore\n");
     }
     else {
         fprintf(fp, "  %% skip clip+back\n");
@@ -9968,6 +10080,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         if(xu->type==CMD_PAPER) {
             fprintf(fp, "  %% surface\n");
             ik = Gpaper_surface(fp,  xu->wd, xu->ht);
+        }
+        if(xu->type==CMD_DRUM) {
+            fprintf(fp, "  %% surface\n");
+            ik = Gdrum_surface(fp,  xu->wd, xu->ht);
         }
         fprintf(fp, "  grestore %% for outline\n");
     }
@@ -12715,9 +12831,11 @@ P;
     if(u->type==CMD_CLOUD) {
         epsdraw_cloud(fp, ox, oy, u, xns);
     }
+#if 0
     if(u->type==CMD_DRUM) {
         epsdraw_drum(fp, ox, oy, u, xns);
     }
+#endif
     if(u->type==CMD_DOTS) {
         epsdraw_dots(fp, ox, oy, u, xns);
     }
@@ -12726,7 +12844,7 @@ P;
     }
     if(u->type==CMD_BOX || u->type==CMD_CIRCLE || u->type==CMD_ELLIPSE ||
         u->type==CMD_PAPER || u->type==CMD_CARD || u->type==CMD_DIAMOND ||
-        u->type==CMD_HOUSE || u->type==CMD_POLYGON) {
+        u->type==CMD_HOUSE || u->type==CMD_POLYGON || u->type==CMD_DRUM) {
         epsdraw_bodyX(fp, ox, oy, u, xns);
     }
 

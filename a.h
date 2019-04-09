@@ -7,7 +7,7 @@ int dellastcharif(char *src, int xch);
 char *draw_wordDQ(char *src, char *dst, int wlen);
 char *draw_wordW(char *src, char *dst, int wlen);
 char *draw_word(char *src, char *dst, int wlen, int sep);
-int confirm_objattr(struct obattr xoa);
+int confirm_objattr(struct obattr *xoa);
 int confirm_attr(ob *xo);
 int dump_objattr(struct obattr xo);
 int cha_fprint(FILE *fp, char *msg, ch *tg);

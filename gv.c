@@ -440,6 +440,7 @@ int def_scale           =   1;
 int def_color           =   0;
 int def_fgcolor         =   0;
 int def_bgcolor         =   7;
+int def_backhatch       =   HT_SOLID;
 
 int def_linethickmode   =   1;
 int def_linethick       =   1;
