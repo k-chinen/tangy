@@ -12,8 +12,6 @@
 #include "font.h"
 #include "tx.h"
 #include "a.h"
-#if 0
-#endif
 #include "bez.h"
 #include "xns.h"
 #include "put.h"
@@ -5132,8 +5130,8 @@ __line_deco2(FILE *fp,
     int fsegtype;
 
 P;
-    changethick(fp, xu->vob.outlinethick);
     changecolor(fp, xu->vob.outlinecolor);
+    changethick(fp, xu->vob.outlinethick);
 
     if(xu->cob.outlinetype==LT_SOLID) {
 P;
@@ -8532,7 +8530,7 @@ Echo("  --- calc size 2\n");
 
 
         if(mcar[i]<=0) {
-            fprintf(fp, "%% skip  sstr drawing %d mcar %d\n", i, mcar[i]);
+            fprintf(fp, "  %% skip  sstr drawing %d mcar %d\n", i, mcar[i]);
             goto skip_txtdrawing;
         }
 
@@ -9881,11 +9879,26 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         MX(0, 0, 0);
     }
 
+#if 1
+    /*****
+     ***** SHADE
+     *****/
+    if(xu->cob.shadow) {
+            fprintf(fp, "  gsave    %% for shadow\n");
+            fprintf(fp, "    %d -%d translate\n", objunit/10, objunit/10);
+            changecolor(fp, xu->cob.outlinecolor);
+            changethick(fp, xu->cob.hatchthick);
+            ik = _line_path(fp, 0, 0, 0, xu, xns);
+            fprintf(fp, "  fill     %% for shadow\n");
+            fprintf(fp, "  grestore %% for shadow\n");
+    }
+#endif
+
     /*****
      ***** BACK
      *****/
     if(xu->cob.backhatch != HT_NONE && xu->cob.backcolor>=0) {
-            fprintf(fp, " gsave %% for clip+back\n");
+            fprintf(fp, "  gsave %% for clip+back\n");
             changecolor(fp, xu->cob.backcolor);
             changethick(fp, xu->cob.hatchthick);
             ik = _line_path(fp, 0, 0, 0, xu, xns);
@@ -9894,10 +9907,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
 
-            fprintf(fp, " grestore\n");
+            fprintf(fp, "  grestore\n");
     }
     else {
-        fprintf(fp, "%% skip clip+back\n");
+        fprintf(fp, "  %% skip clip+back\n");
     }
 
     /*****
@@ -9905,7 +9918,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
      *****/
     if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
         if(xu->cob.hollow && xu->cob.seghar) {
-            fprintf(fp, " gsave %% for hollow+clip+fill\n");
+            fprintf(fp, "  gsave %% for hollow+clip+fill\n");
 
             changecolor(fp, xu->cob.fillcolor);
             changethick(fp, xu->cob.hatchthick);
@@ -9920,10 +9933,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
-            fprintf(fp, " grestore\n");
+            fprintf(fp, "  grestore\n");
          }
          else {
-            fprintf(fp, " gsave %% for clip+fill\n");
+            fprintf(fp, "  gsave %% for clip+fill\n");
             changecolor(fp, xu->cob.fillcolor);
             changethick(fp, xu->cob.hatchthick);
             ik = _line_path(fp, 0, 0, 0, xu, xns);
@@ -9932,12 +9945,34 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
 
-            fprintf(fp, " grestore\n");
+            fprintf(fp, "  grestore\n");
         }
 
     }
     else {
-        fprintf(fp, "%% skip clip+fill\n");
+        fprintf(fp, "  %% skip clip+fill\n");
+    }
+
+    /*****
+     ***** OUTLINE
+     *****/
+    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
+        fprintf(fp, "  gsave %% for outline\n");
+#if 0
+        changecolor(fp, xu->cob.outlinecolor);
+        changethick(fp, xu->cob.outlinethick);
+#endif
+        ik = _line_deco2(fp, 0, 0, 0, xu, xns);
+
+        /*** SURFACE ***/
+        if(xu->type==CMD_PAPER) {
+            fprintf(fp, "  %% surface\n");
+            ik = Gpaper_surface(fp,  xu->wd, xu->ht);
+        }
+        fprintf(fp, "  grestore %% for outline\n");
+    }
+    else {
+        fprintf(fp, "  %% skip outline\n");
     }
 
     /*****
@@ -9958,27 +9993,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         fprintf(fp, " grestore\n");
     }
     else {
-        fprintf(fp, "%% skip deco\n");
-    }
-
-    /*****
-     ***** OUTLINE
-     *****/
-    if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
-        fprintf(fp, " gsave %% for outline\n");
-        changecolor(fp, xu->cob.outlinecolor);
-        changethick(fp, xu->cob.outlinethick);
-        ik = _line_deco2(fp, 0, 0, 0, xu, xns);
-
-        /*** SURFACE ***/
-        if(xu->type==CMD_PAPER) {
-            fprintf(fp, "  %% surface\n");
-            ik = Gpaper_surface(fp,  xu->wd, xu->ht);
-        }
-        fprintf(fp, " grestore\n");
-    }
-    else {
-        fprintf(fp, "%% skip outline\n");
+        fprintf(fp, "  %% skip deco\n");
     }
 
     fprintf(fp, "grestore %% bodyX\n");
@@ -12706,16 +12721,6 @@ P;
     if(u->type==CMD_DOTS) {
         epsdraw_dots(fp, ox, oy, u, xns);
     }
-#if 1
-    if(u->type==CMD_DMY1) {
-        if(u->cob.concave) {
-        epsdraw_polygonX(fp, ox, oy, u, xns, 1);
-        }
-        else {
-        epsdraw_polygonX(fp, ox, oy, u, xns, 0);
-        }
-    }
-#endif
     if(u->type==CMD_RULER) {
         epsdraw_ruler(fp, ox, oy, u, xns);
     }

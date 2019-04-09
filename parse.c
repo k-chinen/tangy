@@ -749,6 +749,9 @@ P;
     ISET(OA_TEXTBGCOLOR,    textbgcolor);
     ISET(OA_TEXTROTATE,     textrotate);
 
+    ONSET(OA_HOLLOW,        hollow);
+    ONSET(OA_SHADOW,        shadow);
+
     AISET(OA_LINKSTYLE, ls_ial, linkstyle);
     ISET(OA_RAD,            rad);
     ISET(OA_PEAK,           polypeak);
@@ -777,6 +780,7 @@ P;
     ISET(OA_BACKCHOP,       backchop);
     ISET(OA_BULGE,          bulge);
 
+
     GFSET(OA_TEXTHEIGHTFACTOR,      textheightfactor);
     GFSET(OA_ARROWSIZEFACTOR,       arrowsizefactor);
     GFSET(OA_LINETHICKFACTOR,       linethickfactor);
@@ -786,6 +790,7 @@ P;
     GFSET(OA_HATCHPITCHFACTOR,      hatchpitchfactor);
     GFSET(OA_NOTEOSEPFACTOR,        noteosepfactor);
     GFSET(OA_NOTEISEPFACTOR,        noteisepfactor);
+
 
 #if 0
     if(strcasecmp(name, "linetype")==0)        {
@@ -983,10 +988,12 @@ Info("sub-command '%s' argument skip\n", name);
         rob->cob.markguide = 1;
         uc++;
     }
+#if 0
     else if(oak==OA_HOLLOW) {
         rob->cob.hollow = 1;
         uc++;
     }
+#endif
     else if(oak==OA_ARROWEVERY) {
         rob->cob.arrowevery = 1;
         uc++;

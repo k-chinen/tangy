@@ -343,6 +343,7 @@ apair_t objattr_ial[] = {
     {"markguide",           OA_MARKGUIDE},
 
     {"hollow",              OA_HOLLOW},
+    {"shadow",              OA_SHADOW},
     
     {"laneorder",           OA_LANEORDER},
     {"lanenum",             OA_LANENUM},

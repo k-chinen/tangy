@@ -138,7 +138,6 @@ extern apair_t cmd_ial[];
     ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
      (x)==CMD_DOTS||(x)==CMD_CLINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
      (x)==CMD_POLYGON|| \
-     (x)==CMD_DMY1|| (x)==CMD_DMY2|| (x)==CMD_DMY3|| \
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
@@ -255,10 +254,15 @@ extern apair_t lo_ial[];
 #define OA_FILLHATCH        (12)
 #define OA_BACKCOLOR        (15)
 #define OA_BACKHATCH        (16)
-#define OA_TEXTCOLOR        (21)
-#define OA_TEXTBGCOLOR      (22)
-#define OA_HATCHTHICK       (31)
-#define OA_HATCHPITCH       (32)
+
+#define OA_HATCHTHICK       (21)
+#define OA_HATCHPITCH       (22)
+
+#define OA_HOLLOW           (25)
+#define OA_SHADOW           (26)
+
+#define OA_TEXTCOLOR        (31)
+#define OA_TEXTBGCOLOR      (32)
 
 #define OA_WIDTH            (41)
 #define OA_HEIGHT           (42)
@@ -326,8 +330,6 @@ extern apair_t lo_ial[];
 
 #define OA_KEEPDIR          (701)
 #define OA_NOEXPAND         (703)
-
-#define OA_HOLLOW           (601)
 
 #define OA_MARKBB           (711)
 #define OA_MARKPATH         (712)
@@ -475,6 +477,7 @@ struct obattr {
     int    markpitch;
     int    markguide;
     int    hollow;
+    int    shadow;
 
 #if 1
     int    laneorder;
