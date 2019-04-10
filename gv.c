@@ -235,6 +235,7 @@ apair_t sj_ial[] = {
 
 apair_t ls_ial[] = {
     {"direct",      LS_DIRECT},
+    {"straight",    LS_STRAIGHT},
     {"square",      LS_SQUARE},
     {"squaredot",   LS_SQUAREDOT},
     {"man",         LS_MAN},

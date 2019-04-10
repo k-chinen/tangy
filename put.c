@@ -927,10 +927,26 @@ insboxpath(varray_t *xar, int xwd, int xht)
 }
 
 
+ /*
+  * name    size        description
+  *-----
+  * WO      1.5  x 1.0  wide
+  * RO      1.0  x 1.0  regular
+  * NO      0.5  x 1.0  narrow
+  * NNO     0.25 x 1.0  narrow narrow
+  * VO      0    x 1.0  vartical line
+  * HO      1.0  x 0    horizontal line
+  * ZO      0    x 0    zero
+  *
+  */
+ 
+
 #define WO      {wd = objunit*3/2;  ht = objunit; }
 #define RO      {wd = objunit;      ht = objunit; }
 #define NO      {wd = objunit/2;    ht = objunit; }
 #define NNO     {wd = objunit/4;    ht = objunit; }
+#define VO      {wd = 0;            ht = objunit; }
+#define HO      {wd = objunit       ht = 0;       }
 #define ZZ      {wd = 0;            ht = 0;       }
 
 #if 0
@@ -996,13 +1012,6 @@ P;
  *   -----
  */
 
- /*
-  * WO  1.5 x 1.0   wide
-  * RO  1.0 x 1.0   regular
-  * NO  0.5 x 1.0   narrow
-  */
- 
-
     wd = ht = 0;
 
     switch(u->type) {
@@ -1060,8 +1069,12 @@ P;
 #endif
 
     case CMD_PLINE:
+            VO;
+Echo("PLINE oid %d dir %d\n", u->oid ,dir);
+            u->cob.sepcurdir = dir;
+            break;
     case CMD_SEP:     
-            NO;
+            NNO;
 Echo("SEP oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
@@ -1233,6 +1246,9 @@ Echo("\t  2   wd %d ht %d\n", wd, ht);
 #endif
     if(u->wd<0) u->wd = wd;
     if(u->ht<0) u->ht = ht;
+#if 1
+Echo("\t  3 u wd %d ht %d\n", u->wd, u->ht);
+#endif
 
 #if 1
     /*** FIX ***/
@@ -2746,7 +2762,8 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         }
         switch(u->type) {
         case CMD_SEP:
-            Echo("SEP oid %d %3d: oid %d xy %d,%d curdir %d\n",
+        case CMD_PLINE:
+            Echo("SEP/PLINE oid %d %3d: oid %d xy %d,%d curdir %d\n",
                 xch->oid, i, u->oid, u->cx, u->cy, u->cob.sepcurdir);
 
             ik = expand_sep(xch->cx, xch->cy, xch->cwd, xch->cht,

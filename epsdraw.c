@@ -2641,6 +2641,7 @@ epsdraw_seglinearrow(FILE *fp,
     }
 #endif
 
+P;
     ik = epsdraw_Xseglinearrow(fp,
         xox, xoy,
         x1, y1, x2, y2,
@@ -3793,6 +3794,7 @@ epsdraw_plinearrow(FILE *fp,
     dx = (int)(r*cos((xdir+90)*rf));
     dy = (int)(r*sin((xdir+90)*rf));
 
+P;
 #if 0
     fprintf(fp, "%% x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
     fprintf(fp, "%% xdir %.3f dx,dy %d,%d\n", xdir, dx, dy);
@@ -4380,36 +4382,10 @@ drawpath(FILE *fp,
     return _drawpathX(fp, ydir, xox, xoy, xu, xns, xu->cob.segar, 1, 1);
 }
 
-#if 0
-int
-drawpathMM(FILE *fp,
-    int ydir, int xox, int xoy, ob *xu, int MM, ns *xns, int f_new, int f_close)
-{
-    fprintf(fp, "%% %s:%d %s MM %d\n", __FILE__, __LINE__, __func__, MM);
-    fprintf(fp, "%% segar  %p\n", xu->cob.segar);
-    fprintf(fp, "%% seghar %p\n", xu->cob.seghar);
-    if(MM==0) {
-        return _drawpathX(fp, ydir, xox, xoy, xu, xns, xu->cob.seghar, f_new, f_close);
-    }
-    else {
-        return _drawpathX(fp, ydir, xox, xoy, xu, xns, xu->cob.segar, f_new, f_close);
-    }
-}
-
-#define drawpathN(f,d,x,y,u,n)            drawpathMM(f,d,x,y,u,1,n,1,1)
-#define drawpathN_woclose(f,d,x,y,u,n)    drawpathMM(f,d,x,y,u,1,n,1,0)
-#define drawpathR(f,d,x,y,u,n)            drawpathMM(f,d,x,y,u,0,n,1,1)
-#define drawpathR_wonew(f,d,x,y,u,n)      drawpathMM(f,d,x,y,u,0,n,0,1)
-
-#endif
-
 #define drawpathN(f,d,x,y,u,n)         _drawpathX(f,d,x,y,u,n,u->cob.segar,1,1)
 #define drawpathN_woclose(f,d,x,y,u,n) _drawpathX(f,d,x,y,u,n,u->cob.segar,1,0)
 #define drawpathR(f,d,x,y,u,n)         _drawpathX(f,d,x,y,u,n,u->cob.seghar,1,1)
 #define drawpathR_wonew(f,d,x,y,u,n)   _drawpathX(f,d,x,y,u,n,u->cob.seghar,0,1)
-
-
-
 
 
 int
@@ -7441,30 +7417,31 @@ fprintf(fp, "%% %s end\n", __func__);
     return 0;
 }
 
+char qbox[BUFSIZ]="";
+char qdia[BUFSIZ]="";
+
 int
 _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
 {
     int bw;
     int cr;
-    char box[BUFSIZ];
-    char dia[BUFSIZ];
 
 #define CKBOX \
-    if(!box[0]) { \
-        sprintf(box, \
+    if(!qbox[0]) { \
+        sprintf(qbox, \
     " %d %d rmoveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill", \
         -cr, -cr, 2*cr, 2*cr, -2*cr); \
     }
 
 #define CKDIA \
-    if(!dia[0]) { \
-        sprintf(dia, \
+    if(!qdia[0]) { \
+        sprintf(qdia, \
     " %d 0 rmoveto %d %d rlineto %d %d rlineto %d %d rlineto closepath fill", \
         -cr, cr, -cr, cr, cr, -cr, cr); \
     }
 
-    box[0] = '\0';
-    dia[0] = '\0';
+    qbox[0] = '\0';
+    qdia[0] = '\0';
 
     fprintf(fp, "%% wxh %dx%d lc %d fc %d cmd |%s|\n",
         xw, xh, xlc, xfc, xcmd);
@@ -7559,6 +7536,11 @@ _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
   *
   */
     else
+    if(strcasecmp(xcmd, "ccir")==0) {
+        fprintf(fp, "    newpath %d %d %d 0 360 arc fill\n",
+                    0, 0, cr);
+    }
+    else
     if(strcasecmp(xcmd, "nwcir")==0) {
         fprintf(fp, "    newpath %d %d %d 0 360 arc fill\n",
                     -xw/2, xh/2, cr);
@@ -7602,103 +7584,115 @@ _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
   *
   */
     else
+    if(strcasecmp(xcmd, "cbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, 0, qbox);
+    }
+    else
     if(strcasecmp(xcmd, "nwbox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, xh/2, box);
+                    -xw/2, xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "nbox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    0, xh/2, box);
+                    0, xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "nebox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, xh/2, box);
+                    xw/2, xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "ebox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, 0, box);
+                    xw/2, 0, qbox);
     }
     else
     if(strcasecmp(xcmd, "sebox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, -xh/2, box);
+                    xw/2, -xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "sbox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    0, -xh/2, box);
+                    0, -xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "swbox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, -xh/2, box);
+                    -xw/2, -xh/2, qbox);
     }
     else
     if(strcasecmp(xcmd, "wbox")==0) {
         CKBOX;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, 0, box);
+                    -xw/2, 0, qbox);
     }
  /*
   *
   */
     else
+    if(strcasecmp(xcmd, "cdia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, 0, qdia);
+    }
+    else
     if(strcasecmp(xcmd, "nwdia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, xh/2, dia);
+                    -xw/2, xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "ndia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    0, xh/2, dia);
+                    0, xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "nedia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, xh/2, dia);
+                    xw/2, xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "edia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, 0, dia);
+                    xw/2, 0, qdia);
     }
     else
     if(strcasecmp(xcmd, "sedia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    xw/2, -xh/2, dia);
+                    xw/2, -xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "sdia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    0, -xh/2, dia);
+                    0, -xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "swdia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, -xh/2, dia);
+                    -xw/2, -xh/2, qdia);
     }
     else
     if(strcasecmp(xcmd, "wdia")==0) {
         CKDIA;
         fprintf(fp, "    newpath %d %d moveto %s\n", 
-                    -xw/2, 0, dia);
+                    -xw/2, 0, qdia);
     }
  /*
   *
@@ -9783,15 +9777,9 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
             changecolor(fp, xu->cob.fillcolor);
             changethick(fp, xu->cob.hatchthick);
-            /*
-            ik = drawpathMM(fp, 0, 0, 0, xu, 0, xns, 1, 0);
-            */
             ik = drawpathN_woclose(fp, 0, 0, 0, xu, xns);
 
             fprintf(fp, "     0.8 0.8 scale\n");
-            /*
-            ik = drawpathMM(fp, 0, 0, 0, xu, 1, xns, 0, 1);
-            */
             ik = drawpathR_wonew(fp, 0, 0, 0, xu, xns);
             fprintf(fp, "  clip\n");
 
@@ -11131,6 +11119,68 @@ out:
 }
 
 int
+epsdraw_gather_straight(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int dsdir)
+
+{
+    ob *pe;
+    int i;
+    int sx, sy;
+    int ex, ey;
+
+P;
+    if(!pf || !pb) {
+        goto out;
+    }
+
+    ex = pf->cx - pf->cwd/2 * dsdir;
+    ey = pf->cy;
+
+    fprintf(fp, "    gsave\n");
+
+    if(ISCHUNK(pb->type)) {
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            sx = pe->cx + pe->cwd/2 * dsdir;
+            sy = pe->cy;
+
+#if 0
+            fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
+                xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey);
+#endif
+#if 0
+            epsdraw_seglinearrow(fp, xdir, 0, 0,
+                xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy, xox+ex, xoy+ey, xu, xns);
+#endif
+#if 1
+            epsdraw_seglinearrow(fp, xdir, 0, 0,
+                xox+pb->cx+pb->ox+sx, xoy+pb->cy+pb->oy+sy,
+                xox+ex, xoy+pb->cy+pb->oy+sy, xu, xns);
+#endif
+        }
+    }
+    else {
+            sx = pb->cx + pb->cwd/2;
+            sy = pb->cy;
+            fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
+                xox+sx, xoy+sy, xox+ex, xoy+ey);
+#if 0
+            epsdraw_seglinearrow(fp, xdir, xox, xoy, sx, sy, ex, ey, pb, xns);
+#endif
+            
+    }
+    fprintf(fp, "     grestore\n");
+
+out:
+    return 0;
+}
+
+int
 epsdraw_gather(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
 {
     ob *pf, *pb;
@@ -11161,6 +11211,9 @@ P;
         break;
     case LS_MAN:
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+        break;
+    case LS_STRAIGHT:
+        ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
         break;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
@@ -11269,6 +11322,9 @@ P;
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
 */
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
+        break;
+    case LS_STRAIGHT:
+        ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
         break;
     case LS_ARC:
         Error("LS_ARC is not implemented yet.\n");
@@ -11799,7 +11855,7 @@ out:
 int
 epsdraw_sep(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
-
+P;
     fprintf(fp, "%% sep oid %d\n", xu->oid);
     fprintf(fp, "gsave    %% for sep\n");
 
@@ -12557,7 +12613,10 @@ P;
         epsdraw_blinearrow(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_PLINE) {
+#if 0
         epsdraw_plinearrow(fp, *xdir, ox, oy, u, xns);
+#endif
+        epsdraw_sep(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_PING) {
         epsdraw_ping(fp, *xdir, ox, oy, u, xns);

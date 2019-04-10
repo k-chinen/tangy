@@ -27,6 +27,9 @@
 #include "a.h"
 
 #include "notefile.c"
+#ifdef DO_LINKCHK
+#include "linkchk.c"
+#endif
 #ifdef DO_FORKCHK
 #include "forkchk.c"
 #endif
