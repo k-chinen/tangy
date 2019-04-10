@@ -760,7 +760,9 @@ P;
     ISET(OA_IMARGIN,        imargin);
     ISET(OA_GIMARGIN,       gimargin);
     ISET(OA_ROTATE,         rotateval);
+
     LADD(OA_DECO,           deco);
+    ISET(OA_DECOCOLOR,      decocolor);
 
     AISET(OA_LANEORDER,     lo_ial, laneorder);
     ISET(OA_LANENUM,        lanenum);
@@ -1065,6 +1067,8 @@ parseobj(char *p)
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
+    nob->cob.decocolor      = -1;
+
     nob->cob.arrowevery     = 0;
 
     nob->cob.wlinethick     = def_wlinethick;
@@ -1741,6 +1745,10 @@ fparse(char *fn, ob* ch0, ns *ns0)
     int   ik;
     
     fp = fopen(fn, "r");
+    if(fp==NULL) {
+        Error("cannot open file %s\n", fn);
+        return -1;
+    }
     ik = parse(fp, ch0, ns0);
     fclose(fp);
     return ik;

@@ -278,7 +278,9 @@ extern apair_t lo_ial[];
 #define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
 #define OA_TEXTROTATE       (80)
+
 #define OA_DECO             (90)
+#define OA_DECOCOLOR        (91)
 
 #define OA_AT               (100)
 #define OA_WITH             (101)
@@ -460,6 +462,7 @@ struct obattr {
     char  *carg2;
 
     char  *deco;
+    int    decocolor;
 
     char  *bgshape;
 

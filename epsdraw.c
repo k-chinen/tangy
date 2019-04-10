@@ -7446,6 +7446,25 @@ _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
 {
     int bw;
     int cr;
+    char box[BUFSIZ];
+    char dia[BUFSIZ];
+
+#define CKBOX \
+    if(!box[0]) { \
+        sprintf(box, \
+    " %d %d rmoveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill", \
+        -cr, -cr, 2*cr, 2*cr, -2*cr); \
+    }
+
+#define CKDIA \
+    if(!dia[0]) { \
+        sprintf(dia, \
+    " %d 0 rmoveto %d %d rlineto %d %d rlineto %d %d rlineto closepath fill", \
+        -cr, cr, -cr, cr, cr, -cr, cr); \
+    }
+
+    box[0] = '\0';
+    dia[0] = '\0';
 
     fprintf(fp, "%% wxh %dx%d lc %d fc %d cmd |%s|\n",
         xw, xh, xlc, xfc, xcmd);
@@ -7578,6 +7597,108 @@ _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
     if(strcasecmp(xcmd, "wcir")==0) {
         fprintf(fp, "    newpath %d %d %d 0 360 arc fill\n",
                     -xw/2, 0, cr);
+    }
+ /*
+  *
+  */
+    else
+    if(strcasecmp(xcmd, "nwbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "nbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "nebox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "ebox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, 0, box);
+    }
+    else
+    if(strcasecmp(xcmd, "sebox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, -xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "sbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, -xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "swbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, -xh/2, box);
+    }
+    else
+    if(strcasecmp(xcmd, "wbox")==0) {
+        CKBOX;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, 0, box);
+    }
+ /*
+  *
+  */
+    else
+    if(strcasecmp(xcmd, "nwdia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "ndia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "nedia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "edia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, 0, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "sedia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    xw/2, -xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "sdia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    0, -xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "swdia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, -xh/2, dia);
+    }
+    else
+    if(strcasecmp(xcmd, "wdia")==0) {
+        CKDIA;
+        fprintf(fp, "    newpath %d %d moveto %s\n", 
+                    -xw/2, 0, dia);
     }
  /*
   *
@@ -9729,17 +9850,19 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
      ***** DECO
      *****/
     if(xu->cob.deco) {
+        int _dcolor;
         fprintf(fp, " %% deco |%s|\n", xu->cob.deco);
         fprintf(fp, " gsave %% for deco\n");
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
         ik = drawpathN(fp, 0, 0, 0, xu, xns);
-#if 0
-        fprintf(fp, "  closepath\n");
-#endif
         fprintf(fp, "  clip\n");
+        _dcolor = xu->cob.decocolor;
+        if(_dcolor<0) {
+            _dcolor = xu->cob.outlinecolor;
+        }
         epsdraw_deco(fp, xu->wd, xu->ht,
-            xu->cob.outlinecolor, xu->cob.fillcolor, xu->cob.deco);
+            _dcolor, xu->cob.fillcolor, xu->cob.deco);
         fprintf(fp, " grestore %% for deco\n");
     }
     else {

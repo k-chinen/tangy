@@ -404,6 +404,7 @@ fprintf(stderr, "optind %d/argc %d\n", optind, argc);
 #endif
             ik = fparse(argv[i], ch0, ns0);
             if(ik) {
+                break;
             }
         }
     }
