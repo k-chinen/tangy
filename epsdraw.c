@@ -9663,6 +9663,7 @@ epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     varray_t *saved_segar;
     seg *e;
     double a;
+    int awd, aht;
 
     mx = xu->x+xox;
     my = xu->y+xoy;
@@ -9673,46 +9674,51 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     saved_segar = xu->cob.segar;
 
     a = 1.0;
+
+    awd = xu->wd;
+    aht = xu->ht;
+        awd = xu->wd - xu->cob.imargin*2;
+        aht = xu->ht - xu->cob.imargin*2;
     
     switch(xu->type) {
     case CMD_CHUNK:
     case CMD_BOX:
-        ik = mkpath_box(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_box(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_PAPER:
-        ik = mkpath_paper(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_paper(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_CARD:
-        ik = mkpath_card(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rbox(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_card(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rbox(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_DIAMOND:
-        ik = mkpath_diamond(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rdiamond(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_diamond(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rdiamond(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_HOUSE:
-        ik = mkpath_house(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rhouse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_house(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rhouse(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_CIRCLE:
-        ik = mkpath_circle(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rcircle(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_circle(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rcircle(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_POLYGON:
-        ik = mkpath_polygon(xu->cob.segar, xu->wd, xu->ht, xu->cob.rad,
+        ik = mkpath_polygon(xu->cob.segar, awd, aht, xu->cob.rad,
                 xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
-        ik = mkpath_Rpolygon(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad,
+        ik = mkpath_Rpolygon(xu->cob.seghar, awd, aht, xu->cob.rad,
                 xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
         break;
     case CMD_ELLIPSE:
-        ik = mkpath_ellipse(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rellipse(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_ellipse(xu->cob.segar,  awd, aht, xu->cob.rad);
+        ik = mkpath_Rellipse(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_DRUM:
-        ik = mkpath_drum(xu->cob.segar,  xu->wd, xu->ht, xu->cob.rad);
-        ik = mkpath_Rdrum(xu->cob.seghar, xu->wd, xu->ht, xu->cob.rad);
+        ik = mkpath_drum(xu->cob.segar,  awd, aht, xu->cob.rad);
+        ik = mkpath_Rdrum(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     default:
         fprintf(fp, "%% unknown type %d\n", xu->type);
@@ -12618,14 +12624,14 @@ P;
 #endif
         epsdraw_sep(fp, ox, oy, u, xns);
     }
+    if(u->type==CMD_SEP) {
+        epsdraw_sep(fp, ox, oy, u, xns);
+    }
     if(u->type==CMD_PING) {
         epsdraw_ping(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_PINGPONG) {
         epsdraw_pingpong(fp, *xdir, ox, oy, u, xns);
-    }
-    if(u->type==CMD_SEP) {
-        epsdraw_sep(fp, ox, oy, u, xns);
     }
     if(u->type==CMD_LPAREN || u->type==CMD_RPAREN) {
         epsdraw_Xparen(fp, ox, oy, u, xns);
