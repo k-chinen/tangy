@@ -1647,6 +1647,33 @@ eval_dir(ob *u, int *xdir)
     return g;
 }
 
+static
+int
+isinside(int x1, int x2, int y1, int y2, double gx, double gy)
+{
+    int r=0;
+    if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
+       ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
+        r = 1;
+    }
+    return r;
+}
+
+static
+int
+isinside2(int x1, int x2, int y1, int y2, double gx, double gy)
+{
+    int r=0;
+    int tx, ty;
+    tx = (int)gx;
+    ty = (int)gy;
+    if(((tx>=x1 && tx<=x2) || (tx>=x2 && tx<=x1)) &&
+       ((ty>=y1 && ty<=y2) || (ty>=y2 && ty<=y1))) {
+        r = 1;
+    }
+    return r;
+}
+
 int
 bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     int *rgx, int *rgy)
@@ -1655,6 +1682,7 @@ bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     double a, b;
     double c, d;
     double gx, gy;
+    int ik, ik2;
 
     Echo("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
         __func__, x1, y1, x2, y2, cx, cy, cdir);
@@ -1671,8 +1699,20 @@ bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
 
     Echo("  gx %9.3f gy %9.3f\n", gx, gy);
 
-    if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
-       ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
+    Echo("  x1,gx,x2 %d,%f,%d\n", x1, gx, x2);
+    Echo("  y1,gy,y2 %d,%f,%d\n", y1, gy, y2);
+    Echo("  q1 %d, q2 %d, q3 %d, q4 %d\n",
+        (gx>=x1 && gx<=x2),
+        (gx>=x2 && gx<=x1),
+        (gy>=y1 && gy<=y2),
+        (gy>=y2 && gy<=y1));
+
+    ik = isinside(x1, x2, y1, y2, gx, gy);
+    Echo("  ik %d\n", ik);
+    ik = isinside2(x1, x2, y1, y2, gx, gy);
+    Echo("  ik %d\n", ik);
+
+    if(ik2) {
         Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
@@ -1695,6 +1735,7 @@ bumpV(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
     double a, b;
     double c, d;
     double gx, gy;
+    int ik, ik2;
 
     Echo("%s: (%d %d %d %d) vs (%d,%d;%d)\n",
         __func__, x1, y1, x2, y2, cx, cy, cdir);
@@ -1711,8 +1752,20 @@ bumpV(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
 
     Echo("  gx %9.3f gy %9.3f\n", gx, gy);
 
-    if(((gx>=x1 && gx<=x2) || (gx>=x2 && gx<=x1)) &&
-       ((gy>=y1 && gy<=y2) || (gy>=y2 && gy<=y1))) {
+    Echo("  x1,gx,x2 %d,%f,%d\n", x1, gx, x2);
+    Echo("  y1,gy,y2 %d,%f,%d\n", y1, gy, y2);
+    Echo("  q1 %d, q2 %d, q3 %d, q4 %d\n",
+        (gx>=x1 && gx<=x2),
+        (gx>=x2 && gx<=x1),
+        (gy>=y1 && gy<=y2),
+        (gy>=y2 && gy<=y1));
+
+    ik = isinside(x1, x2, y1, y2, gx, gy);
+    Echo("  ik %d\n", ik);
+    ik = isinside2(x1, x2, y1, y2, gx, gy);
+    Echo("  ik %d\n", ik);
+
+    if(ik2) {
         Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
@@ -2768,6 +2821,7 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 
             ik = expand_sep(xch->cx, xch->cy, xch->cwd, xch->cht,
                     xch->ox, xch->oy, u);
+            break;
         case CMD_LPAREN:
         case CMD_RPAREN:
         case CMD_LBRACKET:
