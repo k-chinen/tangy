@@ -34,7 +34,6 @@ int epsdraw_ping(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_pingpong(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_plinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_plinearrowR(FILE *fp, int ydir, int xox, int xoy, int r, ob *xu, ns *xns);
-int drawpathMM(FILE *fp, int ydir, int xox, int xoy, ob *xu, int MM, ns *xns, int f_new, int f_close);
 int drawpath(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty, double lax, double lay, double *cax, double *cay);
 double solve_pitch(int ty);

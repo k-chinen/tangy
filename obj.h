@@ -275,6 +275,7 @@ extern apair_t lo_ial[];
 #define OA_PEAKROTATE       (71)
 #define OA_CONCAVE          (72)
 #define OA_RAD              (75)
+#define OA_LENGTH           (76)
 #define OA_IMARGIN          (77)
 #define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
@@ -423,6 +424,7 @@ struct obattr {
     int   concave;
     int   rotateval;
     int   rad;
+    int   length; /* for line family */
 
     int   sepcurdir;
     int   sepx1, sepy1, sepx2, sepy2;

@@ -727,9 +727,101 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
     return rv;
 }
 
-
 int
 est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
+    int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
+    int *rfx, int *rfy)
+{
+    int     x, y;
+    int     _lx, _by, _rx, _ty;
+    int     i;
+    segop  *e;
+    int     m;
+    double  dm;
+    char    mstr[BUFSIZ];
+    char   *p, *q;
+    int     lx, ly;
+    double  ldir;
+    double  lldir;
+    int     r;
+    
+    int     mx, my;
+    int     ik;
+    int     rad, an;
+
+    int     rv;
+    int     qc;
+    int     actf;
+    int     arcx, arcy;
+
+    int     c;
+    int     jc;
+
+    int     isset_final;
+
+    int     isx, isy, iex, iey; /* from and to */
+
+    int     Uwd, Uht;
+    int     ddir;
+
+    rv = 0;
+
+Echo("%s:\n", __func__);
+    ddir = (*zdir+360)%360;
+Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
+
+    if(u->cob.length) {
+        r = u->cob.length;
+    }
+    else {
+        r = objunit;
+    }
+Echo("  u->cob.length %d r %d\n", u->cob.length, r);
+
+    if(ddir==270) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = 0;
+        *rty = -r;
+    }
+    else if(ddir==180) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = -r;
+        *rty = 0;
+    }
+    else if(ddir==90) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = 0;
+        *rty = r;
+    }
+    else if(ddir==0) {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = r;
+        *rty = 0;
+    }
+    else {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = r*cos(ddir*rf);
+        *rty = r*sin(ddir*rf);
+    }
+    *rfx = *rrx;
+    *rfy = *rty;
+
+#if 1
+Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
+#endif
+    return rv;
+
+#undef FREG
+}
+
+
+int
+Xest_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
     int *rfx, int *rfy)
 {
@@ -799,13 +891,22 @@ Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
         *rfx = 0;
         *rfy = Uht;
     }
-    else {
+    else if(ddir==0) {
         *rlx = 0;
         *rby = 0;
         *rrx = Uwd;
         *rty = 0;
         *rfx = Uwd;
         *rfy = 0;
+    }
+    else {
+        *rlx = 0;
+        *rby = 0;
+        *rrx = objunit*cos(ddir*rf);
+        *rty = objunit*sin(ddir*rf);
+
+        *rfx = *rrx;
+        *rfy = *rty;
     }
 
 #if 1

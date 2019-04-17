@@ -282,6 +282,7 @@ apair_t objattr_ial[] = {
     {"textrotate",          OA_TEXTROTATE},
     {"rotate",              OA_ROTATE},
     {"rad",                 OA_RAD},
+    {"length",              OA_LENGTH},
     {"deco",                OA_DECO},
     {"decocolor",           OA_DECOCOLOR},
 

@@ -754,6 +754,7 @@ P;
 
     AISET(OA_LINKSTYLE, ls_ial, linkstyle);
     ISET(OA_RAD,            rad);
+    ISET(OA_LENGTH,         length);
     ISET(OA_PEAK,           polypeak);
     ISET(OA_PEAKROTATE,     polyrotate);
     ONSET(OA_CONCAVE,       concave);

@@ -3912,10 +3912,12 @@ _drawpathX(FILE *fp,
     cdir = ydir;
 
 
+#if 0
     if(xu->cob.outlinecolor<0||xu->cob.outlinethick<0) {
         fprintf(fp, "  %% %s: skip no color or no thickness\n", __func__);
         goto out;
     }
+#endif
 
     fprintf(fp, "    %% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
@@ -3933,9 +3935,6 @@ _drawpathX(FILE *fp,
     }
 
 #if 0
-    varray_fprintv(stdout, qar);
-#endif
-#if 0
     fprintf(fp, " gsave %% %s\n", __func__);
 #endif
 
@@ -3944,6 +3943,9 @@ _drawpathX(FILE *fp,
 
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
+    if(INTRACE) {
+        varray_fprintv(stdout, qar);
+    }
 
     if(xu->type==CMD_CLINE) {
         x0 = x1 = xox+xu->cx+xu->cox;
@@ -4254,9 +4256,11 @@ PP;
 
             break;
 
+#if 0
         default:
+#endif
+        case OA_FORWARD:
 
-/* XXX */
             if(s->ftflag & COORD_FROM) {
 P;
                 Echo("    part seg %d: ftflag %d : %d,%d\n",
@@ -4343,10 +4347,10 @@ P;
             
             break;
 
-#if 0
         default:
             Error("unsupported segment part <%d>\n", s->ptype);
             break;
+#if 0
 #endif
         }
         
@@ -4710,11 +4714,11 @@ _drawpath_deco(FILE *fp,
     double us, ue;
     double vs, ve;
 
-    int i;
-    int x0, y0;
-    int x1, y1, x2, y2;
-    seg *s;
-    int cdir;
+    int    i;
+    int    x0, y0;
+    int    x1, y1, x2, y2;
+    seg   *s;
+    int    cdir;
     double dcdir;
 
     double lx, ly;
@@ -4733,7 +4737,7 @@ _drawpath_deco(FILE *fp,
     int isfseg;
     int fsegtype;
 
-    fprintf(fp, "%% %s: enter\n", __func__);
+    fprintf(fp, "%% %s: enter ydir %d\n", __func__, ydir);
 P;
     changecolor(fp, xu->vob.outlinecolor);
     changethick(fp, xu->vob.outlinethick);
@@ -4742,6 +4746,8 @@ P;
 P;
         drawpath(fp, ydir, xox, xoy, xu, xns);
         fprintf(fp, "    stroke\n");
+        fprintf(fp, "%% %s:%d out2 oid %d ydir %d cdir %4d\n",
+            __func__, __LINE__, xu->oid, ydir, cdir);
         return 0;
     }
     fprintf(fp, "%% %s: middle\n", __func__);
@@ -4767,13 +4773,13 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     dcdir = ydir;
 
     if(bbox_mode) {
-
+#if 0
         Echo("REMARK BEGIN oid %d\n", xu->oid);
+#endif
 #if 0
         Echo("xox,xoy %d,%d cx,cy %d,%d csx,csy %d,%d cox,coy %d,%d\n",
             xox, xoy, xu->cx, xu->cy, xu->csx, xu->csy, xu->cox, xu->coy);
 #endif
-
 #if 0
         Echo("  xox,xoy %d,%d ox,oy %d,%d\n",
             xox, xoy, xu->cox, xu->coy);
@@ -4839,6 +4845,9 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
 
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
+    if(INTRACE) {
+        varray_fprintv(stdout, xu->cob.segar);
+    }
 
     if(xu->type==CMD_CLINE) {
         x0 = x1 = xox+xu->cx+xu->cox;
@@ -5276,10 +5285,11 @@ skip_arcn:
         case OA_RLINETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
-#if 0
             fprintf(fp, "  %d %d rlineto\n", x2, y2);
-#endif
+            goto next;
+#if 0
             goto coord_done;
+#endif
             break;
 
         case OA_LINE:
@@ -5290,16 +5300,23 @@ skip_arcn:
             goto coord_done;
             break;
 
-        default:
+        case OA_FORWARD:
 
 /* XXX */
+/* FORWARD */
             if(s->ftflag & COORD_FROM) {
 P;
                 Echo("    part seg %d: ftflag %d : %d,%d\n",
                     i, s->ftflag, s->x1, s->y1);
             
+Echo("FROM\n");
+
+                x1 = s->x1 + xox;
+                y1 = s->y1 + xoy;
+
                 /* skip */
                 continue;
+
             }
             if(s->ftflag & COORD_TO) {
 P;
@@ -5540,6 +5557,10 @@ P;
             }
 
             break;
+
+        default:
+            Error("unsupported segment part <%d>\n", s->ptype);
+            break;
         }
         
 next:
@@ -5549,6 +5570,10 @@ next:
 
 #if 0
         fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
+#endif
+#if 1
+        fprintf(fp, "%% %s:%d oid %d cdir %4d\n",
+            __func__, __LINE__, xu->oid, cdir);
 #endif
         x1 = x2;
         y1 = y2;
@@ -5587,6 +5612,9 @@ next:
 #if 0
     fprintf(fp, " grestore %% %s\n", __func__);
 #endif
+
+    fprintf(fp, " %% %s:%d oid %d out3 ydir %d cdir %d dcdir %.3f\n",
+        __func__, __LINE__, ydir, xu->oid, cdir, dcdir);
 
 out:
     return 0;
@@ -8511,6 +8539,8 @@ skip_label:
 /*** OBJECTS */
 
 
+#if 0
+
 int
 epsdraw_circle(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -8592,8 +8622,9 @@ apply:
 out:
     return 0;
 }
+#endif
 
-#if 1
+#if 0
 static
 int
 Gpolygon(FILE *fp, int n, double ar, int cc, double aoff)
@@ -8730,6 +8761,7 @@ out:
 #endif
 
         
+#if 0
 int
 epsdraw_ellipse(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -8822,6 +8854,7 @@ apply:
 out:
     return 0;
 }
+#endif
 
 #if 0
 int
@@ -9062,6 +9095,7 @@ _box_path(FILE *fp, int x1, int y1, int aw, int ah, int r, int op)
     return 0;
 }
 
+#if 0
 int
 epsdraw_box(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -9163,6 +9197,7 @@ apply:
 out:
     return 0;
 }
+#endif
 
 
 
@@ -9292,12 +9327,13 @@ P;
 Echo("polygon:  ar %.3f, br %.3f, aoff %d, n %d, cc %d\n", ar, br, aoff, n, cc);
 
     for(i=0;i<n;i++) {
-        x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff);
-        y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff);
-        x3 = br*cos(M_PI*2/(double)n*((double)i+0.5)+aoff);
-        y3 = br*sin(M_PI*2/(double)n*((double)i+0.5)+aoff);
-        x4 = ar*cos(M_PI*2/(double)n*((double)i+1.0)+aoff);
-        y4 = ar*sin(M_PI*2/(double)n*((double)i+1.0)+aoff);
+        x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff*rf);
+        y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff*rf);
+        x3 = br*cos(M_PI*2/(double)n*((double)i+0.5)+aoff*rf);
+        y3 = br*sin(M_PI*2/(double)n*((double)i+0.5)+aoff*rf);
+        x4 = ar*cos(M_PI*2/(double)n*((double)i+1.0)+aoff*rf);
+        y4 = ar*sin(M_PI*2/(double)n*((double)i+1.0)+aoff*rf);
+
         if(i==0) {
             try_regsegmoveto(sar,     x2, y2);
         }
@@ -9306,7 +9342,12 @@ Echo("polygon:  ar %.3f, br %.3f, aoff %d, n %d, cc %d\n", ar, br, aoff, n, cc);
         if(cc) {
             try_regseglineto(sar,    x3, y3);
         }
+        if(i==n-1) {
+            /* skip */
+        }
+        else {
             try_regseglineto(sar,    x4, y4);
+        }
     }
     try_regsegclose(sar);
 
@@ -9340,12 +9381,12 @@ P;
 Echo("Rpolygon: ar %.3f, br %.3f, aoff %d, n %d, cc %d\n", ar, br, aoff, n, cc);
 
     for(i=0;i<n;i++) {
-        x2 = ar*cos(M_PI*2/(double)n*(double)-i+aoff);
-        y2 = ar*sin(M_PI*2/(double)n*(double)-i+aoff);
-        x3 = br*cos(M_PI*2/(double)n*((double)-i-0.5)+aoff);
-        y3 = br*sin(M_PI*2/(double)n*((double)-i-0.5)+aoff);
-        x4 = ar*cos(M_PI*2/(double)n*((double)-i-1.0)+aoff);
-        y4 = ar*sin(M_PI*2/(double)n*((double)-i-1.0)+aoff);
+        x2 = ar*cos(M_PI*2/(double)n*(double)-i+aoff*rf);
+        y2 = ar*sin(M_PI*2/(double)n*(double)-i+aoff*rf);
+        x3 = br*cos(M_PI*2/(double)n*((double)-i-0.5)+aoff*rf);
+        y3 = br*sin(M_PI*2/(double)n*((double)-i-0.5)+aoff*rf);
+        x4 = ar*cos(M_PI*2/(double)n*((double)-i-1.0)+aoff*rf);
+        y4 = ar*sin(M_PI*2/(double)n*((double)-i-1.0)+aoff*rf);
         if(i==0) {
             try_regsegmoveto(sar,     x2, y2);
         }
@@ -9675,10 +9716,12 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     a = 1.0;
 
+#if 0
     awd = xu->wd;
     aht = xu->ht;
-        awd = xu->wd - xu->cob.imargin*2;
-        aht = xu->ht - xu->cob.imargin*2;
+#endif
+    awd = xu->wd - xu->cob.imargin*2;
+    aht = xu->ht - xu->cob.imargin*2;
     
     switch(xu->type) {
     case CMD_CHUNK:
@@ -9808,10 +9851,9 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
             fprintf(fp, "  grestore %% for fill\n");
         }
-
     }
     else {
-        fprintf(fp, "  %% skip clip+fill\n");
+        fprintf(fp, "  %% skip fill\n");
     }
 
     /*****
@@ -9828,11 +9870,11 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         /*** SURFACE ***/
         if(xu->type==CMD_PAPER) {
             fprintf(fp, "  %% surface\n");
-            ik = Gpaper_surface(fp,  xu->wd, xu->ht);
+            ik = Gpaper_surface(fp, awd, aht);
         }
         if(xu->type==CMD_DRUM) {
             fprintf(fp, "  %% surface\n");
-            ik = Gdrum_surface(fp,  xu->wd, xu->ht);
+            ik = Gdrum_surface(fp,  awd, aht);
         }
         fprintf(fp, "  grestore %% for outline\n");
     }
