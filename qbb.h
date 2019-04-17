@@ -5,6 +5,16 @@
 #ifndef _QBB_H_
 #define _QBB_H_
 
+#define QBB_M_L     (0x07)
+#define QBB_M_B     (0x04)
+#define QBB_M_R     (0x02)
+#define QBB_M_T     (0x01)
+#define QBB_M_ALL   (0x0f)
+
+#define QBB_M_U     (0x01)
+#define QBB_M_M     (0x02)
+#define QBB_M_O     (0x04)
+
 typedef struct {
     int qbbid;
     int cc;
