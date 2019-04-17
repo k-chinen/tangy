@@ -10,8 +10,7 @@ OBJS=tx.o qbb.o alist.o color.o varray.o font.o seg.o xns.o word.o put.o finaliz
 
 all: tangy 
 tangy: a.c $(OBJS)
-	cc $(CFLAGS) -o tangy -DGITCHASH='"'`git show -s --format=%H`'"' \
-   		$(OBJS) -lm
+	cc $(CFLAGS) -o tangy $(OBJS) -lm
 
 clean:
 	$(RM) tangy *.o
