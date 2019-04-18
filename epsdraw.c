@@ -4307,7 +4307,7 @@ fprintf(stderr, "%% m atan2 %.3f\n", atan2(y2-y1,x2-x1)/rf);
 fprintf(stderr, "%% m cdir %d\n", cdir);
 #endif
 
-            fprintf(fp, "    %d %d lineto %% forward\n", x2, y2);
+            fprintf(fp, "    %d %d lineto %% forward _drawpathX\n", x2, y2);
 
 confirm_arrow:
 #if 1
@@ -4418,6 +4418,11 @@ symdraw(FILE *fp, double x, double y, double a, double pt, int c, int ty,
 #if 0
     fprintf(fp, "%% %s: x %.3f y %.3f a %.3f c %d ty %d\n", __func__, x, y, a, c, ty);
 #endif
+
+    if(isnan(x) || isnan(y)) {
+        Error("%s: nan is detected; %.3f,%.3f\n", __func__, x, y);
+        return -1;
+    }
 
     mact = 0;
     mangle = 45;
@@ -4745,7 +4750,7 @@ P;
     if(xu->cob.outlinetype==LT_SOLID) {
 P;
         drawpath(fp, ydir, xox, xoy, xu, xns);
-        fprintf(fp, "    stroke\n");
+        fprintf(fp, "    stroke %% solid\n");
         fprintf(fp, "%% %s:%d out2 oid %d ydir %d cdir %4d\n",
             __func__, __LINE__, xu->oid, ydir, cdir);
         return 0;
@@ -5279,17 +5284,26 @@ skip_arcn:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
+            break;
+
+        case OA_LINETO:
+            x2 = s->x1 + xox;
+            y2 = s->y1 + xoy;
+#if 0
+            fprintf(fp, "  %d %d rlineto\n", x2, y2);
             goto next;
+#endif
+            goto coord_done;
             break;
 
         case OA_RLINETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
+#if 0
             fprintf(fp, "  %d %d rlineto\n", x2, y2);
             goto next;
-#if 0
-            goto coord_done;
 #endif
+            goto coord_done;
             break;
 
         case OA_LINE:
