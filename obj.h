@@ -121,9 +121,6 @@
 
 extern apair_t cmd_ial[];
 
-#if 0
-#define ISCHUNK(x)  ((x)==CMD_CHUNK||(x)==CMD_FORK||(x)==CMD_BRANCH)
-#endif
 
 #define ISCHUNK(x)  ((x)==CMD_CHUNK)
 #define ISGLUE(x)   \
@@ -439,14 +436,6 @@ struct obattr {
     int    hasfrom;
     int    hasto;
 
-#if 0
-    void  *forkfocus;
-    int    forkhasbranch;
-    void  *forkbranchmem[MAXBRANCH];    /* XXX */
-    int    forkhasend;
-    void  *forkbranchbody;
-#endif
-
     int   originalshape;
 
     varray_t *ssar;
@@ -485,16 +474,12 @@ struct obattr {
     int    hollow;
     int    shadow;
 
-#if 1
     int    laneorder;
     int    lanenum;
     int    lanegapv;
     int    lanegaph;
-#endif
 
-#if 1
     char   *note[PO_MAX];
-#endif
 }; 
 
 typedef struct _ch {
@@ -506,9 +491,6 @@ typedef struct _ch {
     int  thick;
     int  scale;
     int  x, y;
-#if 0
-    int  lanenum;
-#endif
 
     /* members */
     struct _ch *root;
@@ -538,9 +520,6 @@ typedef struct _ob {
     int  sx, sy;        /* area start */
     int  ex, ey;        /* area end */
     int  ox, oy;        /* offset or pen start */
-#if 0
-    int  jx, jy;        /* pen start; jo point, sometime be used to draw starting point */
-#endif
     int  fx, fy;        /* pen end; final point, sometime be used to draw next object */
 
     int  x, y;          /* center */

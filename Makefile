@@ -1,10 +1,7 @@
 ### 
 ### temporary Makefile for tangy
 ###
-#CFLAGS=-g -O0 -DDO_FORKCHK -DDO_LINKCHK
-#CFLAGS=-g -O0 -DDO_LINKCHK
-CFLAGS=-g -O0 -DDO_FORKCHK
-#CFLAGS=-g -O0
+CFLAGS=-g -O0
 
 OBJS=tx.o qbb.o alist.o color.o varray.o font.o seg.o xns.o word.o put.o finalize.o gv.o epsdraw.o parse.o a.o tangy.o chs.o bez.o xcur.o
 

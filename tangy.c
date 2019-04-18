@@ -27,12 +27,7 @@
 #include "a.h"
 
 #include "notefile.c"
-#ifdef DO_LINKCHK
-#include "linkchk.c"
-#endif
-#ifdef DO_FORKCHK
 #include "forkchk.c"
-#endif
 #include "picdraw.c"
 
 int     nodraw = 0;
@@ -424,10 +419,8 @@ Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cch.lanenum);
 #endif
 Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cob.lanenum);
 
-#ifdef DO_FORKCHK
     ik = fkchk(ch0, ns0);
 P;
-#endif
 
     x = 0;
     y = 0;
