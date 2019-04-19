@@ -774,7 +774,19 @@ Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
         r = u->cob.length;
     }
     else {
-        r = objunit;
+        /* default value */
+#if 0
+        switch(u->type) {
+        case CMD_WLINE:
+        case CMD_WARROW:
+            r = objunit*3/2;
+            break;
+        default:
+            r = objunit;
+            break;
+        }
+#endif
+            r = objunit*3/2;
     }
 Echo("  u->cob.length %d r %d\n", u->cob.length, r);
 

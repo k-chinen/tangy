@@ -890,24 +890,29 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
         fprintf(fp, "    closepath\n");
 
         if(atype==AH_SHIP) {
-        fprintf(fp, "    fill\n");
+            fprintf(fp, "    fill\n");
         }
         else {
-        fprintf(fp, "    gsave\n");
-        fprintf(fp, "    1 setgray\n");
-        fprintf(fp, "    1 0 0 setrgbcolor\n");
-        fprintf(fp, "    fill\n");
-        fprintf(fp, "    grestore\n");
+            fprintf(fp, "    stroke\n");
+        }
+#if 0
+        {
+            fprintf(fp, "    gsave\n");
+            fprintf(fp, "    1 setgray\n");
+            fprintf(fp, "    1 0 0 setrgbcolor\n");
+            fprintf(fp, "    fill\n");
+            fprintf(fp, "    grestore\n");
 
-        fprintf(fp, "    %d %d moveto\n", 0, 0);
-        fprintf(fp, "    %d %d %d 30 90 arc\n", 0-k+d, 0-k/2, r);
-        fprintf(fp, "    %d %d rlineto\n", -k-d, 0);
-        fprintf(fp, "    %d %d rlineto\n", 0, -k);
-        fprintf(fp, "    %d %d %d -90 -30 arc\n", 0-k+d, 0+k/2, r);
-        fprintf(fp, "    closepath\n");
-        fprintf(fp, "    stroke\n");
+            fprintf(fp, "    %d %d moveto\n", 0, 0);
+            fprintf(fp, "    %d %d %d 30 90 arc\n", 0-k+d, 0-k/2, r);
+            fprintf(fp, "    %d %d rlineto\n", -k-d, 0);
+            fprintf(fp, "    %d %d rlineto\n", 0, -k);
+            fprintf(fp, "    %d %d %d -90 -30 arc\n", 0-k+d, 0+k/2, r);
+            fprintf(fp, "    closepath\n");
+            fprintf(fp, "    stroke\n");
 
         }
+#endif
         fprintf(fp, "  grestore\n");
 
         }
@@ -12285,8 +12290,22 @@ epsdraw_portboard(FILE *fp, int xdir, ob *u)
     int lax, lay;
     int fht;
 
+    if(u) {
+        if(u->cob.portstr) {    
+            fprintf(fp, "%% portstr '%s'\n", u->cob.portstr);
+        }
+        else {
+            fprintf(fp, "%% no portstr\n");
+        }
+        if(u->cob.boardstr) {   
+            fprintf(fp, "%% portstr '%s'\n", u->cob.boardstr);
+        }
+        else {
+            fprintf(fp, "%% no boardstr\n");
+        }
+    }
+
     if(u->cob.portstr || u->cob.boardstr) {
-        fprintf(fp, "      gsave\n");
 
         lax = (objunit/8)*cos((xdir+90)*rf);
         lay = (objunit/8)*sin((xdir+90)*rf);
@@ -12298,8 +12317,11 @@ epsdraw_portboard(FILE *fp, int xdir, ob *u)
         dy = qy - u->gy;
 
         if(ik<=0) {
+            fprintf(fp, "%% skip ik %d\n", ik);
             goto skip_portboard;
         }
+
+        fprintf(fp, "      gsave\n");
 
         /* TEMP */
         fht = def_textheight;
@@ -12961,8 +12983,10 @@ Echo(" call obj oid %d drawing start %d,%d\n",
         }
     }
 
+#if 0
     ik = epsdraw_note(fp, xch);
     ik = epsdraw_portboard(fp, xch->cch.dir, u);
+#endif
 
     fprintf(fp, "%% oid %d DONE\n", xch->oid);
 

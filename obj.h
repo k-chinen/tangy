@@ -134,6 +134,7 @@ extern apair_t cmd_ial[];
 #define ISATOM(x)   \
     ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
      (x)==CMD_DOTS||(x)==CMD_CLINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
+     (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
      (x)==CMD_POLYGON|| \
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
@@ -150,6 +151,7 @@ extern apair_t cmd_ial[];
 #define VISIBLE(x) \
 ((x)==CMD_BOX||(x)==CMD_DOTS||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||\
  (x)==CMD_POLYGON||(x)==CMD_CLINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
+ (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||\
  (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||(x)==CMD_SEP||\
