@@ -165,16 +165,16 @@ set_default_pallet(pallet_t* ar)
     pallet_addrgbstr(ar, 12, "66f");
     pallet_addrgbstr(ar, 13, "f6f");
     pallet_addrgbstr(ar, 14, "6ff");
-    pallet_addrgbstr(ar, 15, "fff");
+    pallet_addrgbstr(ar, 15, "ccc");
 
-    pallet_addrgbstr(ar, 16, "000");
+    pallet_addrgbstr(ar, 16, "333");
     pallet_addrgbstr(ar, 17, "600");
     pallet_addrgbstr(ar, 18, "060");
     pallet_addrgbstr(ar, 19, "660");
     pallet_addrgbstr(ar, 20, "006");
     pallet_addrgbstr(ar, 21, "606");
     pallet_addrgbstr(ar, 22, "066");
-    pallet_addrgbstr(ar, 23, "666");
+    pallet_addrgbstr(ar, 23, "999");
 
     return 0;
 }
