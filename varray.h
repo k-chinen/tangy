@@ -52,6 +52,7 @@ int varray_entrypurgefunc(varray_t *ar, int(*subf)(char*.int,void*,int));
 
 int varray_dump(varray_t*ar);
 int varray_fprint(FILE *fp, varray_t*ar);
+int varray_fprintv(FILE *fp, varray_t *ar);
 
 
 #endif /* VARRAY_T */

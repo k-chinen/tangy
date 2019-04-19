@@ -404,12 +404,49 @@ varray_fprint(FILE *fp, varray_t *ar)
     return 0;
 }
 
+int
+varray_fprintv(FILE *fp, varray_t *ar)
+{
+    int i;
+    int ik;
+    char tmp[BUFSIZ];
+
+    if(!ar) {
+        return -1;
+    }
+    if(!ar->sprintfunc) {
+        Error("sprintfunc is not registered\n");
+    }
+
+    fprintf(fp, "varray %p; %d/%d\n",
+        ar, ar->use, ar->len);
+
+    tmp[0] = '\0';
+    ik = ar->sprintfunc(tmp, BUFSIZ, NULL, 0);
+    if(ik == 0 && tmp[0]) {
+        fprintf(fp, "num : %s\n", tmp);
+    }
+
+    for(i=0;i<ar->use;i++) {
+        if(!ar->sprintfunc||!ar->slot[i]) {
+            strcpy(tmp, "---");
+        }
+        else {
+            ik = ar->sprintfunc(tmp, BUFSIZ, ar->slot[i], 0);
+        }
+        fprintf(fp, "%4d: %s\n", i, tmp);
+    }
+    return 0;
+}
 
 #ifdef VARRAY_STANDALONE
 
 int
 myvarraysprintf(char *dst, int dlen, void* v, int opt)
 {
+    if(!v) {
+        return -1;
+    }
     if(opt<=0) {
         sprintf(dst, "%8d", *((int*)v));
     }
@@ -455,6 +492,7 @@ main()
 
     b = varray_clone(a);
     varray_fprint(stdout, b);
+    varray_fprintv(stdout, b);
 
 
 }

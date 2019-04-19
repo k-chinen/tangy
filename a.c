@@ -689,7 +689,7 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
     return 0;
 }
 
-
+#if 0
 int
 varray_fprintv(FILE *fp, varray_t *ar)
 {
@@ -724,6 +724,7 @@ varray_fprintv(FILE *fp, varray_t *ar)
     }
     return 0;
 }
+#endif
 
 ob*
 newobj()
