@@ -3946,12 +3946,19 @@ _drawpathX(FILE *fp,
     x0 = x1 = xox+xu->cx+xu->cox;
     y0 = y1 = xoy+xu->cy+xu->coy;
 
+Echo("LINEs X oid %d xox %6d cx %6d csx %6d cox %6d; x0 %6d x1 %6d\n",
+    xu->oid, xox, xu->cx, xu->csx, xu->cox, x0, x1);
+Echo("LINEs X oid %d xoy %6d cy %6d csy %6d coy %6d; y0 %6d y1 %6d\n",
+    xu->oid, xoy, xu->cy, xu->csy, xu->coy, y0, y1);
+
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
     if(INTRACE) {
         varray_fprintv(stdout, qar);
     }
 
+P;
+#if 0
     if(xu->type==CMD_CLINE) {
         x0 = x1 = xox+xu->cx+xu->cox;
         y0 = y1 = xoy+xu->cy+xu->coy;
@@ -3963,6 +3970,7 @@ _drawpathX(FILE *fp,
         Echo("    cox,coy %6d,%-6d\n", xu->cox, xu->coy);
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
+#endif
 
     fprintf(fp, "  %d %d moveto %% zero-point\n", x1, y1);
 
@@ -4371,6 +4379,7 @@ next:
         markfdot(xu->cob.outlinecolor, x1, y1);
     }
 
+P;
     if(xu->type==CMD_CLINE) {
         fprintf(fp, "    closepath\n");
     }
@@ -4853,12 +4862,19 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
         x0 = x1 = xox+xu->cx+xu->cox;
         y0 = y1 = xoy+xu->cy+xu->coy;
 
+Echo("LINEs d oid %d xox %6d cx %6d csx %6d cox %6d; x0 %6d x1 %6d\n",
+    xu->oid, xox, xu->cx, xu->csx, xu->cox, x0, x1);
+Echo("LINEs d oid %d xoy %6d cy %6d csy %6d coy %6d; y0 %6d y1 %6d\n",
+    xu->oid, xoy, xu->cy, xu->csy, xu->coy, y0, y1);
+
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
     if(INTRACE) {
         varray_fprintv(stdout, xu->cob.segar);
     }
 
+P;
+#if 0
     if(xu->type==CMD_CLINE) {
         x0 = x1 = xox+xu->cx+xu->cox;
         y0 = y1 = xoy+xu->cy+xu->coy;
@@ -4870,6 +4886,7 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
         Echo("    cox,coy %6d,%-6d\n", xu->cox, xu->coy);
         Echo("    x1,y1 %d,%d\n", x1, y1);
     }
+#endif
 
 #if 0
     fprintf(fp, "  %d %d moveto %% starting-point\n", x1, y1);
@@ -5618,6 +5635,7 @@ next:
         markfdot(xu->cob.outlinecolor, x1, y1);
     }
 
+P;
     if(xu->type==CMD_CLINE) {
 #if 1
         epsdraw_seglinearrow(fp, ydir, xox, xoy, x2, y2, x0, y0, xu, xns);
@@ -6257,7 +6275,7 @@ Zepsdraw_clinearrow(FILE *fp,
     int r;
     int aw, ah;
 P;
-#if 0
+#if 1
 Echo("%s: enter\n", __func__);
 #endif
 
@@ -6267,6 +6285,7 @@ P;
     }
 
     if(xu->type==CMD_CLINE) {
+P;
         fprintf(fp, " %% fill color %d hatch %d\n",
             xu->cob.fillcolor, xu->cob.fillhatch);
         if(xu->cob.fillhatch != HT_NONE && xu->cob.fillcolor>=0) {
@@ -6299,15 +6318,17 @@ P;
             fprintf(fp, " grestore\n");
         }
         else {
+P;
             fprintf(fp, " %% no-fill\n");
         }
     }
-
+P;
     fprintf(fp, " gsave\n");
     changecolor(fp, xu->cob.outlinecolor);
     r = drawpath_deco(fp, ydir, xox, xoy, xu, xns);
     fprintf(fp, " grestore\n");
 
+P;
     return r;
 }
 
@@ -12546,6 +12567,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     int ik;
     int wd, ht;
     int g;
+    int oldxdir;
 
     Echo("%s: arg xdir %d oxy %d,%d|u oid %d xy %d,%d gxy %d,%d\n",
         __func__, *xdir, ox, oy, u->oid, u->x, u->y, u->gx, u->gy);
@@ -12583,9 +12605,21 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     wd = u->crx-u->clx;
     ht = u->cty-u->cby;
 
+    oldxdir = *xdir;
 
     g = eval_dir(u, xdir);
     if(g>0) {
+
+#if 0
+        if(*xdir != oldxdir) {
+            fprintf(fp,
+                "%% dir change %d to %d\n", oldxdir, *xdir);
+            fprintf(fp,
+                "gsave %d %d moveto %d %d %d 0 360 arc fill grestore %% dir\n",
+                ox, oy, ox, oy, objunit/10);
+        }
+#endif
+
         goto out;
     }
 

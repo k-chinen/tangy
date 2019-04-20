@@ -1256,8 +1256,8 @@ P;
     case CMD_ELLIPSE:   WO;     break;
     case CMD_POLYGON:   RO;     break;
 
-    case CMD_DMY1:      WO;     break;
 #if 0
+    case CMD_DMY1:      WO;     break;
     case CMD_DMY2:      RO;     break;
     case CMD_DMY3:      WO;     break;
 #endif
@@ -1349,10 +1349,32 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             }
             break;
 
-
     case CMD_SCATTER: 
     case CMD_GATHER: 
     case CMD_CLINE:
+        {
+            int ik;
+            int lx, by, rx, ty, fx, fy;
+
+            if(u->cob.originalshape) {
+                ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+            }
+            else {
+                ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+            }
+            wd = rx - lx;
+            ht = ty - by;
+Echo("CLINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
+            u->ox = -wd/2;
+            u->oy = -ht/2-by;
+Echo("CLINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
+#if 0
+#endif
+        }
+        break;
+
     case CMD_LINE:     
     case CMD_ARROW:
     case CMD_WLINE:
@@ -1363,24 +1385,14 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             int ik;
             int lx, by, rx, ty, fx, fy;
 
-        if(u->cob.originalshape) {
-            ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
+            if(u->cob.originalshape) {
+                ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
-        }
-        else {
-            ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
+            }
+            else {
+                ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
-        }
-#if 0
- {
-    int ax, ay;
-    int bx, by;
-    int ik;
-    ik = __solve_fandt(xns, u, u->cob.segopar, 1, &ax, &ay, &bx, &by);
-    Echo(" oid %-3d ; ik %4d F? %2d T? %2d fandt %d,%d %d,%d\n",
-        u->oid, ik, (ik%100)/10, ik/100, ax, ay, bx, by);
- }
-#endif
+            }
 
 #if 1
 Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
