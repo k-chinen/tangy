@@ -3954,6 +3954,7 @@ Echo("LINEs X oid %d xoy %6d cy %6d csy %6d coy %6d; y0 %6d y1 %6d\n",
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
     if(INTRACE) {
+        P;
         varray_fprintv(stdout, qar);
     }
 
@@ -4227,7 +4228,7 @@ PP;
             x2 = x1;
             y2 = y1;
             if(f_close) {
-                fprintf(fp, "    closepath\n");
+                fprintf(fp, "    closepath %% CLOSE X\n");
             }
             goto next;
             break;
@@ -4323,7 +4324,7 @@ fprintf(stderr, "%% m cdir %d\n", cdir);
             fprintf(fp, "    %d %d lineto %% forward _drawpathX\n", x2, y2);
 
 confirm_arrow:
-#if 1
+#if 0
 fprintf(fp, "%% arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
 #endif
 Echo("    arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
@@ -4380,9 +4381,11 @@ next:
     }
 
 P;
+#if 0
     if(xu->type==CMD_CLINE) {
         fprintf(fp, "    closepath\n");
     }
+#endif
 
 #if 0
     fprintf(fp, " grestore %% %s\n", __func__);
@@ -4870,6 +4873,7 @@ Echo("LINEs d oid %d xoy %6d cy %6d csy %6d coy %6d; y0 %6d y1 %6d\n",
     Echo("    csx,csy %d,%d\n", xu->csx, xu->csy);
     Echo("    x1,y1 %d,%d\n", x1, y1);
     if(INTRACE) {
+        P;
         varray_fprintv(stdout, xu->cob.segar);
     }
 
@@ -5291,7 +5295,7 @@ skip_arcn:
         case OA_CLOSE:
             x2 = x1;
             y2 = y1;
-            fprintf(fp, "  closepath\n");
+            fprintf(fp, "  closepath %% CLOSE d\n");
             goto next;
             break;
 

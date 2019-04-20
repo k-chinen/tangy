@@ -627,6 +627,7 @@ ss_sprintf(char*dst, int dlen, void* xv, int opt)
     int ik;
     sstr *sv;
 
+    if(!xv) return -1;
     sv = (sstr*)xv;
     ik = sprintf(dst, "<'%s' %x>", sv->ssval, sv->ssopt);
 
@@ -639,6 +640,7 @@ segop_sprintf(char*dst, int dlen, void* xv, int opt)
     int ik;
     segop *sv;
 
+    if(!xv) return -1;
     sv = (segop*)xv;
     ik = sprintf(dst, "<%s(%d) '%s'>",
             rassoc(objattr_ial, sv->cmd), sv->cmd, sv->val);
@@ -657,6 +659,7 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
     char tmp1[32];
     char tmp2[32];
 
+    if(!xv) return -1;
     s = (seg*)xv;
 
     if(!s) {

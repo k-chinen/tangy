@@ -496,6 +496,10 @@ P;
 
             break;
 
+        case OA_CLOSE:  
+            FREG(OA_CLOSE, jc, REL_COORD, 0, 0, 0, 0, 0);
+            break;
+
         case OA_RIGHT:      x += m; c++; ldir =    0; break;
         case OA_LEFT:       x -= m; c++; ldir =  180; break;
         case OA_UP:         y += m; c++; ldir =   90; break;
@@ -720,6 +724,12 @@ Echo("set final as last position\n");
 Echo("set final as specified position\n");
     }
 
+    if(INTRACE) {
+        printf("opar\n");
+        varray_fprintv(stdout, opar);
+        printf("segar\n");
+        varray_fprintv(stdout, segar);
+    }
 
 #if 1
 Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
@@ -1367,7 +1377,7 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             wd = rx - lx;
             ht = ty - by;
 Echo("CLINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
-            u->ox = -wd/2;
+            u->ox = -wd/2-lx;
             u->oy = -ht/2-by;
 Echo("CLINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
 #if 0

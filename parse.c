@@ -352,7 +352,6 @@ Warn("tmp '%s' seems not value\n", tmp);
 E;
     }
     memset(newop, 0, sizeof(segop));
-
     newop->cmd = dt;
     newop->val = strdup(vstr);
 
@@ -380,6 +379,20 @@ P;
     }
 #endif
 
+#if 1
+    if(dt==OA_CLOSE) {
+        segop *dmyop;
+        dmyop = (segop*)malloc(sizeof(segop));
+        if(!dmyop) {
+E;
+        }
+        memset(dmyop, 0, sizeof(segop));
+        dmyop->cmd = OA_THEN;
+        dmyop->val = strdup(vstr);
+        varray_push(nob->cob.segopar, (void*)dmyop);
+    }
+#endif
+
 #if 0
 Echo("  push cmd %d val '%s'\n", newop->cmd, newop->val);
 #endif
@@ -392,6 +405,10 @@ Echo("  push cmd '%s'(%d) val '%s'\n",
 #if 0
     fprintf(stdout, "segopar");
     varray_fprint(stdout, nob->cob.segopar);
+#endif
+#if 0
+    fprintf(stdout, "segopar");
+    varray_fprintv(stdout, nob->cob.segopar);
 #endif
 
     nob->cob.originalshape++;
@@ -941,6 +958,7 @@ P;
             (strcasecmp(name, "join")==0)   ||
             (strcasecmp(name, "skip")==0)   ||
 
+            (strcasecmp(name, "close")==0)  ||
             (strcasecmp(name, "then")==0)   ) {
         char *j;
         int   dt;
@@ -1021,6 +1039,12 @@ Info("sub-command '%s' argument skip\n", name);
 
 #if 0
 Echo("k1 %d\n", k1);
+#endif
+
+#if 0
+P;
+    fprintf(stdout, "segopar\n");
+    varray_fprintv(stdout, rob->cob.segopar);
 #endif
 
 out:
@@ -1165,6 +1189,15 @@ fflush(stdout);
         if(!u) break;
         if(*u=='\0') break;
     } while(1);
+
+#if 0
+    if(nob->cob.segopar && nob->cob.segopar->use>0) {
+P;
+        fprintf(stdout, "segopar\n");
+        varray_fprintv(stdout, nob->cob.segopar);
+    }
+#endif
+
 
     if(nob->type==CMD_NOTEFILE) {
         if(nob->cob.carg1) {

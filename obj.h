@@ -440,15 +440,15 @@ struct obattr {
 
     int   originalshape;
 
-    varray_t *ssar;
+    varray_t *ssar;         /* surface string ; text */
     int   textrotate;
 
     char  *portstr;
     char  *boardstr;
 
-    varray_t *segopar;
-    varray_t *segar;
-    varray_t *seghar;
+    varray_t *segopar;      /* path segment operation */
+    varray_t *segar;        /* path segment outline */
+    varray_t *seghar;       /* path segment hollow */
 
     int    iarg1;
     int    iarg2;
