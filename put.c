@@ -732,6 +732,99 @@ est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
     int *rfx, int *rfy)
 {
+    int     rv;
+    qbb_t   sbb;
+    int     r;
+    int     ddir;
+    int     isx, isy, iex, iey; /* from and to */
+    int     bm, bmx, bmy;   /* beam and its offset for size */
+
+    rv = 0;
+
+Echo("%s:\n", __func__);
+    ddir = dirnormalize(*zdir);
+Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
+
+    qbb_reset(&sbb);
+
+    if(u->cob.length) {
+        r = u->cob.length;
+    }
+    else {
+        /* default value */
+#if 0
+        switch(u->type) {
+        case CMD_WLINE:
+        case CMD_WARROW:
+            r = objunit*3/2;
+            break;
+        default:
+            r = objunit;
+            break;
+        }
+#endif
+            r = objunit*3/2;
+    }
+Echo("  u->cob.length %d r %d\n", u->cob.length, r);
+
+
+    isx = 0;
+    isy = 0;
+    iex = r*cos(ddir*rf);
+    iey = r*sin(ddir*rf);
+Echo("  isx,y %d,%d iex,y %d,%d\n", isx, isy, iex, iey);
+
+    switch(u->type) {
+    case CMD_WLINE:
+    case CMD_WARROW:
+        if(u->cob.arrowheadpart) {
+            bm = objunit;
+        }
+        else {
+            bm = objunit/2;
+        }
+        break;
+    default:
+        if(u->cob.arrowheadpart) {
+            bm = objunit/10;
+        }
+        else {
+            bm = objunit/20;
+        }
+    }
+
+    bmx = (bm/2)*cos((ddir+90)*rf);
+    bmy = (bm/2)*sin((ddir+90)*rf);
+Echo("  bm %d bmx,y %d,%d\n", bm, bmx, bmy);
+
+    qbb_mark(&sbb, isx, isy);
+    qbb_mark(&sbb, isx-bmx, isy+bmy);
+    qbb_mark(&sbb, isx+bmx, isy-bmy);
+    qbb_mark(&sbb, iex, iey); 
+    qbb_mark(&sbb, iex-bmx, iey+bmy);
+    qbb_mark(&sbb, iex+bmx, iey-bmy);
+
+    *rfx = iex;
+    *rfy = iey;
+
+    *rlx = sbb.lx;
+    *rby = sbb.by;
+    *rrx = sbb.rx;
+    *rty = sbb.ty;
+
+#if 1
+Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
+#endif
+    return rv;
+
+#undef FREG
+}
+
+int
+Yest_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
+    int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
+    int *rfx, int *rfy)
+{
     int     x, y;
     int     _lx, _by, _rx, _ty;
     int     i;
@@ -767,7 +860,7 @@ est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     rv = 0;
 
 Echo("%s:\n", __func__);
-    ddir = (*zdir+360)%360;
+    ddir = dirnormalize(*zdir);
 Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
 
     if(u->cob.length) {
@@ -1306,11 +1399,11 @@ Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
 Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
 #endif
 
-#if 0
+#if 1
             u->fx = fx;
             u->fy = fy;
 #endif
-#if 1
+#if 0
             u->fx = fx - lx;
             u->fy = fy - by;
 #endif
@@ -1732,10 +1825,9 @@ eval_dir(ob *u, int *xdir)
     odir = *xdir;
 
     /* XXX */
-    if(u->type==CMD_DIR)    { *xdir =   u->cob.iarg1; g++; }
-
     if(u->type==CMD_UNIT)   { objunit = u->cob.iarg1; recalcsizeparam(); g++; }
 
+    if(u->type==CMD_DIR)    { *xdir =   u->cob.iarg1; g++; }
     if(u->type==CMD_INCDIR) { *xdir +=  u->cob.iarg1; g++; }
     if(u->type==CMD_DECDIR) { *xdir -=  u->cob.iarg1; g++; }
 
@@ -1745,6 +1837,8 @@ eval_dir(ob *u, int *xdir)
     if(u->type==CMD_RIGHT)  { *xdir =     0; g++; }
     if(u->type==CMD_UP)     { *xdir =    90; g++; }
     if(u->type==CMD_LEFT)   { *xdir =   180; g++; }
+
+    *xdir = dirnormalize(*xdir);
 
 #if 0
     Echo("%s: oid %d type %d: g %d; dir %d -> %d\n",
