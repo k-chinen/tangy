@@ -10800,7 +10800,7 @@ P;
     if(ISCHUNK(pf->type)) {
         for(i=0;i<pf->cch.nch;i++) {
             pe = (ob*)pf->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -10877,7 +10877,7 @@ P;
         cu = ce = cd = call = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -10895,7 +10895,7 @@ P;
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -10963,7 +10963,7 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
         for(i=0;i<pb->cch.nch;i++) {
             g = 0;
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -11082,7 +11082,7 @@ P;
         changecolor(fp, xu->cob.outlinecolor);
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -11110,7 +11110,7 @@ P;
 
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type)) {
+            if(EXVISIBLE(pe->type)) {
             }
             else {
                 continue;
@@ -11177,7 +11177,7 @@ P;
     if(ISCHUNK(pb->type)) {
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
+            if(EXVISIBLE(pe->type) || ISCHUNK(pe->type)) {
             }
             else {
                 continue;
@@ -11234,7 +11234,7 @@ P;
     if(ISCHUNK(pb->type)) {
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
+            if(EXVISIBLE(pe->type) || ISCHUNK(pe->type)) {
             }
             else {
                 continue;
@@ -11343,7 +11343,7 @@ P;
     if(ISCHUNK(pf->type)) {
         for(i=0;i<pf->cch.nch;i++) {
             pe = (ob*)pf->cch.ch[i];
-            if(ISATOM(pe->type) || ISCHUNK(pe->type)) {
+            if(EXVISIBLE(pe->type) || ISCHUNK(pe->type)) {
             }
             else {
                 continue;
@@ -11475,7 +11475,7 @@ solve_se(char *tg,
 
     q = tmp;
     c = 0;
-    while(p && *p && (*p=='-' || *p=='>' || *p=='<') && c<BUFSIZ) {
+    while(p && *p && (*p==':'||*p=='-' || *p=='>' || *p=='<') && c<BUFSIZ) {
         *q++ = *p++;
         c++;
     }
@@ -11484,13 +11484,13 @@ solve_se(char *tg,
     if(!tmp[0]) {
         goto out;
     }
-  { 
-    int ik;
-    ik = parse_aheads(tmp, &xa, &xf, &xc, &xb, 1);
-    if(ik==0) {
-        xa = -1;
+    if(tmp[0]!=':') { 
+        int ik;
+        ik = parse_aheads(tmp, &xa, &xf, &xc, &xb, 0);
+        if(ik==0) {
+            xa = -1;
+        }
     }
-  }
 
     q = tmp;
     c = 0;
@@ -11508,6 +11508,7 @@ solve_se(char *tg,
     Echo("xs %d xe %d xa %d\n", xs, xe, xa);
     fflush(stdout);
 
+    *rss = -1;
     *rsn = xs;
     *ren = xe;
     *rat = xa;
@@ -11655,6 +11656,8 @@ P;
     int  ik;
     int  cs;
 
+    cmap[0] = '\0';
+
     if(xu->cob.linkmap) {
         strcpy(cmap, xu->cob.linkmap);
     }
@@ -11663,20 +11666,29 @@ P;
         int m, h;
         m = (u<v ? u : v); /* MIN */
         
+#if 0
         strcpy(cmap, "solid");
+#endif
         for(h=1;h<=m;h++) {
-            sprintf(w, ",%d-%d", h, h);
+            sprintf(w, ",%d:%d", h, h);
             strcat(cmap, w);
         }
     }
     Echo(" oid %d cmap '%s'\n", xu->oid, cmap);
     p = cmap;
-    cs = LT_SOLID;
+    ss = xu->cob.outlinetype;
+    at = xu->cob.arrowheadpart;
+    af = xu->cob.arrowforeheadtype;
+    ac = xu->cob.arrowcentheadtype;
+    ab = xu->cob.arrowbackheadtype;
     while(*p) {
         sn = en = at = -1;
         af = ac = ab = -1;
         p = draw_word(p, token, BUFSIZ, ',');
         Echo("token '%s'\n", token);
+        if(!token[0]) {
+            continue;
+        }
         ik = solve_se(token, &ss, &sn, &en, &at, &af, &ac, &ab);    
         Echo("  ik %d; ss %d sn %d en %d at %d af %d ac %d ab %d\n",
             ik, ss, sn, en, at, af, ac, ab);
@@ -11689,10 +11701,21 @@ P;
                 y1 = bs[sn]->gy;
                 x2 = fs[en]->gx-fs[sn]->cwd/2;
                 y2 = fs[en]->gy;
-                Echo("cs %d\n", cs);
+                Echo("ss %d at %d af %d ac %d ab %d\n",
+                    ss, at, af, ac, ab);
+                if(at<0) {  
+                    ss = xu->cob.outlinetype;
+                    at = xu->cob.arrowheadpart;
+                    af = xu->cob.arrowforeheadtype;
+                    af = xu->cob.arrowforeheadtype;
+                    ac = xu->cob.arrowcentheadtype;
+                    ab = xu->cob.arrowbackheadtype;
+                    Echo("ss %d at %d af %d ac %d ab %d\n",
+                        ss, at, af, ac, ab);
+                }
                 epsdraw_Xseglinearrow(fp, xox, xoy,
                     x1, y1, x2, y2,
-                    cs, objunit/50, 0,
+                    ss, objunit/50, 0,
                     at, af, ac, ab);
             }
         }
@@ -11702,32 +11725,6 @@ P;
     
     }
  }
-
-    goto out;
-
-    switch(xu->cob.linkstyle) {
-    case LS_SQUAREDOT:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
-        break;
-    case LS_SQUARE:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 0, -1);
-        break;
-    case LS_MAN:
-/*
-        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
-*/
-        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
-        break;
-    case LS_STRAIGHT:
-        ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
-        break;
-    case LS_ARC:
-        Error("LS_ARC is not implemented yet.\n");
-    case LS_DIRECT:
-    default:
-        ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
-        break;
-    }
 
 out:
     return 0;
