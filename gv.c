@@ -96,6 +96,7 @@ apair_t cmd_ial[] = {
     {"ruler",           CMD_RULER},
     {"gather",          CMD_GATHER},
     {"scatter",         CMD_SCATTER},
+    {"thru",            CMD_THRU},
     {"traceon",         CMD_TRACEON},
     {"traceoff",        CMD_TRACEOFF},
     {NULL,              -1},
@@ -269,6 +270,7 @@ apair_t objattr_ial[] = {
     {"textbgcolor",         OA_TEXTBGCOLOR},
 
     {"linkstyle",           OA_LINKSTYLE},
+    {"linkmap",             OA_LINKMAP},
 
     {"width",               OA_WIDTH},
     {"height",              OA_HEIGHT},

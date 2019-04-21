@@ -1277,12 +1277,11 @@ P;
     case CMD_PING:
     case CMD_PINGPONG:  WO;     break;
 
-#if 0
     case CMD_SCATTER: 
     case CMD_GATHER: 
+    case CMD_THRU: 
             RO;     
             break;
-#endif
 
     case CMD_PLINE:
             VO;
@@ -1359,8 +1358,6 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             }
             break;
 
-    case CMD_SCATTER: 
-    case CMD_GATHER: 
     case CMD_CLINE:
         {
             int ik;

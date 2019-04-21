@@ -431,6 +431,68 @@ Echo("  push cmd '%s'(%d) val '%s'\n",
     return r;
 }
 
+
+int
+parse_aheads(char *name, int *m, int *fa, int *ca, int *ba, int acshortdash)
+{
+    if(acshortdash) {
+    if(strcasecmp(name, "-")==0)     {
+        *m  = AR_NONE;
+        *fa = AH_NONE;
+        *ca = AR_NONE;
+        *ba = AH_NONE;
+        goto out;
+    }
+    }
+    if(strcasecmp(name, "--")==0)     {
+        *m  = AR_NONE;
+        *fa = AH_NONE;
+        *ca = AR_NONE;
+        *ba = AH_NONE;
+        goto out;
+    }
+    if(strcasecmp(name, "->")==0)     {
+        *m  = AR_FORE;
+        *fa = AH_NORMAL;
+        *ca = AR_NONE;
+        *ba = AH_NONE;
+        goto out;
+    }
+    if(strcasecmp(name, "<-")==0)     {
+        *m  = AR_BACK;
+        *fa = AH_NONE;
+        *ca = AR_NONE;
+        *ba = AH_NORMAL;
+        goto out;
+    }
+    if(strcasecmp(name, "<->")==0)     {
+        *m  = AR_BOTH;
+        *fa = AH_NORMAL;
+        *ca = AR_NONE;
+        *ba = AH_NORMAL;
+        goto out;
+    }
+    if(strcasecmp(name, "->-")==0)     {
+        *m  = AR_CENT;
+        *fa = AH_NONE;
+        *ca = AH_NORMAL;
+        *ba = AH_NONE;
+        goto out;
+    }
+    if(strcasecmp(name, "-<-")==0)     {
+        *m  = AR_CENT;
+        *fa = AH_NONE;
+        *ca = AH_REVNORMAL;
+        *ba = AH_NONE;
+        goto out;
+    }
+
+    return 0;
+    
+out:
+    return 1;
+}
+
 char *
 parseobjattr(ob *rob, char *src)
 {
@@ -571,6 +633,14 @@ skip_number:
     }
 skip_note:
 
+
+    parse_aheads(name,
+        &rob->cob.arrowheadpart,
+        &rob->cob.arrowforeheadtype,
+        &rob->cob.arrowcentheadtype,
+        &rob->cob.arrowbackheadtype, 0);
+
+#if 0
     if(strcasecmp(name, "--")==0)     {
         rob->cob.arrowheadpart     = AR_NONE;
         rob->cob.arrowforeheadtype = AH_NONE;
@@ -609,6 +679,7 @@ skip_note:
         rob->cob.arrowbackheadtype = AH_NONE;
         goto out;
     }
+#endif
 
     oak = assoc(objattr_ial, name);
     if(oak<0) {
@@ -770,6 +841,8 @@ P;
     ONSET(OA_SHADOW,        shadow);
 
     AISET(OA_LINKSTYLE, ls_ial, linkstyle);
+    SADD(OA_LINKMAP,        linkmap);
+
     ISET(OA_RAD,            rad);
     ISET(OA_LENGTH,         length);
     ISET(OA_PEAK,           polypeak);

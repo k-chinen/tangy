@@ -10772,6 +10772,7 @@ out:
 }
 
 
+#if 0
 
 int
 Xepsdraw_scatter(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
@@ -10823,6 +10824,7 @@ P;
 out:
     return 0;
 }
+#endif
 
 int
 epsdraw_gather_man(FILE *fp, int xdir, int xox, int xoy,
@@ -11385,12 +11387,155 @@ epsdraw_scatter(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
 {
     ob *pf, *pb;
     int ik;
-#if 0
-    int i;
-    ob *pe;
-    int sx, sy;
-    int ex, ey;
+
+P;
+    pf = (ob*)xu->cob.linkfore;
+    pb = (ob*)xu->cob.linkback;
+    fprintf(fp, "%% pf %p, pb %p\n", pf, pb);
+    Echo("%% pf %p, pb %p\n", pf, pb);
+
+    if(xu->cob.linkmap) {
+        Echo("%s: oid %d linkmap '%s'\n",
+            __func__, xu->oid, xu->cob.linkmap);
+    }
+
+    if(!pf || !pb) {
+        goto out;
+    }
+
+    switch(xu->cob.linkstyle) {
+    case LS_SQUAREDOT:
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
+        break;
+    case LS_SQUARE:
+        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 0, -1);
+        break;
+    case LS_MAN:
+/*
+        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
+*/
+        ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
+        break;
+    case LS_STRAIGHT:
+        ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
+        break;
+    case LS_ARC:
+        Error("LS_ARC is not implemented yet.\n");
+    case LS_DIRECT:
+    default:
+        ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
+        break;
+    }
+
+out:
+    return 0;
+}
+
+int parse_aheads(char*,int*,int*,int*,int*, int);
+
+int
+solve_se(char *tg,
+    int *rss, int* rsn, int* ren, int* rat, int *raf, int *rac, int *rab)
+{
+    int   rv;
+    char  tmp[BUFSIZ];
+    char *p;
+    char *q;
+    int   c;
+    int   ss;
+    int   xs, xe, xa;
+    int   xf, xc, xb;
+
+    rv = -1;
+    xs = xe = xa = -1;
+    xf = xc = xb = -1;
+
+
+    ss = assoc(linetype_ial, tg);
+    Echo("ss %d\n", ss);
+    if(ss>=0) {
+        *rss = ss;
+        return 2;
+    }
+
+    p = tg;
+
+    q = tmp;
+    c = 0;
+    while(p && *p && (*p>='0' && *p<='9') && c<BUFSIZ) {
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+    Info("  tmp '%s'\n", tmp);
+    if(!tmp[0]) {
+        goto out;
+    }
+    xs = atoi(tmp);
+
+    q = tmp;
+    c = 0;
+    while(p && *p && (*p=='-' || *p=='>' || *p=='<') && c<BUFSIZ) {
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+    Info("  tmp '%s'\n", tmp);
+    if(!tmp[0]) {
+        goto out;
+    }
+  { 
+    int ik;
+    ik = parse_aheads(tmp, &xa, &xf, &xc, &xb, 1);
+    if(ik==0) {
+        xa = -1;
+    }
+  }
+
+    q = tmp;
+    c = 0;
+    while(p && *p && (*p>='0' && *p<='9') && c<BUFSIZ) {
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+    Info("  tmp '%s'\n", tmp);
+    if(!tmp[0]) {
+        goto out;
+    }
+    xe = atoi(tmp);
+
+    Echo("xs %d xe %d xa %d\n", xs, xe, xa);
+    fflush(stdout);
+
+    *rsn = xs;
+    *ren = xe;
+    *rat = xa;
+    *raf = xf;
+    *rac = xc;
+    *rab = xb;
+
+    rv = 1;
+
+out:
+    return rv;
+}
+
+#ifndef FBSLOT_LEN
+#define FBSLOT_LEN (128)
 #endif
+
+
+int
+epsdraw_thru(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob *pf, *pb;
+    ob *fs[FBSLOT_LEN];
+    ob *bs[FBSLOT_LEN];
+    ob *pe, *se;
+    int ik;
+    int i, j;
+    int u, v;
 
 P;
     pf = (ob*)xu->cob.linkfore;
@@ -11401,6 +11546,164 @@ P;
     if(!pf || !pb) {
         goto out;
     }
+    Echo("pf %p oid %d %d\n", pf, pf->oid, pf->type);
+    Echo("pb %p oid %d %d\n", pb, pb->oid, pb->type);
+
+    memset(fs, 0, sizeof(fs));
+    memset(bs, 0, sizeof(bs));
+
+    u = 0;
+    for(i=0;i<pb->cch.nch;i++) {
+        pe = (ob*)pb->cch.ch[i];
+        if(EXVISIBLE(pe->type)) {
+        }
+        else {
+            continue;
+        }
+        u++;
+        bs[u] = pe;
+        Echo("i,u %2d %2d: %p oid %d %d\n", i, u, pe, pe->oid, pe->type);
+    }
+
+    v = 0;
+    for(j=0;j<pf->cch.nch;j++) {
+        se = (ob*)pf->cch.ch[j];
+        if(EXVISIBLE(se->type)) {
+        }
+        else {
+            continue;
+        }
+        v++;
+        fs[v] = se;
+        Echo("j,v %2d %2d: %p oid %d %d\n", j, v, se, se->oid, se->type);
+    }
+    Echo(" u %d v %d\n", u, v);
+    fflush(stdout);
+
+    for(i=0;i<u;i++) {
+        if(!bs[i]) {
+            Echo("b %3d: %p\n", i, bs[i]);
+        }
+        else {
+            Echo("b %3d: %p oid %d type %d\n",
+                i, bs[i], bs[i]->oid, bs[i]->type);
+        }
+    }
+    for(j=0;j<v;j++) {
+        if(!fs[j]) {
+            Echo("f %3d: %p\n", j, fs[j]);
+        }
+        else {
+            Echo("f %3d: %p oid %d type %d\n",
+                j, fs[j], fs[j]->oid, fs[j]->type);
+        }
+    }
+
+    if(xu->cob.markguide)
+    {
+    int x1,y1;
+    int fht;
+    fprintf(fp, "      gsave\n");
+
+    /* TEMP */
+    fht = def_textheight;
+    fprintf(fp, "      /%s findfont %d scalefont setfont %% thru backport\n",
+        def_fontname, fht);
+
+    for(i=0;i<=u;i++) {
+        pe = bs[i];
+        if(!pe) {
+            continue;
+        }
+        x1 = pe->gx+pe->cwd/2;
+        y1 = pe->gy;
+        fprintf(fp, "      %d %d %d (%d) rrshow\n",
+            x1, y1, 0, i);
+    }
+
+    for(j=0;j<=v;j++) {
+        pe = fs[j];
+        if(!pe) {
+            continue;
+        }
+        x1 = pe->gx-pe->cwd/2;
+        y1 = pe->gy;
+        fprintf(fp, "      %d %d %d (%d) lrshow\n",
+            x1, y1, 0, j);
+    }
+
+    fprintf(fp, "      grestore\n");
+    }
+
+
+    if(xu->cob.linkmap) {
+        Echo("%s: oid %d linkmap '%s'\n",
+            __func__, xu->oid, xu->cob.linkmap);
+    }
+    else {
+        Echo("%s: oid %d no linkmap\n",
+            __func__, xu->oid);
+    }
+    
+ {
+    char *p;
+    char token[BUFSIZ];
+    char cmap[BUFSIZ];
+    int  ss;
+    int  sn, en, at;
+    int  af, ac, ab;
+    int  ik;
+    int  cs;
+
+    if(xu->cob.linkmap) {
+        strcpy(cmap, xu->cob.linkmap);
+    }
+    else {
+        char w[BUFSIZ];
+        int m, h;
+        m = (u<v ? u : v); /* MIN */
+        
+        strcpy(cmap, "solid");
+        for(h=1;h<=m;h++) {
+            sprintf(w, ",%d-%d", h, h);
+            strcat(cmap, w);
+        }
+    }
+    Echo(" oid %d cmap '%s'\n", xu->oid, cmap);
+    p = cmap;
+    cs = LT_SOLID;
+    while(*p) {
+        sn = en = at = -1;
+        af = ac = ab = -1;
+        p = draw_word(p, token, BUFSIZ, ',');
+        Echo("token '%s'\n", token);
+        ik = solve_se(token, &ss, &sn, &en, &at, &af, &ac, &ab);    
+        Echo("  ik %d; ss %d sn %d en %d at %d af %d ac %d ab %d\n",
+            ik, ss, sn, en, at, af, ac, ab);
+        fflush(stdout);
+
+        if(ik==1) {
+            int x1, y1, x2, y2;
+            if(bs[sn] && fs[en]) {
+                x1 = bs[sn]->gx+bs[sn]->cwd/2;
+                y1 = bs[sn]->gy;
+                x2 = fs[en]->gx-fs[sn]->cwd/2;
+                y2 = fs[en]->gy;
+                Echo("cs %d\n", cs);
+                epsdraw_Xseglinearrow(fp, xox, xoy,
+                    x1, y1, x2, y2,
+                    cs, objunit/50, 0,
+                    at, af, ac, ab);
+            }
+        }
+        if(ik==2) {
+            cs = ss;
+        }
+    
+    }
+ }
+
+    goto out;
 
     switch(xu->cob.linkstyle) {
     case LS_SQUAREDOT:
@@ -12701,6 +13004,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
     if(u->type==CMD_GATHER) {
         epsdraw_gather(fp, *xdir, ox, oy, u, xns);
+    }
+    if(u->type==CMD_THRU) {
+        epsdraw_thru(fp, *xdir, ox, oy, u, xns);
     }
     if(u->type==CMD_BCURVE || u->type==CMD_XCURVE) {
         Zepsdraw_bcurvearrow(fp, *xdir, ox, oy, u, xns);

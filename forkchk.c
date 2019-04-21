@@ -23,6 +23,9 @@ fkchkchunk(ob *xch, ns *xns)
     ob*   lastfork;
     ob*   curfork;
 
+#define RM(g) \
+  ((g)->type==CMD_GATHER||(g)->type==CMD_SCATTER||(g)->type==CMD_THRU) 
+
 P;
 
     lobj = NULL;
@@ -30,13 +33,13 @@ P;
         cobj = (ob*) xch->cch.ch[i];
         Echo("%d: oid %d type %d\n", i, cobj->oid, cobj->type);
     
-        if(cobj->type==CMD_GATHER||cobj->type==CMD_SCATTER) {
+        if(RM(cobj)) {
             cobj->cob.linkback = (void*)lobj;
             Echo("\tgather or scatter\n");
         }
-        if(lobj && (lobj->type==CMD_GATHER||lobj->type==CMD_SCATTER)) {
-            Echo("\tgather or scatter\n");
+        if(lobj && RM(lobj)) {
             lobj->cob.linkfore = (void*)cobj;
+            Echo("\tgather or scatter\n");
         }
 
         if(cobj->type==CMD_CHUNK) {
@@ -48,7 +51,7 @@ P;
 
     for(i=0;i<xch->cch.nch;i++) {
         cobj = (ob*) xch->cch.ch[i];
-        if(cobj->type==CMD_GATHER||cobj->type==CMD_SCATTER) {
+        if(RM(cobj)) {
             Echo("link %d: oid %d type %d back %d fore %d\n",
                 i, cobj->oid, cobj->type,
                 cobj->cob.linkback ?  ((ob*)cobj->cob.linkback)->oid : -1,
@@ -56,6 +59,8 @@ P;
                 );
         }
     }
+
+#undef RM
 
     return 0;
 }

@@ -93,6 +93,7 @@
 
 #define CMD_GATHER      (3007)
 #define CMD_SCATTER     (3008)
+#define CMD_THRU        (3009)
 
 #define CMD_LPAREN      (4001)
 #define CMD_RPAREN      (4002)
@@ -148,15 +149,18 @@ extern apair_t cmd_ial[];
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
     )
 
-#define VISIBLE(x) \
-((x)==CMD_BOX||(x)==CMD_DOTS||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||\
+#define EXVISIBLE(x) \
+((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||\
  (x)==CMD_POLYGON||(x)==CMD_CLINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
  (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||\
  (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\
- (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||(x)==CMD_SEP||\
+ (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||\
  (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF)
+
+#define VISIBLE(x) \
+(EXVISIBLE(x)||(x)==CMD_DOTS||(x)==CMD_SEP)
 
 
 #define PO_CENTER           (0)
@@ -269,6 +273,7 @@ extern apair_t lo_ial[];
 #define OA_DEPTH            (43)
 
 #define OA_LINKSTYLE        (51)
+#define OA_LINKMAP          (52)
 
 #define OA_PEAK             (70)
 #define OA_PEAKROTATE       (71)
@@ -463,6 +468,7 @@ struct obattr {
     void  *linkfore;
     void  *linkback;
     int    linkstyle;
+    char  *linkmap;
 
     int    arrowevery;
     int    keepdir;
