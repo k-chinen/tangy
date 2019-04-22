@@ -737,6 +737,7 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
     return rv;
 }
 
+/* XXX */
 int
 est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
@@ -787,7 +788,8 @@ Echo("  isx,y %d,%d iex,y %d,%d\n", isx, isy, iex, iey);
     switch(u->type) {
     case CMD_WLINE:
     case CMD_WARROW:
-        if(u->cob.arrowheadpart) {
+        if(u->cob.arrowforeheadtype>0 || u->cob.arrowcentheadtype>0
+            || u->cob.arrowbackheadtype>0) {
             bm = objunit;
         }
         else {
@@ -795,8 +797,9 @@ Echo("  isx,y %d,%d iex,y %d,%d\n", isx, isy, iex, iey);
         }
         break;
     default:
-        if(u->cob.arrowheadpart) {
-            bm = objunit/10;
+        if(u->cob.arrowforeheadtype>0 || u->cob.arrowcentheadtype>0
+            || u->cob.arrowbackheadtype>0) {
+            bm = objunit/8;
         }
         else {
             bm = objunit/20;

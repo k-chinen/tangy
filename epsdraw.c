@@ -859,27 +859,8 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
         d = (int)((double)r - (double)r*sin(th));
         fprintf(fp, "%% th %.4f; k %d d %d\n", th, k, d);
 
-#if 0
         fprintf(fp, "  gsave\n");
-        fprintf(fp, "    0 0 1 setrgbcolor\n");
-        fprintf(fp, "    %d %d moveto\n", x, y);
-        fprintf(fp, "    %d %d rlineto\n", 0, k/2);
-        fprintf(fp, "    %d %d rlineto\n", -k*2, 0);
-        fprintf(fp, "    %d %d rlineto\n", 0, -k);
-        fprintf(fp, "    %d %d rlineto\n", k*2, 0);
-        fprintf(fp, "    closepath\n");
-        fprintf(fp, "    stroke\n");
-        fprintf(fp, "  grestore\n");
-#endif
-
-        fprintf(fp, "  gsave\n");
-#if 0
-        fprintf(fp, "    1 0 0 setrgbcolor\n");
-#endif
         fprintf(fp, "    %d %d translate\n", x, y);
-#if 0
-        fprintf(fp, "    0 %d translate\n", objunit);
-#endif
         fprintf(fp, "    %d rotate\n", xdir);
 
         fprintf(fp, "    %d %d moveto\n", 0, 0);
@@ -895,24 +876,7 @@ epsdraw_arrowhead(FILE *fp, int atype, int xdir, int lc, int x, int y)
         else {
             fprintf(fp, "    stroke\n");
         }
-#if 0
-        {
-            fprintf(fp, "    gsave\n");
-            fprintf(fp, "    1 setgray\n");
-            fprintf(fp, "    1 0 0 setrgbcolor\n");
-            fprintf(fp, "    fill\n");
-            fprintf(fp, "    grestore\n");
 
-            fprintf(fp, "    %d %d moveto\n", 0, 0);
-            fprintf(fp, "    %d %d %d 30 90 arc\n", 0-k+d, 0-k/2, r);
-            fprintf(fp, "    %d %d rlineto\n", -k-d, 0);
-            fprintf(fp, "    %d %d rlineto\n", 0, -k);
-            fprintf(fp, "    %d %d %d -90 -30 arc\n", 0-k+d, 0+k/2, r);
-            fprintf(fp, "    closepath\n");
-            fprintf(fp, "    stroke\n");
-
-        }
-#endif
         fprintf(fp, "  grestore\n");
 
         }
@@ -11524,7 +11488,6 @@ solve_se(char *tg,
     Echo("xs %d xe %d xa %d\n", xs, xe, xa);
     fflush(stdout);
 
-    *rss = -1;
     *rsn = xs;
     *ren = xe;
     *rat = xa;
@@ -11698,8 +11661,10 @@ P;
     ac = xu->cob.arrowcentheadtype;
     ab = xu->cob.arrowbackheadtype;
     while(*p) {
+#if 0
         sn = en = at = -1;
         af = ac = ab = -1;
+#endif
         p = draw_word(p, token, BUFSIZ, ',');
         Echo("token '%s'\n", token);
         if(!token[0]) {
@@ -11717,8 +11682,9 @@ P;
                 y1 = bs[sn]->gy;
                 x2 = fs[en]->gx-fs[sn]->cwd/2;
                 y2 = fs[en]->gy;
-                Echo("ss %d at %d af %d ac %d ab %d\n",
+                Echo("b ss %d at %d af %d ac %d ab %d\n",
                     ss, at, af, ac, ab);
+#if 0
                 if(at<0) {  
                     ss = xu->cob.outlinetype;
                     at = xu->cob.arrowheadpart;
@@ -11726,9 +11692,10 @@ P;
                     af = xu->cob.arrowforeheadtype;
                     ac = xu->cob.arrowcentheadtype;
                     ab = xu->cob.arrowbackheadtype;
-                    Echo("ss %d at %d af %d ac %d ab %d\n",
-                        ss, at, af, ac, ab);
                 }
+#endif
+                Echo("a ss %d at %d af %d ac %d ab %d\n",
+                    ss, at, af, ac, ab);
                 epsdraw_Xseglinearrow(fp, xox, xoy,
                     x1, y1, x2, y2,
                     ss, objunit/50, 0,
@@ -11736,7 +11703,9 @@ P;
             }
         }
         if(ik==2) {
+#if 0
             cs = ss;
+#endif
         }
     
     }
@@ -13327,7 +13296,7 @@ PP;
                     epsdraw_bbox(fp, u);
                 }
                 else {
-                    fprintf(stderr, "; bbox invisible oid %d\n", u->oid);
+                    Info("; bbox invisible oid %d\n", u->oid);
                 }
             }
 #endif

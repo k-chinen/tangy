@@ -82,10 +82,8 @@ confirm_attr(ob *xo)
 fprintf(stderr, "polygon peak %d\n", xoa->polypeak);
 #endif
             nv = 3;
-#if 1
-fprintf(stderr, "%s: FIX polygon peak %d -> %d\n",
-        __func__, xoa->polypeak, nv);
-#endif
+            Info("SET oid %d polygon peak %d -> %d\n",
+                xo->oid, xoa->polypeak, nv);
             xoa->polypeak = nv;
         }
     }
