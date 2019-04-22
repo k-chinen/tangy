@@ -4035,10 +4035,10 @@ Echo("%s: oid %d i %d s ptype %d x1,y1 %d,%d x2,y2 %d,%d\n",
         case OA_JOIN:
 PP;
 #if 1
-			fprintf(fp, "gsave\n");
+            fprintf(fp, "gsave\n");
             fprintf(fp, "  %d %d %d 0 360 arc fill %% join-mark\n",
                 x1, y1, xu->cob.outlinethick*2);
-			fprintf(fp, "grestore\n");
+            fprintf(fp, "grestore\n");
 #endif
             x2 = x1;
             y2 = y1;
@@ -4989,10 +4989,10 @@ Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achbh %d\n",
         case OA_JOIN:
 P;
 #if 1
-			fprintf(fp, "gsave\n");
+            fprintf(fp, "gsave\n");
             fprintf(fp, "  %d %d %d 0 360 arc fill %% join-mark\n",
                 x1, y1, xu->cob.outlinethick*2);
-			fprintf(fp, "grestore\n");
+            fprintf(fp, "grestore\n");
 #endif
             x2 = x1;
             y2 = y1;
@@ -9578,14 +9578,26 @@ mkpath_card(varray_t *sar, int wd, int ht, int rad)
 P;
     try_regsegmoveto(sar,  -wd/2,   -ht/2);
     try_regsegrlineto(sar,    wd,       0);
-    try_regsegrlineto(sar,     0, ht-ht/4);
-    try_regsegrlineto(sar, -ht/4,    ht/4);
+    try_regsegrlineto(sar,     0,      ht);
     try_regsegrlineto(sar, -wd+ht/4,    0);
-    try_regsegrlineto(sar,     0,    -ht);
+    try_regsegrlineto(sar, -ht/4,   -ht/4);
     try_regsegclose(sar);
 
     return 0;
+}
 
+int
+mkpath_Rcard(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+    try_regsegmoveto(sar,  -wd/2,   -ht/2);
+    try_regsegrlineto(sar,     0, ht-ht/4);
+    try_regsegrlineto(sar,  ht/4,    ht/4);
+    try_regsegrlineto(sar, wd-ht/4,     0);
+    try_regsegrlineto(sar,     0,     -ht);
+    try_regsegclose(sar);
+
+    return 0;
 }
 
 int
@@ -9783,7 +9795,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         break;
     case CMD_CARD:
         ik = mkpath_card(xu->cob.segar, awd, aht, xu->cob.rad);
-        ik = mkpath_Rbox(xu->cob.seghar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rcard(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     case CMD_DIAMOND:
         ik = mkpath_diamond(xu->cob.segar, awd, aht, xu->cob.rad);
