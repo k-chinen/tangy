@@ -4034,9 +4034,11 @@ Echo("%s: oid %d i %d s ptype %d x1,y1 %d,%d x2,y2 %d,%d\n",
 
         case OA_JOIN:
 PP;
-#if 0
-            fprintf(fp, " %d %d %d 0 360 arc fill %% join-mark\n",
+#if 1
+			fprintf(fp, "gsave\n");
+            fprintf(fp, "  %d %d %d 0 360 arc fill %% join-mark\n",
                 x1, y1, xu->cob.outlinethick*2);
+			fprintf(fp, "grestore\n");
 #endif
             x2 = x1;
             y2 = y1;
@@ -4986,9 +4988,11 @@ Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achbh %d\n",
 
         case OA_JOIN:
 P;
-#if 0
-            fprintf(fp, " %d %d %d 0 360 arc fill %% join-mark\n",
+#if 1
+			fprintf(fp, "gsave\n");
+            fprintf(fp, "  %d %d %d 0 360 arc fill %% join-mark\n",
                 x1, y1, xu->cob.outlinethick*2);
+			fprintf(fp, "grestore\n");
 #endif
             x2 = x1;
             y2 = y1;
