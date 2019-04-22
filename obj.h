@@ -42,8 +42,9 @@
 #define CMD_DOTS        (21)
 #define CMD_CIRCLE      (31)
 #define CMD_ELLIPSE     (32)
+#define CMD_POINT       (35)
 #define CMD_POLYGON     (43)
-#define CMD_CLINE       (44)
+#define CMD_ULINE       (44)
 #define CMD_DRUM        (50)
 #define CMD_PAPER       (51)
 #define CMD_CARD        (52)
@@ -134,9 +135,9 @@ extern apair_t cmd_ial[];
     )
 #define ISATOM(x)   \
     ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
-     (x)==CMD_DOTS||(x)==CMD_CLINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
+     (x)==CMD_DOTS||(x)==CMD_ULINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
      (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
-     (x)==CMD_POLYGON|| \
+     (x)==CMD_POLYGON||(x)==CMD_POINT ||\
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
@@ -150,8 +151,8 @@ extern apair_t cmd_ial[];
     )
 
 #define EXVISIBLE(x) \
-((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||\
- (x)==CMD_POLYGON||(x)==CMD_CLINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
+((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_POINT||(x)==CMD_ELLIPSE||\
+ (x)==CMD_POLYGON||(x)==CMD_ULINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
  (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||\
  (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\

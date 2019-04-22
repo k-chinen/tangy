@@ -24,6 +24,7 @@ apair_t cmd_ial[] = {
     {"shore",           CMD_SHORE},
     {"goto",            CMD_GOTO},
     {"box",             CMD_BOX},
+    {"point",           CMD_POINT},
     {"dots",            CMD_DOTS},
     {"drum",            CMD_DRUM},
     {"paper",           CMD_PAPER},
@@ -37,7 +38,7 @@ apair_t cmd_ial[] = {
     {"circle",          CMD_CIRCLE},
     {"ellipse",         CMD_ELLIPSE},
     {"polygon",         CMD_POLYGON},
-    {"cline",           CMD_CLINE},
+    {"uline",           CMD_ULINE},
     {"line",            CMD_LINE},
     {"arrow",           CMD_ARROW},
     {"wline",           CMD_WLINE},
@@ -439,6 +440,9 @@ int oidl_mode       = 0;
 int namel_mode      = 0;
 int ruler_mode      = 0;
 int text_mode       = 0;
+
+double def_hollowratio  = 0.8;
+double def_shadowgray   = 0.5;
 
 int def_dir             =   0;
 int def_scale           =   1;

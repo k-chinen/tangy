@@ -1218,7 +1218,7 @@ Echo("CHECK CHUNK attr\n");
     case CMD_LINE:
         nob->cob.keepdir = 0;
         break;
-    case CMD_CLINE:
+    case CMD_ULINE:
         nob->cob.keepdir = 1;
         break;
 

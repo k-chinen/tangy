@@ -1150,23 +1150,25 @@ insboxpath(varray_t *xar, int xwd, int xht)
   * name    size        description
   *-----
   * WO      1.5  x 1.0  wide
-  * RO      1.0  x 1.0  regular
+  * RO      1.0  x 1.0  square
   * NO      0.5  x 1.0  narrow
   * NNO     0.25 x 1.0  narrow narrow
   * VO      0    x 1.0  vartical line
   * HO      1.0  x 0    horizontal line
   * ZO      0    x 0    zero
+  * SO      0.1  x 0.1  small
   *
   */
  
 
-#define WO      {wd = objunit*3/2;  ht = objunit; }
-#define RO      {wd = objunit;      ht = objunit; }
-#define NO      {wd = objunit/2;    ht = objunit; }
-#define NNO     {wd = objunit/4;    ht = objunit; }
-#define VO      {wd = 0;            ht = objunit; }
-#define HO      {wd = objunit       ht = 0;       }
-#define ZZ      {wd = 0;            ht = 0;       }
+#define WO      {wd = objunit*3/2;  ht = objunit;   }
+#define RO      {wd = objunit;      ht = objunit;   }
+#define NO      {wd = objunit/2;    ht = objunit;   }
+#define NNO     {wd = objunit/4;    ht = objunit;   }
+#define VO      {wd = 0;            ht = objunit;   }
+#define HO      {wd = objunit       ht = 0;         }
+#define ZZ      {wd = 0;            ht = 0;         }
+#define SO      {wd = objunit/5;    ht = objunit/5; }
 
 #if 0
 #include "xcur.c"
@@ -1266,6 +1268,7 @@ P;
 
     case CMD_BOX:       WO;     break;
     case CMD_CIRCLE:    RO;     break;
+    case CMD_POINT:     SO;     break;
     case CMD_ELLIPSE:   WO;     break;
     case CMD_POLYGON:   RO;     break;
 
@@ -1361,7 +1364,7 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             }
             break;
 
-    case CMD_CLINE:
+    case CMD_ULINE:
         {
             int ik;
             int lx, by, rx, ty, fx, fy;
@@ -1376,10 +1379,10 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             }
             wd = rx - lx;
             ht = ty - by;
-Echo("CLINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
+Echo("ULINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
             u->ox = -wd/2-lx;
             u->oy = -ht/2-by;
-Echo("CLINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
+Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
 #if 0
 #endif
         }
@@ -1438,7 +1441,7 @@ Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
             u->ox = -(lx+rx)/2;
             u->oy = -(ty+by)/2;
 #endif
-            if(u->type==CMD_CLINE) {
+            if(u->type==CMD_ULINE) {
             }
             else {
 #if 0
@@ -1461,7 +1464,8 @@ Echo("\tseg original 1 u; ox,oy %d,%d fx,fy %d,%d\n",
                 u->oid);
         }
         else {
-            Warn("unsupported type %d\n", u->type);
+            Warn("unsupported type '%s'(%d)\n", 
+                rassoc(cmd_ial, u->type), u->type);
         }
         break;
     }
@@ -1481,6 +1485,12 @@ Echo("\t  3 u wd %d ht %d\n", u->wd, u->ht);
 #if 1
     /*** FIX ***/
     if(u->type==CMD_CIRCLE || u->type==CMD_POLYGON) {
+        if(u->cob.rad>0) {
+            u->wd = u->cob.rad*2;
+            u->ht = u->cob.rad*2;
+        }
+    }
+    if(u->type==CMD_POINT) {
         if(u->cob.rad>0) {
             u->wd = u->cob.rad*2;
             u->ht = u->cob.rad*2;
@@ -2958,7 +2968,7 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
             else {
             }
 
-            if(u->type==CMD_LINE||u->type==CMD_CLINE) {
+            if(u->type==CMD_LINE||u->type==CMD_ULINE) {
             }
                 Echo("OUT oid %-3d (%6d %6d %6d %6d) %6d x %-6d ; %6d x %-6d\n",
                     u->oid,

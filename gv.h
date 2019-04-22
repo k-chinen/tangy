@@ -46,6 +46,9 @@ extern int namel_mode;
 extern int ruler_mode;
 extern int text_mode;
 
+extern double def_hollowratio;
+extern double def_shadowgray;
+
 extern int def_dir;
 extern int def_scale;
 extern int def_color;

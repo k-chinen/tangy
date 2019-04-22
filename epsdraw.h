@@ -43,7 +43,7 @@ int QQ__solve_dir(ns *xns, ob *u, varray_t *opar, int X, int *ang);
 int QQ__solve_fandt(ns *xns, ob *u, varray_t *opar, int X, int *sx, int *sy, int *ex, int *ey);
 int Zepsdraw_curveselfarrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int Zepsdraw_curvearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
-int Zepsdraw_clinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
+int Zepsdraw_ulinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int lineparam(double *k, double *u, double x1, double y1, double x2, double y2);
 int linecrosspoint(double *rcx, double *rcy, int L1x1, int L1y1, int L1x2, int L1y2, int L2x1, int L2y1, int L2x2, int L2y2);
 int Zepsdraw_wlinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
