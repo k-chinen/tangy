@@ -3061,6 +3061,10 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
             ik = expand_sep(xch->cx, xch->cy, xch->cwd, xch->cht,
                     xch->ox, xch->oy, u);
             break;
+#if 1
+        case CMD_SCATTER:
+        case CMD_GATHER:
+#endif
         case CMD_LPAREN:
         case CMD_RPAREN:
         case CMD_LBRACKET:

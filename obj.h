@@ -145,7 +145,9 @@ extern apair_t cmd_ial[];
 #define HASBODY(x)  \
     (ISGLUE(x)||ISATOM(x)||(x)==CMD_NOP) 
 #define MAYEXPAND(x)  \
-    ((x)==CMD_SEP||(x)==CMD_PLINE||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
+    ((x)==CMD_SEP||(x)==CMD_PLINE||\
+     (x)==CMD_SCATTER||(x)==CMD_GATHER|| \
+     (x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
     )
@@ -225,12 +227,13 @@ extern apair_t pos_ial[];
 
 extern apair_t sj_ial[];
 
-#define LS_DIRECT            (0)
-#define LS_STRAIGHT          (5)
+#define LS_DIRECT           (0)
+#define LS_DIRECT1          (1)
 #define LS_SQUARE           (10)
-#define LS_SQUAREDOT        (11)
-#define LS_MAN              (20)
-#define LS_ARC              (30)
+#define LS_ARC1             (20)
+#define LS_ARC              (21)
+#define LS_MAN              (30)
+#define LS_STRAIGHT         (50)
 
 extern apair_t ls_ial[];
 

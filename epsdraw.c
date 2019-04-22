@@ -10021,7 +10021,6 @@ out:
 }
 #endif
 
-
 int
 epsdraw_gather_man(FILE *fp, int xdir, int xox, int xoy,
     ob *xu, ob *pf, ob *pb, ns *xns, int dsdir)
@@ -10091,7 +10090,10 @@ P;
             if(i>maxi) maxi = i;
             if(i<mini) mini = i;
         }
+#if 0
         yp = xu->ht / (call+1);
+#endif
+        yp = pf->ht / (call+1);
         Echo("call %d yp %d\n", call, yp);
 
         usi = uei = esi = eei = dsi = dei = -1;
@@ -10116,7 +10118,10 @@ P;
 Echo(" sx i %d j %d sx %d minsx %d maxsx %d\n", i, j, sx, minsx, maxsx);
 
             eex = ex;
+#if 0
             eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
 
 Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
 #if 0
@@ -10206,7 +10211,10 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             Echo("i %d j %d: g %d k %d\n", i, j, g, k);
 
             eex = ex;
+#if 0
             eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
 
 
             /*
@@ -10248,6 +10256,8 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                             " 0 %d rlineto %d 0 rlineto stroke\n",
                             maxsx, sy, h1, v, h2);
 #endif
+                /* XXX */
+                /* no linecolor, no linetype and no arrowhead */
                 fprintf(fp, "   %d %d moveto %d 0 rlineto"
                             " 0 %d rlineto %d 0 rlineto stroke\n",
                             sx, sy, (maxsx-sx)+h1, v, h2);
@@ -10273,9 +10283,817 @@ out:
     return 0;
 }
 
+int
+epsdraw_gather_direct(FILE *fp, int xdir, int xox, int xoy,
+    ob *xu, ob *pf, ob *pb, ns *xns, int dsdir)
+{
+    ob *pe;
+    int i;
+    int sx, sy;
+    int ex, ey;
+    int minsx, maxsx;
+    int miny, maxy;
+    int mini, maxi;
+    int jr;
+    int j;
+    int k;
+    int eyt, eyb;
+    int cu, ce, cd, call;
+    int eex, eey;
+    int yp;
+    int g;
+
+    int usi, uei, esi, eei, dsi, dei;
+
+    int h1, h2, v;
+    int t1x, t1y, t2x, t2y;
+
+P;
+    if(!pf || !pb) {
+        goto out;
+    }
+
+    jr = xu->cob.outlinethick*2;
+
+    ex = xox + pf->cx - pf->cwd/2 * (dsdir);
+    ey = xoy + pf->cy;
+
+    eyt = xoy + pf->cy + pf->cht/2;
+    eyb = xoy + pf->cy - pf->cht/2;
+
+#if 1
+    eyt = xoy + pf->cy;
+    eyb = xoy + pf->cy;
+#endif
+    minsx = INT_MAX;
+    maxsx = -(INT_MAX-1);
+
+    miny = INT_MAX;
+    maxy = -(INT_MAX-1);
+
+    mini = INT_MAX;
+    maxi = -(INT_MAX-1);
+
+        fprintf(fp, "    gsave\n");
+
+    if(ISCHUNK(pb->type)) {
+        changethick(fp, xu->cob.outlinethick);
+        changecolor(fp, xu->cob.outlinecolor);
+        cu = ce = cd = call = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            call++;
+            if(i>maxi) maxi = i;
+            if(i<mini) mini = i;
+        }
+#if 0
+        yp = xu->ht / (call+1);
+#endif
+        yp = pf->ht / (call+1);
+        Echo("call %d yp %d\n", call, yp);
+
+        usi = uei = esi = eei = dsi = dei = -1;
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+            if(sx>maxsx) maxsx = sx;
+            if(sx<minsx) minsx = sx;
+            if(sy>maxy) maxy = sy;
+            if(sy<miny) miny = sy;
+
+Echo(" sx i %d j %d sx %d minsx %d maxsx %d\n", i, j, sx, minsx, maxsx);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
+#if 0
+            fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
+                eex, eey, jr);
+#endif
+
+            if(sy>eyt) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (u) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cu++;
+                if(usi<0) {
+                    usi = j;
+                }
+                uei = j;
+            }
+            else
+            if(sy<=eyt && sy>=eyb) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (e) show\n",
+                    eex+objunit/8, eey);
+#endif
+                ce++;
+                if(esi<0) {
+                    esi = j;
+                }
+                eei = j;
+            }
+            else {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (d) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cd++;
+                if(dsi<0) {
+                    dsi = j;
+                }
+                dei = j;
+            }
+    
+            j++;
+        }
+
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+        if(dsdir==-1) {
+            int dmy;
+            dmy = minsx;
+            maxsx = minsx;
+            minsx = dmy;
+        }
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+
+        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
+        Echo("  usi %d uei %d\n", usi, uei);
+        Echo("  esi %d eei %d\n", esi, eei);
+        Echo("  dsi %d dei %d\n", dsi, dei);
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            g = 0;
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            if(j>=usi && j<=uei) {
+                k = uei - j;
+                g = 1;
+            }
+            if(j>=esi && j<=eei) {
+                k = j - esi;
+#if 0
+                g = 2;
+#endif
+                g = 7;
+            }
+            if(j>=dsi && j<=dei) {
+                k = j - dsi;
+                g = 3;
+            }
+            else {
+            }
+            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+
+            /*
+             *         h1
+             * sx,sy ----+ t1x,t1y
+             *           | v
+             *   t2x,t2y +---- ex,ey
+             *            h2
+             */ 
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+#if 0
+            if(j>=esi && j<=eei)
+#endif
+            if(g==2)
+            {
+                fprintf(fp, "   %d %d moveto %d 0 rlineto stroke\n",
+                        sx, eey, ex-sx
+                        );
+            }
+            else {
+                h1 = yp*(k+1) * dsdir;
+#if 0
+                h2 = (ex-sx) - h1;
+#endif
+                h2 = (ex-maxsx) - h1;
+                v  = (eey-sy);
+
+                Echo("  h1 %7d v %7d h2 %7d\n", h1, v, h2);
+
+                /* XXX */
+                /* no linecolor, no linetype and no arrowhead */
+#if 0
+                fprintf(fp, "   %d %d moveto %d 0 rlineto"
+                            " 0 %d rlineto %d 0 rlineto stroke\n",
+                            sx, sy, (maxsx-sx)+h1, v, h2);
+#endif
+#if 0
+                fprintf(fp, "   %d %d moveto %d %d %d %d %d %d curveto"
+                            " stroke\n",
+                            sx, sy, maxsx, sy, ex, sy, ex, eey);
+#endif
+#if 0
+                fprintf(fp, "   %d %d moveto %d %d lineto stroke\n",
+                            sx, sy, ex, eey);
+#endif
+                epsdraw_seglinearrow(fp, xdir, 0, 0,
+                    sx, sy, ex, eey, xu, xns);
+
+            }
+
+            j++;
+        }
+
+    }
+    else {
+        sx = xox + pb->cx + pb->cwd/2 *dsdir;
+        sy = xoy + pb->cy;
+
+        if(sy==ey) {
+        }
+            fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
+                sx, sy, ex, ey);
+    }
+    fprintf(fp, "     grestore\n");
+
+out:
+    return 0;
+}
+
+
+
 
 int
-epsdraw_gather_square(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir)
+epsdraw_gather_arc(FILE *fp, int xdir, int xox, int xoy,
+    ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir)
+{
+    ob *pe;
+    int i;
+    int sx, sy;
+    int ex, ey;
+    int minsx, maxsx;
+    int miny, maxy;
+    int mini, maxi;
+    int jr;
+    int j;
+    int k;
+    int eyt, eyb;
+    int cu, ce, cd, call;
+    int eex, eey;
+    int yp;
+    int g;
+
+    int usi, uei, esi, eei, dsi, dei;
+
+    int h1, h2, v;
+    int t1x, t1y, t2x, t2y;
+
+P;
+    if(!pf || !pb) {
+        goto out;
+    }
+
+    jr = -1;
+    if(drad>0) {
+        jr = xu->cob.outlinethick*2;
+    }
+
+    ex = xox + pf->cx - pf->cwd/2 * (dsdir);
+    ey = xoy + pf->cy;
+
+    eyt = xoy + pf->cy + pf->cht/2;
+    eyb = xoy + pf->cy - pf->cht/2;
+
+#if 1
+    eyt = xoy + pf->cy;
+    eyb = xoy + pf->cy;
+#endif
+    minsx = INT_MAX;
+    maxsx = -(INT_MAX-1);
+
+    miny = INT_MAX;
+    maxy = -(INT_MAX-1);
+
+    mini = INT_MAX;
+    maxi = -(INT_MAX-1);
+
+        fprintf(fp, "    gsave\n");
+
+    if(ISCHUNK(pb->type)) {
+        changethick(fp, xu->cob.outlinethick);
+        changecolor(fp, xu->cob.outlinecolor);
+        cu = ce = cd = call = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            call++;
+            if(i>maxi) maxi = i;
+            if(i<mini) mini = i;
+        }
+#if 0
+        yp = xu->ht / (call+1);
+#endif
+        yp = pf->ht / (call+1);
+        Echo("call %d yp %d\n", call, yp);
+
+        usi = uei = esi = eei = dsi = dei = -1;
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+            if(sx>maxsx) maxsx = sx;
+            if(sx<minsx) minsx = sx;
+            if(sy>maxy) maxy = sy;
+            if(sy<miny) miny = sy;
+
+Echo(" sx i %d j %d sx %d minsx %d maxsx %d\n", i, j, sx, minsx, maxsx);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
+#if 0
+            fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
+                eex, eey, jr);
+#endif
+
+            if(sy>eyt) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (u) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cu++;
+                if(usi<0) {
+                    usi = j;
+                }
+                uei = j;
+            }
+            else
+            if(sy<=eyt && sy>=eyb) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (e) show\n",
+                    eex+objunit/8, eey);
+#endif
+                ce++;
+                if(esi<0) {
+                    esi = j;
+                }
+                eei = j;
+            }
+            else {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (d) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cd++;
+                if(dsi<0) {
+                    dsi = j;
+                }
+                dei = j;
+            }
+    
+            j++;
+        }
+
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+        if(dsdir==-1) {
+            int dmy;
+            dmy = minsx;
+            maxsx = minsx;
+            minsx = dmy;
+        }
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+
+        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
+        Echo("  usi %d uei %d\n", usi, uei);
+        Echo("  esi %d eei %d\n", esi, eei);
+        Echo("  dsi %d dei %d\n", dsi, dei);
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            g = 0;
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            if(j>=usi && j<=uei) {
+                k = uei - j;
+                g = 1;
+            }
+            if(j>=esi && j<=eei) {
+                k = j - esi;
+#if 0
+                g = 2;
+#endif
+                g = 7;
+            }
+            if(j>=dsi && j<=dei) {
+                k = j - dsi;
+                g = 3;
+            }
+            else {
+            }
+            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+
+            /*
+             *         h1
+             * sx,sy ----+ t1x,t1y
+             *           | v
+             *   t2x,t2y +---- ex,ey
+             *            h2
+             */ 
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+#if 0
+            if(j>=esi && j<=eei)
+#endif
+            if(g==2)
+            {
+                fprintf(fp, "   %d %d moveto %d 0 rlineto stroke\n",
+                        sx, eey, ex-sx
+                        );
+            }
+            else {
+                h1 = yp*(k+1) * dsdir;
+#if 0
+                h2 = (ex-sx) - h1;
+#endif
+                h2 = (ex-maxsx) - h1;
+                v  = (eey-sy);
+
+                Echo("  h1 %7d v %7d h2 %7d\n", h1, v, h2);
+
+                /* XXX */
+                /* no linecolor, no linetype and no arrowhead */
+#if 0
+                fprintf(fp, "   %d %d moveto %d 0 rlineto"
+                            " 0 %d rlineto %d 0 rlineto stroke\n",
+                            sx, sy, (maxsx-sx)+h1, v, h2);
+#endif
+                fprintf(fp, "   %d %d moveto %d %d %d %d %d %d curveto"
+                            " stroke\n",
+                            sx, sy, maxsx, sy, ex, sy, ex, eey);
+
+            }
+
+            j++;
+        }
+
+    }
+    else {
+        sx = xox + pb->cx + pb->cwd/2 *dsdir;
+        sy = xoy + pb->cy;
+
+        if(sy==ey) {
+        }
+            fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
+                sx, sy, ex, ey);
+    }
+    fprintf(fp, "     grestore\n");
+
+out:
+    return 0;
+}
+
+
+
+
+int
+epsdraw_gather_arc1(FILE *fp, int xdir, int xox, int xoy,
+    ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir)
+{
+    ob *pe;
+    int i;
+    int sx, sy;
+    int ex, ey;
+    int minsx, maxsx;
+    int miny, maxy;
+    int mini, maxi;
+    int jr;
+    int j;
+    int k;
+    int eyt, eyb;
+    int cu, ce, cd, call;
+    int eex, eey;
+    int yp;
+    int g;
+
+    int usi, uei, esi, eei, dsi, dei;
+
+    int h1, h2, v;
+    int t1x, t1y, t2x, t2y;
+
+P;
+    if(!pf || !pb) {
+        goto out;
+    }
+
+    jr = -1;
+    if(drad>0) {
+        jr = xu->cob.outlinethick*2;
+    }
+
+    ex = xox + pf->cx - pf->cwd/2 * (dsdir);
+    ey = xoy + pf->cy;
+
+    eyt = xoy + pf->cy + pf->cht/2;
+    eyb = xoy + pf->cy - pf->cht/2;
+
+#if 1
+    eyt = xoy + pf->cy;
+    eyb = xoy + pf->cy;
+#endif
+    minsx = INT_MAX;
+    maxsx = -(INT_MAX-1);
+
+    miny = INT_MAX;
+    maxy = -(INT_MAX-1);
+
+    mini = INT_MAX;
+    maxi = -(INT_MAX-1);
+
+        fprintf(fp, "    gsave\n");
+
+    if(ISCHUNK(pb->type)) {
+        changethick(fp, xu->cob.outlinethick);
+        changecolor(fp, xu->cob.outlinecolor);
+        cu = ce = cd = call = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            call++;
+            if(i>maxi) maxi = i;
+            if(i<mini) mini = i;
+        }
+#if 0
+        yp = xu->ht / (call+1);
+#endif
+        yp = pf->ht / (call+1);
+        Echo("call %d yp %d\n", call, yp);
+
+        usi = uei = esi = eei = dsi = dei = -1;
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+            if(sx>maxsx) maxsx = sx;
+            if(sx<minsx) minsx = sx;
+            if(sy>maxy) maxy = sy;
+            if(sy<miny) miny = sy;
+
+Echo(" sx i %d j %d sx %d minsx %d maxsx %d\n", i, j, sx, minsx, maxsx);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
+#if 0
+            fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
+                eex, eey, jr);
+#endif
+
+            if(sy>eyt) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (u) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cu++;
+                if(usi<0) {
+                    usi = j;
+                }
+                uei = j;
+            }
+            else
+            if(sy<=eyt && sy>=eyb) {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (e) show\n",
+                    eex+objunit/8, eey);
+#endif
+                ce++;
+                if(esi<0) {
+                    esi = j;
+                }
+                eei = j;
+            }
+            else {
+#if 0
+                fprintf(fp, "   newpath %d %d moveto (d) show\n",
+                    eex+objunit/8, eey);
+#endif
+                cd++;
+                if(dsi<0) {
+                    dsi = j;
+                }
+                dei = j;
+            }
+    
+            j++;
+        }
+
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+        if(dsdir==-1) {
+            int dmy;
+            dmy = minsx;
+            maxsx = minsx;
+            minsx = dmy;
+        }
+        Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
+
+        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
+        Echo("  usi %d uei %d\n", usi, uei);
+        Echo("  esi %d eei %d\n", esi, eei);
+        Echo("  dsi %d dei %d\n", dsi, dei);
+
+        j = 0;
+        for(i=0;i<pb->cch.nch;i++) {
+            g = 0;
+            pe = (ob*)pb->cch.ch[i];
+            if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+            }
+            else {
+                continue;
+            }
+
+            if(j>=usi && j<=uei) {
+                k = uei - j;
+                g = 1;
+            }
+            if(j>=esi && j<=eei) {
+                k = j - esi;
+#if 0
+                g = 2;
+#endif
+                g = 7;
+            }
+            if(j>=dsi && j<=dei) {
+                k = j - dsi;
+                g = 3;
+            }
+            else {
+            }
+            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
+
+            eex = ex;
+#if 0
+            eey = ey+xu->ht/2-(j+1)*yp;
+#endif
+            eey = ey+pf->ht/2-(j+1)*yp;
+
+
+            /*
+             *         h1
+             * sx,sy ----+ t1x,t1y
+             *           | v
+             *   t2x,t2y +---- ex,ey
+             *            h2
+             */ 
+            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
+            sy = xoy + pb->cy + pb->oy + pe->cy;
+
+#if 0
+            if(j>=esi && j<=eei)
+#endif
+            if(g==2)
+            {
+                fprintf(fp, "   %d %d moveto %d 0 rlineto stroke\n",
+                        sx, eey, ex-sx
+                        );
+            }
+            else {
+                h1 = yp*(k+1) * dsdir;
+#if 0
+                h2 = (ex-sx) - h1;
+#endif
+                h2 = (ex-maxsx) - h1;
+                v  = (eey-sy);
+
+                Echo("  h1 %7d v %7d h2 %7d\n", h1, v, h2);
+
+                /* XXX */
+                /* no linecolor, no linetype and no arrowhead */
+#if 0
+                fprintf(fp, "   %d %d moveto %d 0 rlineto"
+                            " 0 %d rlineto %d 0 rlineto stroke\n",
+                            sx, sy, (maxsx-sx)+h1, v, h2);
+#endif
+#if 0
+                fprintf(fp, "   %d %d moveto %d %d %d %d %d %d curveto"
+                            " stroke\n",
+                            sx, sy, maxsx, sy, ex, sy, ex, ey);
+#endif
+                fprintf(fp, "   %d %d moveto %d %d %d %d %d %d curveto"
+                            " stroke\n",
+                            sx, sy, maxsx, sy, xox+xu->cx, sy,
+                            xox+xu->cx, xoy+xu->cy);
+
+
+            }
+
+            j++;
+        }
+        if(jr>0) {
+            fprintf(fp, "  %d %d moveto %d %d %d 0 360 arc fill\n",
+                xox+xu->cx, xoy+xu->cy, 
+                xox+xu->cx, xoy+xu->cy, jr);
+        }
+        fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
+            xox+xu->cx, xoy+xu->cy, ex, ey);
+
+    }
+    else {
+        sx = xox + pb->cx + pb->cwd/2 *dsdir;
+        sy = xoy + pb->cy;
+
+        if(sy==ey) {
+        }
+            fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
+                sx, sy, ex, ey);
+    }
+    fprintf(fp, "     grestore\n");
+
+out:
+    return 0;
+}
+
+
+
+
+
+int
+epsdraw_gather_square1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir)
 {
     ob *pe;
     int i;
@@ -10293,9 +11111,6 @@ P;
 
     jr = -1;
     if(drad>0) {
-#if 0
-        jr = objunit/20;
-#endif
         jr = xu->cob.outlinethick*2;
     }
 
@@ -10389,7 +11204,7 @@ out:
 }
 
 int
-epsdraw_gather_direct(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns)
+epsdraw_gather_direct1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns)
 
 {
     ob *pe;
@@ -10530,23 +11345,27 @@ P;
     }
 
     switch(xu->cob.linkstyle) {
-    case LS_SQUARE:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 0, 1);
-        break;
-    case LS_SQUAREDOT:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pf, pb, xns, 1, 1);
-        break;
     case LS_MAN:
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
         break;
     case LS_STRAIGHT:
         ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
         break;
+    case LS_SQUARE:
+        ik = epsdraw_gather_square1(fp, xdir, xox, xoy, xu, pf, pb, xns, 1, 1);
+        break;
+    case LS_ARC1:
+        ik = epsdraw_gather_arc1(fp, xdir, xox, xoy, xu, pf, pb, xns, 1, 1);
+        break;
     case LS_ARC:
-        Error("LS_ARC is not implemented yet.\n");
+        ik = epsdraw_gather_arc(fp, xdir, xox, xoy, xu, pf, pb, xns, 1, 1);
+        break;
+    case LS_DIRECT1:
+        ik = epsdraw_gather_direct1(fp, xdir, xox, xoy, xu, pf, pb, xns);
+        break;
     case LS_DIRECT:
     default:
-        ik = epsdraw_gather_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
+        ik = epsdraw_gather_direct(fp, xdir, xox, xoy, xu, pf, pb, xns, 1);
         break;
     }
 
@@ -10555,7 +11374,7 @@ out:
 }
 
 int
-epsdraw_scatter_direct(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns)
+epsdraw_scatter_direct1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns)
 
 {
     ob *pe;
@@ -10637,23 +11456,27 @@ P;
     }
 
     switch(xu->cob.linkstyle) {
-    case LS_SQUAREDOT:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
-        break;
-    case LS_SQUARE:
-        ik = epsdraw_gather_square(fp, xdir, xox, xoy, xu, pb, pf, xns, 0, -1);
-        break;
     case LS_MAN:
         ik = epsdraw_gather_man(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
         break;
     case LS_STRAIGHT:
         ik = epsdraw_gather_straight(fp, xdir, xox, xoy, xu, pb, pf, xns, -1);
         break;
+    case LS_SQUARE:
+        ik = epsdraw_gather_square1(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
+        break;
     case LS_ARC:
-        Error("LS_ARC is not implemented yet.\n");
+        ik = epsdraw_gather_arc(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
+        break;
+    case LS_ARC1:
+        ik = epsdraw_gather_arc1(fp, xdir, xox, xoy, xu, pb, pf, xns, 1, -1);
+        break;
+    case LS_DIRECT1:
+        ik = epsdraw_scatter_direct1(fp, xdir, xox, xoy, xu, pf, pb, xns);
+        break;
     case LS_DIRECT:
     default:
-        ik = epsdraw_scatter_direct(fp, xdir, xox, xoy, xu, pf, pb, xns);
+        ik = epsdraw_gather_direct(fp, xdir, xox, xoy, xu, pf, pb, xns, -1);
         break;
     }
 

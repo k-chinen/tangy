@@ -74,12 +74,17 @@ int _cloud_clip(FILE *fp, double sx, double sy);
 int epsdraw_cloud(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_dots(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_paper(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
+
 int Xepsdraw_scatter(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_gather_man(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int dsdir);
-int epsdraw_gather_square(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir);
-int epsdraw_gather_direct(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns);
+int epsdraw_gather_direct(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int dsdir);
+int epsdraw_gather_arc(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir);
+int epsdraw_gather_arc1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir);
+int epsdraw_gather_square1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns, int drad, int dsdir);
+int epsdraw_gather_direct1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns);
+int epsdraw_scatter_direct1(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns);
+
 int epsdraw_gather(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns);
-int epsdraw_scatter_direct(FILE *fp, int xdir, int xox, int xoy, ob *xu, ob *pf, ob *pb, ns *xns);
 int epsdraw_scatter(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_Xparen(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_Xbrace(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
