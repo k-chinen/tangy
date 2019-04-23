@@ -227,13 +227,15 @@ extern apair_t pos_ial[];
 
 extern apair_t sj_ial[];
 
-#define LS_DIRECT           (0)
-#define LS_DIRECT1          (1)
-#define LS_SQUARE           (10)
-#define LS_ARC1             (20)
-#define LS_ARC              (21)
-#define LS_MAN              (30)
-#define LS_STRAIGHT         (50)
+#define LS_NONE             (0x00)
+#define LS_DIRECT           (0x01)
+#define LS_SQUARE           (0x02)
+#define LS_ARC              (0x04)
+#define LS_STRAIGHT         (0x07)
+#define LS_M_TYPE           (0x0f)
+#define LS_JOIN             (0x10)
+#define LS_FOCUS            (0x20)
+#define LS_MAN              (0x100)
 
 extern apair_t ls_ial[];
 
