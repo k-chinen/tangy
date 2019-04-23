@@ -35,11 +35,11 @@ P;
     
         if(RM(cobj)) {
             cobj->cob.linkback = (void*)lobj;
-            Echo("\tgather or scatter\n");
+            Echo("\tgather, scatter or thru\n");
         }
         if(lobj && RM(lobj)) {
             lobj->cob.linkfore = (void*)cobj;
-            Echo("\tgather or scatter\n");
+            Echo("\tgather, scatter or thru\n");
         }
 
         if(cobj->type==CMD_CHUNK) {

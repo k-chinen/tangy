@@ -2067,8 +2067,8 @@ int
 expand_paren(int bx, int by, int w, int h, int ox, int oy, ob* u)
 {
 
-Echo("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
-        __func__, bx, by, w, h, ox, oy);
+Echo("%s: oid %d, bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
+        __func__, u->oid, bx, by, w, h, ox, oy);
 Echo("  vs oid %d cx,cy %d,%d w,h %d,%d noexpand? %d\n",
         u->oid, u->cx, u->cy, u->cwd, u->cht, u->cnoexpand);
 
@@ -2076,6 +2076,7 @@ Echo("  vs oid %d cx,cy %d,%d w,h %d,%d noexpand? %d\n",
     }
 
     u->cht = h;
+Echo("%s: oid %d, ht %d\n", __func__, u->oid, u->cht);
 
     return 0;
 }
@@ -3064,6 +3065,7 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
 #if 1
         case CMD_SCATTER:
         case CMD_GATHER:
+        case CMD_THRU:
 #endif
         case CMD_LPAREN:
         case CMD_RPAREN:

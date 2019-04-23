@@ -145,8 +145,8 @@ extern apair_t cmd_ial[];
 #define HASBODY(x)  \
     (ISGLUE(x)||ISATOM(x)||(x)==CMD_NOP) 
 #define MAYEXPAND(x)  \
-    ((x)==CMD_SEP||(x)==CMD_PLINE||\
-     (x)==CMD_SCATTER||(x)==CMD_GATHER|| \
+    ((x)==CMD_SEP||(x)==CMD_PLINE|| \
+     (x)==CMD_SCATTER||(x)==CMD_GATHER||(x)==CMD_THRU|| \
      (x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \
