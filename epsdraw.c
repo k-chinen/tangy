@@ -2731,7 +2731,10 @@ _drawpathX(FILE *fp,
 
     int  bwmsz;
 
+#if 0
     bwmsz = objunit/20;
+#endif
+    bwmsz = xu->cob.outlinethick*4;
 
     Echo("%s: qar %p\n", __func__, qar);
     fprintf(fp, "%% %s:%d %s qar %p f_new %d f_close %d\n",
@@ -3684,7 +3687,10 @@ __drawpath_LT(FILE *fp,
     int    isfseg;
     int    fsegtype;
 
+#if 0
     bwmsz = objunit/20;
+#endif
+    bwmsz = xu->cob.outlinethick*4;
 
     Echo("%s: xu %p oid %d qar %p use %d\n",
         __func__, xu, xu->oid, qar, qar->use);

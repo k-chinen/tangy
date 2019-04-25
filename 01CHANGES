@@ -1,5 +1,9 @@
-CHANGES from 2.045
+CHANGES
+
+This file describe remarkable change in user's view.
+
+From 2.045
   - shape of CARD
-        currently shapes is cut-off left upper corner.
+        currently shapes is left upper corner cut-offed.
   - change name CLINE to ULINE
         ULINE is user defined line sequence.
