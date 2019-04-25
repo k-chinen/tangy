@@ -3273,6 +3273,11 @@ putchunk(ob *xch, int *x, int *y, ns *xns)
     else {
         ik = _putchunk(xch, x, y, xns);
     }
+#if 1
+    Echo("%s: oid %d --- wxh %dx%d; xy %d,%d; ---\n",
+        __func__, xch->oid, xch->wd, xch->ht,
+        xch->x, xch->y);
+#endif
     return ik;
 }
 

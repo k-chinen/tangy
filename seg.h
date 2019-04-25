@@ -50,5 +50,15 @@ int path_regsegarcn(varray_t *segar, int rad, int ang);
 int path_regsegcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3);
 int path_regsegclose(varray_t *segar);
 int path_regsegbwcir(varray_t *segar, int, int);
+int path_regsegdir(varray_t *segar, int);
+
+#define SEG_VISIBLE(x) \
+    ((x)==OA_LINETO||(x)==OA_RLINETO||(x)==OA_LINE||\
+     (x)==OA_CURVETO||(x)==OA_RCURVETO||\
+     (x)==OA_RIGHT||(x)==OA_LEFT||(x)==OA_UP||(x)==OA_DOWN||\
+     (x)==OA_FORWARD||(x)==OA_ARC||(x)==OA_ARCN||(x)==OA_JOIN)
+
+int path_firstvisible(varray_t *segar);
+int path_lastvisible(varray_t *segar);
 
 #endif/*_TANGY_SEG_H_*/

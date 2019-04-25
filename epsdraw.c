@@ -2728,12 +2728,10 @@ _drawpathX(FILE *fp,
     int  qcx, qcy;
 
     int  actfh, actch, actbh;
+    int  ahbpos, ahfpos;
 
     int  bwmsz;
 
-#if 0
-    bwmsz = objunit/20;
-#endif
     bwmsz = xu->cob.outlinethick*4;
 
     Echo("%s: qar %p\n", __func__, qar);
@@ -2764,13 +2762,13 @@ varray_fprintv(stderr, qar);
         Echo("    qar.use %d\n", qar->use);
     }
 
+    ahbpos = path_firstvisible(qar);
+    ahfpos = path_lastvisible(qar);
+    Echo("  oid %d ahbpos %d ahfpos %d\n", xu->oid, ahbpos, ahfpos);
+
     if(f_new) {
         fprintf(fp, "    newpath\n");
     }
-
-#if 0
-    fprintf(fp, " gsave %% %s\n", __func__);
-#endif
 
     x0 = x1 = xox+xu->cx+xu->cox;
     y0 = y1 = xoy+xu->cy+xu->coy;
@@ -2821,11 +2819,15 @@ Echo("%s: i %d ptype %d\n", __func__, i, s->ptype);
         }
 
 #if 0
-Echo("%s: oid %d i %d seg-arrow actbh %d actch %d achbh %d\n",
+Echo("%s: oid %d i %d seg-arrow actbh %d actch %d achfh %d\n",
     __func__, xu->oid, i, actbh, actch, actfh);
 Echo("%s: oid %d i %d s ptype %d x1,y1 %d,%d x2,y2 %d,%d\n",
     __func__, xu->oid, i, s->ptype, s->x1, s->y1, s->x2, s->y2);
 #endif
+#if 1
+Echo("%s: oid %d seg i %d type %d; actbh %d actch %d actfh %d\n",
+    __func__, xu->oid, i, s->ptype, actbh, actch, actfh);
+#endif 
 
         if(xu->cob.marknode) {
             markfdot(xu->cob.outlinecolor, x1, y1);
@@ -2921,39 +2923,6 @@ PP;
                 fprintf(fp, "grestore\n");
             }
 
-            if(actch) {
-                tx = arcx + s->rad*cos((cdir-90+s->ang/2)*rf);
-                ty = arcy + s->rad*sin((cdir-90+s->ang/2)*rf);
-                fprintf(fp, "gsave\n");
-                if(actch>0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir+s->ang/2,
-                        xu->cob.outlinecolor, tx, ty);
-                }
-                if(actch<0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir+s->ang/2+180,
-                        xu->cob.outlinecolor, tx, ty);
-                }
-                fprintf(fp, "grestore\n");
-            }
-
-            if(actfh>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowforeheadtype, cdir+s->ang,
-                    xu->cob.outlinecolor, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-            if(actbh>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowbackheadtype, cdir-180,
-                    xu->cob.outlinecolor, x1, y1);
-                fprintf(fp, "grestore\n");
-            }
-
-
             cdir += s->ang;
 
             break;
@@ -3003,38 +2972,6 @@ PP;
                 fprintf(fp,
                     "  %d %d moveto %d %d lineto %d %d lineto stroke\n",
                         x1, y1, arcx, arcy, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-
-            if(actch) {
-                tx = arcx + s->rad*cos((cdir+90-s->ang/2)*rf);
-                ty = arcy + s->rad*sin((cdir+90-s->ang/2)*rf);
-                fprintf(fp, "gsave\n");
-                if(actch>0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir-90+s->ang/2,
-                        xu->cob.outlinecolor, tx, ty);
-                }
-                if(actch<0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir-90+s->ang/2+180,
-                        xu->cob.outlinecolor, tx, ty);
-                }
-                fprintf(fp, "grestore\n");
-            }
-
-            if(actfh>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowforeheadtype, cdir-s->ang,
-                    xu->cob.outlinecolor, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-            if(actbh>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowbackheadtype, cdir-180,
-                    xu->cob.outlinecolor, x1, y1);
                 fprintf(fp, "grestore\n");
             }
 
@@ -3247,36 +3184,6 @@ fprintf(fp, "%% arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
 #endif
 Echo("    arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
 
-            if(actch) {
-                fprintf(fp, "gsave\n");
-                if(actch>0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir-s->ang,
-                        xu->cob.outlinecolor, (x1+x2)/2, (y1+y2)/2);
-                }
-                if(actch<0) {
-                    epsdraw_arrowhead(fp,
-                        xu->cob.arrowcentheadtype, cdir-s->ang,
-                        xu->cob.outlinecolor, (x1+x2)/2, (y1+y2)/2);
-                }
-                fprintf(fp, "grestore\n");
-            }
-            if(actfh>0) {
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowforeheadtype, cdir-s->ang,
-                    xu->cob.outlinecolor, x2, y2);
-                fprintf(fp, "grestore\n");
-            }
-            if(actbh>0) {
-P;
-                fprintf(fp, "gsave\n");
-                epsdraw_arrowhead(fp,
-                    xu->cob.arrowbackheadtype, cdir-180,
-                    xu->cob.outlinecolor, x1, y1);
-                fprintf(fp, "grestore\n");
-            }
-            
             break;
 
         default:
@@ -3287,6 +3194,24 @@ P;
         }
         
 next:
+
+        if(i==ahfpos && xu->cob.arrowforeheadtype) {
+Echo("AH F oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            fprintf(fp, "gsave\n");
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowforeheadtype, cdir,
+                xu->cob.outlinecolor, x2, y2);
+            fprintf(fp, "grestore\n");
+        }
+        if(i==ahbpos && xu->cob.arrowbackheadtype) {
+Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            fprintf(fp, "gsave\n");
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowbackheadtype, cdir-180,
+                xu->cob.outlinecolor, x1, y1);
+            fprintf(fp, "grestore\n");
+        }
+
 #if 0
         fprintf(fp, "%% a cdir %4d : %s\n", cdir, __func__);
 #endif
@@ -3299,15 +3224,6 @@ next:
     }
 
 P;
-#if 0
-    if(xu->type==CMD_ULINE) {
-        fprintf(fp, "    closepath\n");
-    }
-#endif
-
-#if 0
-    fprintf(fp, " grestore %% %s\n", __func__);
-#endif
 
 out:
     return 0;
@@ -3681,6 +3597,7 @@ __drawpath_LT(FILE *fp,
     int    gsym, gpitch;
 
     int    actfh, actch, actbh;
+    int    ahbpos, ahfpos;
 
     int    bwmsz;
 
@@ -3696,8 +3613,10 @@ __drawpath_LT(FILE *fp,
         __func__, xu, xu->oid, qar, qar->use);
     fprintf(fp, "%% %s: enter ydir %d\n", __func__, ydir);
 P;
+#if 0
     changecolor(fp, xu->vob.outlinecolor);
     changethick(fp, xu->vob.outlinethick);
+#endif
 
     if(xu->cob.outlinetype==LT_SOLID) {
 P;
@@ -3742,7 +3661,13 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
 
     Echo("    qar.use %d\n", qar->use);
 
+    ahbpos = path_firstvisible(qar);
+    ahfpos = path_lastvisible(qar);
+    Echo("  oid %d ahbpos %d ahfpos %d\n", xu->oid, ahbpos, ahfpos);
+
+#if 0
     changethick(fp, xu->vob.outlinethick);
+#endif
 
     x0 = x1 = xox+xu->cx+xu->cox;
     y0 = y1 = xoy+xu->cy+xu->coy;
@@ -3794,8 +3719,14 @@ P;
             }
         }
 
-Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achbh %d\n",
+#if 0
+Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achfh %d\n",
     xu->oid, __func__, __LINE__,  s->ptype, actbh, actch, actfh);
+#endif
+#if 1
+Echo("%s: oid %d seg i %d type %d; actbh %d actch %d actfh %d\n",
+    __func__, xu->oid, i, s->ptype, actbh, actch, actfh);
+#endif
 
         switch(s->ptype) {
 
@@ -3914,6 +3845,7 @@ P;
             }
             trip += etrip;
 
+#if 0
             if(actch) {
                 px = arcx + s->rad*cos((cdir+(s->ang/2)-90)*rf);
                 py = arcy + s->rad*sin((cdir+(s->ang/2)-90)*rf);
@@ -3939,6 +3871,7 @@ P;
                     xu->cob.arrowbackheadtype, cdir-180+vs/2,
                     xu->cob.outlinecolor, x1, y1);
             }
+#endif
 
 skip_arc:
             cdir += s->ang;
@@ -4025,6 +3958,7 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
                 fprintf(fp, "%% i %d count %d: trip %.3f\n",
                     i, count, trip);
 
+#if 0
             if(actch) {
                 px = arcx + s->rad*cos((cdir-(s->ang/2)+90)*rf);
                 py = arcy + s->rad*sin((cdir-(s->ang/2)+90)*rf);
@@ -4050,6 +3984,7 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
                     xu->cob.arrowbackheadtype, cdir-180-vs/2,
                     xu->cob.outlinecolor, x1, y1);
             }
+#endif
 
 skip_arcn:
             cdir -= s->ang;
@@ -4315,6 +4250,7 @@ coord_done:
             fprintf(fp, "%% i %d count %d: trip %.3f\n",
                 i, count, trip);
 
+#if 0
             if(actch) {
                 px = x1 + (x2-x1)/2;
                 py = y1 + (y2-y1)/2;
@@ -4341,6 +4277,7 @@ P;
                     xu->cob.arrowbackheadtype, cdir-180,
                     xu->cob.outlinecolor, x1, y1);
             }
+#endif
 
             break;
 
@@ -4354,8 +4291,28 @@ next:
             markfdot(xu->cob.outlinecolor, x1, y1);
         }
 
+        if(i==ahfpos && xu->cob.arrowforeheadtype) {
+Echo("AH F oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            fprintf(fp, "gsave\n");
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowforeheadtype, cdir,
+                xu->cob.outlinecolor, x2, y2);
+            fprintf(fp, "grestore\n");
+        }
+        if(i==ahbpos && xu->cob.arrowbackheadtype) {
+Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            fprintf(fp, "gsave\n");
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowbackheadtype, cdir-180,
+                xu->cob.outlinecolor, x1, y1);
+            fprintf(fp, "grestore\n");
+        }
+
+
+#if 0
         fprintf(fp, "%% %s:%d oid %d cdir %4d\n",
             __func__, __LINE__, xu->oid, cdir);
+#endif
         x1 = x2;
         y1 = y2;
 
@@ -8289,8 +8246,10 @@ int
 mkpath_1seg(varray_t *sar,
     int x1, int y1, int x2, int y2)
 {
+#if 0
     fprintf(stderr, "%s: %d %d; %d %d\n",
         __func__, x1, x2, x2, y2);
+#endif
     path_regsegmoveto(sar, x1, y1);
     path_regseglineto(sar, x2, y2);
 
@@ -8414,43 +8373,88 @@ _drawgslink(varray_t *qar, int xid, int style, int jr,
         "%s: xid %d style %3d %3xH rstyle %3d %3xH focus %d join %d j/n %d/%d\n",
         __func__, xid, style, style, rstyle, rstyle, focus, join, j, n);
 
+#if 0
+    if(dsdir>0) {
+        path_regsegdir(qar, 180);
+    }
+    if(dsdir<0) {
+        path_regsegdir(qar, -180);
+    }
+#endif
+
     switch(rstyle) {
     case LS_STRAIGHT:
-        mkpath_1seg(qar, sx, sy, ex, sy);
+        if(dsdir>=0) {
+            mkpath_1seg(qar, sx, sy, ex, sy);
+        }
+        else {
+            mkpath_1seg(qar, ex, sy, sx, sy);
+        }
         break;
     case LS_SQUARE:
         if(focus) {
-            mkpath_3seg(qar, sx, sy, mx, sy, mx, ey, ex, ey);
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, mx, sy, mx, ey, ex, ey);
+            }
+            else {
+                mkpath_3seg(qar, ex, ey, mx, ey, mx, sy, sx, sy);
+            }
             if(join) { mkpath_addbwcir(qar, mx, my); }
             if(join) {  if(j==0 || j==n-1) {}
                         else { mkpath_addbwcir(qar, mx, sy); }
             }
         }
         else {
-            mkpath_3seg(qar, sx, sy, maxsx+h1, sy,
-               maxsx+h1, eey, ex, eey);
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx+h1, sy, maxsx+h1, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, maxsx+h1, eey, maxsx+h1, sy, sx, sy);
+            }
         }
         break;
     case LS_ARC:
         if(focus) {
-            mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
-               mx, ey, ex, ey);
+            if(dsdir>=0) {
+                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                   mx, ey, ex, ey);
+            }
+            else {
+                mkpath_segarcseg(qar, ex, ey, mx, ey, mx, sy,
+                   maxsx, sy, sx, sy);
+            }
             if(join) { mkpath_addbwcir(qar, mx, my); }
         }
         else {
-            mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
-               mx, eey, ex, eey);
+            if(dsdir>=0) {
+                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                   mx, eey, ex, eey);
+            }
+            else {
+                mkpath_segarcseg(qar, ex, eey, mx, eey, mx, sy,
+                   maxsx, sy, sx, sy);
+            }
         }
         break;
     case LS_DIRECT:
     default:
         if(focus) {
-            mkpath_3seg(qar, sx, sy, maxsx, sy, mx, ey, ex, ey);
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx, sy, mx, ey, ex, ey);
+            }
+            else {
+                mkpath_3seg(qar, ex, ey, mx, ey, maxsx, sy, sx, sy);
+            }
             if(join) { mkpath_addbwcir(qar, mx, my); }
         }
         else {
-            mkpath_3seg(qar, sx, sy, maxsx, sy,
-               mx, eey, ex, eey);
+            mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, mx, eey, maxsx, sy, sx, sy);
+            }
         }
         break;
     }
@@ -8532,8 +8536,10 @@ P;
     ex = xox + pf->cx - pf->cwd/2 * (dsdir);
     ey = xoy + pf->cy;
 
+#if 0
     eyt = xoy + pf->cy + pf->cht/2;
     eyb = xoy + pf->cy - pf->cht/2;
+#endif
 
 #if 1
     eyt = xoy + pf->cy;
@@ -8740,6 +8746,10 @@ fprintf(fp,"%% sx,sy %d,%d maxsx %d mx,my %d,%d ex,ey %d,%d eey %d dsdir %d\n",
                     j, call, h1, h2, v,
                     sx, sy, maxsx,
                     xox+xu->cx, xoy+xu->cy, ex, ey, eey, dsdir);
+
+#if 0
+                varray_fprintv(stdout, tmpar);
+#endif
 
 Echo("%s: tmpar %p use %d\n", __func__, tmpar, tmpar->use);
                 if(tmpar->use>0) {
@@ -10106,6 +10116,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
 
     changenormal(fp); /* for faill safe */
+
+    changecolor(fp, u->vob.outlinecolor);
+    changethick(fp, u->vob.outlinethick);
 
     if(u->type==CMD_NOP) {
         /* nothing */

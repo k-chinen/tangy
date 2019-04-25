@@ -52,6 +52,30 @@ seg_new()
 }
 
 int
+path_regsegclose(varray_t *segar)
+{
+    int  ik;
+    seg *e;
+
+#if 0
+    Echo("%s:\n", __func__);
+    Echo("b use %d\n", segar->use);
+#endif
+
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_CLOSE;
+    e->coordtype    = REL_COORD;
+    ik = varray_push(segar, e);
+
+out:
+
+    return 0;
+}
+
+int
 path_regsegbwcir(varray_t *segar, int x1, int y1)
 {
     int  ik;
@@ -82,7 +106,7 @@ out:
 }
 
 int
-path_regsegclose(varray_t *segar)
+path_regsegdir(varray_t *segar, int dir)
 {
     int  ik;
     seg *e;
@@ -96,18 +120,15 @@ path_regsegclose(varray_t *segar)
     if(!e) {
         return -1;
     }
-    e->ptype        = OA_CLOSE;
+    e->ptype        = OA_DIR;
     e->coordtype    = REL_COORD;
+    e->ang          = dir;
     ik = varray_push(segar, e);
-
 out:
-#if 0
-    Echo("ik %d\n", ik);
-    Echo("a use %d\n", segar->use);
-#endif
 
     return 0;
 }
+
 
 int
 path_regsegcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3)
@@ -357,4 +378,45 @@ out:
 
     return 0;
 }
+
+int
+path_firstvisible(varray_t *segar)
+{
+    int v;
+    int p;
+    int i;
+    seg *e;
+
+    v = -1;
+    for(i=0;i<segar->use;i++) {
+        e = segar->slot[i];
+        if(SEG_VISIBLE(e->ptype)) {
+            v = i;
+            break;
+        }
+    }
+
+    return v;
+}
+
+int
+path_lastvisible(varray_t *segar)
+{
+    int v;
+    int p;
+    int i;
+    seg *e;
+
+    v = -1;
+    for(i=0;i<segar->use;i++) {
+        e = segar->slot[i];
+        if(SEG_VISIBLE(e->ptype)) {
+            v = i;
+        }
+    }
+
+    return v;
+}
+
+
 
