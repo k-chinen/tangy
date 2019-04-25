@@ -664,8 +664,9 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
 #if 0
     ik = sprintf(dst, "<%-12.12s,%s(%d),%d,%d;%6d,%6d,%6d,%6d;%6d,%4d>",
 #endif
-    ik = sprintf(dst, "<%-12s,%-7s,%1s,%1s;%6s,%6s,%6s,%6s;%6s,%4s>",
-            "type", "join", "c", "f", "x1", "y1", "x2", "y2",
+    ik = sprintf(dst, "<%-12s,%-7s,%1s,%1s;%6s,%6s,%6s,%6s,%6s,%6s,%6s,%6s;%6s,%4s>",
+            "type", "join", "c", "f",
+            "x1", "y1", "x2", "y2", "x3", "y3", "x4", "y4",
             "rad", "ang");
     return 0;
     }
@@ -681,10 +682,11 @@ seg_sprintf(char*dst, int dlen, void* xv, int opt)
 #if 0
     ik = sprintf(dst, "(%s(%d),%s(%d),%d,%d;%d,%d,%d,%d;%d,%d)",
 #endif
-    ik = sprintf(dst, "<%-12.12s,%-7.7s,%s,%s;%6d,%6d,%6d,%6d;%6d,%4d>",
+    ik = sprintf(dst, "<%-12.12s,%-7.7s,%s,%s;%6d,%6d,%6d,%6d,%6d,%6d,%6d,%6d;%6d,%4d>",
         tmp1, tmp2,
         mcr, mft,
         s->x1, s->y1, s->x2, s->y2,
+        s->x3, s->y3, s->x4, s->y4,
         s->rad, s->ang);
 
     return 0;

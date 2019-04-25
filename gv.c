@@ -319,6 +319,9 @@ apair_t objattr_ial[] = {
     {"rmoveto",             OA_RMOVETO},
     {"lineto",              OA_LINETO},
     {"rlineto",             OA_RLINETO},
+    {"rcurveto",            OA_RCURVETO},
+    {"curveto",             OA_CURVETO},
+    {"curve",               OA_RCURVETO},
     {"close",               OA_CLOSE},
 
     {"forehead",            OA_FOREHEAD},
@@ -366,13 +369,21 @@ apair_t objattr_ial[] = {
     {"arrowsizefactor",     OA_ARROWSIZEFACTOR},
     {"warrowsizefactor",    OA_WARROWSIZEFACTOR},
     {"linethickfactor",     OA_LINETHICKFACTOR},
-    {"linedecothickfactor",     OA_LINEDECOTHICKFACTOR},
-    {"linedecopitchfactor",     OA_LINEDECOPITCHFACTOR},
+    {"linedecothickfactor", OA_LINEDECOTHICKFACTOR},
+    {"linedecopitchfactor", OA_LINEDECOPITCHFACTOR},
     {"wlinethickfactor",    OA_WLINETHICKFACTOR},
     {"hatchthickfactor",    OA_HATCHTHICKFACTOR},
     {"hatchpitchfactor",    OA_HATCHPITCHFACTOR},
     {"noteosepfactor",      OA_NOTEOSEPFACTOR},
     {"noteisepfactor",      OA_NOTEISEPFACTOR},
+
+    {"bwcir",               OA_BWCIR},
+    {"bwhcir",              OA_BWHCIR},
+    {"bwrcir",              OA_BWRCIR},
+
+    {"bwbox",               OA_BWBOX},
+    {"bwxss",               OA_BWXSS},
+    {"bwpls",               OA_BWPLS},
 
     {NULL,                  -1},
 };

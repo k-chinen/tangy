@@ -52,7 +52,37 @@ seg_new()
 }
 
 int
-try_regsegclose(varray_t *segar)
+path_regsegbwcir(varray_t *segar, int x1, int y1)
+{
+    int  ik;
+    seg *e;
+
+#if 0
+    Echo("%s:\n", __func__);
+    Echo("b use %d\n", segar->use);
+#endif
+
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_BWCIR;
+    e->coordtype    = REL_COORD;
+    e->x1           = x1;
+    e->y1           = y1;
+    ik = varray_push(segar, e);
+
+out:
+#if 0
+    Echo("ik %d\n", ik);
+    Echo("a use %d\n", segar->use);
+#endif
+
+    return 0;
+}
+
+int
+path_regsegclose(varray_t *segar)
 {
     int  ik;
     seg *e;
@@ -80,7 +110,68 @@ out:
 }
 
 int
-try_regline(varray_t *segar, int x1, int y1, int x2, int y2)
+path_regsegcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    seg *e;
+
+#if 0
+    Echo("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
+    Echo("b use %d\n", segar->use);
+#endif
+P;
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_CURVETO;
+    e->coordtype    = REL_COORD;
+    e->x1           = x1;
+    e->y1           = y1;
+    e->x2           = x2;
+    e->y2           = y2;
+    e->x3           = x3;
+    e->y3           = y3;
+    varray_push(segar, e);
+
+out:
+
+    return 0;
+}
+
+
+
+int
+path_regsegrcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    seg *e;
+
+#if 0
+    Echo("%s: x1,y1 %d,%d x2,y2 %d,%d\n", __func__, x1, y1, x2, y2);
+    Echo("b use %d\n", segar->use);
+#endif
+P;
+    e = seg_new();
+    if(!e) {
+        return -1;
+    }
+    e->ptype        = OA_RCURVETO;
+    e->coordtype    = REL_COORD;
+    e->x1           = x1;
+    e->y1           = y1;
+    e->x2           = x2;
+    e->y2           = y2;
+    e->x3           = x3;
+    e->y3           = y3;
+    varray_push(segar, e);
+
+out:
+
+    return 0;
+}
+
+
+int
+path_regline(varray_t *segar, int x1, int y1, int x2, int y2)
 {
     seg *e;
 
@@ -111,7 +202,7 @@ out:
 
 
 int
-try_regsegmoveto(varray_t *segar, int x1, int y1)
+path_regsegmoveto(varray_t *segar, int x1, int y1)
 {
     int  ik;
     seg *e;
@@ -134,7 +225,7 @@ out:
 }
 
 int
-try_regsegrmoveto(varray_t *segar, int x1, int y1)
+path_regsegrmoveto(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -156,7 +247,7 @@ out:
 }
 
 int
-try_regseglineto(varray_t *segar, int x1, int y1)
+path_regseglineto(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -178,7 +269,7 @@ out:
 }
 
 int
-try_regsegrlineto(varray_t *segar, int x1, int y1)
+path_regsegrlineto(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -200,7 +291,7 @@ out:
 }
 
 int
-try_regsegforward(varray_t *segar, int x1, int y1)
+path_regsegforward(varray_t *segar, int x1, int y1)
 {
     seg *e;
 
@@ -224,7 +315,7 @@ out:
 
 
 int
-try_regsegarc(varray_t *segar, int rad, int ang)
+path_regsegarc(varray_t *segar, int rad, int ang)
 {
     seg *e;
 
@@ -246,7 +337,7 @@ out:
 }
 
 int
-try_regsegarcn(varray_t *segar, int rad, int ang)
+path_regsegarcn(varray_t *segar, int rad, int ang)
 {
     seg *e;
 

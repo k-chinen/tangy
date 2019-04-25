@@ -325,6 +325,7 @@ Info("segop tmp '%s'\n", tmp);
             strcpy(vstr, tmp);
 
             if(dt==OA_ARC||dt==OA_ARCN) {
+                /* one more arg */
 
                 p = draw_wordW(p, tmp, BUFSIZ);
 
@@ -342,6 +343,34 @@ Warn("tmp '%s' seems not value\n", tmp);
                     strcat(vstr, tmp);
                 }
             }
+            else
+            if(dt==OA_RCURVETO) {
+                /* 5 more args */
+                int cc;
+
+                cc = 0;
+                while(cc<5) {
+                    p = draw_wordW(p, tmp, BUFSIZ);
+
+                    top = assoc(objattr_ial, tmp);
+                    if(sop>=0) {
+#if 0
+Warn("tmp '%s' seems not value\n", tmp);
+#endif
+                        tmp[0] = '\0';
+                        break;
+                    }
+                    else {
+                        co = 1;
+
+                        Echo("cc %d tmp '%s'\n", cc, tmp);
+                        strcat(vstr, SEG_SEPS);
+                        strcat(vstr, tmp);
+                    }
+                    cc++;
+                }
+            }
+
 
         }
 
@@ -1028,6 +1057,7 @@ P;
             (strcasecmp(name, "dir")==0)    ||
             (strcasecmp(name, "arc")==0)    ||
             (strcasecmp(name, "arcn")==0)   ||
+            (strcasecmp(name, "curve")==0)  ||
             (strcasecmp(name, "join")==0)   ||
             (strcasecmp(name, "skip")==0)   ||
 

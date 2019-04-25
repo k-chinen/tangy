@@ -21,7 +21,7 @@ typedef struct {
     int jtype;
     int coordtype;
     int ftflag;
-    int x1, y1, x2, y2;
+    int x1, y1, x2, y2, x3, y3, x4, y4;
     int rad;
     int ang;
     int ltype;
@@ -39,14 +39,16 @@ extern apair_t ftcoord_ial[];
 extern apair_t ftcoord_isal[];
 
 seg *seg_new();
-int try_regline(varray_t *segar, int x1, int y1, int x2, int y2);
-int try_regsegmoveto(varray_t *segar, int x1, int y1);
-int try_regsegrmoveto(varray_t *segar, int x1, int y1);
-int try_regseglineto(varray_t *segar, int x1, int y1);
-int try_regsegrlineto(varray_t *segar, int x1, int y1);
-int try_regsegforward(varray_t *segar, int x1, int y1);
-int try_regsegarc(varray_t *segar, int rad, int ang);
-int try_regsegarcn(varray_t *segar, int rad, int ang);
-int try_regsegclose(varray_t *segar);
+int path_regline(varray_t *segar, int x1, int y1, int x2, int y2);
+int path_regsegmoveto(varray_t *segar, int x1, int y1);
+int path_regsegrmoveto(varray_t *segar, int x1, int y1);
+int path_regseglineto(varray_t *segar, int x1, int y1);
+int path_regsegrlineto(varray_t *segar, int x1, int y1);
+int path_regsegforward(varray_t *segar, int x1, int y1);
+int path_regsegarc(varray_t *segar, int rad, int ang);
+int path_regsegarcn(varray_t *segar, int rad, int ang);
+int path_regsegcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3);
+int path_regsegclose(varray_t *segar);
+int path_regsegbwcir(varray_t *segar, int, int);
 
 #endif/*_TANGY_SEG_H_*/

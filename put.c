@@ -118,9 +118,13 @@ Echo("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
 #if 1
 
 #define MARK(m,x,y) \
-    Echo("MARK oid %d line %d %s x %6d, y %6d\n", u->oid, __LINE__, m, x, y); \
+  { \
+    if(_t_){ \
+        printf("MARK oid %d line %d %s x %6d, y %6d\n", \
+        u->oid, __LINE__, m, x, y); } \
     if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
-    if(y<_by)  _by = y; if(y>_ty)  _ty = y; 
+    if(y<_by)  _by = y; if(y>_ty)  _ty = y; \
+  }
 
 #else
 
@@ -357,28 +361,67 @@ P;
 skip_m:
 
 
-#define FREG(qpt,qjt,qct,qft,qx,qy,qra,qan) \
+#define FREG1(qpt,qjt,qct,qft,qx,qy,qra,qan) \
     r = seg_new(); \
-    if(!r) {} \
+    if(!r) {Error("no memory");} \
     r->ptype    = qpt; \
     r->jtype    = qjt; \
-    r->coordtype = qct; \
+    r->coordtype= qct; \
     r->ftflag   = qft;  \
     r->x1       = qx;   \
     r->y1       = qy;   \
     r->rad      = qra; \
     r->ang      = qan; \
     varray_push(segar, r); \
+    Echo("%s:%d FREG1 %d %d,%d\n", __func__, __LINE__, qpt, qx, qy); \
+    c = 0; \
+    jc = 0;
+
+#define FREG3(qpt,qjt,qct,qft,qx1,qy1,qx2,qy2,qx3,qy3,qra,qan) \
+    r = seg_new(); \
+    if(!r) {Error("no memory");} \
+    r->ptype    = qpt; \
+    r->jtype    = qjt; \
+    r->coordtype= qct; \
+    r->ftflag   = qft; \
+    r->x1       = qx1; \
+    r->y1       = qy1; \
+    r->x2       = qx2; \
+    r->y2       = qy2; \
+    r->x3       = qx3; \
+    r->y3       = qy3; \
+    varray_push(segar, r); \
+    Echo("%s:%d FREG3 %d %d,%d\n", __func__, __LINE__, qpt, qx1, qy1); \
+    c = 0; \
+    jc = 0;
+
+#define FREG4(qpt,qjt,qct,qft,qx1,qy1,qx2,qy2,qx3,qy3,qx4,qy4,qra,qan) \
+    r = seg_new(); \
+    if(!r) {Error("no memory");} \
+    r->ptype    = qpt; \
+    r->jtype    = qjt; \
+    r->coordtype= qct; \
+    r->ftflag   = qft; \
+    r->x1       = qx1; \
+    r->y1       = qy1; \
+    r->x2       = qx2; \
+    r->y2       = qy2; \
+    r->x3       = qx3; \
+    r->y3       = qy3; \
+    r->x4       = qx4; \
+    r->y4       = qy4; \
+    varray_push(segar, r); \
+    Echo("%s:%d FREG4 %d %d,%d\n", __func__, __LINE__, qpt, qx1, qy1); \
     c = 0; \
     jc = 0;
 
 
-#if 0
+#if 1
 Echo("  m %d\n", m);
 #endif
 
-        if(e->cmd==OA_ARC||e->cmd==OA_ARCN||e->cmd==OA_THEN||
-            e->cmd==OA_JOIN||e->cmd==OA_SKIP) {
+        if(e->cmd==OA_ARC||e->cmd==OA_ARCN||e->cmd==OA_RCURVETO||
+            e->cmd==OA_THEN||e->cmd==OA_JOIN||e->cmd==OA_SKIP) {
             actf = 1;
         }
 
@@ -387,8 +430,10 @@ Echo("  m %d\n", m);
 flush_que:
             if(c>0) {
                 MARK("f ", x, y);
-                FREG(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
+                FREG1(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
+Echo("  ldir %.2f      :%d\n", ldir, __LINE__);
                 ldir = atan2(y-ly, x-lx)/rf;
+Echo("  ldir %.2f new  :%d\n", ldir, __LINE__);
                 lx = x;
                 ly = y;
             }
@@ -399,20 +444,19 @@ flush_que:
             Warn("unknown sub-command %d\n", e->cmd);
             break;
 
-
         case OA_FROM:       
         case OA_TO:     
 #if 1
             if(c>0) {
-                            r = seg_new();
-                            r->coordtype = REL_COORD;
-                            r->ptype = OA_FORWARD;
-                            r->x1 = x - lx;
-                            r->y1 = y - ly;
-                            varray_push(segar, r);
+                r = seg_new();
+                r->coordtype = REL_COORD;
+                r->ptype = OA_FORWARD;
+                r->x1 = x - lx;
+                r->y1 = y - ly;
+                varray_push(segar, r);
 
 #if 1
-                            ldir = atan2(y-ly, x-lx)/rf;
+                ldir = atan2(y-ly, x-lx)/rf;
 Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
@@ -420,11 +464,11 @@ Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
-                            r = NULL;
-                            lx = x;
-                            ly = y;
-                            c=0;
-                            jc=0;
+                r = NULL;
+                lx = x;
+                ly = y;
+                c=0;
+                jc=0;
             }
 #endif
 
@@ -480,12 +524,12 @@ Echo("mark final position %d,%d\n", mx, my);
 
 P;
             if(e->cmd==OA_FROM) {
-                FREG(OA_FORWARD, jc, ABS_COORD, COORD_FROM, mx, my, rad, an);
+                FREG1(OA_FORWARD, jc, ABS_COORD, COORD_FROM, mx, my, rad, an);
                 rv |= COORD_FROM;
             }
             else
             if(e->cmd==OA_TO) {
-                FREG(OA_FORWARD, jc, ABS_COORD, COORD_TO, mx, my, rad, an);
+                FREG1(OA_FORWARD, jc, ABS_COORD, COORD_TO, mx, my, rad, an);
                 rv |= COORD_TO;
             }
             else {
@@ -497,7 +541,7 @@ P;
             break;
 
         case OA_CLOSE:  
-            FREG(OA_CLOSE, jc, REL_COORD, 0, 0, 0, 0, 0);
+            FREG1(OA_CLOSE, jc, REL_COORD, 0, 0, 0, 0, 0);
             break;
 
         case OA_RIGHT:      x += m; c++; ldir =    0; break;
@@ -511,156 +555,222 @@ P;
         case OA_DECDIR:     ldir -= m; break;
 #endif
 #if 1
-        case OA_DIR:        ldir = m;
-                            FREG(OA_DIR, jc, REL_COORD, 0, 0, 0, 0, m);
-                            break;
+        case OA_DIR:        
+            ldir = m;
+            FREG1(OA_DIR, jc, REL_COORD, 0, 0, 0, 0, m);
+            break;
 
         case OA_INCDIR:
         case OA_LTURN:
-                            ldir += m;
-                            FREG(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, m);
-                            break;
+            ldir += m;
+            FREG1(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, m);
+            break;
         case OA_DECDIR:
         case OA_RTURN:
-                            ldir -= m;
-                            FREG(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, -m);
-                            break;
+            ldir -= m;
+            FREG1(OA_INCDIR, jc, REL_COORD, 0, 0, 0, 0, -m);
+            break;
 #endif
 
         case OA_JOIN:
-                            jc += 1;
-                            c++;
-                            FREG(OA_JOIN, 1, REL_COORD, 0, 0, 0, 0, 0);
-                            MARK("J ", x, y);
-                            break;
+            jc += 1;
+            c++;
+            FREG1(OA_JOIN, 1, REL_COORD, 0, 0, 0, 0, 0);
+            MARK("J ", x, y);
+            break;
 
         case OA_SKIP:
-                            jc += 1000;
-                            x += m*cos(ldir*rf);
-                            y += m*sin(ldir*rf);
-                            c++;
-                            FREG(OA_SKIP, 1000, REL_COORD, 0, x-lx, y-ly, 0, 0);
-                            MARK("S ", x, y);
-                            break;
+            jc += 1000;
+            x += m*cos(ldir*rf);
+            y += m*sin(ldir*rf);
+            c++;
+            FREG1(OA_SKIP, 1000, REL_COORD, 0, x-lx, y-ly, 0, 0);
+            MARK("S ", x, y);
+            break;
     
-        case OA_FORWARD:    x += m*cos(ldir*rf);
-                            y += m*sin(ldir*rf);
-                            c++;
-                            break;
+        case OA_FORWARD:    
+            (void)0;
+            MARK("Fs", x, y);
+            x += m*cos(ldir*rf);
+            y += m*sin(ldir*rf);
+            c++;
+
+            MARK("Fd", x, y);
+            break;
+
+        case OA_RCURVETO:
+            {
+                int lpx, lpy;
+                int fk;
+                double t;
+                double ppx, ppy;
+                double bpx, bpy;
+                int x2, y2, x3, y3, x4, y4;
+                double bdir;
+                char tmp[BUFSIZ];
+                char *p;
+                extern int _bez_pos(double*,double*,double,
+                    double,double,double,double,double,double,double,double);
+                extern int _bez_posdir(double*,double*,double*,double,
+                    double,double,double,double,double,double,double,double);
+
+
+#define PICK(vn) \
+    if(*p) { p = draw_word(p, tmp, BUFSIZ, ','); vn = xatoi(tmp); }
+                
+                p = e->val;
+                PICK(x2); PICK(y2);
+                PICK(x3); PICK(y3);
+                PICK(x4); PICK(y4);
+    
+#if 0
+                FREG1(OA_BWCIR,  1000, REL_COORD, 0, x,    y,    0, 0);
+                FREG1(OA_BWBOX,  1000, REL_COORD, 0, x+x2, y+y2, 0, 0);
+                FREG1(OA_BWXSS,  1000, REL_COORD, 0, x+x3, y+y3, 0, 0);
+                FREG1(OA_BWPLS,  1000, REL_COORD, 0, x+x4, y+y4, 0, 0);
+#endif
+
+                lpx = x; lpy = y;
+                MARK("Cs", x, y);
+                for(t=0;t<=1.0;t+=0.1) {
+                    fk = _bez_pos(&ppx, &ppy, t,
+                        (double)(x),    (double)(y),
+                        (double)(x+x2), (double)(y+y2),
+                        (double)(x+x3), (double)(y+y3),
+                        (double)(x+x4), (double)(y+y4));
+                    MARK("Cm", ((int)ppx), ((int)ppy));
+                }
+                _bez_posdir(&bpx, &bpy, &bdir, 1.0,
+                        (double)(x),    (double)(y),
+                        (double)(x+x2), (double)(y+y2),
+                        (double)(x+x3), (double)(y+y3),
+                        (double)(x+x4), (double)(y+y4));
+Echo(" ldir %.2f     :%d\n", ldir, __LINE__);
+Echo(" bdir %.2f     :%d\n", bdir, __LINE__);
+                ldir = bdir/rf;
+Echo(" ldir %.2f new :%d\n", ldir, __LINE__);
+                x = ppx;
+                y = ppy;
+                c++;
+                FREG3(OA_RCURVETO, 1000, REL_COORD, 0,
+                    x2, y2, x3, y3, x4, y4, 0, 0);
+                MARK("Cd", x, y);
+                lx = x;
+                ly = y;
+            }
+            break;
         
         case OA_ARC:
 Echo("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
-                            MARK("cB", x, y);
-                            arcx = x + rad*cos((ldir+90)*rf);
-                            arcy = y + rad*sin((ldir+90)*rf);
+            MARK("cB", x, y);
+            arcx = x + rad*cos((ldir+90)*rf);
+            arcy = y + rad*sin((ldir+90)*rf);
 
 Echo("  arc ldir %f .. %f\n", ldir-90, ldir-90+an);
-    
-                            /* mark peak points */
-                            {
-                                int a;
-                                int tx, ty;
-                                for(a=ldir-90;a<=ldir-90+an;a++) {
-                                    if(a==ldir-90||a==ldir-90+an||a%90==0) {
-                                        tx = arcx+rad*cos((a)*rf);
-                                        ty = arcy+rad*sin((a)*rf);
-                                        Echo(" a %4d ", a);
-                                        if(a==ldir-90) {
-                                            Echo(" first  ");
-                                        }
-                                        if(a==ldir-90+an) {
-                                            Echo(" last   ");
-                                        }
-                                        if(a%90==0) {
-                                            Echo(" middle ");
-                                        }
-                                        MARK("cM", tx, ty);
-                                    }
-                                }
-                            }
 
-                            x = arcx+rad*cos((ldir-90+an)*rf);
-                            y = arcy+rad*sin((ldir-90+an)*rf);
+            /* mark peak points */
+            {
+                int a;
+                int tx, ty;
+                for(a=ldir-90;a<=ldir-90+an;a++) {
+                    if(a==ldir-90||a==ldir-90+an||a%90==0) {
+                        tx = arcx+rad*cos((a)*rf);
+                        ty = arcy+rad*sin((a)*rf);
+                        Echo(" a %4d ", a);
+                        if(a==ldir-90) {
+                            Echo(" first  ");
+                        }
+                        if(a==ldir-90+an) {
+                            Echo(" last   ");
+                        }
+                        if(a%90==0) {
+                            Echo(" middle ");
+                        }
+                        MARK("cM", tx, ty);
+                    }
+                }
+            }
+
+            x = arcx+rad*cos((ldir-90+an)*rf);
+            y = arcy+rad*sin((ldir-90+an)*rf);
 
 Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("cE", x, y);
+            MARK("cE", x, y);
 
 
-                            FREG(OA_ARC, jc, REL_COORD, 0, 0, 0, rad, an);
+            FREG1(OA_ARC, jc, REL_COORD, 0, 0, 0, rad, an);
 
-                            ldir += an;
+            ldir += an;
 Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 
-                            r = NULL;
-                            lx = x;
-                            ly = y;
-                            c=0;
-                            jc=0;
+            r = NULL;
+            lx = x;
+            ly = y;
+            c=0;
+            jc=0;
 
-                            break;
+            break;
 
         case OA_ARCN:
 Echo("  ldir %7.2f rad %d an %d\n", ldir, rad, an);
-                            MARK("nB", x, y);
+            MARK("nB", x, y);
 
-                            arcx = x + rad*cos((ldir-90)*rf);
-                            arcy = y + rad*sin((ldir-90)*rf);
+            arcx = x + rad*cos((ldir-90)*rf);
+            arcy = y + rad*sin((ldir-90)*rf);
 #if 0
-                            x = arcx+rad*cos((ldir+90)*rf);
-                            y = arcy+rad*sin((ldir+90)*rf);
+            x = arcx+rad*cos((ldir+90)*rf);
+            y = arcy+rad*sin((ldir+90)*rf);
 
 Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("nB", x, y);
+            MARK("nB", x, y);
 #endif
 
 Echo("  arcn ldir %f .. %f\n", ldir+90, ldir+90-an);
-                            /* mark peak points */
-                            {
-                                int a;
-                                int tx, ty;
-                                for(a=ldir+90;a>=ldir+90-an;a--) {
-                                    if(a==ldir+90||a==ldir+90-an||a%90==0) {
-                                        tx = arcx+rad*cos((a)*rf);
-                                        ty = arcy+rad*sin((a)*rf);
-                                        Echo(" a %4d ", a);
-                                        if(a==ldir+90) {
-                                            Echo(" first  ");
-                                        }
-                                        if(a==ldir+90-an) {
-                                            Echo(" last   ");
-                                        }
-                                        if(a%90==0) {
-                                            Echo(" middle ");
-                                        }
-                                        MARK("nM", tx, ty);
-                                    }
-                                }
-                            }
+            /* mark peak points */
+            {
+                int a;
+                int tx, ty;
+                for(a=ldir+90;a>=ldir+90-an;a--) {
+                    if(a==ldir+90||a==ldir+90-an||a%90==0) {
+                        tx = arcx+rad*cos((a)*rf);
+                        ty = arcy+rad*sin((a)*rf);
+                        Echo(" a %4d ", a);
+                        if(a==ldir+90) {
+                            Echo(" first  ");
+                        }
+                        if(a==ldir+90-an) {
+                            Echo(" last   ");
+                        }
+                        if(a%90==0) {
+                            Echo(" middle ");
+                        }
+                        MARK("nM", tx, ty);
+                    }
+                }
+            }
 
-                            x = arcx+rad*cos((ldir+90-an)*rf);
-                            y = arcy+rad*sin((ldir+90-an)*rf);
+            x = arcx+rad*cos((ldir+90-an)*rf);
+            y = arcy+rad*sin((ldir+90-an)*rf);
 
 Echo("  arcx,y %d,%d x,y %d,%d\n", arcx, arcy, x, y);
-                            MARK("nE", x, y);
+            MARK("nE", x, y);
 
-                            FREG(OA_ARCN, jc, REL_COORD, 0, 0, 0, rad, an);
+            FREG1(OA_ARCN, jc, REL_COORD, 0, 0, 0, rad, an);
 
-                            ldir -= an;
+            ldir -= an;
 Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 
-                            r = NULL;
-                            lx = x;
-                            ly = y;
-                            c=0;
-                            jc=0;
+            r = NULL;
+            lx = x;
+            ly = y;
+            c=0;
+            jc=0;
 
-                            break;
-
-    
+            break;
 
         case OA_THEN:   
             /* nothing */
-                            break;
+            break;
         }
 #if 0
 Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
@@ -830,7 +940,7 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 
-#undef FREG
+#undef FREG1
 }
 
 int
@@ -934,7 +1044,7 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 
-#undef FREG
+#undef FREG1
 }
 
 
@@ -1032,7 +1142,7 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 
-#undef FREG
+#undef FREG1
 }
 
 
@@ -1619,7 +1729,7 @@ Echo("%s: oid %d START dir %d x,y %d,%d fx,y %d,%d\n",
 
 #if 0
     int ik;
-    ik = try_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
+    ik = path_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
 #endif
 
 #if 0
@@ -1806,7 +1916,7 @@ Echo("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 
 #if 0
     int ik;
-    ik = try_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
+    ik = path_regline(u->cob.segar, u->csx, u->csy, u->cex, u->cey);
 #endif
 
 

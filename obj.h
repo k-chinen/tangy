@@ -334,8 +334,11 @@ extern apair_t lo_ial[];
 #define OA_RMOVETO          (351)
 #define OA_LINETO           (352)
 #define OA_RLINETO          (353)
-#define OA_CLOSE            (354)
+#define OA_CURVETO          (354)
+#define OA_RCURVETO         (355)
+#define OA_CLOSE            (359)
 #define OA_LINE             (360)
+
 
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)
@@ -370,6 +373,13 @@ extern apair_t lo_ial[];
 #define OA_HATCHPITCHFACTOR         (932)
 #define OA_NOTEOSEPFACTOR           (941)
 #define OA_NOTEISEPFACTOR           (942)
+
+#define OA_BWCIR                    (1010)
+#define OA_BWHCIR                   (1011)
+#define OA_BWRCIR                   (1012)
+#define OA_BWBOX                    (1020)
+#define OA_BWXSS                    (1030)
+#define OA_BWPLS                    (1040)
 
 extern apair_t objattr_ial[];
 
