@@ -1395,6 +1395,8 @@ P;
 
     case CMD_SCATTER: 
     case CMD_GATHER: 
+            WO;     
+            break;
     case CMD_THRU: 
             RO;     
             break;

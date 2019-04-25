@@ -8505,10 +8505,12 @@ _drawgs(FILE *fp, int xdir, int xox, int xoy,
     int   i;
     int   sx, sy;
     int   ex, ey;
+    int   mx, my;
     int   minsx, maxsx;
     int   miny, maxy;
     int   mini, maxi;
     int   jr;
+    int   am;
     int   j;
     int   k;
     int   eyt, eyb;
@@ -8518,10 +8520,10 @@ _drawgs(FILE *fp, int xdir, int xox, int xoy,
     int   g;
     varray_t *tmpar;
 
-    int usi, uei, esi, eei, dsi, dei;
+    int   usi, uei, esi, eei, dsi, dei;
 
-    int h1, h2, v;
-    int t1x, t1y, t2x, t2y;
+    int   h1, h2, v;
+    int   t1x, t1y, t2x, t2y;
 
     Echo("%s: xu %p oid %d, style\n", __func__, xu, xu->oid);
 
@@ -8532,6 +8534,9 @@ P;
     }
 
     jr = xu->cob.outlinethick*2;
+
+    /* array margin */
+    am = 4*objunit/10;
 
     ex = xox + pf->cx - pf->cwd/2 * (dsdir);
     ey = xoy + pf->cy;
@@ -8658,13 +8663,33 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             j++;
         }
 
+        mx = xox+xu->cx;
+        my = xoy+xu->cy;
+
         Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
         if(dsdir==-1) {
             int dmy;
             dmy = minsx;
             maxsx = minsx;
             minsx = dmy;
+
         }
+        else {
+        }
+
+        if(dsdir==-1) {
+            maxsx -= am;
+            if(mx-ex>am) {
+                mx -= mx-ex-am;
+            }
+        }
+        else {
+            maxsx += am;
+            if(ex-mx>am) {
+                mx += ex-mx-am;
+            }
+        }
+
         Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
 
         Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
@@ -8745,7 +8770,7 @@ fprintf(fp,"%% sx,sy %d,%d maxsx %d mx,my %d,%d ex,ey %d,%d eey %d dsdir %d\n",
                     xu->cob.outlinethick*2,
                     j, call, h1, h2, v,
                     sx, sy, maxsx,
-                    xox+xu->cx, xoy+xu->cy, ex, ey, eey, dsdir);
+                    mx, my, ex, ey, eey, dsdir);
 
 #if 0
                 varray_fprintv(stdout, tmpar);
