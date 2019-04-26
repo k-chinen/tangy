@@ -1,6 +1,6 @@
 
 int
-fkchkchunk(ob *xch, ns *xns)
+linkchkchunk(ob *xch, ns *xns)
 {
     int ik;
     int i;
@@ -43,7 +43,7 @@ P;
         }
 
         if(cobj->type==CMD_CHUNK) {
-            ik = fkchkchunk(cobj, xns);
+            ik = linkchkchunk(cobj, xns);
         }
 
         lobj = cobj;
@@ -66,11 +66,11 @@ P;
 }
 
 int
-fkchk(ob *xch, ns *xns)
+linkchk(ob *xch, ns *xns)
 {
     int ik;
 
-    ik = fkchkchunk(xch, xns);
+    ik = linkchkchunk(xch, xns);
 
     return ik;
 }

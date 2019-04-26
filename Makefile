@@ -29,7 +29,7 @@ parse.o: a.h alist.h chas.h gv.h notefile.h obj.h seg.h varray.h \
 put.o: a.h alist.h chas.h gv.h notefile.h obj.h seg.h xcur.c 
 qbb.o: qbb.h 
 seg.o: gv.h obj.h seg.h 
-tangy.o: a.h alist.h chas.h color.h epsdraw.h font.h forkchk.c geom.h \
+tangy.o: a.h alist.h chas.h color.h epsdraw.h font.h linkchk.c geom.h \
     gv.h notefile.c notefile.h obj.h picdraw.c qbb.h seg.h varray.h 
 tx.o: tx.h varray.h 
 varray.o: varray.h 

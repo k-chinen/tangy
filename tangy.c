@@ -27,7 +27,7 @@
 #include "a.h"
 
 #include "notefile.c"
-#include "forkchk.c"
+#include "linkchk.c"
 #include "picdraw.c"
 
 int     nodraw = 0;
@@ -419,7 +419,7 @@ Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cch.lanenum);
 #endif
 Echo("ch0 oid %d LANE? %d\n", ch0->oid, ch0->cob.lanenum);
 
-    ik = fkchk(ch0, ns0);
+    ik = linkchk(ch0, ns0);
 P;
 
     x = 0;
@@ -430,14 +430,6 @@ P;
         ob_gdump(ch0);
     }
 
-#ifdef DO_LINKCHK
-P;
-    ik = linkchk(ch0, ns0);
-    if(INTRACE) {
-        ob_gdump(ch0);
-    }
-#endif
-
 P;
     finalize(ch0, 0, 0, ns0);
 
@@ -446,11 +438,6 @@ P;
         ob_bgdump(ch0);
         ob_bldump(ch0);
     }
-
-#if 0
-    picdraw(ch0, 0, 0, ns0);
-    fflush(stdout);
-#endif
 
 #if 0
     printf("ht root-chunk %d vs canvas %d\n", ch0->ht, canvasht);
@@ -464,6 +451,11 @@ P;
 #if 0
     canvassc = canvasht/ch0->ht;
     canvassc = 0.01;
+#endif
+
+#if 0
+    picdraw(ch0, 0, 0, ns0);
+    fflush(stdout);
 #endif
 
 P;
