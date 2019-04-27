@@ -7438,6 +7438,61 @@ P;
     return 0;
 }
 
+int
+mkpath_gear(varray_t *sar, int wd, int ht, int rad, int aoff, int n, int th, int ir)
+{
+    double ar, br;
+    int i;
+    double x2, y2;
+    double x3, y3;
+    double x4, y4;
+P;
+
+    if(rad==0) {
+        goto out;
+    }
+    if(rad<0) {
+        ar = ht/2;
+    }
+    if(rad>0) {
+        ar = rad;
+    }
+
+    br = ar*cos(M_PI*2/(double)n)/cos(M_PI*2/(double)n/2.0);
+    br = ar - th;
+
+#if 0
+    Echo("polygon:  ar %.3f, br %.3f, aoff %d, n %d, cc %d\n",
+        ar, br, aoff, n, cc);
+#endif
+
+    for(i=0;i<n;i++) {
+        x2 = ar*cos(M_PI*2/(double)n*(double)i+aoff*rf);
+        y2 = ar*sin(M_PI*2/(double)n*(double)i+aoff*rf);
+        x3 = br*cos(M_PI*2/(double)n*((double)i+0.5)+aoff*rf);
+        y3 = br*sin(M_PI*2/(double)n*((double)i+0.5)+aoff*rf);
+        x4 = ar*cos(M_PI*2/(double)n*((double)i+1.0)+aoff*rf);
+        y4 = ar*sin(M_PI*2/(double)n*((double)i+1.0)+aoff*rf);
+
+        if(i==0) {
+            path_regsegmoveto(sar,     x2, y2);
+        }
+        else {
+        }
+        path_regseglineto(sar,    x3, y3);
+        if(i==n-1) {
+            /* skip */
+        }
+        else {
+            path_regseglineto(sar,    x4, y4);
+        }
+    }
+    path_regsegclose(sar);
+
+out:
+    return 0;
+}
+
 
 int
 mkpath_polygon(varray_t *sar, int wd, int ht, int rad, int aoff, int n, int cc)
@@ -7494,6 +7549,7 @@ P;
 out:
     return 0;
 }
+
 
 
 int
@@ -7839,6 +7895,11 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
                 xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
         ik = mkpath_Rpolygon(xu->cob.seghar, awd, aht, xu->cob.rad,
                 xu->cob.polyrotate, xu->cob.polypeak, xu->cob.concave);
+        break;
+    case CMD_GEAR:
+        ik = mkpath_gear(xu->cob.segar, awd, aht, xu->cob.rad,
+                xu->cob.polyrotate, xu->cob.polypeak, objunit/10, objunit/4);
+        ik = mkpath_Rcircle(xu->cob.seghar, awd, aht, xu->cob.rad-objunit/10);
         break;
     case CMD_ELLIPSE:
         ik = mkpath_ellipse(xu->cob.segar,  awd, aht, xu->cob.rad);
@@ -10256,7 +10317,8 @@ P;
     if(u->type==CMD_BOX || u->type==CMD_CIRCLE || u->type==CMD_POINT ||
         u->type==CMD_ELLIPSE ||
         u->type==CMD_PAPER || u->type==CMD_CARD || u->type==CMD_DIAMOND ||
-        u->type==CMD_HOUSE || u->type==CMD_POLYGON || u->type==CMD_DRUM) {
+        u->type==CMD_HOUSE || u->type==CMD_POLYGON || u->type==CMD_GEAR ||
+        u->type==CMD_DRUM) {
         epsdraw_bodyX(fp, ox, oy, u, xns);
     }
     else {

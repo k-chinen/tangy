@@ -70,6 +70,9 @@
 #define CMD_BCURVE      (511)
 #define CMD_BCURVESELF  (512)
 
+#define CMD_GEAR        (600)
+
+
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
 

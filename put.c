@@ -1377,10 +1377,12 @@ P;
     case CMD_DRUM:      WO;     break;
 
     case CMD_BOX:       WO;     break;
+    case CMD_ELLIPSE:   WO;     break;
+
     case CMD_CIRCLE:    RO;     break;
     case CMD_POINT:     SO;     break;
-    case CMD_ELLIPSE:   WO;     break;
     case CMD_POLYGON:   RO;     break;
+    case CMD_GEAR:      RO;     break;
 
 #if 0
     case CMD_DMY1:      WO;     break;
@@ -1596,13 +1598,19 @@ Echo("\t  3 u wd %d ht %d\n", u->wd, u->ht);
 
 #if 1
     /*** FIX ***/
-    if(u->type==CMD_CIRCLE || u->type==CMD_POLYGON) {
+    if(u->type==CMD_CIRCLE || u->type==CMD_POLYGON || u->type==CMD_GEAR) {
+        if(u->cob.rad<=0) {
+            u->cob.rad = objunit/2;
+        }
         if(u->cob.rad>0) {
             u->wd = u->cob.rad*2;
             u->ht = u->cob.rad*2;
         }
     }
     if(u->type==CMD_POINT) {
+        if(u->cob.rad<=0) {
+            u->cob.rad = objunit/5;
+        }
         if(u->cob.rad>0) {
             u->wd = u->cob.rad*2;
             u->ht = u->cob.rad*2;

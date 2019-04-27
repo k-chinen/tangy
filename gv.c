@@ -69,8 +69,8 @@ apair_t cmd_ial[] = {
     {"again",           CMD_AGAIN},
     {"back",            CMD_BACK},
     {"hback",           CMD_HBACK},
-    {"dmy1",            CMD_DMY1},
 #if 0
+    {"dmy1",            CMD_DMY1},
     {"dmy2",            CMD_DMY2},
     {"dmy3",            CMD_DMY3},
 #endif
@@ -86,6 +86,8 @@ apair_t cmd_ial[] = {
     {"rbrace",          CMD_RBRACE},
     {"\"{\"",           CMD_LBRACE},
     {"\"}\"",           CMD_RBRACE},
+    {"gear",            CMD_GEAR},
+
     {"chunk",           CMD_CHUNK},
     {"[",               CMD_CHUNK},
     {".",               CMD_CHUNKOBJATTR},
