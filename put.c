@@ -1400,7 +1400,7 @@ P;
             WO;     
             break;
     case CMD_THRU: 
-            RO;     
+            WO;     
             break;
 
     case CMD_PLINE:

@@ -8875,10 +8875,12 @@ P;
     fprintf(fp, "%% pf %p, pb %p\n", pf, pb);
     Echo("%% pf %p, pb %p\n", pf, pb);
 
+#if 0
     if(xu->cob.linkmap) {
         Echo("%s: oid %d linkmap '%s'\n",
             __func__, xu->oid, xu->cob.linkmap);
     }
+#endif
 
     if(!pf || !pb) {
         if(!pf) { Error("scatter oid %d; no fore object\n", xu->oid); }
@@ -8922,15 +8924,33 @@ int parse_aheads(char*,int*,int*,int*,int*, int);
 
 static
 int
+_parse_o_n(char *ss, int *ro, int *rn)
+{
+    char *u;
+    u = ss;
+    if(*u=='b'||*u=='B') { *ro = AR_BACK; u++; }
+    else
+    if(*u=='f'||*u=='F') { *ro = AR_FORE; u++; }
+Info(" u '%s'\n", u);
+    *rn = atoi(u);
+Echo("%s: ss '%s' -> %d %d\n", __func__, ss, *ro, *rn);
+    return 0;
+}
+
+static
+int
 solve_se(char *tg,
-    int *rss, int* rsn, int* ren, int* rat, int *raf, int *rac, int *rab)
+    int *rso, int* rsn, int *reo, int* ren,
+    int *rss, int* rat, int *raf, int *rac, int *rab)
 {
     int   rv;
     char  tmp[BUFSIZ];
     char *p;
     char *q;
+    char *u;
     int   c;
     int   ss;
+    int   xso, xeo;
     int   xs, xe, xa;
     int   xf, xc, xb;
 
@@ -8950,7 +8970,8 @@ solve_se(char *tg,
 
     q = tmp;
     c = 0;
-    while(p && *p && (*p>='0' && *p<='9') && c<BUFSIZ) {
+    while(p && *p && c<BUFSIZ &&
+        ((*p>='0'&&*p<='9')||(*p=='b'||*p=='B')||(*p=='f'||*p=='F')) ) {
         *q++ = *p++;
         c++;
     }
@@ -8959,7 +8980,8 @@ solve_se(char *tg,
     if(!tmp[0]) {
         goto out;
     }
-    xs = atoi(tmp);
+    _parse_o_n(tmp, &xso, &xs);
+    Info("  xso %d xs %d\n", xso, xs);
 
     q = tmp;
     c = 0;
@@ -8982,7 +9004,8 @@ solve_se(char *tg,
 
     q = tmp;
     c = 0;
-    while(p && *p && (*p>='0' && *p<='9') && c<BUFSIZ) {
+    while(p && *p && c<BUFSIZ &&
+        ((*p>='0'&&*p<='9')||(*p=='b'||*p=='B')||(*p=='f'||*p=='F')) ) {
         *q++ = *p++;
         c++;
     }
@@ -8991,10 +9014,14 @@ solve_se(char *tg,
     if(!tmp[0]) {
         goto out;
     }
-    xe = atoi(tmp);
+    _parse_o_n(tmp, &xeo, &xe);
+    Info("  xeo %d xe %d\n", xeo, xe);
 
-    Echo("xs %d xe %d xa %d\n", xs, xe, xa);
+    Echo("xso %d xs %d ; xeo %d xe %d ; xa %d\n", xso, xs, xeo, xe, xa);
     fflush(stdout);
+
+    *rso = xso;
+    *reo = xeo;
 
     *rsn = xs;
     *ren = xe;
@@ -9012,6 +9039,464 @@ out:
 #ifndef FBSLOT_LEN
 #define FBSLOT_LEN (128)
 #endif
+
+
+typedef struct {
+    int so, sn;
+    int eo, en;
+    int x1, y1;
+    int x2, y2;
+    int x3, y3;
+    int x4, y4;
+    ob prop;
+} clink_t;
+
+int
+clink_fprint(FILE *fp, clink_t *par, int np)
+{
+    int i;
+    char os, es;
+
+    printf("par %p np %d\n", par, np);
+    for(i=0;i<np;i++) {
+        os = '-';
+        if(par[i].so==AR_FORE) { os = 'F'; }
+        if(par[i].so==AR_BACK) { os = 'B'; }
+        es = '-';
+        if(par[i].eo==AR_FORE) { es = 'F'; }
+        if(par[i].eo==AR_BACK) { es = 'B'; }
+
+        printf("    i %d: %c %d:%d %c %d:%d %d,%d %d,%d; ss %d at %d f/c/b %d %d %d\n",
+            i, 
+            os, par[i].so, par[i].sn,
+            es, par[i].eo, par[i].en,
+            par[i].x1, par[i].y1,
+            par[i].x2, par[i].y2,
+            par[i].prop.cob.outlinetype,
+            par[i].prop.cob.arrowheadpart,
+            par[i].prop.cob.arrowforeheadtype,
+            par[i].prop.cob.arrowcentheadtype,
+            par[i].prop.cob.arrowbackheadtype);
+    }   
+
+    return 0;
+}
+
+int
+epsdraw_thruX(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
+{
+    ob *pf, *pb;
+    ob *fs[FBSLOT_LEN];
+    ob *bs[FBSLOT_LEN];
+    ob *pe, *se;
+    int ik;
+    int i, j;
+    int u, v;
+    int am;
+    int cm;
+    varray_t *tmpar;
+
+    int bxmax, fxmin;
+
+    am = 4*objunit/10;
+    cm = 2*objunit/10;
+    bxmax = -(INT_MAX-1);
+    fxmin = INT_MAX;
+
+    Echo("%s: oid %d\n", __func__, xu->oid);
+P;
+    pf = (ob*)xu->cob.linkfore;
+    pb = (ob*)xu->cob.linkback;
+    fprintf(fp, "%% pf %p, pb %p\n", pf, pb);
+    Echo("%% pf %p, pb %p\n", pf, pb);
+
+    if(!pf || !pb) {
+        goto out;
+    }
+    Echo("pf %p oid %d %d\n", pf, pf->oid, pf->type);
+    Echo("pb %p oid %d %d\n", pb, pb->oid, pb->type);
+
+    memset(fs, 0, sizeof(fs));
+    memset(bs, 0, sizeof(bs));
+
+    u = 0;
+    for(i=0;i<pb->cch.nch;i++) {
+        pe = (ob*)pb->cch.ch[i];
+        if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
+        }
+        else {
+            continue;
+        }
+        u++;
+        bs[u] = pe;
+        Echo("i,u %2d %2d: %p oid %d %d\n", i, u, pe, pe->oid, pe->type);
+        if(pe->gx + pe->cwd/2 > bxmax) {
+            bxmax = pe->gx + pe->cwd/2;
+        }
+    }
+
+    v = 0;
+    for(j=0;j<pf->cch.nch;j++) {
+        se = (ob*)pf->cch.ch[j];
+        if(EXVISIBLE(se->type)||ISCHUNK(se->type)) {
+        }
+        else {
+            continue;
+        }
+        v++;
+        fs[v] = se;
+        Echo("j,v %2d %2d: %p oid %d %d\n", j, v, se, se->oid, se->type);
+        if(se->gx - se->cwd/2 < fxmin) {
+            fxmin = se->gx - se->cwd/2;
+        }
+    }
+    Echo(" u %d v %d\n", u, v);
+    Echo(" bxmax %d fxmin %d\n", bxmax, fxmin);
+    fflush(stdout);
+
+    for(i=0;i<u;i++) {
+        if(!bs[i]) {
+            Echo("b %3d: %p\n", i, bs[i]);
+        }
+        else {
+            Echo("b %3d: %p oid %d type %d\n",
+                i, bs[i], bs[i]->oid, bs[i]->type);
+        }
+    }
+    for(j=0;j<v;j++) {
+        if(!fs[j]) {
+            Echo("f %3d: %p\n", j, fs[j]);
+        }
+        else {
+            Echo("f %3d: %p oid %d type %d\n",
+                j, fs[j], fs[j]->oid, fs[j]->type);
+        }
+    }
+
+    if(xu->cob.markguide)
+    {
+    int x1,y1;
+    int fht;
+    fprintf(fp, "      gsave\n");
+
+    /* TEMP */
+    fht = def_textheight;
+    fprintf(fp, "      /%s findfont %d scalefont setfont %% thru backport\n",
+        def_fontname, fht);
+
+    for(i=0;i<=u;i++) {
+        pe = bs[i];
+        if(!pe) {
+            continue;
+        }
+        x1 = pe->gx+pe->cwd/2;
+        y1 = pe->gy;
+        fprintf(fp, "      %d %d %d (%d) rrshow\n",
+            x1, y1, 0, i);
+    }
+
+    for(j=0;j<=v;j++) {
+        pe = fs[j];
+        if(!pe) {
+            continue;
+        }
+        x1 = pe->gx-pe->cwd/2;
+        y1 = pe->gy;
+        fprintf(fp, "      %d %d %d (%d) lrshow\n",
+            x1, y1, 0, j);
+    }
+
+    fprintf(fp, "      grestore\n");
+    }
+
+
+    if(xu->cob.linkmap) {
+        Echo("%s: oid %d linkmap '%s'\n",
+            __func__, xu->oid, xu->cob.linkmap);
+    }
+    else {
+        Echo("%s: oid %d no linkmap\n",
+            __func__, xu->oid);
+    }
+    
+ {
+    char *p;
+    char token[BUFSIZ];
+    char cmap[BUFSIZ];
+    int  ss;
+    int  so, sn, eo, en, at;
+    int  af, ac, ab;
+    int  ik;
+    int  cs;
+
+    cmap[0] = '\0';
+
+    if(xu->cob.linkmap) {
+        strcpy(cmap, xu->cob.linkmap);
+    }
+    else {
+        char w[BUFSIZ];
+        int m, h;
+        m = (u<v ? u : v); /* MIN */
+        
+        strcpy(cmap, "solid");
+        for(h=0;h<=m;h++) {
+            sprintf(w, ",%d:%d", h, h);
+            strcat(cmap, w);
+        }
+    }
+    Echo(" oid %d cmap '%s'\n", xu->oid, cmap);
+    p = cmap;
+    ss = xu->cob.outlinetype;
+    at = xu->cob.arrowheadpart;
+    af = xu->cob.arrowforeheadtype;
+    ac = xu->cob.arrowcentheadtype;
+    ab = xu->cob.arrowbackheadtype;
+                Echo("g ss %d at %d af %d ac %d ab %d\n",
+                    ss, at, af, ac, ab);
+
+#if 0
+    ob** par;
+    par = (ob**)alloca(sizeof(ob*)*(u+v));
+#endif
+
+    int npar;
+    clink_t *par;
+    int i;
+
+    par = (clink_t*)alloca(sizeof(clink_t)*(u+v));
+    if(par) {
+        memset(par, 0, sizeof(clink_t)*(u+v));
+    }
+
+    npar = 0;
+    for(i=0;i<u+v;i++) {
+        par[i].prop.cob.outlinetype     = xu->cob.outlinetype;
+        par[i].prop.cob.arrowheadpart   = xu->cob.arrowheadpart;
+        par[i].prop.cob.arrowforeheadtype = xu->cob.arrowforeheadtype;
+        par[i].prop.cob.arrowcentheadtype = xu->cob.arrowcentheadtype;
+        par[i].prop.cob.arrowbackheadtype = xu->cob.arrowbackheadtype;
+    }   
+
+    if(INTRACE) {
+        fprintf(stdout, "npar %d\n", npar);
+        clink_fprint(stdout, par, u+v);
+        clink_fprint(stdout, par, npar);
+    }
+
+    while(*p) {
+        p = draw_word(p, token, BUFSIZ, ',');
+        Echo("token '%s'\n", token);
+        if(!token[0]) {
+            continue;
+        }
+        ik = solve_se(token,
+                &so, &sn, &eo, &en, &ss, &at, &af, &ac, &ab);    
+        Echo("  ik %d; so %d sn %d eo %d en %d; ss %d at %d af %d ac %d ab %d\n",
+            ik, so, sn, eo, en, ss, at, af, ac, ab);
+        fflush(stdout);
+
+        if(ik==1) {
+            int x1, y1, x2, y2, x3, y3, x4, y4;
+            if(so==AR_BACK) { pe = bs[sn]; } else { pe = fs[sn]; }
+            if(eo==AR_BACK) { se = bs[en]; } else { se = fs[en]; }
+
+#if 0
+            if(bs[sn] && fs[en]) {
+                x1 = bs[sn]->gx+bs[sn]->cwd/2;
+                y1 = bs[sn]->gy;
+                x2 = fs[en]->gx-fs[sn]->cwd/2;
+                y2 = fs[en]->gy;
+#endif
+            if(pe && se) {
+                if(so==AR_BACK) {
+                    x1 = pe->gx + pe->cwd/2;
+                    y1 = pe->gy;
+#if 0
+                    x3 = pe->gx + pe->cwd/2 + am;
+#endif
+                    x3 = bxmax + am;
+                    y3 = pe->gy;
+                }
+                else {
+                    x1 = pe->gx - pe->cwd/2;
+                    y1 = pe->gy;
+#if 0
+                    x3 = pe->gx - pe->cwd/2 - am;
+#endif
+                    x3 = fxmin - am;
+                    y3 = pe->gy;
+                }
+                if(eo==AR_FORE) {
+                    x2 = se->gx - se->cwd/2;
+                    y2 = se->gy;
+#if 0
+                    x4 = se->gx - se->cwd/2 - am;
+#endif
+                    x4 = fxmin - am;
+                    y4 = se->gy;
+                }
+                else {
+                    x2 = se->gx + se->cwd/2;
+                    y2 = se->gy;
+#if 0
+                    x4 = se->gx + se->cwd/2 + am;
+#endif
+                    x4 = bxmax + am;
+                    y4 = se->gy;
+                }
+
+
+                Echo("b ss %d at %d af %d ac %d ab %d\n",
+                    ss, at, af, ac, ab);
+                if(at<0) {  
+                    ss = xu->cob.outlinetype;
+                    at = xu->cob.arrowheadpart;
+                    af = xu->cob.arrowforeheadtype;
+                    ac = xu->cob.arrowcentheadtype;
+                    ab = xu->cob.arrowbackheadtype;
+                }
+                Echo("a ss %d at %d af %d ac %d ab %d\n",
+                    ss, at, af, ac, ab);
+#if 0
+                epsdraw_Xseglinearrow(fp, xox, xoy,
+                    x1, y1, x2, y2,
+                    ss, objunit/50, 0,
+                    at, af, ac, ab);
+#endif
+#if 0
+                changecolor(fp, xu->cob.outlinecolor);
+                changethick(fp, xu->cob.outlinethick);
+                epsdraw_Xseglinearrow(fp, xox, xoy,
+                    x1, y1, x2, y2,
+                    ss, -1, -1,
+                    at, af, ac, ab);
+#endif
+
+#if 0
+                fprintf(fp, "newpath %d %d moveto %d %d %d 0 360 arc fill\n",
+                    x3, y3, x3, y3, objunit/20);
+                fprintf(fp, "newpath %d %d moveto %d %d %d 0 360 arc fill\n",
+                    x4, y4, x4, y4, objunit/20);
+#endif
+
+{
+                tmpar = varray_new();
+                varray_entrysprintfunc(tmpar, seg_sprintf);
+                
+
+                varray_fprintv(stdout, tmpar);
+
+#if 0
+                if(so==AR_BACK) {
+                    path_regsegmoveto(tmpar, x1, y1);
+                    path_regseglineto(tmpar, x3, y3);
+                    if(x3==x4) {
+                        path_regsegcurveto(tmpar, x3+am, y3, x4+am, y4, x4, y4);
+                    }
+                    else {
+                        path_regseglineto(tmpar, x4, y4);
+                    }
+                    path_regseglineto(tmpar, x2, y2);
+                }
+#endif
+
+#if 1
+                path_regsegmoveto(tmpar, x1, y1);
+                path_regseglineto(tmpar, x3, y3);
+                if(x3==x4) {
+                    if(so==AR_BACK) {
+                        path_regsegcurveto(tmpar, x3+am, y3, x4+am, y4, x4, y4);
+                    }
+                    else {
+                        path_regsegcurveto(tmpar, x3-am, y3, x4-am, y4, x4, y4);
+                    }
+                }
+                else {
+#if 0
+                    path_regseglineto(tmpar, x4, y4);
+#endif
+                    if(so==AR_BACK) {
+                        path_regsegcurveto(tmpar, x3+cm, y3, x4-cm, y4, x4, y4);
+                    }
+                    else {
+                        path_regsegcurveto(tmpar, x3-cm, y3, x4+cm, y4, x4, y4);
+                    }
+                }
+                path_regseglineto(tmpar, x2, y2);
+#endif
+
+                if(tmpar->use>0) {
+                    /*** NOTE offset is cared already. do not applay twice */
+fprintf(fp, "%% thruX token '%s'\n", token);
+                    __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
+                }
+
+    
+}
+
+
+                if(npar<u+v) {
+Echo("ADD\n");
+                    par[npar].so = so;
+                    par[npar].sn = sn;
+                    par[npar].eo = eo;
+                    par[npar].en = en;
+                    par[npar].x1 = x1;
+                    par[npar].y1 = y1;
+                    par[npar].x2 = x2;
+                    par[npar].y2 = y2;
+                    par[npar].x3 = x3;
+                    par[npar].y3 = y3;
+                    par[npar].x4 = x4;
+                    par[npar].y4 = y4;
+
+#if 1
+                    par[npar].prop.cob.outlinetype = ss;
+                    par[npar].prop.cob.arrowheadpart = at;
+                    par[npar].prop.cob.arrowforeheadtype = af;
+                    par[npar].prop.cob.arrowcentheadtype = ac;
+                    par[npar].prop.cob.arrowbackheadtype = ab;
+#endif
+
+#if 0
+                    par[npar].prop.cob.outlinetype = xu->cob.outlinetype;
+                    par[npar].prop.cob.arrowheadpart = xu->cob.arrowheadpart;
+                    par[npar].prop.cob.arrowforeheadtype = xu->cob.arrowforeheadtype;
+                    par[npar].prop.cob.arrowcentheadtype = xu->cob.arrowcentheadtype;
+                    par[npar].prop.cob.arrowbackheadtype = xu->cob.arrowbackheadtype;
+#endif
+
+
+                    npar++;
+
+    if(INTRACE) {
+        fprintf(stdout, "npar %d\n", npar);
+        clink_fprint(stdout, par, u+v);
+        clink_fprint(stdout, par, npar);
+    }
+                }
+            }
+        }
+        if(ik==2) {
+#if 0
+            cs = ss;
+#endif
+        }
+    }
+
+
+    if(INTRACE) {
+        fprintf(stdout, "npar %d\n", npar);
+        clink_fprint(stdout, par, u+v);
+        clink_fprint(stdout, par, npar);
+    }
+
+ }
+
+out:
+    return 0;
+}
 
 
 int
@@ -9138,7 +9623,7 @@ P;
     char token[BUFSIZ];
     char cmap[BUFSIZ];
     int  ss;
-    int  sn, en, at;
+    int  so, sn, eo, en, at;
     int  af, ac, ab;
     int  ik;
     int  cs;
@@ -9178,7 +9663,7 @@ P;
         if(!token[0]) {
             continue;
         }
-        ik = solve_se(token, &ss, &sn, &en, &at, &af, &ac, &ab);    
+        ik = solve_se(token, &ss, &so, &sn, &eo, &en, &at, &af, &ac, &ab);    
         Echo("  ik %d; ss %d sn %d en %d at %d af %d ac %d ab %d\n",
             ik, ss, sn, en, at, af, ac, ab);
         fflush(stdout);
@@ -9228,6 +9713,9 @@ P;
 out:
     return 0;
 }
+
+
+
 
 
 int
@@ -10219,7 +10707,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     }
     else
     if(u->type==CMD_THRU) {
-        epsdraw_thru(fp, *xdir, ox, oy, u, xns);
+        epsdraw_thruX(fp, *xdir, ox, oy, u, xns);
     }
     else
     if(u->type==CMD_BCURVE || u->type==CMD_XCURVE) {
