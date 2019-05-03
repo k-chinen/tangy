@@ -9241,7 +9241,7 @@ P;
         
         strcpy(cmap, "solid");
         for(h=0;h<=m;h++) {
-            sprintf(w, ",%d:%d", h, h);
+            sprintf(w, ",b%d:f%d", h, h);
             strcat(cmap, w);
         }
     }
@@ -9301,47 +9301,28 @@ P;
             if(so==AR_BACK) { pe = bs[sn]; } else { pe = fs[sn]; }
             if(eo==AR_BACK) { se = bs[en]; } else { se = fs[en]; }
 
-#if 0
-            if(bs[sn] && fs[en]) {
-                x1 = bs[sn]->gx+bs[sn]->cwd/2;
-                y1 = bs[sn]->gy;
-                x2 = fs[en]->gx-fs[sn]->cwd/2;
-                y2 = fs[en]->gy;
-#endif
             if(pe && se) {
                 if(so==AR_BACK) {
                     x1 = pe->gx + pe->cwd/2;
                     y1 = pe->gy;
-#if 0
-                    x3 = pe->gx + pe->cwd/2 + am;
-#endif
                     x3 = bxmax + am;
                     y3 = pe->gy;
                 }
                 else {
                     x1 = pe->gx - pe->cwd/2;
                     y1 = pe->gy;
-#if 0
-                    x3 = pe->gx - pe->cwd/2 - am;
-#endif
                     x3 = fxmin - am;
                     y3 = pe->gy;
                 }
                 if(eo==AR_FORE) {
                     x2 = se->gx - se->cwd/2;
                     y2 = se->gy;
-#if 0
-                    x4 = se->gx - se->cwd/2 - am;
-#endif
                     x4 = fxmin - am;
                     y4 = se->gy;
                 }
                 else {
                     x2 = se->gx + se->cwd/2;
                     y2 = se->gy;
-#if 0
-                    x4 = se->gx + se->cwd/2 + am;
-#endif
                     x4 = bxmax + am;
                     y4 = se->gy;
                 }
@@ -9358,20 +9339,6 @@ P;
                 }
                 Echo("a ss %d at %d af %d ac %d ab %d\n",
                     ss, at, af, ac, ab);
-#if 0
-                epsdraw_Xseglinearrow(fp, xox, xoy,
-                    x1, y1, x2, y2,
-                    ss, objunit/50, 0,
-                    at, af, ac, ab);
-#endif
-#if 0
-                changecolor(fp, xu->cob.outlinecolor);
-                changethick(fp, xu->cob.outlinethick);
-                epsdraw_Xseglinearrow(fp, xox, xoy,
-                    x1, y1, x2, y2,
-                    ss, -1, -1,
-                    at, af, ac, ab);
-#endif
 
 #if 0
                 fprintf(fp, "newpath %d %d moveto %d %d %d 0 360 arc fill\n",
@@ -9383,25 +9350,11 @@ P;
 {
                 tmpar = varray_new();
                 varray_entrysprintfunc(tmpar, seg_sprintf);
-                
-
-                varray_fprintv(stdout, tmpar);
 
 #if 0
-                if(so==AR_BACK) {
-                    path_regsegmoveto(tmpar, x1, y1);
-                    path_regseglineto(tmpar, x3, y3);
-                    if(x3==x4) {
-                        path_regsegcurveto(tmpar, x3+am, y3, x4+am, y4, x4, y4);
-                    }
-                    else {
-                        path_regseglineto(tmpar, x4, y4);
-                    }
-                    path_regseglineto(tmpar, x2, y2);
-                }
+                varray_fprintv(stdout, tmpar);
 #endif
 
-#if 1
                 path_regsegmoveto(tmpar, x1, y1);
                 path_regseglineto(tmpar, x3, y3);
                 if(x3==x4) {
@@ -9413,9 +9366,6 @@ P;
                     }
                 }
                 else {
-#if 0
-                    path_regseglineto(tmpar, x4, y4);
-#endif
                     if(so==AR_BACK) {
                         path_regsegcurveto(tmpar, x3+cm, y3, x4-cm, y4, x4, y4);
                     }
@@ -9424,7 +9374,6 @@ P;
                     }
                 }
                 path_regseglineto(tmpar, x2, y2);
-#endif
 
                 if(tmpar->use>0) {
                     /*** NOTE offset is cared already. do not applay twice */
@@ -9476,6 +9425,10 @@ Echo("ADD\n");
         clink_fprint(stdout, par, npar);
     }
                 }
+            }
+            else {
+                Error("ignore position in '%s'; recognized objects back %d fore %d\n",
+                    token, u, v);
             }
         }
         if(ik==2) {
