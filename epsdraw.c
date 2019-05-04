@@ -8372,9 +8372,53 @@ mkpath_segarcseg(varray_t *sar,
 {
     Echo("%s: %d %d; %d %d; %d %d; %d %d\n",
         __func__, x1, x2, x2, y2, x3, y3, x4, y4);
+
     path_regsegmoveto(sar, x1, y1);
     path_regseglineto(sar, x2, y2);
     path_regsegcurveto(sar, x2, y2, x3, y3, x4, y4);
+    path_regseglineto(sar, x5, y5);
+
+    return 0;
+}
+
+
+/* seg+arc+seg : 4 points */
+/*
+ *  1    2  
+ *  +----+ x  
+ *        \
+ *         \
+ *          \
+ *         x +----+
+ *           4    5 
+ */
+static
+int
+mkpath_segarcseg2(varray_t *sar,
+    int x1, int y1, int x2, int y2, 
+    int x4, int y4, int x5, int y5)
+{
+    int x2b, y2b;
+    int x4b, y4b;
+    int cm;
+    /* curve margin */
+    cm = 2*objunit/10;
+    
+    if(x5>x1) {
+        x2b = x2+cm; y2b = y2;
+        x4b = x4-cm; y4b = y4;
+    }
+    else {
+        x2b = x2-cm; y2b = y2;
+        x4b = x4+cm; y4b = y4;
+    }
+
+    Echo("%s: %d %d; %d %d; %d %d; %d %d\n",
+        __func__, x1, x2, x2, y2, x4, y4, x5, y5);
+
+    path_regsegmoveto(sar, x1, y1);
+    path_regseglineto(sar, x2, y2);
+    path_regsegcurveto(sar, x2b, y2b, x4b, y4b, x4, y4);
     path_regseglineto(sar, x5, y5);
 
     return 0;
@@ -8474,6 +8518,32 @@ _drawgslink(varray_t *qar, int xid, int style, int jr,
             }
         }
         break;
+
+    case LS_CURVE:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_segarcseg2(qar, sx, sy, maxsx, sy,
+                   mx, ey, ex, ey);
+            }
+            else {
+                mkpath_segarcseg2(qar, ex, ey, mx, ey,
+                   maxsx, sy, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            if(dsdir>=0) {
+
+                mkpath_segarcseg2(qar, sx, sy, maxsx, sy, 
+                   mx, eey, ex, eey);
+            }
+            else {
+                mkpath_segarcseg2(qar, ex, eey, mx, eey,
+                   maxsx, sy, sx, sy);
+            }
+        }
+        break;
+
     case LS_ARC:
         if(focus) {
             if(dsdir>=0) {
@@ -8497,6 +8567,7 @@ _drawgslink(varray_t *qar, int xid, int style, int jr,
             }
         }
         break;
+
     case LS_DIRECT:
     default:
         if(focus) {

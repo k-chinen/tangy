@@ -244,6 +244,8 @@ apair_t ls_ial[] = {
     {"square1",     LS_SQUARE | LS_FOCUS},
     {"arc",         LS_ARC},
     {"arc1",        LS_ARC    | LS_FOCUS},
+    {"curve",       LS_CURVE},
+    {"curve1",      LS_CURVE    | LS_FOCUS},
     {"straight",    LS_STRAIGHT},
     {"straight1",   LS_STRAIGHT | LS_FOCUS},
     {"man",         LS_MAN},
