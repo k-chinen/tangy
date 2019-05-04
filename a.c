@@ -87,6 +87,19 @@ fprintf(stderr, "polygon peak %d\n", xoa->polypeak);
             xoa->polypeak = nv;
         }
     }
+    
+    if(xo->type==CMD_GEAR) {
+        if(xoa->polypeak<4) {
+            int nv;
+#if 0
+fprintf(stderr, "polygon peak %d\n", xoa->polypeak);
+#endif
+            nv = 32;
+            Info("SET oid %d polygon peak %d -> %d\n",
+                xo->oid, xoa->polypeak, nv);
+            xoa->polypeak = nv;
+        }
+    }
 
     return 0;
 }
