@@ -4140,13 +4140,13 @@ skip_arcn:
             fprintf(fp, "%% RCUVETO %d %d %d %d %d %d\n", 
                 s->x1, s->y1, s->x2, s->y2, s->x3, s->y3);
 
-#if 1
+#if 0
             fprintf(stderr, "_bez_LT in %s:%d\n", __FILE__,__LINE__);
+#endif
             fprintf(fp, "gsave\n");
             fprintf(fp, "newpath\n");
             _bez_LT(fp, xu, x1, y1, x2, y2, x3, y3, x4, y4);
             fprintf(fp, "grestore\n");
-#endif
 
             x2 = x4;
             y2 = y4;

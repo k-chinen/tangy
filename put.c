@@ -1283,9 +1283,6 @@ insboxpath(varray_t *xar, int xwd, int xht)
 #define ZZ      {wd = 0;            ht = 0;         }
 #define SO      {wd = objunit/5;    ht = objunit/5; }
 
-#if 0
-#include "xcur.c"
-#endif
 
 int
 putobj(ob *u, ns *xns, int *gdir)
