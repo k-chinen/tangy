@@ -10713,8 +10713,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
     }
 
+#if 0
     changenormal(fp); /* for faill safe */
-
+#endif
     changecolor(fp, u->vob.outlinecolor);
     changethick(fp, u->vob.outlinethick);
 
@@ -10956,17 +10957,22 @@ P;
             gox, goy, xch->ox, xch->oy, xch->x, xch->y,
             xch->wd, xch->ht);
 
+        changecolor(fp, xch->cob.outlinecolor);
+        changethick(fp, xch->cob.outlinethick);
+
         fprintf(fp, "%% bgshape %p\n", xch->cob.bgshape);
         if(xch->cob.bgshape) {
             fprintf(fp, "%% value shape '%s'\n", xch->cob.bgshape);
         }
         if(xch->cob.bgshape && strcmp(xch->cob.bgshape, "plane")==0) {
 PP;
+fprintf(fp, "%% plane\n");
             ik = epsdraw_plane(fp,
                     gox,
                     goy, xch, xns);
         }
         else {
+fprintf(fp, "%% bodyX\n");
 PP;
             ik = epsdraw_bodyX(fp, gox, goy, xch, xns);
         }
