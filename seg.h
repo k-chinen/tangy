@@ -44,7 +44,7 @@ int path_regsegmoveto(varray_t *segar, int x1, int y1);
 int path_regsegrmoveto(varray_t *segar, int x1, int y1);
 int path_regseglineto(varray_t *segar, int x1, int y1);
 int path_regsegrlineto(varray_t *segar, int x1, int y1);
-int path_regsegforward(varray_t *segar, int x1, int y1);
+int path_regsegforward(varray_t *segar, int d);
 int path_regsegarc(varray_t *segar, int rad, int ang);
 int path_regsegarcn(varray_t *segar, int rad, int ang);
 int path_regsegcurveto(varray_t *segar, int x1, int y1, int x2, int y2, int x3, int y3);

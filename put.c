@@ -430,7 +430,10 @@ Echo("  m %d\n", m);
 flush_que:
             if(c>0) {
                 MARK("f ", x, y);
+#if 0
                 FREG1(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
+#endif
+                FREG1(OA_RLINETO, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
 Echo("  ldir %.2f      :%d\n", ldir, __LINE__);
                 ldir = atan2(y-ly, x-lx)/rf;
 Echo("  ldir %.2f new  :%d\n", ldir, __LINE__);

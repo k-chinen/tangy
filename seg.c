@@ -312,11 +312,11 @@ out:
 }
 
 int
-path_regsegforward(varray_t *segar, int x1, int y1)
+path_regsegforward(varray_t *segar, int d)
 {
     seg *e;
 
-    Echo("%s: x1,y1 %d,%d\n", __func__, x1, y1);
+    Echo("%s: d %d\n", __func__, d);
 
     e = seg_new();
     if(!e) {
@@ -324,8 +324,7 @@ path_regsegforward(varray_t *segar, int x1, int y1)
     }
     e->ptype        = OA_FORWARD;
     e->coordtype    = REL_COORD;
-    e->x1           = x1;
-    e->y1           = y1;
+    e->x1           = d;
     varray_push(segar, e);
 
 out:

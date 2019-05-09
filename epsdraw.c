@@ -2735,10 +2735,15 @@ _drawpathX(FILE *fp,
     bwmsz = xu->cob.outlinethick*4;
 
     Echo("%s: qar %p\n", __func__, qar);
+#if 0
     fprintf(fp, "%% %s:%d %s qar %p f_new %d f_close %d\n",
         __FILE__, __LINE__, __func__, qar, f_new, f_close);
+#endif
 
     cdir = ydir;
+#if 0
+    fprintf(fp, "%% cdir %d ydir %d\n", cdir, ydir);
+#endif
 
 #if 0
 varray_fprintv(stderr, qar);
@@ -2751,8 +2756,10 @@ varray_fprintv(stderr, qar);
     }
 #endif
 
+#if 0
     fprintf(fp, "    %% %s: ydir %d xox %d xoy %d\n",
         __func__, ydir, xox, xoy);
+#endif
 
     if(qar && qar->use<=0) {
         Error("null or empty qar %p\n", qar);
@@ -2882,7 +2889,13 @@ PP;
         case OA_ARC:
 
 #if 0
+    fprintf(fp, "%% OA_ARC b cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
+#endif
+
+#if 0
     fprintf(fp, "%%  cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
+#endif
+#if 0
     fprintf(stderr, "%% b cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
 #endif
 
@@ -2924,6 +2937,13 @@ PP;
             }
 
             cdir += s->ang;
+
+#if 0
+    fprintf(fp, "%% OA_ARC a cdir %d rad %d ang %d\n", cdir, s->rad, s->ang);
+#endif
+#if 0
+    fprintf(fp, "%% OA_ARC a cdir %d\n", cdir);
+#endif
 
             break;
 
@@ -2993,12 +3013,18 @@ PP;
             x2 = s->x1+xox;
             y2 = s->y1+xoy;
             fprintf(fp, "    %d %d moveto\n", x2, y2);
+#if 0
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
             break;
 
         case OA_RMOVETO:
             x2 = s->x1;
             y2 = s->y1;
             fprintf(fp, "    %d %d rmoveto\n", x2, y2);
+#if 0
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
             break;
 
         case OA_LINETO:
@@ -3008,9 +3034,24 @@ PP;
             break;
 
         case OA_RLINETO:
+#if 0
+            fprintf(fp, "    %% before RLINETO; %d %d\n", x1, y1);
+            fprintf(fp, "    %% RLINETO %d %d\n", s->x1, s->y1);
+#endif
+#if 0
             x2 = s->x1;
             y2 = s->y1;
             fprintf(fp, "    %d %d rlineto\n", x2, y2);
+#endif
+            x2 = s->x1+x1;
+            y2 = s->y1+y1;
+            fprintf(fp, "    %d %d lineto\n", x2, y2);
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#if 0
+            fprintf(fp, "    %% dx %d dy %d\n", x2-x1, y2-y1);
+            fprintf(fp, "    %% cdir rad %f : %d\n", atan2(y2-y1,x2-x1), __LINE__);
+            fprintf(fp, "    %% cdir %d : %d\n", cdir, __LINE__);
+#endif
             break;
 
         case OA_CURVETO:
@@ -3052,7 +3093,6 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             x2 = x4;
             y2 = y4;
 
-            cdir = 0;
             break;
 
         case OA_LINE:
@@ -3063,6 +3103,9 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             fprintf(fp,
                 "    %d %d moveto %d %d lineto %% LINE\n",
                 x1, y1, x2, y2);
+#if 1
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
 
             goto confirm_arrow;
 
@@ -3126,7 +3169,6 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
 
             if(s->ftflag & COORD_FROM) {
 P;
-                fprintf(fp, "%% forward FROM\n");
                 Echo("    part seg %d: ftflag %d : %d,%d\n",
                     i, s->ftflag, s->x1, s->y1);
             
@@ -3150,26 +3192,38 @@ P;
             }
             if(s->ftflag & COORD_TO) {
 P;
-                fprintf(fp, "%% forward TO\n");
                 x2 = s->x1 + xox;
                 y2 = s->y1 + xoy;
+#if 1
+                cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
                 goto coord_done;
             }
 
 P;
             fprintf(fp, "    %% b x1,y1 %d,%d x2,y2 %d,%d\n", x1, y1, x2, y2);
-            fprintf(fp, "%% forward %d %d\n", s->x1, s->y1);
 
+#if 0
+            fprintf(fp, "%% forward %d %d\n", s->x1, s->y1);
             x2 = x1+s->x1;
             y2 = y1+s->y1;
-#if 0
-            x2 = x1 + s->x1 + xox;
-            y2 = y1 + s->y1 + xoy;
+#endif
+#if 1
+            fprintf(fp, "%% forward %d with cdir %d\n", s->x1, cdir);
+#endif
+#if 1
+            x2 = x1+s->x1*cos(cdir*rf);
+            y2 = y1+s->x1*sin(cdir*rf);
 #endif
 
 coord_done:
 
+#if 0
             cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
+#if 0
+fprintf(fp, "%% OA_FORWARD cdir %d\n", cdir);
+#endif
 #if 0
 fprintf(stderr, "%% m atan2 %.3f\n", atan2(y2-y1,x2-x1)/rf);
 fprintf(stderr, "%% m cdir %d\n", cdir);
@@ -3611,7 +3665,10 @@ __drawpath_LT(FILE *fp,
 
     Echo("%s: xu %p oid %d qar %p use %d\n",
         __func__, xu, xu->oid, qar, qar->use);
+
+#if 0
     fprintf(fp, "%% %s: enter ydir %d\n", __func__, ydir);
+#endif
 P;
 #if 0
     changecolor(fp, xu->vob.outlinecolor);
@@ -3622,12 +3679,15 @@ P;
 P;
         _drawpathX(fp, ydir, xox, xoy, xu, xns, qar, 1, 1);
         fprintf(fp, "    stroke %% solid\n");
+#if 0
         fprintf(fp, "%% %s:%d out2 oid %d ydir %d cdir %4d\n",
             __func__, __LINE__, xu->oid, ydir, cdir);
+#endif
         return 0;
     }
+#if 0
     fprintf(fp, "%% %s: middle\n", __func__);
-
+#endif
 
     gsym = xu->cob.outlinetype;
     pitch = solve_pitch(xu->cob.outlinetype);
@@ -3636,14 +3696,16 @@ P;
         __func__, gsym, pitch, def_linedecopitch); 
 #endif
 
-#if 1
+#if 0
 Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     __func__, ydir, xox, xoy, xu->cob.outlinetype);
 #endif
     Echo("%s: enter\n", __func__);
 
+#if 0
     fprintf(fp, "%% %s: ydir %d xox %d xoy %d linetype %d\n",
         __func__, ydir, xox, xoy, xu->cob.outlinetype);
+#endif
 
     cdir = ydir;
     dcdir = ydir;
@@ -3723,9 +3785,12 @@ P;
 Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achfh %d\n",
     xu->oid, __func__, __LINE__,  s->ptype, actbh, actch, actfh);
 #endif
-#if 1
+#if 0
 Echo("%s: oid %d seg i %d type %d; actbh %d actch %d actfh %d\n",
     __func__, xu->oid, i, s->ptype, actbh, actch, actfh);
+#endif
+#if 0
+    fprintf(fp, "%% cdir %d : before switch %d\n", cdir, __LINE__);
 #endif
 
         switch(s->ptype) {
@@ -3825,6 +3890,7 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
                 ttrip = trip + (v*2*M_PI*s->rad)/360;
 
 P;
+#if 0
                 if(count>10) {
                     printf("%s:%d oid %d count %d\n",
                         __func__, __LINE__, xu->oid, count);
@@ -3832,6 +3898,7 @@ P;
                         ui, us, etrip, ue, pitch);
                     fflush(stdout);
                 }
+#endif
 
                 if(xu->cob.markpitch) {
                     MP(1, (int)px, (int)py);
@@ -3876,6 +3943,9 @@ P;
 skip_arc:
             cdir += s->ang;
             dcdir += s->ang;
+#if 0
+            fprintf(fp, "%% cdir %d : end arc %d\n", cdir, __LINE__);
+#endif
 
             break;
 
@@ -3895,8 +3965,10 @@ skip_arc:
                 etrip, pitch, nd);
 
 
+#if 0
                 fprintf(fp, "%% i %d count %d: trip %.3f etrip %.3f\n",
                     i, count, trip, etrip);
+#endif
 
     if(nd<=0) goto skip_arcn;
 
@@ -3928,8 +4000,10 @@ P;
 Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
     us, vs, ue, ve, etrip, vi, (double)s->ang);
 
+#if 0
             fprintf(fp, "%% i %d count %d: ui %.3f vi %.3f vpitch %.3f arcn\n",
                     i, count, ui, vi, vpitch);
+#endif
             for(v=vi+vs;v<=(double)s->ang-ve;v+=vpitch) {
                 px = arcx + s->rad*cos((cdir-v+90)*rf);
                 py = arcy + s->rad*sin((cdir-v+90)*rf);
@@ -3955,8 +4029,10 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
                 count++;
             }
             trip += etrip;
+#if 0
                 fprintf(fp, "%% i %d count %d: trip %.3f\n",
                     i, count, trip);
+#endif
 
 #if 0
             if(actch) {
@@ -3989,6 +4065,9 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
 skip_arcn:
             cdir -= s->ang;
             dcdir -= s->ang;
+#if 1
+            fprintf(fp, "%% cdir %d : end arcn %d\n", cdir, __LINE__);
+#endif
 
             break;
 
@@ -4010,17 +4089,20 @@ skip_arcn:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
             fprintf(fp, "  %d %d moveto\n", x2, y2);
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             break;
 
         case OA_LINETO:
             x2 = s->x1 + xox;
             y2 = s->y1 + xoy;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             goto coord_done;
             break;
 
         case OA_RLINETO:
             x2 = s->x1 + x1;
             y2 = s->y1 + y1;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             goto coord_done;
             break;
 
@@ -4042,6 +4124,7 @@ skip_arcn:
 
             x2 = x4;
             y2 = y4;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             goto next;
 
             break;
@@ -4067,6 +4150,7 @@ skip_arcn:
 
             x2 = x4;
             y2 = y4;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             goto next;
 
             break;
@@ -4076,6 +4160,7 @@ skip_arcn:
             y1 = s->y1 + xoy;
             x2 = s->x2 + xox;
             y2 = s->y2 + xoy;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
             goto coord_done;
             break;
 
@@ -4106,6 +4191,7 @@ P;
                     i, s->ftflag, s->x1, s->y1);
             
 Echo("FROM\n");
+fprintf(stderr, "%s: FORWARD FROM %d,%d\n", __func__, s->x1, s->y1);
 
                 x1 = s->x1 + xox;
                 y1 = s->y1 + xoy;
@@ -4115,22 +4201,34 @@ Echo("FROM\n");
 
             }
             if(s->ftflag & COORD_TO) {
+fprintf(stderr, "%s: FORWARD TO   %d,%d\n", __func__, s->x1, s->y1);
 P;
                 x2 = s->x1 + xox;
                 y2 = s->y1 + xoy;
+                cdir = (int)(atan2(y2-y1,x2-x1)/rf);
                 goto coord_done;
             }
 
+#if 0
             x2 = x1+s->x1;
             y2 = y1+s->y1;
+            cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
+            x2 = x1+s->x1*cos(cdir*rf);
+            y2 = y1+s->x1*sin(cdir*rf);
 
 
 coord_done:
 /*****
  ***** finally drawing process
  ******/
+#if 0
+fprintf(fp, "%% line %d cdir %d\n", __LINE__, cdir);
+#endif
 
+#if 0
             cdir = (int)(atan2(y2-y1,x2-x1)/rf);
+#endif
             dcdir = atan2(y2-y1,x2-x1)/rf;
             v = atan2(y2-y1,x2-x1)/rf;
 
@@ -4247,8 +4345,10 @@ coord_done:
 
 
             trip += etrip;
+#if 0
             fprintf(fp, "%% i %d count %d: trip %.3f\n",
                 i, count, trip);
+#endif
 
 #if 0
             if(actch) {
@@ -4287,6 +4387,10 @@ P;
         }
         
 next:
+#if 0
+    fprintf(fp, "%% cdir %d : after  switch %d\n", cdir, __LINE__);
+#endif
+
         if(xu->cob.marknode) {
             markfdot(xu->cob.outlinecolor, x1, y1);
         }
@@ -4342,8 +4446,10 @@ P;
         epsdraw_seglinearrow(fp, ydir, xox, xoy, x2, y2, x0, y0, xu, xns);
     }
 
+#if 0
     fprintf(fp, " %% %s:%d oid %d out3 ydir %d cdir %d dcdir %.3f\n",
         __func__, __LINE__, ydir, xu->oid, cdir, dcdir);
+#endif
 
 out:
     return 0;
@@ -5723,6 +5829,7 @@ fprintf(fp, "%% a cdir %d\n", cdir);
 
             goto next;
         }
+        else
         if(s->ptype==OA_ARCN) {
             int arcx, arcy;
 
@@ -5781,19 +5888,23 @@ fprintf(fp, "%% a cdir %d\n", cdir);
         }
 
 /* XXX */
-        if(s->ftflag & COORD_FROM) {
+        else {
+            Echo("unsupported type %d\n", s->ptype);
+            if(s->ftflag & COORD_FROM) {
 P;
-        Echo("    part seg %d: ftflag %d : %d,%d\n",
-            i, s->ftflag, s->x1, s->y1);
-            
-            /* skip */
-            continue;
-        }
-        if(s->ftflag & COORD_TO) {
+            Echo("    part seg %d: ftflag %d : %d,%d\n",
+                i, s->ftflag, s->x1, s->y1);
+                
+                /* skip */
+                continue;
+            }
+            else
+            if(s->ftflag & COORD_TO) {
 P;
-            x2 = s->x1 + xox;
-            y2 = s->y1 + xoy;
-            goto coord_done;
+                x1 = s->x1 + xox;
+                y2 = s->y1 + xoy;
+                goto coord_done;
+            }
         }
 
         x2 = x1+s->x1;
@@ -5868,8 +5979,11 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 
     Echo("%s: aw %d ah %d hc %d hty %d\n", __func__,
         aw, ah, hc, hty);
+
+#if 0
     fprintf(fp, "%% %s start aw %d ah %d hc %d hty %d\n",
         __func__, aw, ah, hc, hty);
+#endif
 
     changecolor(fp, hc);
 
@@ -6136,7 +6250,9 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 
     }
 
-fprintf(fp, "%% %s end\n", __func__);
+#if 0
+    fprintf(fp, "%% %s end\n", __func__);
+#endif
 
     return 0;
 }
@@ -7350,15 +7466,15 @@ P;
         path_regsegrlineto(sar,     0,   -ht);
     }
     else {
-        path_regsegmoveto(sar,     -wd/2+rad,        -ht/2);
-        path_regsegforward(sar,   wd-2*rad,            0);
-        path_regsegarc(sar,            rad,           90);
-        path_regsegforward(sar,          0,     ht-2*rad);
-        path_regsegarc(sar,            rad,           90);
-        path_regsegforward(sar,  -(wd-2*rad),          0);
-        path_regsegarc(sar,            rad,           90);
-        path_regsegforward(sar,          0,  -(ht-2*rad));
-        path_regsegarc(sar,            rad,           90);
+        path_regsegmoveto(sar,  -wd/2+rad,        -ht/2);
+        path_regsegforward(sar,  wd-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  ht-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  wd-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  ht-2*rad);
+        path_regsegarc(sar,      rad,   90);
     }
     path_regsegclose(sar);
 
@@ -7378,15 +7494,16 @@ P;
         path_regsegrlineto(sar,     0,   -ht);
     }
     else {
-        path_regsegmoveto(sar,      wd/2-rad,        -ht/2);
-        path_regsegforward(sar,-(wd-2*rad),            0);
-        path_regsegarcn(sar,           rad,           90);
-        path_regsegforward(sar,          0,     ht-2*rad);
-        path_regsegarcn(sar,           rad,           90);
-        path_regsegforward(sar, (wd-2*rad),            0);
-        path_regsegarcn(sar,           rad,           90);
-        path_regsegforward(sar,          0,  -(ht-2*rad));
-        path_regsegarcn(sar,           rad,           90);
+        path_regsegmoveto(sar,  -wd/2+rad, -ht/2);
+        path_regsegdir(sar,     180);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, ht-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, wd-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, ht-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, wd-2*rad);
     }
     path_regsegclose(sar);
 
@@ -7627,12 +7744,9 @@ Echo("a %9.2f\n", a);
 #if 0
 fprintf(stderr, "u y %9.2f x %9.2f\n", y-ly, x-lx);
 #endif
-        path_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        path_regsegrlineto(sar, (int)(a*(x-lx)), (int)(y-ly));
         lx = x; ly = y;
     }
-#if 0
-    path_regsegforward(sar, 0, r);
-#endif
     lx = 0;
     ly = r;
     for(y=r;y>=-r;y+=-ep) {
@@ -7640,7 +7754,7 @@ fprintf(stderr, "u y %9.2f x %9.2f\n", y-ly, x-lx);
 #if 0
 fprintf(stderr, "d y %9.2f x %9.2f\n", y-ly, x-lx);
 #endif
-        path_regsegforward(sar, (int)(a*(x-lx)), (int)(y-ly));
+        path_regsegrlineto(sar, (int)(a*(x-lx)), (int)(y-ly));
         lx = x; ly = y;
     }
     path_regsegclose(sar);
