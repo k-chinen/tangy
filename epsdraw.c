@@ -6464,7 +6464,7 @@ epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist)
     c = 0;
     p = xcmdlist;
     while(*p) {
-        p = draw_word(p, cmd, BUFSIZ, ',');
+        p = draw_word(p, cmd, BUFSIZ, DECO_SEPC);
         if(!cmd[0]) {
             break;
         }
@@ -6793,7 +6793,7 @@ Echo("  --- calc size 1\n");
                     p = te->vs;
                 }
                 while(*p) {
-                    p = draw_word(p, token, BUFSIZ, ',');
+                    p = draw_word(p, token, BUFSIZ, SSTR_SEPC);
                     if(token[0]) {
 Echo("    token '%s'\n", token);
                         if(strncasecmp(token,"scale", 5)==0) {
@@ -7124,7 +7124,7 @@ Echo("  --- drawing\n");
                     p = te->vs;
                 }
                 while(*p) {
-                    p = draw_word(p, token, BUFSIZ, ',');
+                    p = draw_word(p, token, BUFSIZ, SSTR_SEPC);
                     if(token[0]) {
                         if(strncasecmp(token,"scale", 5)==0) {
                             hscale = atoi(token+5);
@@ -9356,7 +9356,7 @@ P;
     }
 
     while(*p) {
-        p = draw_word(p, token, BUFSIZ, ',');
+        p = draw_word(p, token, BUFSIZ, MAP_SEPC);
         Echo("token '%s'\n", token);
         if(!token[0]) {
             continue;
@@ -9682,7 +9682,7 @@ P;
         sn = en = at = -1;
         af = ac = ab = -1;
 #endif
-        p = draw_word(p, token, BUFSIZ, ',');
+        p = draw_word(p, token, BUFSIZ, MAP_SEPC); 
         Echo("token '%s'\n", token);
         if(!token[0]) {
             continue;

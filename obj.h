@@ -28,6 +28,12 @@
 #include "hatch.h"
 
 
+#define DECO_SEPC   (',')
+#define DECO_SEPS   (",")
+#define MAP_SEPC    (',')
+#define MAP_SEPS    (",")
+#define SSTR_SEPC   ('.')
+
 
 #define CMD_UNKNOWN     (0)
 #define CMD_NOP         (1)

@@ -11,12 +11,6 @@
 #include "a.h"
 #include "gv.h"
 
-
-#if 0
-#define SEG_SEP         ','
-#define SEG_SEPS        ","
-#endif
-
 int
 sdump(FILE *fp, char *msg, char *s)
 {
@@ -761,7 +755,7 @@ skip_note:
         else { \
             char atmp[BUFSIZ]; \
             strcpy(atmp, rob->cob.y); \
-            strcat(atmp, ","); \
+            strcat(atmp, DECO_SEPS); \
             strcat(atmp, value); \
             free(rob->cob.y); \
             rob->cob.y = strdup(atmp); \
@@ -781,7 +775,7 @@ skip_note:
         else { \
             char atmp[BUFSIZ]; \
             strcpy(atmp, rob->cob.y); \
-            strcat(atmp, ","); \
+            strcat(atmp, MAP_SEPS); \
             strcat(atmp, value); \
             free(rob->cob.y); \
             rob->cob.y = strdup(atmp); \

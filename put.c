@@ -342,10 +342,10 @@ P;
         if(e->cmd==OA_ARC || e->cmd==OA_ARCN) {
             char tmp[BUFSIZ];
             p = e->val;
-            p = draw_word(p, tmp, BUFSIZ, SEG_SEP);
+            p = draw_word(p, tmp, BUFSIZ, SEG_SEPC);
             if(tmp[0]) {
                 rad = xatoi(tmp);
-                p = draw_word(p, tmp, BUFSIZ, SEG_SEP);
+                p = draw_word(p, tmp, BUFSIZ, SEG_SEPC);
                 if(tmp[0]) {
                     an  = xatoi(tmp);
                 }
@@ -616,7 +616,7 @@ P;
 
 
 #define PICK(vn) \
-    if(*p) { p = draw_word(p, tmp, BUFSIZ, ','); vn = xatoi(tmp); }
+    if(*p) { p = draw_word(p, tmp, BUFSIZ, SEG_SEPC); vn = xatoi(tmp); }
                 
                 p = e->val;
                 PICK(x2); PICK(y2);
