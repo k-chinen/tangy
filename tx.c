@@ -84,7 +84,7 @@ Echo("\t'%s'\n", token);
             }
             continue;
         }
-        if(*p=='|') {
+        if(*p==TXE_ESCC) {
             ne = NULL;
             *q = '\0';
             if(token[0]) {

@@ -13,6 +13,9 @@
 #define TXE_CONST       ('c')
 #define TXE_VARIABLE    ('v')
 
+#define SSTR_SEPC       (',')
+#define TXE_ESCC        ('|')
+
 typedef struct {
     int   ct;
     int   st;
