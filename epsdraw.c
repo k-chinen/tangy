@@ -1097,19 +1097,25 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 
     if((xdir<125&&xdir>45)||(xdir<-45&&xdir>-135)) {
+#if 0
         fprintf(fp, "%% Y-base\n");
+#endif
 
         if(y1>y2) {
             int tmp;
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             tmp = x1;
             x1 = x2;
             x2 = tmp;
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -1152,10 +1158,14 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
 
     }
     else {
+#if 0
         fprintf(fp, "%% X-base\n");
+#endif
         
         if(x1>x2) {
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             int tmp;
             tmp = x1;
             x1 = x2;
@@ -1163,8 +1173,10 @@ epsdraw_seglineSEP(FILE *fp, int ltype, int lt, int lc,
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -1225,8 +1237,10 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
     double hx, hy;
     double tx, ty;
 
+#if 0
     fprintf(fp, "%% seglineTICK type %d %d,%d-%d,%d\n",
         ltype, x1, y1, x2, y2);
+#endif
 
     changethick(fp, lt);
     changecolor(fp, lc);
@@ -1245,19 +1259,25 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
     oxdir = xdir;
 
     if((xdir<125&&xdir>45)||(xdir<-45&&xdir>-135)) {
+#if 0
         fprintf(fp, "%% Y-base\n");
+#endif
 
         if(y1>y2) {
             int tmp;
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             tmp = x1;
             x1 = x2;
             x2 = tmp;
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -1266,8 +1286,10 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
         px = (x2-x1)/cy;
         py = (y2-y1)/cy;
 
+#if 0
         fprintf(fp, "%% ll %d cy %.2f px %.2f py %.2f\n",
             ll, cy, px, py);
+#endif
 
         if(ltype==LT_TRIANGLE || ltype==LT_MOUNTAIN) {
             hx = sepw*cos((oxdir)*rf);
@@ -1275,7 +1297,9 @@ epsdraw_seglineTICK(FILE *fp, int ltype, int lt, int lc,
             tx = sepw*cos((oxdir+90)*rf);
             ty = sepw*sin((oxdir+90)*rf);
 
+#if 0
 fprintf(fp, "%% hx,hy %.2f,%.2f tx,ty %.2f,%.2f\n", hx, hy, tx, ty);
+#endif
         }
 
         j  = 0;
@@ -1319,10 +1343,14 @@ fprintf(fp, "%% hx,hy %.2f,%.2f tx,ty %.2f,%.2f\n", hx, hy, tx, ty);
 
     }
     else {
+#if 0
         fprintf(fp, "%% X-base\n");
+#endif
         
         if(x1>x2) {
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             int tmp;
             tmp = x1;
             x1 = x2;
@@ -1330,8 +1358,10 @@ fprintf(fp, "%% hx,hy %.2f,%.2f tx,ty %.2f,%.2f\n", hx, hy, tx, ty);
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -1431,19 +1461,25 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 
     if((xdir<125&&xdir>45)||(xdir<-45&&xdir>-135)) {
+#if 0
         fprintf(fp, "%% Y-base\n");
+#endif
 
         if(y1>y2) {
             int tmp;
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             tmp = x1;
             x1 = x2;
             x2 = tmp;
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -1528,10 +1564,14 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
 
     }
     else {
+#if 0
         fprintf(fp, "%% X-base\n");
+#endif
         
         if(x1>x2) {
+#if 0
             fprintf(fp, "%% swap x1,x2 y1,y2\n");
+#endif
             int tmp;
             tmp = x1;
             x1 = x2;
@@ -1539,8 +1579,10 @@ epsdraw_seglineTICK2(FILE *fp, int ltype, int lt, int lc,
             tmp = y1;
             y1 = y2;
             y2 = tmp;
+#if 0
             fprintf(fp, "%% segline type %d %d,%d-%d,%d\n",
                 ltype, x1, y1, x2, y2);
+#endif
         }
 
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
@@ -2040,12 +2082,14 @@ epsdraw_Xseglinearrow(FILE *fp,
 
     xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 
+#if 0
     fprintf(fp, "%% %s\n", __func__);
     fprintf(fp, "%%   xdir               %4d\n", xdir);
     fprintf(fp, "%%   line-type          %4d\n", xltype);
     fprintf(fp, "%%   arrowhead-part     %4d fore-type %4d back-type %4d\n",
             xahpart, xahfore, xahback);
     fflush(fp);
+#endif
 
     if(draft_mode) {
         fprintf(fp, "    gsave %% draft 1\n");
@@ -3068,6 +3112,10 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             fprintf(fp, "    %d %d %d %d %d %d curveto %% CURVETO %d %d %d %d %d %d %d %d\n",
                 x2, y2, x3, y3, x4, y4,
                 s->x1, s->y1, s->x2, s->y2, s->x3, s->y3, s->x4, s->y4);
+            if(xu->cob.marknode) {
+                markxross(0, s->x1, s->y1);
+                markxross(0, s->x2, s->y2);
+            }
             break;
 
         case OA_RCURVETO:
@@ -3088,7 +3136,13 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             fprintf(fp, "    %d %d %d %d %d %d curveto %% RCURVETO %d %d %d %d %d %d %d %d\n",
                 x2, y2, x3, y3, x4, y4,
                 s->x1, s->y1, s->x2, s->y2, s->x3, s->y3, s->x4, s->y4);
+#if 0
             fprintf(fp, " %% x4,y4 %d,%d\n", x4, y4);
+#endif
+            if(xu->cob.marknode) {
+                markxross(0, s->x1, s->y1);
+                markxross(0, s->x2, s->y2);
+            }
 
             x2 = x4;
             y2 = y4;
@@ -4114,8 +4168,10 @@ skip_arcn:
             x4 = s->x3;
             y4 = s->y3;
 
+#if 0
             fprintf(fp, "%% RCUVETO %d %d %d %d %d %d\n", 
                 s->x1, s->y1, s->x2, s->y2, s->x3, s->y3);
+#endif
 
             fprintf(fp, "gsave\n");
             fprintf(fp, "newpath\n");
@@ -4137,8 +4193,10 @@ skip_arcn:
             x4 = x1+s->x3;
             y4 = y1+s->y3;
 
+#if 0
             fprintf(fp, "%% RCUVETO %d %d %d %d %d %d\n", 
                 s->x1, s->y1, s->x2, s->y2, s->x3, s->y3);
+#endif
 
 #if 0
             fprintf(stderr, "_bez_LT in %s:%d\n", __FILE__,__LINE__);
@@ -4613,7 +4671,9 @@ _bez_LT(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int x4
     double mx, my;
     double nx, ny;
 
+#if 0
     fprintf(fp, "%% %s\n", __func__);
+#endif
 
 #if 1
     if(xu->cob.markpath) {
@@ -4627,7 +4687,9 @@ _bez_LT(FILE *fp, ob *xu, int x1, int y1, int x2, int y2, int x3, int y3, int x4
     }
 #endif
 
+#if 0
     fprintf(fp, "%% %s: linetype %d\n", __func__, xu->cob.outlinetype);
+#endif
     
     s = 1.0/50.0;
     sumd = 0.0;
@@ -5064,13 +5126,15 @@ P;
             changecolor(fp, xu->cob.fillcolor);
             r = drawpathN(fp, ydir, xox, xoy, xu, xns);
             fprintf(fp, "  clip\n");
-    #if 0
+#if 0
             fprintf(fp, "  eoclip\n");
             fprintf(fp, "  stroke\n");
-    #endif
+#endif
+#if 0
             fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
             fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
             fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
+#endif
 
             changethick(fp, xu->cob.hatchthick);
             fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
@@ -7960,7 +8024,9 @@ epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
     mx = xu->x+xox;
     my = xu->y+xoy;
 
+#if 0
 fprintf(fp, "%% %s oid %d type %d\n", __func__, xu->oid, xu->type);
+#endif
 Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     saved_segar = xu->cob.segar;
