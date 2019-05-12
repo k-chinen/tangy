@@ -1,3 +1,10 @@
+
+#include <stdio.h>
+
+#include "alist.h"
+#include "obj.h"
+#include "gv.h"
+
 #ifndef NSS_SLOT_LEN
 #define NSS_SLOT_LEN (100)
 #endif

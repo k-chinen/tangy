@@ -877,12 +877,6 @@ newchunk_child(ob* pch)
 }
 
 
-#if 0
-#include "chs.c"
-#endif
-#include "nss.c"
-#include "chas.c"
-
 int
 chadd(ob* xch, ob* xob)
 {

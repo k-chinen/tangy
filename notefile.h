@@ -15,6 +15,7 @@ typedef struct {
 } nf_rec;
 
 extern varray_t *gnotebindlist;
+extern varray_t *gnotefilelist;
 
 nb_rec *nb_new();
 nb_rec *nb_newpair(char *xk, ob *xt);

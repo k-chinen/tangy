@@ -1,3 +1,6 @@
+#include "obj.h"
+#include "chas.h"
+#include "gv.h"
 
 int
 linkchkchunk(ob *xch, ns *xns)

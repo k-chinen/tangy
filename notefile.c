@@ -1,18 +1,10 @@
-/*** notefile.c ***/
+#include <stdio.h>
 
-#if 0
-/* note binding */
-typedef struct {
-    char *nbkey;
-    ob   *nbtarget;
-} nb_rec;
-
-/* notefile */
-typedef struct {
-    char *fn;
-    int   loadcount;
-} nf_rec;
-#endif
+#include "word.h"
+#include "varray.h"
+#include "color.h"
+#include "gv.h"
+#include "obj.h"
 
 #include "notefile.h"
 

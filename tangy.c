@@ -26,9 +26,11 @@
 #include "epsdraw.h"
 #include "a.h"
 
-#include "notefile.c"
-#include "linkchk.c"
+/*
 #include "picdraw.c"
+*/
+
+int linkchk(ob *xch, ns *xns);
 
 int     nodraw = 0;
 char   *outfile = "out.eps";

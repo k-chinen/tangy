@@ -1,17 +1,9 @@
+#include "obj.h"
 #include "chas.h"
 
-#if 0
-typedef struct {
-    int use;
-    int max;
-    ch* slot;
-} chas;
-
-#ifndef DEF_CHAS_ILEN
-#define DEF_CHAS_ILEN   (32)
-#endif
-
-#endif
+int cha_fprint(FILE *fp, char *msg, ch *tg);
+int cha_reset(ch *xch);
+int cha_copy(ch *dst, ch *src);
 
 int def_chas_ilen=DEF_CHAS_ILEN;
 
