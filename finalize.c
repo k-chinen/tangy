@@ -97,7 +97,7 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     Echo("= oid %d type %d x,y %d,%d: gx,gy %d,%d\n",
         u->oid, u->type, u->cx, u->cy, u->cgx, u->cgy);
 
-#if 0
+#if 1
     Echo("obb oid %-4d s1 %6d %6d %6d %6d\n",
         u->oid, _lx, _by, _rx, _ty);
 #endif
@@ -118,19 +118,18 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     MARK("objcRT",  ox+u->cx+u->wd/2, oy+u->cy+u->ht/2);
 #endif
 
-#if 1
+#if 0
     MARK("objcgx ", u->cgx,     u->cgy);
     MARK("objcgsx", u->cgsx,    u->cgey);
     MARK("objcgex", u->cgex,    u->cgey);
+#endif
     MARK("objcLB",  ox+u->lx,   oy+u->by);
     MARK("objcRT",  ox+u->rx,   oy+u->ty);
-#endif
 
     Echo("obb oid %-4d s2 %6d %6d %6d %6d ; %6d x %6d\n",
         u->oid, _lx, _by, _rx, _ty, (_rx-_lx), (_ty-_by));
 
 #if 0
-#include <assert.h>
 assert(_lx<=_rx);
 assert(_by<=_ty);
 #endif
@@ -150,8 +149,11 @@ assert(_by<=_ty);
         u->oid, u->gx, u->gy, u->glx, u->gby, u->grx, u->gty);
 #endif
 
-    Echo("%s: oid %d finalized %d %d: %d %d %d %d\n",
+    Echo("%s: oid %-3d finalized %6d %6d: gbb %6d %6d %6d %6d\n",
         __func__, u->oid, u->gx, u->gy, u->glx, u->gby, u->grx, u->gty);
+    Echo("%s: oid %-3d finalized wdxht %6d %6d\n",
+        __func__, u->oid, u->grx - u->glx, u->gty - u->gby);
+
     u->finalized++;
 
 out:
