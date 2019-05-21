@@ -21,6 +21,12 @@
 #include "xcur.h"
 #include "epsdraw.h"
 
+#include "qbb.h"
+
+#define _umo(lv,hv,av) \
+    (((av)<(lv)? QBB_M_U : ((av)<=(hv) ? QBB_M_M : QBB_M_O)))
+
+
 #ifndef EPSOUTMARGIN
 #define EPSOUTMARGIN    (18)    /* 1/4 inch */
 #endif
@@ -3154,9 +3160,29 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             y1 = s->y1+xoy;
             x2 = s->x2+xox;
             y2 = s->y2+xoy;
+#if 0
             fprintf(fp,
                 "    %d %d moveto %d %d lineto %% LINE\n",
                 x1, y1, x2, y2);
+#endif
+            /* in simple line, context reaches here.
+             * we have to care empty line in such case.
+             */
+#if 0
+            fprintf(fp, "%% color %d thick %d\n",
+                xu->cob.outlinecolor, xu->cob.outlinethick);
+#endif
+            if(xu->cob.outlinecolor<0||xu->cob.outlinethick<=0) {
+                fprintf(fp,
+                    "    %d %d moveto %d %d moveto %% empty LINE\n",
+                    x1, y1, x2, y2);
+            }
+            else {
+                fprintf(fp,
+                    "    %d %d moveto %d %d lineto %% LINE\n",
+                    x1, y1, x2, y2);
+            }
+
 #if 1
             cdir = (int)(atan2(y2-y1,x2-x1)/rf);
 #endif
@@ -4249,7 +4275,7 @@ P;
                     i, s->ftflag, s->x1, s->y1);
             
 Echo("FROM\n");
-fprintf(stderr, "%s: FORWARD FROM %d,%d\n", __func__, s->x1, s->y1);
+Echo("%s: FORWARD FROM %d,%d\n", __func__, s->x1, s->y1);
 
                 x1 = s->x1 + xox;
                 y1 = s->y1 + xoy;
@@ -4259,7 +4285,7 @@ fprintf(stderr, "%s: FORWARD FROM %d,%d\n", __func__, s->x1, s->y1);
 
             }
             if(s->ftflag & COORD_TO) {
-fprintf(stderr, "%s: FORWARD TO   %d,%d\n", __func__, s->x1, s->y1);
+Echo("%s: FORWARD TO   %d,%d\n", __func__, s->x1, s->y1);
 P;
                 x2 = s->x1 + xox;
                 y2 = s->y1 + xoy;
@@ -10521,7 +10547,174 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
 }
 
 int
-epsdraw_portboard(FILE *fp, int xdir, ob *u)
+epsdraw_portboard_curve(FILE *fp, ns *xns, int xdir, ob *u)
+{
+    double  px, py, a, adeg;
+    double  pag, bag;
+    int     ux, uy, vx, vy;
+    int     tx1, ty1, tx2, ty2;
+    double  mu, mv;
+    int     ik;
+    int     gap;
+
+fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+
+    if(u->type==CMD_BCURVE) {
+        ik = solve_curve_points(u, xns,
+            &mu, &mv, &ux, &uy, &tx1, &ty1, &tx2, &ty2, &vx, &vy);
+    }
+    else
+    if(u->type==CMD_BCURVESELF) {
+        ik = solve_curveself_points(u, xns,
+            &mu, &mv, &ux, &uy, &tx1, &ty1, &tx2, &ty2, &vx, &vy);
+    }
+    else {
+    }
+    
+
+fprintf(fp, "%% %s: %d ik %d\n", __func__, __LINE__, ik);
+
+    ik = _bez_posdir(&px, &py, &a, 0.5,
+            ux, uy, tx1, ty1, tx2, ty2, vx, vy);
+
+fprintf(fp, "%% %s: %d ik %d\n", __func__, __LINE__, ik);
+
+    adeg = a/rf;
+    pag = adeg-90;
+    fprintf(fp, "%% a %f, adeg %f, pag %f\n", a, adeg, pag);
+
+    if(u->cob.marknode) {
+        fprintf(fp, "gsave 1 0 0 setrgbcolor "
+            "newpath %.3f %.3f %d 0 360 arc fill grestore\n",
+                px, py, objunit/20);
+    }
+
+    gap = def_pbstrgap;
+    gap += u->cob.outlinethick/2;
+
+    if(u->cob.portstr) {
+        fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xlrshow\n",
+            px, py, gap, def_textheight,
+                pag, (double)u->cob.portrotate, u->cob.portstr);
+    }
+    if(u->cob.boardstr) {
+        fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xrrshow\n",
+            px, py, gap, def_textheight,
+                pag, (double)u->cob.boardrotate, u->cob.boardstr);
+    }
+
+    return 0;
+}
+
+int
+_solve_pbpoint(FILE *fp, ns *xns, int xdir, int da, ob *u, int *px, int *py)
+{
+    int    rv;
+    double th;
+    double ph;
+    int    fi;
+    int    rr;
+/*
+ *     \  2
+ *   +--\------+
+ *   |   \     |
+ * 3 |    x    | 1
+ *   |         |
+ *   +---------+
+ *        4
+ *
+ *       1 r
+ *   fi  2 u
+ *       3 l
+ *       4 d
+ */
+
+    rv = 0;
+    fi = 0;
+    ph = dirnormalize_positive(xdir + da);
+    th = atan2(u->ht/2, u->wd/2)/rf;
+    rr = sqrt( (u->ht/2)*(u->ht/2) + (u->wd/2)*(u->wd/2) );
+
+    int kx, ky;
+
+#if 0
+    kx = u->gx;
+    ky = u->gy;
+#else
+    kx = ( u->glx + u->grx ) / 2;
+    ky = ( u->gby + u->gty ) / 2;
+#endif
+
+    if(0<=ph && ph<=th)                 { fi = 1; }
+    else if(th<=ph && ph<=180-th)       { fi = 2; }
+    else if(180-th<=ph && ph<=180+th)   { fi = 3; }
+    else if(180+th<=ph && ph<=360-th)   { fi = 4; }
+    else if(360-th<=ph)                 { fi = 1; }
+    
+    switch(fi) {
+    case 1: /* right side */
+            rv++; *px = u->grx; *py = ky + tan(ph*rf)*(*px-kx);
+            break;
+    case 3: /* left side */
+            rv++; *px = u->glx; *py = ky + tan(ph*rf)*(*px-kx);
+            break;
+    case 2: /* upper side */
+            rv++; *py = u->gty; *px = (*py-ky)/tan(ph*rf)+kx;
+            break;
+    case 4: /* bottom sude */
+            rv++; *py = u->gby; *px = (*py-ky)/tan(ph*rf)+kx;
+            break;
+    default:
+#if 0
+        Error("normal line of oid %d does not touch bbox; ph %.2f th %.2f\n",
+                u->oid, ph, th);
+#endif
+            Error("miss cross point oid %d, ph %.2f th %.2f\n",
+                u->oid, ph, th);
+            break;
+    }
+
+#if 0
+    fprintf(stderr,
+        "#Z oid %-3d ph %7.2f vs th %7.2f fi %d ; rv %d px,py %6d,%-6d\n",
+        u->oid, ph, th, fi, rv, *px, *py);
+    fflush(stdout);
+#endif
+
+    if(0) {
+        fprintf(fp, "gsave 0 1 0 setrgbcolor %d setlinewidth "
+            "newpath %d %d moveto %d %d lineto %d %d lineto "
+            "%d %d lineto closepath stroke grestore\n",
+            objunit/50,
+            u->glx, u->gby, u->grx, u->gby,
+            u->grx, u->gty, u->glx, u->gty);
+    }
+    if(0) {
+        int nx, ny;
+        nx = kx + rr*cos(ph*rf);
+        ny = ky + rr*sin(ph*rf);
+        fprintf(fp, "gsave 1 1 0 setrgbcolor %d setlinewidth "
+            "newpath %d %d moveto %d %d lineto stroke grestore\n",
+            objunit/50, kx, ky, nx, ny);
+    }
+
+    if(u->cob.marknode) {
+        fprintf(fp, "gsave 1 0 0 setrgbcolor "
+            "newpath %d %d %d 0 360 arc fill grestore\n",
+            *px, *py, objunit/20);
+    }
+
+    if(0) {
+        fprintf(fp, "gsave 0 0 1 setrgbcolor %d setlinewidth "
+            "newpath %d %d %d 0 360 arc fill grestore\n",
+            objunit/50, kx, ky, objunit/20);
+    }
+
+    return rv;
+}
+
+int
+epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
 {
     int ik;
     int dx, dy;
@@ -10529,59 +10722,64 @@ epsdraw_portboard(FILE *fp, int xdir, ob *u)
     int lax, lay;
     int fht;
 
-    if(u) {
-        if(u->cob.portstr) {    
-            fprintf(fp, "%% portstr '%s'\n", u->cob.portstr);
-        }
-        else {
-            fprintf(fp, "%% no portstr\n");
-        }
-        if(u->cob.boardstr) {   
-            fprintf(fp, "%% portstr '%s'\n", u->cob.boardstr);
-        }
-        else {
-            fprintf(fp, "%% no boardstr\n");
-        }
+    int px, py;
+    int bx, by;
+
+    if(u->type==CMD_BCURVE||u->type==CMD_BCURVESELF) {
+        return epsdraw_portboard_curve(fp, xns, xdir, u);
     }
 
-    if(u->cob.portstr || u->cob.boardstr) {
+#if 0
+{
+    int i;
+    int cz, cp, cn;
+    fflush(stdout);
+    cz = cp = cn = 0;
+    for(i=0;i<=360;i++) {
+        ik = _solve_pbpoint(fp, xns, i,  90, u, &px, &py);
+        if(ik>0)    {cp++;}
+        if(ik==0)   {cz++;}
+        if(ik<0)    {cn++;}
 
-        lax = (objunit/8)*cos((xdir+90)*rf);
-        lay = (objunit/8)*sin((xdir+90)*rf);
-
-        ik = bumpBB(u->gx, u->gy, u->wd, u->ht,
-                u->gx, u->gy, xdir+90, &qx, &qy);
-
-        dx = qx - u->gx;
-        dy = qy - u->gy;
-
-        if(ik<=0) {
-            fprintf(fp, "%% skip ik %d\n", ik);
-            goto skip_portboard;
+#if 1
+        fprintf(stderr, "#PB %4d %4d %d\n", i, 90, ik);
+#endif
+#if 0
+        fprintf(stderr, "#PB %d %4d %4d %d\n", u->oid, i, 90, ik);
+        if(ik==0) {
+            fprintf(stderr, "#PB %d %4d %4d %d\n", u->oid, i, 90, ik);
         }
-
-        fprintf(fp, "      gsave\n");
-
-        /* TEMP */
-        fht = def_textheight;
-        fprintf(fp, "      /%s findfont %d scalefont setfont %% port/board\n",
-            def_fontname, fht);
-
-        if(u->cob.portstr) {
-            fprintf(fp, "      %d %d %d (%s) rrshow\n",
-                u->gx+dx+lax, u->gy+dy+lay, xdir-90, u->cob.portstr);
-        }
-        if(u->cob.boardstr) {
-            fprintf(fp, "      %d %d %d (%s) lrshow\n",
-                u->gx-dx-lax, u->gy-dy-lay, xdir-90, u->cob.boardstr);
-        }
-        fprintf(fp, "      grestore\n");
+#endif
     }
-skip_portboard:
+    fprintf(stderr, "#PB %d p/z/n %d %d %d\n", u->oid, cp, cz, cn);
+}
+#endif
+
+    if(u->cob.portstr) {    
+        ik = _solve_pbpoint(fp, xns, xdir,  90, u, &px, &py);
+        if(ik) {
+            fprintf(fp, "      %d %d %d %d %d %d (%s) xlrshow\n",
+                px, py, def_pbstrgap, def_textheight,
+                xdir-90, u->cob.portrotate, u->cob.portstr);
+        }
+        else {
+            Error("cannot solve %dth obj portpoint\n", u->oid);
+        }
+    }
+    if(u->cob.boardstr) {   
+        ik = _solve_pbpoint(fp, xns, xdir, -90, u, &bx, &by);
+        if(ik) {
+            fprintf(fp, "      %d %d %d %d %d %d (%s) xrrshow\n",
+                bx, by, def_pbstrgap, def_textheight,
+                xdir-90, u->cob.boardrotate, u->cob.boardstr);
+        }
+        else {
+            Error("cannot solve %dth obj boardpoint\n", u->oid);
+        }
+    }
 
     return 0;
 }
-
 
 
 int
@@ -11055,7 +11253,7 @@ skip_sstr:
     }
 
     ik = epsdraw_note(fp, u);
-    ik = epsdraw_portboard(fp, *xdir, u);
+    ik = epsdraw_portboard(fp, xns, *xdir, u);
 
     u->drawed = 1;
 
@@ -11536,6 +11734,41 @@ printdefs(FILE *fp)
     grestore\n\
 } def\n\
 ");
+
+    fprintf(fp, "\
+%% x y g h r1 r2 s xlrshow - double rotate left justify text show\n\
+/xlrshow {\n\
+    gsave\n\
+      /s exch def /r2 exch def /r1 exch def\n\
+      /h exch def /g exch def /y exch def /x exch def\n\
+      /w s stringwidth pop def\n\
+      x y translate r1 rotate\n\
+  %% gsave 1 0 0 setrgbcolor 0 0 h 10 div 0 360 arc fill grestore\n\
+  %% gsave 1 0 0 setrgbcolor w g add neg h 2 div neg w h 0 mrbox grestore\n\
+      w 2 div g add neg 0 translate r2 rotate\n\
+  %% gsave 0 0 1 setrgbcolor w 2 div neg h 2 div neg w h 0 mrbox grestore\n\
+      newpath\n\
+      w 2 div neg h 2 div neg moveto\n\
+      s show\n\
+    grestore\n\
+} def\n\
+");
+fprintf(fp, "\
+%% x y g h r1 r2 s xrrshow -\n\
+/xrrshow {\n\
+    gsave\n\
+      /s exch def /r2 exch def /r1 exch def\n\
+      /h exch def /g exch def /y exch def /x exch def\n\
+      /w s stringwidth pop def\n\
+      x y translate r1 rotate\n\
+      w 2 div g add 0 translate r2 rotate\n\
+      newpath\n\
+      w 2 div neg h 2 div neg moveto\n\
+      s show\n\
+    grestore\n\
+} def\n\
+");
+
 
     fprintf(fp, "\
 %% x y w h r mrbox -        margined round box\n\

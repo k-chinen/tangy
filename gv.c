@@ -346,6 +346,8 @@ apair_t objattr_ial[] = {
     {"larboard",            OA_PORT},
     {"starboard",           OA_STARBOARD},
     {"board",               OA_STARBOARD},
+    {"portrotate",          OA_PORTROTATE},
+    {"boardrotate",         OA_BOARDROTATE},
 
     {"bgshape",             OA_BGSHAPE},
 
@@ -450,6 +452,8 @@ double markbbthickfactor    = 0.02;
 double noteosepfactor       = 0.20;
 double noteisepfactor       = 0.10;
 
+double pbstrgapfactor       = 0.10;
+
 int draft_mode      = 0;
 int skelton_mode    = 0;
 int grid_mode       = 0;
@@ -494,6 +498,9 @@ int def_gridrange       =  100;
 
 int def_noteosep        =   5;
 int def_noteisep        =   5;
+
+int def_pbstrgap        =  72;
+
 
 #if 0
 char *def_fontname      = "Times-Roman";

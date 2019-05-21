@@ -93,6 +93,20 @@ qbb_new()
 }
 
 int
+qbb_setbb(qbb_t *qb, int x1, int y1, int x2, int y2)
+{
+    if(!qb) {
+        return -1;
+    }
+    if(x1>x2)   { qb->rx = x1; qb->lx = x2; }
+    else        { qb->lx = x1; qb->rx = x2; }
+    if(y1>y2)   { qb->ty = y1; qb->by = y2; }
+    else        { qb->by = y1; qb->ty = y2; }
+
+    return 0;
+}
+
+int
 qbb_mark(qbb_t *qb, int tx, int ty)
 {
     if(!qb) {
@@ -163,6 +177,17 @@ Xqbb_isinside(qbb_t *q, int cx, int cy)
     else                { my |= QBB_M_O; }
 
     return (mx<<4) | my;
+}
+
+int
+Yqbb_isinside(qbb_t *q, int cx, int cy)
+{
+    int rr;
+    rr = 0;
+    if(q->lx<=cx && cx<=q->rx && q->by<=cy && cy<=q->ty) {
+        rr = 1;
+    }
+    return rr;
 }
 
 

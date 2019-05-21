@@ -37,6 +37,8 @@ extern double markbbthickfactor;
 extern double noteosepfactor;
 extern double noteisepfactor;
 
+extern double pbstrgapfactor;
+
 extern int draft_mode;
 extern int skelton_mode;
 extern int grid_mode;
@@ -75,6 +77,9 @@ extern int def_gridrange;
 extern int def_noteosep;
 extern int def_noteisep;
 extern char *def_fontname;
+
+extern int def_pbstrgap;
+
 
 extern pallet_t *pallet;
 

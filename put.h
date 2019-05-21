@@ -1,4 +1,5 @@
 int dirnormalize(int xxdir);
+int dirnormalize_positive(int xxdir);
 int rewindcenter(ob *u, int qdir, int *rx, int *ry);
 int applywith(ob *u, char *xpos, int *rx, int *ry);
 int find_from(ob *xob, int *risx, int *risy);

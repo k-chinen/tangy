@@ -353,7 +353,9 @@ extern apair_t lo_ial[];
 
 
 #define OA_PORT             (402)
-#define OA_STARBOARD        (403)
+#define OA_PORTROTATE       (403)
+#define OA_STARBOARD        (404)
+#define OA_BOARDROTATE      (405)
 
 #define OA_BGSHAPE          (501)
 
@@ -477,7 +479,9 @@ struct obattr {
     int   textrotate;
 
     char  *portstr;
+    int    portrotate;
     char  *boardstr;
+    int    boardrotate;
 
     varray_t *segopar;      /* path segment operation */
     varray_t *segar;        /* path segment outline */

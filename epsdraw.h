@@ -94,7 +94,7 @@ int epsdraw_mark(FILE *fp, int gx, int gy, int ty);
 int bumpBB(int gx, int gy, int gw, int gh, int x, int y, int cth, int *rx, int *ry);
 int XbumpBB(int gx, int gy, int gw, int gh, int x, int y, int cr, int *rx, int *ry);
 int solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn, int ogap, int igap, int tht);
-int epsdraw_portboard(FILE *fp, int xdir, ob *u);
+int epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u);
 int epsdraw_note(FILE *fp, ob *u);
 int epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns);
 int epsdrawchunk(FILE *fp, ob *xch, int gox, int goy, ns *xns);

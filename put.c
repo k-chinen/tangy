@@ -23,8 +23,6 @@ char debuglog[BUFSIZ*10]="";
 #define QLIMIT  (0.01)
 #endif
 
-
-
 /* normalize to -180..180 */
 int
 dirnormalize(int xxdir)
@@ -35,6 +33,19 @@ dirnormalize(int xxdir)
 
     return dir;
 }
+
+/* normalize to 0..360 */
+int
+dirnormalize_positive(int xxdir)
+{
+    int dir;
+
+    dir = (xxdir+360)%360;
+
+    return dir;
+}
+
+
 
 int
 rewindcenter(ob *u, int qdir, int *rx, int *ry)
@@ -918,6 +929,9 @@ Echo("  isx,y %d,%d iex,y %d,%d\n", isx, isy, iex, iey);
             bm = objunit/20;
         }
     }
+Echo("  bm %d vs thick %d\n", bm, u->cob.outlinethick);
+
+    bm = MAX(bm, u->cob.outlinethick);
 
     bmx = (bm/2)*cos((ddir+90)*rf);
     bmy = (bm/2)*sin((ddir+90)*rf);
@@ -939,7 +953,8 @@ Echo("  bm %d bmx,y %d,%d\n", bm, bmx, bmy);
     *rty = sbb.ty;
 
 #if 1
-Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
+    Echo("%s: oid %d lbb %6d %6d %6d %6d\n",
+        __func__, u->oid, *rlx, *rby, *rrx, *rty);
 #endif
     return rv;
 

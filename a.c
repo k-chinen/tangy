@@ -1084,6 +1084,8 @@ recalcsizeparam()
     def_marknoderad     = marknoderadfactor     * objunit;
     def_markbbthick     = markbbthickfactor     * objunit;
 
+    def_pbstrgap        = pbstrgapfactor        * objunit;
+
 #if 0
     V(objunit);
     V(def_arrowsize);

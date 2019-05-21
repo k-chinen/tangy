@@ -885,7 +885,9 @@ P;
     ISET2(OA_LANEGAP,       lanegapv, lanegaph);
 
     SADD(OA_PORT,           portstr);
+    ISET(OA_PORTROTATE,     portrotate);
     SADD(OA_STARBOARD,      boardstr);
+    ISET(OA_BOARDROTATE,    boardrotate);
     SADD(OA_BGSHAPE,        bgshape);
 
     OISET(OA_WIDTH,         wd);
