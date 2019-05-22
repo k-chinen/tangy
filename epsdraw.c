@@ -752,8 +752,10 @@ _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
     double  dx, dy;
     double  r2;
 
+#if 0
     fprintf(fp, "%% arrowhead atype %d xdir %.2f lc %d x,y %.3f,%.3f\n",
         atype, xdir, lc, x, y);
+#endif
     fprintf(fp, "gsave %% for AH\n");
 
     changecolor(fp, lc);
@@ -10560,7 +10562,9 @@ epsdraw_portboard_curve(FILE *fp, ns *xns, int xdir, ob *u)
     int     ik;
     int     gap;
 
-fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+#if 0
+    fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+#endif
 
     if(u->type==CMD_BCURVE) {
         ik = solve_curve_points(u, xns,
@@ -10614,18 +10618,13 @@ int
 epsdraw_portboard_simpleline(FILE *fp, ns *xns, int xdir, ob *u)
 {
     double  px, py, pag;
-#if 0
-    double  px, py, a, adeg;
-    double  pag, bag;
-    int     ux, uy, vx, vy;
-    int     tx1, ty1, tx2, ty2;
-    double  mu, mv;
-#endif
     int     ik;
     int     gap;
     varray_t *sar;
 
-fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+#if 0
+    fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+#endif
 
     sar = u->cob.segar;
     if(!sar) {
@@ -10640,7 +10639,9 @@ fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
     fprintf(fp, "%% oid %d px %f py %f\n", u->oid, px, py);
 
     pag = xdir-90;
+#if 0
     fprintf(fp, "%% xdir %d, pag %f\n", xdir, pag);
+#endif
 
     if(u->cob.marknode) {
         fprintf(fp, "gsave 1 0 0 setrgbcolor "
@@ -10776,13 +10777,15 @@ int
 epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
 {
     int ik;
-    int dx, dy;
-    int qx, qy;
-    int lax, lay;
-    int fht;
-
     int px, py;
     int bx, by;
+
+    fprintf(fp, "%% %s: enter oid %-3d xdir %4d\n",
+        __func__, u->oid, xdir);
+#if 0
+    fprintf(fp, "%% %s: enter with xdir %d u %p oid %d\n",
+        __func__, xdir, u, u->oid);
+#endif
 
     if(u->type==CMD_BCURVE||u->type==CMD_BCURVESELF) {
         return epsdraw_portboard_curve(fp, xns, xdir, u);
@@ -11201,7 +11204,13 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
             (u->type==CMD_ARROW)) {
 P;
+#if 0
+fprintf(stderr, "#before Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
+#endif
         Zepsdraw_ulinearrow(fp, *xdir, ox, oy, u, xns);
+#if 0
+fprintf(stderr, "#after  Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
+#endif
     }
     else
     if(u->type==CMD_ULINE) {

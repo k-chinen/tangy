@@ -2,13 +2,18 @@ CHANGES
 
 This file describe remarkable change in user's view.
 
+From 2.052
+  - arrange port/board string
+        fit them according to curves and lines in
+        CURVE family and simple lines in LINE family.
+
 From 2.051
   - change width of THRU
-		from 1.0u to 1.5u to keep margin for arrows.
+        from 1.0u to 1.5u to keep margin for arrows.
 
 From 2.050
   - chang width of SACTTER/GATHER
-		from 1.0u to 1.5u to keep margin for arrows.
+        from 1.0u to 1.5u to keep margin for arrows.
 
 From 2.045
   - shape of CARD
