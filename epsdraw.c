@@ -2886,9 +2886,12 @@ Echo("%s: oid %d seg i %d type %d; actbh %d actch %d actfh %d\n",
     __func__, xu->oid, i, s->ptype, actbh, actch, actfh);
 #endif 
 
+#if 0
+        /* already apply 'translate'. do not plot */
         if(xu->cob.marknode) {
             markfdot(xu->cob.outlinecolor, x1, y1);
         }
+#endif
 
         switch(s->ptype) {
 
@@ -10606,6 +10609,62 @@ fprintf(fp, "%% %s: %d ik %d\n", __func__, __LINE__, ik);
     return 0;
 }
 
+
+int
+epsdraw_portboard_simpleline(FILE *fp, ns *xns, int xdir, ob *u)
+{
+    double  px, py, pag;
+#if 0
+    double  px, py, a, adeg;
+    double  pag, bag;
+    int     ux, uy, vx, vy;
+    int     tx1, ty1, tx2, ty2;
+    double  mu, mv;
+#endif
+    int     ik;
+    int     gap;
+    varray_t *sar;
+
+fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
+
+    sar = u->cob.segar;
+    if(!sar) {
+        return -2;
+    }
+    if(sar->use!=1) {
+        return -3;
+    }
+
+    px = (u->gsx+u->gex)/2;
+    py = (u->gsy+u->gey)/2;
+    fprintf(fp, "%% oid %d px %f py %f\n", u->oid, px, py);
+
+    pag = xdir-90;
+    fprintf(fp, "%% xdir %d, pag %f\n", xdir, pag);
+
+    if(u->cob.marknode) {
+        fprintf(fp, "gsave 1 0 0 setrgbcolor "
+            "newpath %.3f %.3f %d 0 360 arc fill grestore\n",
+                px, py, objunit/20);
+    }
+
+    gap = def_pbstrgap;
+    gap += u->cob.outlinethick/2;
+
+    if(u->cob.portstr) {
+        fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xlrshow\n",
+            px, py, gap, def_textheight,
+                pag, (double)u->cob.portrotate, u->cob.portstr);
+    }
+    if(u->cob.boardstr) {
+        fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xrrshow\n",
+            px, py, gap, def_textheight,
+                pag, (double)u->cob.boardrotate, u->cob.boardstr);
+    }
+
+    return 0;
+}
+
 int
 _solve_pbpoint(FILE *fp, ns *xns, int xdir, int da, ob *u, int *px, int *py)
 {
@@ -10727,6 +10786,14 @@ epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
 
     if(u->type==CMD_BCURVE||u->type==CMD_BCURVESELF) {
         return epsdraw_portboard_curve(fp, xns, xdir, u);
+    }
+#if 0
+    fprintf(stderr, "# oid %d type %d original? %d\n",
+        u->oid, u->type, u->cob.originalshape);
+#endif
+    if((u->type==CMD_LINE||u->type==CMD_ARROW||
+        u->type==CMD_WLINE||u->type==CMD_WARROW) && u->cob.originalshape==0)  {
+        return epsdraw_portboard_simpleline(fp, xns, xdir, u);
     }
 
 #if 0
