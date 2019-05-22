@@ -23,11 +23,13 @@ double x1, double y1, double x2, double y2,
 double x3, double y3, double x4, double y4)
 {
     double a1, a2;
+    double a1a, a2a;
     double a;
     double dx, dy;
     double dt;
     double lx, ly;
     double rx, ry;
+    double da;
 
     dt = 0.01;
 
@@ -54,6 +56,19 @@ double x3, double y3, double x4, double y4)
     dy = ry - ly;
     a2 = atan2(dy, dx);
 
+    /*
+     * atan2 returns (-M_PI, M_PI).
+     * sometime, average of straight value by atan2 makes strange.
+     * for example: a1 = -3.12, a2 = 3.12, (a1+a2)/2 = 0.0
+     * then, here add M_PI*2 if value is negative.
+     */
+
+    a1a = a1;
+    a2a = a2;
+    da  = a2 - a1;
+    if(da<-M_PI || da>M_PI) {
+        a1 += M_PI*2;
+    }
     a = (a1+a2)/2.0;
 
     *x  = lx;
@@ -61,6 +76,8 @@ double x3, double y3, double x4, double y4)
     *aa = a;
 
 #if 0
+    fprintf(stderr, "%s: t %4.2f a1 %7.4f (%7.4f) a2 %7.4f (%7.4f) -> da %7.4f a %7.4f\n",
+        __func__, t, a1, a1a, a2, a2a, da, a);
     fprintf(stderr, "%s: t %5.2f aa a1 %7.4f a2 %7.4f -> a %7.4f\n",
         __func__, t, a1, a2, a);
 #endif
