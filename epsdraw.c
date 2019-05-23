@@ -6409,6 +6409,25 @@ _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd)
   *
   */
     else
+    if(strcasecmp(xcmd, "icir")==0) {
+        int xr;
+        xr = MAX(xh, xw)/2-bw;
+        fprintf(fp, "    newpath %d %d moveto"
+                    " %d %d %d -90 270 arc closepath stroke\n",
+                    0, -xr, 0, 0, xr);
+    }
+    else
+    if(strcasecmp(xcmd, "iicir")==0) {
+        int xr;
+        xr = MAX(xh, xw)/2-bw*2;
+        fprintf(fp, "    newpath %d %d moveto"
+                    " %d %d %d -90 270 arc closepath stroke\n",
+                    0, -xr, 0, 0, xr);
+    }
+ /*
+  *
+  */
+    else
     if(strcasecmp(xcmd, "wbar")==0) {
         fprintf(fp, "    newpath %d %d moveto"
                     " %d %d rlineto %d %d rlineto %d %d rlineto"    
