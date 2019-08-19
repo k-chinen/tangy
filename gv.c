@@ -151,6 +151,8 @@ apair_t arrowhead_ial[] = {
     {"wire",                AH_WIRE},
     {"arrow3",              AH_ARROW3},
     {"arrow4",              AH_ARROW4},
+    {"arrow5",              AH_ARROW5},
+    {"arrow6",              AH_ARROW6},
     {"wnormal",             AH_WNORMAL},
     {"double",              AH_DOUBLE},
     {"diamond",             AH_DIAMOND},

@@ -1022,6 +1022,49 @@ _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
 
         break;
 
+    case AH_ARROW5:
+        r = def_arrowsize;
+
+        dx =  (double)(r*cos((xdir+180+def_arrowangle*2)*rf));
+        dy =  (double)(r*sin((xdir+180+def_arrowangle*2)*rf));
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "%.3f %.3f moveto\n",   x,  y);
+        fprintf(fp, "%.3f %.3f rlineto\n", dx, dy);
+
+        dx =  (double)(r*cos((xdir+180-def_arrowangle*2)*rf));
+        dy =  (double)(r*sin((xdir+180-def_arrowangle*2)*rf));
+        fprintf(fp, "%.3f %.3f lineto\n", x+dx, y+dy);
+        fprintf(fp, "closepath fill\n");
+
+        break;
+
+    case AH_ARROW6:
+      {
+        double dx1, dy1, dx2, dy2, dx3, dy3;
+        r = def_arrowsize;
+
+        dx1 =  (double)(r/2*cos((xdir+180+def_arrowangle)*rf));
+        dy1 =  (double)(r/2*sin((xdir+180+def_arrowangle)*rf));
+        dx2 =  (double)(r/2*cos((xdir+180-def_arrowangle)*rf));
+        dy2 =  (double)(r/2*sin((xdir+180-def_arrowangle)*rf));
+        dx3 =  (double)(r/2*cos((xdir+180+0)*rf));
+        dy3 =  (double)(r/2*sin((xdir+180+0)*rf));
+
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "%.3f %.3f moveto\n",   x,  y);
+        fprintf(fp, "%.3f %.3f lineto\n",   x+dx1, y+dy1);
+        fprintf(fp, "%.3f %.3f lineto\n",   x+dx1+dx3, y+dy1+dy3);
+        fprintf(fp, "%.3f %.3f lineto\n",   x+dx3, y+dy3);
+        fprintf(fp, "%.3f %.3f lineto\n",   x+dx2+dx3, y+dy2+dy3);
+#if 0
+#endif
+        fprintf(fp, "%.3f %.3f lineto\n",   x+dx2, y+dy2);
+        fprintf(fp, "closepath fill\n");
+
+      }
+        break;
+
+
     case AH_WNORMAL:
         r = def_arrowsize;
 

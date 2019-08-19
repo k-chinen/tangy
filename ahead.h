@@ -13,6 +13,8 @@
 #define AH_WIRE             (2)
 #define AH_ARROW3           (3)
 #define AH_ARROW4           (4)
+#define AH_ARROW5           (5)
+#define AH_ARROW6           (6)
 #define AH_WNORMAL          (7)
 #define AH_DOUBLE           (9)
 #define AH_DIAMOND          (11)
