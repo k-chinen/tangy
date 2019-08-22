@@ -6364,6 +6364,38 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
       }
         break;
+
+    case HT_HEX:
+        {
+        int i;
+        double dx;
+        int idx;
+        dx = sqrt(3)/2.0*hp;
+        idx = (int)dx;
+        i = 0;
+        for(x1=-aw/2-idx;x1<aw/2+idx;x1+=idx*2) {
+            fprintf(fp, "    %d %d moveto\n", x1, -ah);
+            for(y1=-ah;y1<ah;y1+=hp*3) {
+                x2=x1+def_hatchthick;
+                fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
+                    -idx, hp/2, 0, hp);
+                fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
+                     idx, hp/2, 0, hp);
+                y2=y1;
+            }
+            fprintf(fp, "    %d %d moveto\n", x1, -ah);
+            for(y1=-ah;y1<ah;y1+=hp*3) {
+                fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
+                     idx, hp/2, 0, hp);
+                fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
+                    -idx, hp/2, 0, hp);
+                y2=y1;
+            }
+            fprintf(fp, "    stroke\n");
+            i++;
+        }
+        }
+        break;
     
     default:
     case HT_NONE:

@@ -15,6 +15,8 @@
 #define HT_HZIGZAG          (16)
 #define HT_CHECKED          (17)
 #define HT_BIGCHECKED       (18)
+#define HT_HEX              (20)
+#define HT_DUMMY            (21)
 
 extern apair_t hatchtype_ial[];
 #endif/*_TANGY_HATCH_H_*/
