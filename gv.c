@@ -27,6 +27,7 @@ apair_t cmd_ial[] = {
     {"point",           CMD_POINT},
     {"dots",            CMD_DOTS},
     {"drum",            CMD_DRUM},
+    {"pipe",            CMD_PIPE},
     {"paper",           CMD_PAPER},
     {"card",            CMD_CARD},
     {"diamond",         CMD_DIAMOND},

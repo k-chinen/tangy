@@ -1390,6 +1390,7 @@ P;
     case CMD_HOUSE:     WO;     break;
     case CMD_CLOUD:     WO;     break;
     case CMD_DRUM:      WO;     break;
+    case CMD_PIPE:      WO;     break;
 
     case CMD_BOX:       WO;     break;
     case CMD_ELLIPSE:   WO;     break;

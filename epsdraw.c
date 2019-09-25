@@ -8137,6 +8137,83 @@ P;
 }
 
 int
+Gpipe_surface(FILE *fp, int wd, int ht)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    fprintf(fp, "%% pipe-surface\n");
+    fprintf(fp, "  gsave\n");
+    fprintf(fp, "  2 setlinejoin\n");
+    fprintf(fp, "  newpath\n");
+    fprintf(fp, "  %d %d moveto\n", -3*wd/8, -ht/2);
+    for(i=-90;i<=90;i+=p) {
+        x = wd/8*cos(M_PI/180*i);
+        y = ht/2*sin(M_PI/180*i);
+        fprintf(fp, "  %d %d lineto\n", (int)x-3*wd/8, (int)y);
+    }
+    fprintf(fp, "  stroke\n");
+    fprintf(fp, "  grestore\n");
+
+    return 0;
+}
+
+
+int
+mkpath_pipe(varray_t *sar, int wd, int ht, int rad)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    path_regsegmoveto(sar,  3*wd/8, -ht/2);
+    for(i=-90;i<=90;i+=p) {
+        x = wd/8*cos(M_PI/180*i);
+        y = ht/2*sin(M_PI/180*i);
+        path_regseglineto(sar,  x+3*wd/8,  y);
+    }
+    path_regsegrlineto(sar, -6*wd/8, 0);
+    for(i=90;i<=270;i+=p) {
+        x = wd/8*cos(M_PI/180*i);
+        y = ht/2*sin(M_PI/180*i);
+        path_regseglineto(sar,  x-3*wd/8, y);
+    }
+    path_regseglineto(sar,  3*wd/8, -ht/2);
+    path_regsegclose(sar);
+
+    return 0;
+}
+
+int
+mkpath_Rpipe(varray_t *sar, int wd, int ht, int rad)
+{
+    int i;
+    int p=10;
+    double x, y;
+
+P;
+    path_regsegmoveto(sar,   3*wd/8, -ht/2);
+    path_regsegrlineto(sar, -6*wd/8,    0);
+    for(i=270;i>=80;i-=p) {
+        x = wd/8*cos(M_PI/180*i);
+        y = ht/2*sin(M_PI/180*i);
+        path_regseglineto(sar,  x-3*wd/8, y);
+    }
+    for(i=90;i>=-90;i-=p) {
+        x = wd/8*cos(M_PI/180*i);
+        y = ht/2*sin(M_PI/180*i);
+        path_regseglineto(sar,  x+3*wd/8, y);
+    }
+    path_regsegclose(sar);
+
+    return 0;
+}
+
+
+int
 epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
 {
     int ik;
@@ -8213,6 +8290,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     case CMD_DRUM:
         ik = mkpath_drum(xu->cob.segar,  awd, aht, xu->cob.rad);
         ik = mkpath_Rdrum(xu->cob.seghar, awd, aht, xu->cob.rad);
+        break;
+    case CMD_PIPE:
+        ik = mkpath_pipe(xu->cob.segar,  awd, aht, xu->cob.rad);
+        ik = mkpath_Rpipe(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     default:
         fprintf(fp, "%% unknown type '%s'(%d)\n",
@@ -8340,6 +8421,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         if(xu->type==CMD_DRUM) {
             fprintf(fp, "  %% surface\n");
             ik = Gdrum_surface(fp,  awd, aht);
+        }
+        if(xu->type==CMD_PIPE) {
+            fprintf(fp, "  %% surface\n");
+            ik = Gpipe_surface(fp,  awd, aht);
         }
         fprintf(fp, "  grestore %% for outline\n");
     }
@@ -11379,7 +11464,7 @@ P;
         u->type==CMD_ELLIPSE ||
         u->type==CMD_PAPER || u->type==CMD_CARD || u->type==CMD_DIAMOND ||
         u->type==CMD_HOUSE || u->type==CMD_POLYGON || u->type==CMD_GEAR ||
-        u->type==CMD_DRUM) {
+        u->type==CMD_DRUM  || u->type==CMD_PIPE) {
         epsdraw_bodyX(fp, ox, oy, u, xns);
     }
     else {
