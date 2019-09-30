@@ -67,3 +67,24 @@ chs_pop()
     Echo("  chs pop  r %p\n", r);
     return r;
 }
+
+int
+chs_verify()
+{
+    extern int chs_n;
+    if(chs_n<0) {
+        Info("chs does not used\n");
+        return 0;
+    }
+    else 
+    if(chs_n == 0) {
+        Info("chs maybe used and safe\n");
+        return 0;
+    }
+    else {
+        Warn("chs maybe used and ignore value (chs_n %d) check >\n", chs_n);
+        return 1;
+    }
+    return 0;
+}
+

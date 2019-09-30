@@ -1592,6 +1592,46 @@ Echo("%s: ns   |%s|\n", __func__, ns);
 }
 
 int
+Xnss_verify()
+{
+    extern int nss_n;
+    if(nss_n<0) {
+        Info("nss does not used\n");
+        return 0;
+    }
+    else 
+    if(nss_n == 0) {
+        Info("nss maybe used and safe\n");
+        return 0;
+    }
+    else {
+        Warn("nss maybe used and ignore value (nss_n %d) check ]\n", nss_n);
+        return 1;
+    }
+    return 0;
+}
+
+int
+Xchs_verify()
+{
+    extern int chs_n;
+    if(chs_n<0) {
+        Info("chs does not used\n");
+        return 0;
+    }
+    else 
+    if(chs_n == 0) {
+        Info("chs maybe used and safe\n");
+        return 0;
+    }
+    else {
+        Warn("chs maybe used and ignore value (chs_n %d) check >\n", chs_n);
+        return 1;
+    }
+    return 0;
+}
+
+int
 parse(FILE *fp, ob* ch0, ns *ns0) 
 {
     ob*   curch;
@@ -1866,9 +1906,21 @@ skip_specialforms:
     ob_dump(ch0);
     ns_dump(ns0);
 #endif
+#if 0
+    extern int nss_n, chs_n;
+    printf("nss_n %d\n", nss_n);
+    printf("chs_n %d\n", chs_n);
+#endif
+#if 1
+    int vk;
+    vk = nss_verify();
+    vk = chs_verify();
+#endif
 
     return 0;
 }
+
+
 
 
 int

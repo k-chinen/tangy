@@ -65,3 +65,24 @@ P;
     Echo("  nss pop  r %p\n", r);
     return r;
 }
+
+int
+nss_verify()
+{
+    extern int nss_n;
+    if(nss_n<0) {
+        Info("nss does not used\n");
+        return 0;
+    }
+    else 
+    if(nss_n == 0) {
+        Info("nss maybe used and safe\n");
+        return 0;
+    }
+    else {
+        Warn("nss maybe used and ignore value (nss_n %d) check ]\n", nss_n);
+        return 1;
+    }
+    return 0;
+}
+
