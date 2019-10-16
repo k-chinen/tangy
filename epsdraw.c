@@ -8580,6 +8580,47 @@ apply:
      *** CLIP and HATCH
      ***/
 
+    if(xu->cob.backhatch!=HT_NONE && xu->cob.backcolor>=0) {
+        
+        changecolor(fp, xu->cob.backcolor);
+
+        fprintf(fp, "  %% clip & hatch\n");
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    %d %d translate\n", x1, y1);
+        fprintf(fp, "    0 0 moveto %d rotate\n", xu->cob.rotateval);
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    0 setlinewidth\n");
+
+        fprintf(fp, "  0 setlinewidth %% for cloud\n");
+        _cloud_clip(fp, gws, ghs);
+        if(debug_clip) {
+            fprintf(fp, "  stroke %% debug\n");
+        }
+        else {
+            fprintf(fp, "  clip\n");
+        }
+
+#if 0
+        fprintf(fp, " %.3f %.3f scale\n", 1.0/gws, 1.0/ghs);
+#endif
+        fprintf(fp, " %.6f %.6f scale\n", 1.0/gws, 1.0/ghs);
+
+        changecolor(fp, xu->cob.backcolor);
+        changethick(fp, xu->cob.hatchthick);
+        epsdraw_hatch(fp, aw, ah,
+                xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+
+        if(xu->cob.deco) {
+            fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
+            epsdraw_deco(fp, aw, ah,
+                xu->cob.outlinecolor, xu->cob.backcolor, xu->cob.deco);
+        }
+        else {
+            fprintf(fp, "%% no-deco\n");
+        }
+        fprintf(fp, "  grestore\n");
+    }
+
     if(xu->cob.fillhatch!=HT_NONE && xu->cob.fillcolor>=0) {
         
         changecolor(fp, xu->cob.fillcolor);
@@ -8600,7 +8641,10 @@ apply:
             fprintf(fp, "  clip\n");
         }
 
+#if 0
         fprintf(fp, " %.3f %.3f scale\n", 1.0/gws, 1.0/ghs);
+#endif
+        fprintf(fp, " %.6f %.6f scale\n", 1.0/gws, 1.0/ghs);
 
         changecolor(fp, xu->cob.fillcolor);
         changethick(fp, xu->cob.hatchthick);
