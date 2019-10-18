@@ -7222,9 +7222,9 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
         
         switch(justify) {
         case SJ_LEFT:
-            fprintf(fp, "      sstrw neg 0 translate\n");
             break;
         case SJ_RIGHT:
+            fprintf(fp, "      sstrw neg 0 translate\n");
             break;
         default:
         case SJ_CENTER:
@@ -7376,31 +7376,6 @@ Echo("  --- calc size 2\n");
         }
 
 
-
-        fprintf(fp, "      %% justify %d\n", justify);
-        
-        switch(justify) {
-        case SJ_LEFT:
-            fprintf(fp, "      sstrw neg 0 translate\n");
-            break;
-        case SJ_RIGHT:
-            break;
-        default:
-        case SJ_CENTER:
-            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
-            break;
-        case SJ_FIT:
-#if 0
-            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
-#endif
-#if 0
-            fprintf(fp, "      %d 2 div neg 0 translate\n", wd);
-#endif
-            fprintf(fp, "      %d sstrw div 1 scale\n", wd);
-            fprintf(fp, "      sstrw 2 div neg 0 translate\n");
-            break;
-        }
-
         /*** PASS 2 */
 
 Echo("  --- drawing\n");
@@ -7454,6 +7429,8 @@ Echo("    hscale %d\n", hscale);
                         case FF_TYPE:       newface = FF_TYPE;  break;
                         case FF_SERIF:      newface = FF_SERIF; break;
                         }
+                        cc = assoc(sj_ial, token);
+                        if(cc>=0) { justify = cc; }
                     }
                 }
 #if 0
@@ -7499,6 +7476,33 @@ Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
 #endif
                 txe_extract(mcpart, BUFSIZ, te);
                 psescape(qs, BUFSIZ, mcpart);
+
+#if 1
+                fprintf(fp, "      %% justify %d\n", justify);
+                
+                switch(justify) {
+                case SJ_LEFT:
+                    break;
+                case SJ_RIGHT:
+                    fprintf(fp, "      sstrw neg 0 translate\n");
+                    break;
+                default:
+                case SJ_CENTER:
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+                    break;
+                case SJ_FIT:
+#if 0
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+#endif
+#if 0
+                    fprintf(fp, "      %d 2 div neg 0 translate\n", wd);
+#endif
+                    fprintf(fp, "      %d sstrw div 1 scale\n", wd);
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+                    break;
+                }
+                fprintf(fp, " 0 0 moveto\n");
+#endif
 
                 if(hscale!=100) {
 P;
