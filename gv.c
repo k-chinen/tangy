@@ -231,6 +231,13 @@ apair_t pos_ial[] = {
     {"WIC",                 PO_WIC},
     {"WIR",                 PO_WIR},
 
+    {"EI",                  PO_EI},
+    {"EO",                  PO_EO},
+    {"WI",                  PO_WI},
+    {"WO",                  PO_WO},
+    {"CE",                  PO_CE},
+    {"CW",                  PO_CW},
+
     {NULL,                  -1},
 };
 
@@ -281,6 +288,8 @@ apair_t objattr_ial[] = {
     {"hatchpitch",          OA_HATCHPITCH},
     {"textcolor",           OA_TEXTCOLOR},
     {"textbgcolor",         OA_TEXTBGCOLOR},
+    {"textalign",           OA_TEXTALIGN},
+    {"textoffset",          OA_TEXTOFFSET},
 
     {"linkstyle",           OA_LINKSTYLE},
     {"linkmap",             OA_LINKMAP},

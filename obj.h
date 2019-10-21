@@ -227,6 +227,13 @@ extern apair_t cmd_ial[];
 #define PO_WIC              (55)
 #define PO_WIR              (56)
 
+#define PO_CE               (111)
+#define PO_CW               (112)
+#define PO_EI               (131)
+#define PO_EO               (132)
+#define PO_WI               (151)
+#define PO_WO               (152)
+
 #define PO_MAX              (57)
 
 extern apair_t pos_ial[];
@@ -286,6 +293,9 @@ extern apair_t lo_ial[];
 
 #define OA_TEXTCOLOR        (31)
 #define OA_TEXTBGCOLOR      (32)
+#define OA_TEXTALIGN        (33)
+#define OA_TEXTOFFSET       (34)
+#define OA_TEXTROTATE       (35)
 
 #define OA_WIDTH            (41)
 #define OA_HEIGHT           (42)
@@ -302,7 +312,6 @@ extern apair_t lo_ial[];
 #define OA_IMARGIN          (77)
 #define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
-#define OA_TEXTROTATE       (80)
 
 #define OA_DECO             (90)
 #define OA_DECOCOLOR        (91)
@@ -445,9 +454,6 @@ struct obattr {
     int   fillhatch;
     int   filllevel;
 
-    int   textcolor;
-    int   textbgcolor;
-
     int   hatchthick;
     int   hatchpitch;
 
@@ -477,6 +483,10 @@ struct obattr {
     int   originalshape;
 
     varray_t *ssar;         /* surface string ; text */
+    int   textcolor;
+    int   textbgcolor;
+    int   textalign;
+    int   textoffset;
     int   textrotate;
 
     char  *portstr;

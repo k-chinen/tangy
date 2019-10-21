@@ -842,6 +842,23 @@ skip_note:
         uc++;   \
     }
 
+    /* skip . (dot) */
+#define AISETXD(N,L,P,D) \
+    if(oak==(N)) {  \
+        char *sv; \
+        p = draw_wordW(p, value, BUFSIZ); \
+        sv = value; \
+        if(sv[0]=='.') { sv++; } \
+        x = assoc((L), sv);  \
+        if(x>=0) {  \
+            rob->cob.P = x; \
+        }   \
+        else {  \
+            rob->cob.P = (D);   \
+        }   \
+        uc++;   \
+    }
+
 P;
     uc = 0;
     ISET(OA_LINECOLOR,      outlinecolor);
@@ -859,6 +876,8 @@ P;
     ISET(OA_TEXTCOLOR,      textcolor);
     ISET(OA_TEXTBGCOLOR,    textbgcolor);
     ISET(OA_TEXTROTATE,     textrotate);
+    AISETXD(OA_TEXTALIGN,  pos_ial, textalign, PO_CENTER);
+    ISET(OA_TEXTOFFSET,    textoffset);
 
     ONSET(OA_HOLLOW,        hollow);
     ONSET(OA_SHADOW,        shadow);
@@ -1191,6 +1210,9 @@ parseobj(char *p)
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
+    nob->cob.textalign      = PO_CENTER;
+    nob->cob.textoffset     = 0;
+    nob->cob.textrotate     = 0;
     nob->cob.decocolor      = -1;
 
     nob->cob.arrowevery     = 0;

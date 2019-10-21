@@ -6836,9 +6836,10 @@ ss_dump(FILE *ofp, varray_t *ssar)
 
 
 int
-epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
+epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
+        int al, int exof, int ro,
         int bgshape, int qbgmargin, int fgcolor, int bgcolor,
-        varray_t *ssar)
+        varray_t *ssar, int ugjust)
 {
 /*
  * 2pass routine
@@ -6852,9 +6853,6 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     int   gy;
     sstr *uu;
     int   fht;
-#if 0
-    int   fsz;
-#endif
     int   n;
     int   rh;
     char  qs[BUFSIZ];
@@ -6876,6 +6874,9 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     char    mcontline[BUFSIZ];
     char    mcpart[BUFSIZ];
     int     mcar[BUFSIZ];
+    int     gjust;
+    int     imof;
+    int     offset;
     
     if(!ssar) {
         E;
@@ -6895,8 +6896,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
 #endif
 
 #if 1
-    Echo("%s: x,y %d,%d wd,ht %d,%d ro %d '%s'\n",
-        __func__, x, y, wd, ht, ro, mcontall);
+    Echo("%s: x,y %d,%d wd,ht %d,%d al %d exof %d ro %d '%s' ugj %d\n",
+        __func__, x, y, wd, ht, al, exof, ro, mcontall, ugjust);
 #endif
 
 #if 0
@@ -6913,24 +6914,12 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     fprintf(fp, "%% fg %d bg %d\n", fgcolor, bgcolor);
 
 
+
     memset(mcar, 0, sizeof(mcar));
 
     n = ssar->use;
 
     fht = def_textheight; 
-#if 0
-    fht = def_textheight; 
-    fsz = fht;
-#endif
-#if 0
-    fht = def_textheight; 
-    fsz = (int)(def_textheight*0.8); 
-#endif
-#if 0
-    fsz = def_textheight; 
-    fht = (int)(def_textheight*0.8); 
-#endif
-
     pyb = (int)((double)fht*textdecentfactor);
     bgmargin = (int)((double)fht*textbgmarginfactor);
 
@@ -6943,8 +6932,38 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
     Echo("ht %d use %d -> py %d\n", 
         ht, ssar->use, py);
 
+#if 0
+fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
+#endif
+
+    if(ugjust<0) {
+        switch(al) {
+        case PO_WEST:   gjust = SJ_LEFT;    imof = -wd/2;   break;
+        case PO_WI:     gjust = SJ_LEFT;    imof = -wd/2 + 2*bgmargin;  break;
+        case PO_WO:     gjust = SJ_RIGHT;   imof = -wd/2 - 2*bgmargin;  break;
+        case PO_EAST:   gjust = SJ_RIGHT;   imof = wd/2;    break;
+        case PO_EI:     gjust = SJ_RIGHT;   imof = wd/2 - 2*bgmargin;   break;
+        case PO_EO:     gjust = SJ_LEFT;    imof = wd/2 + 2*bgmargin;   break;
+        case PO_CE:     gjust = SJ_LEFT;    imof = 0 + 2*bgmargin;   break;
+        case PO_CW:     gjust = SJ_RIGHT;   imof = 0 - 2*bgmargin;   break;
+        default:
+                        gjust = SJ_CENTER;  imof = 0;       break;
+        }
+    }
+
+    offset = exof + imof;
+
+    fprintf(fp, "%% ugjust %d, al %d exof %d -> gjust %d imoff %d offset %d\n",
+        ugjust, al, exof, gjust, imof, offset);
+
+
+
+
     fprintf(fp, "gsave %% for sstr\n");
     fprintf(fp, "  %d %d translate\n", x, y);
+#if 1
+    fprintf(fp, "  %d %d translate\n", offset, 0);
+#endif
     fprintf(fp, "  %d rotate\n", ro);
 
     if(text_mode) {
@@ -7024,7 +7043,10 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro,
         varray_fprint(stdout, tq);
 #endif
 
+#if 0
         justify = SJ_CENTER;
+#endif
+        justify = gjust;
         hscale = 100;
 
         fprintf(fp, "    %% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
@@ -7290,7 +7312,10 @@ skip_bgdrawing:
         varray_fprint(stdout, tq);
 #endif
 
+#if 0
         justify = SJ_CENTER;
+#endif
+        justify = gjust;
         hscale = 100;
 
         fprintf(fp, "    %% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
@@ -11546,9 +11571,17 @@ P;
         Echo("text angle %d\n",
             u->cob.rotateval + u->cob.textrotate);
 #endif
+#if 0
         epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
+            PO_CENTER, 0,
             u->cob.rotateval + u->cob.textrotate,
-            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar);
+            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+#endif
+        epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
+            u->cob.textalign, u->cob.textoffset,
+            u->cob.rotateval + u->cob.textrotate,
+            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+
 
 
 skip_sstr:
