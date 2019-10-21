@@ -229,6 +229,8 @@ extern apair_t cmd_ial[];
 
 #define PO_CE               (111)
 #define PO_CW               (112)
+#define PO_CEO              (113)
+#define PO_CWO              (114)
 #define PO_EI               (131)
 #define PO_EO               (132)
 #define PO_WI               (151)

@@ -6938,16 +6938,18 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
 
     if(ugjust<0) {
         switch(al) {
-        case PO_WEST:   gjust = SJ_LEFT;    imof = -wd/2;   break;
+        case PO_WEST:   gjust = SJ_LEFT;    imof = -wd/2;               break;
         case PO_WI:     gjust = SJ_LEFT;    imof = -wd/2 + 2*bgmargin;  break;
         case PO_WO:     gjust = SJ_RIGHT;   imof = -wd/2 - 2*bgmargin;  break;
-        case PO_EAST:   gjust = SJ_RIGHT;   imof = wd/2;    break;
+        case PO_EAST:   gjust = SJ_RIGHT;   imof = wd/2;                break;
         case PO_EI:     gjust = SJ_RIGHT;   imof = wd/2 - 2*bgmargin;   break;
         case PO_EO:     gjust = SJ_LEFT;    imof = wd/2 + 2*bgmargin;   break;
-        case PO_CE:     gjust = SJ_LEFT;    imof = 0 + 2*bgmargin;   break;
-        case PO_CW:     gjust = SJ_RIGHT;   imof = 0 - 2*bgmargin;   break;
+        case PO_CE:     gjust = SJ_LEFT;    imof = 0;                   break;
+        case PO_CEO:    gjust = SJ_LEFT;    imof = 0 + 2*bgmargin;      break;
+        case PO_CW:     gjust = SJ_RIGHT;   imof = 0;                   break;
+        case PO_CWO:    gjust = SJ_RIGHT;   imof = 0 - 2*bgmargin;      break;
         default:
-                        gjust = SJ_CENTER;  imof = 0;       break;
+                        gjust = SJ_CENTER;  imof = 0;                   break;
         }
     }
 
@@ -11116,6 +11118,7 @@ epsdraw_note(FILE *fp, ob *u)
     int   ik;
     int   fht, fdc;
     char  mcont[BUFSIZ];
+    char  amcont[BUFSIZ];
     int   exa;
     char  tmp[BUFSIZ];
     char *p, *q;
@@ -11219,6 +11222,13 @@ epsdraw_note(FILE *fp, ob *u)
         fprintf(fp, "gsave %d %d translate %d rotate\n",
             tx, ty, ta);
 
+        amcont[0] = '\0';
+        psescape(amcont, BUFSIZ, mcont);
+#if 0
+fprintf(stderr, "mcont  |%s|\n", mcont);
+fprintf(stderr, "amcont |%s|\n", amcont);
+#endif
+
         if(exa) {
             fprintf(fp, "      %d rotate\n", exa);
 
@@ -11260,36 +11270,36 @@ epsdraw_note(FILE *fp, ob *u)
 
                 fprintf(fp, "      %d %d translate\n", 0, fdc);
                 if(bj==SJ_LEFT) {
-                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                    fprintf(fp, "      0 0 (%s) rshow\n", amcont);
                 }
                 if(bj==SJ_CENTER) {
-                    fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+                    fprintf(fp, "      0 0 (%s) cshow\n", amcont);
                 }
                 if(bj==SJ_RIGHT) {
-                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                    fprintf(fp, "      0 0 (%s) lshow\n", amcont);
                 }
             }
             else {
 
                 fprintf(fp, "      %d %d translate\n", 0, fdc);
                 if(bj==SJ_LEFT||bj==SJ_CENTER) {
-                    fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                    fprintf(fp, "      0 0 (%s) lshow\n", amcont);
                 }
                 else {
-                    fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                    fprintf(fp, "      0 0 (%s) rshow\n", amcont);
                 }
             }
         }
         else {
             fprintf(fp, "      %d %d translate\n", 0, fdc);
             if(bj==SJ_LEFT) {
-                fprintf(fp, "      0 0 (%s) lshow\n", mcont);
+                fprintf(fp, "      0 0 (%s) lshow\n", amcont);
             }
             if(bj==SJ_CENTER) {
-                fprintf(fp, "      0 0 (%s) cshow\n", mcont);
+                fprintf(fp, "      0 0 (%s) cshow\n", amcont);
             }
             if(bj==SJ_RIGHT) {
-                fprintf(fp, "      0 0 (%s) rshow\n", mcont);
+                fprintf(fp, "      0 0 (%s) rshow\n", amcont);
             }
         }
 

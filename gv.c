@@ -236,7 +236,9 @@ apair_t pos_ial[] = {
     {"WI",                  PO_WI},
     {"WO",                  PO_WO},
     {"CE",                  PO_CE},
+    {"CEO",                 PO_CEO},
     {"CW",                  PO_CW},
+    {"CWO",                 PO_CWO},
 
     {NULL,                  -1},
 };
