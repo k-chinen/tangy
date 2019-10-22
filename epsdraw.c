@@ -6834,6 +6834,8 @@ ss_dump(FILE *ofp, varray_t *ssar)
 }
 
 
+#define MJ  {fprintf(stderr, "MJ %d i %d justify %d\n", \
+        __LINE__, i, justify);}
 
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
@@ -6877,11 +6879,14 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
     int     gjust;
     int     imof;
     int     offset;
+    int     jsar[BUFSIZ];
     
     if(!ssar) {
         E;
         return -1;
     }
+
+    memset(jsar, 0, sizeof(jsar));
 
 #if 0
     Echo("%s: x,y %d,%d wd,ht %d,%d ro %d\n", __func__, x, y, wd, ht, ro);
@@ -7022,7 +7027,6 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
     fprintf(fp, "  /sstrwar %d array def %% array for string-width\n",
         ssar->use);
 
-
     /*****
      ***** 1st pass
      *****/
@@ -7045,9 +7049,6 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
         varray_fprint(stdout, tq);
 #endif
 
-#if 0
-        justify = SJ_CENTER;
-#endif
         justify = gjust;
         hscale = 100;
 
@@ -7242,6 +7243,8 @@ Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
         }
 
 
+        if(i<BUFSIZ) jsar[i] = justify;
+
         fprintf(fp, "      %% justify %d\n", justify);
         
         switch(justify) {
@@ -7314,10 +7317,7 @@ skip_bgdrawing:
         varray_fprint(stdout, tq);
 #endif
 
-#if 0
-        justify = SJ_CENTER;
-#endif
-        justify = gjust;
+        if(i<BUFSIZ) justify = jsar[i];
         hscale = 100;
 
         fprintf(fp, "    %% enter str %d '%s' gy %d\n", i, uu->ssval, gy);
@@ -7417,6 +7417,33 @@ Echo("  --- drawing\n");
         curface = FF_SERIF;
         hscale    = 100;
 
+#if 1
+                fprintf(fp, "      %% justify %d\n", justify);
+                
+                switch(justify) {
+                case SJ_LEFT:
+                    break;
+                case SJ_RIGHT:
+                    fprintf(fp, "      sstrw neg 0 translate\n");
+                    break;
+                default:
+                case SJ_CENTER:
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+                    break;
+                case SJ_FIT:
+#if 0
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+#endif
+#if 0
+                    fprintf(fp, "      %d 2 div neg 0 translate\n", wd);
+#endif
+                    fprintf(fp, "      %d sstrw div 1 scale\n", wd);
+                    fprintf(fp, "      sstrw 2 div neg 0 translate\n");
+                    break;
+                }
+                fprintf(fp, " 0 0 moveto\n");
+#endif
+
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
             
@@ -7457,7 +7484,9 @@ Echo("    hscale %d\n", hscale);
                         case FF_SERIF:      newface = FF_SERIF; break;
                         }
                         cc = assoc(sj_ial, token);
-                        if(cc>=0) { justify = cc; }
+#if 0
+                        if(cc>=0) { justify = cc; MJ;}
+#endif
                     }
                 }
 #if 0
@@ -7504,8 +7533,9 @@ Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
                 txe_extract(mcpart, BUFSIZ, te);
                 psescape(qs, BUFSIZ, mcpart);
 
-#if 1
+#if 0
                 fprintf(fp, "      %% justify %d\n", justify);
+MJ;
                 
                 switch(justify) {
                 case SJ_LEFT:
