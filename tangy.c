@@ -26,10 +26,6 @@
 #include "epsdraw.h"
 #include "a.h"
 
-/*
-#include "picdraw.c"
-*/
-
 int linkchk(ob *xch, ns *xns);
 
 int     nodraw = 0;
@@ -147,7 +143,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.052\n");
+    printf("tangy version 2.060\n");
     return 0;
 }
 
