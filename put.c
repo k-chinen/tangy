@@ -1370,6 +1370,9 @@ P;
         _t_ --;
         break;
 
+    case CMD_EXIT:
+        break;
+
     case CMD_NOP:
         break;
 

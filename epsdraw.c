@@ -11463,6 +11463,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         /* nothing */
     }
     else
+    if(u->type==CMD_EXIT) {
+        /* nothing */
+    }
+    else
     if(u->type==CMD_SCATTER) {
         epsdraw_scatter(fp, *xdir, ox, oy, u, xns);
     }
