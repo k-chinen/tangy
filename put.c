@@ -1528,7 +1528,7 @@ Echo("ULINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
 Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
 #if 0
 #endif
-            re = 1;
+            re = 0;
         }
         break;
 
