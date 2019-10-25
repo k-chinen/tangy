@@ -5197,21 +5197,25 @@ P;
                 aw = xu->wd;
                 ah = xu->ht;
             }
+
             changecolor(fp, xu->cob.fillcolor);
             r = drawpathN(fp, ydir, xox, xoy, xu, xns);
             fprintf(fp, "  clip\n");
 #if 0
-            fprintf(fp, "  eoclip\n");
-            fprintf(fp, "  stroke\n");
-#endif
-#if 0
+            fprintf(fp, " %% xox %d xoy %d; ydir %d\n", xox, xoy, ydir);
+            fprintf(fp, " %% wd %d ht %d\n", xu->wd, xu->ht);
             fprintf(fp, " %% bb %d %d %d %d\n", xu->lx, xu->by, xu->rx, xu->ty);
-            fprintf(fp, " %% center %d %d\n", xu->x, xu->y);
-            fprintf(fp, " %% xox %d xoy %d\n", xox, xoy);
+            fprintf(fp, " %% x,y     %7d %7d\n", xu->x, xu->y);
+            fprintf(fp, " %% ox,oy   %7d %7d\n", xu->ox, xu->oy);
+            fprintf(fp, " %% gx,gy   %7d %7d\n", xu->gx, xu->gy);
 #endif
 
             changethick(fp, xu->cob.hatchthick);
-            fprintf(fp, "  %d %d translate\n", xu->x+xox, xu->y+xoy);
+            fprintf(fp, "  %d %d translate %% hcnt\n", xu->gx, xu->gy);
+#if 0
+            /* position mark for debug */
+            fprintf(fp, "  gsave newpath 0 0 %d 0 360 arc fill grestore\n", objunit/20);
+#endif
             epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor,
                 xu->cob.fillhatch, xu->cob.hatchpitch);
 
@@ -11633,7 +11637,9 @@ skip_sstr:
     }
 
     ik = epsdraw_note(fp, u);
-    ik = epsdraw_portboard(fp, xns, *xdir, u);
+    if(u->cob.portstr || u->cob.boardstr) {
+        ik = epsdraw_portboard(fp, xns, *xdir, u);
+    }
 
     u->drawed = 1;
 

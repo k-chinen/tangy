@@ -1510,14 +1510,25 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
                 ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
             }
+
+            u->clx = lx;
+            u->cby = by;
+            u->crx = rx;
+            u->cty = ty;
+
             wd = rx - lx;
             ht = ty - by;
+
+            u->fx = fx;
+            u->fy = fy;
+
 Echo("ULINEs oid %d %d,%d,%d,%d %dx%d\n", u->oid, lx, by, rx, ty, wd, ht);
             u->ox = -wd/2-lx;
             u->oy = -ht/2-by;
 Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
 #if 0
 #endif
+            re = 1;
         }
         break;
 
@@ -1557,31 +1568,11 @@ Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
 Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
 #endif
 
-#if 1
             u->fx = fx;
             u->fy = fy;
-#endif
-#if 0
-            u->fx = fx - lx;
-            u->fy = fy - by;
-#endif
 
-#if 1
             u->ox = -wd/2;
             u->oy = -ht/2;
-#endif
-#if 0
-            u->ox = -(lx+rx)/2;
-            u->oy = -(ty+by)/2;
-#endif
-            if(u->type==CMD_ULINE) {
-            }
-            else {
-#if 0
-                u->x = -(lx+rx)/2;
-                u->y = -(ty+by)/2;
-#endif
-            }
 
 #if 1
 Echo("\tseg original 1 u; ox,oy %d,%d fx,fy %d,%d\n",
