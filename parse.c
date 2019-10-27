@@ -591,12 +591,14 @@ skip_number:
         if(tmp[0]) {
         }
             ns = (sstr*) malloc(sizeof(sstr));
-            ns->ssval = strdup(tmp);
-            ns->ssopt = 0;
-            varray_push(rob->cob.ssar, ns);
+			if(ns) {
+				ns->ssval = strdup(tmp);
+				ns->ssopt = 0;
+				varray_push(rob->cob.ssar, ns);
 #if 0
-            varray_fprint(stdout, rob->cob.ssar);
+            	varray_fprint(stdout, rob->cob.ssar);
 #endif
+			}
 
         goto out;
     }
