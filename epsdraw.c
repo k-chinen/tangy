@@ -11703,14 +11703,25 @@ P;
         if(movevisit_mode) {
             int w = u->crx - u->clx;
             int h = u->cty - u->cby;
+            int r = objunit/10;
+#if 0
+fprintf(stderr, "w %d h %d r %d\n", w, h, r);
+#endif
             int aw = w - 3*objunit/10;
             int ah = h - 3*objunit/10;
+#if 0
+fprintf(stderr, "aw %d ah %d\n", aw, ah);
+#endif
+            if(aw<0 || ah<0) { aw = w; ah = h; r = 0; }
+#if 0
+fprintf(stderr, "aw %d ah %d\n", aw, ah);
+#endif
             int ow = (w-aw)/2;
             int oh = (h-ah)/2;
             fprintf(fp, "gsave\n");
             fprintf(fp, "  0.8 setgray\n");
             fprintf(fp, "  %d %d %d %d %d mrboxfill\n",
-                ox+u->clx+ow, oy+u->cby+oh, aw, ah, objunit/10);
+                ox+u->clx+ow, oy+u->cby+oh, aw, ah, r);
 #if 0
             fprintf(fp, "  %d setlinewidth\n", objunit/200);
             fprintf(fp, "  0.5 setgray\n");
