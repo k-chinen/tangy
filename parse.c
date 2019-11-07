@@ -11,6 +11,46 @@
 #include "a.h"
 #include "gv.h"
 
+
+int
+__sdumpNZ(FILE *fp, char *msg, char *s, int n, int zb)
+{
+    int c;
+    fprintf(fp, "%s: |", msg);
+    c = 0;
+    while(c<n) {
+        if(*s<' '||*s==127) {
+#if 0
+            fprintf(fp, "<%02hhX>", (unsigned char)*s);
+#endif
+            fprintf(fp, "<%x%x>", ((unsigned char)*s)/16, ((unsigned char)*s)%16);
+            if(zb>0 && *s=='\0') {
+                break;
+            }
+        }
+        else {  
+            fprintf(fp, "%c", *s);
+        }
+        s++;
+        c++;
+    }
+    fprintf(fp, "|\n");
+    fflush(fp);
+    return 0;
+}
+
+int
+sdumpN(FILE *fp, char *msg, char *s, int n)
+{
+    return __sdumpNZ(fp, msg, s, n, 0);
+}
+
+int
+sdumpNZ(FILE *fp, char *msg, char *s, int n)
+{
+    return __sdumpNZ(fp, msg, s, n, 1);
+}
+
 int
 sdump(FILE *fp, char *msg, char *s)
 {
@@ -50,10 +90,16 @@ trimdoublequote(char *s)
     char *os;
     os = s;
 #if 0
-    sdump(stderr, "b", os);
+    sdumpNZ(stderr, "b", os, 16);
 #endif
     if(*s=='"') {
-        memmove(s, s+1, strlen(s+1));
+#if 0
+        sdumpNZ(stderr, "0s", s, 16);
+#endif
+        memmove(s, s+1, strlen(s+1)+1);
+#if 0
+        sdumpNZ(stderr, "1s", s, 16);
+#endif
         while(*s) {
             if(*s=='"') {
                 *s = '\0';
@@ -62,8 +108,9 @@ trimdoublequote(char *s)
             s++;
         }
     }
+    *s = '\0';
 #if 0
-    sdump(stderr, "a", os);
+    sdumpNZ(stderr, "a", os, 16);
 #endif
     return 0;
 }
@@ -589,16 +636,19 @@ skip_number:
         }
 
         if(tmp[0]) {
-        }
-            ns = (sstr*) malloc(sizeof(sstr));
-			if(ns) {
-				ns->ssval = strdup(tmp);
-				ns->ssopt = 0;
-				varray_push(rob->cob.ssar, ns);
 #if 0
-            	varray_fprint(stdout, rob->cob.ssar);
+fprintf(stderr, "tmp <%s>\n", tmp);
 #endif
-			}
+            ns = (sstr*) malloc(sizeof(sstr));
+            if(ns) {
+                ns->ssval = strdup(tmp);
+                ns->ssopt = 0;
+                varray_push(rob->cob.ssar, ns);
+#if 0
+                varray_fprint(stdout, rob->cob.ssar);
+#endif
+            }
+        }
 
         goto out;
     }
@@ -768,6 +818,7 @@ skip_note:
 
 #define SADD(x,y) \
     if(oak==(x)) { \
+        /*fprintf(stderr, "call draw_wordW <%s>\n", p);*/ \
         p = draw_wordW(p, value, BUFSIZ); \
         if(value[0]){ trimdoublequote(value); } \
         /*fprintf(stderr, "value  |%s|\n", value);*/ \
@@ -1386,7 +1437,6 @@ P;
 }
 
 
-
 static char ibuf[BUFSIZ]="";
 
 int
@@ -1432,11 +1482,37 @@ getcmd(FILE *fp, char *ebuf, int elen)
             sdump(stderr, "k ebuf", ebuf);
 #endif
         }
+#if 0
         else
         if(*p=='\\') {
+            int nv = -1;
+P;
+#if 0
             p++;
             *q++ = *p++;
+#endif
+            sdumpNZ(stderr, "0p", p, 16);
+            sdumpNZ(stderr, "0q", q, 16);
+            sdumpNZ(stderr, "0e", ebuf, 16);
+            switch(*(p+1)) {
+            case 'n':   nv = '\n';      break;
+            case 'r':   nv = '\r';      break;
+            }
+            if(nv>0) {
+P;
+                *q++ = nv;
+                p++;
+                p++;
+            }
+            else {
+P;
+                *q++ = *p++;
+            }
+            sdumpNZ(stderr, "1p", p, 16);
+            sdumpNZ(stderr, "1q", q, 16);
+            sdumpNZ(stderr, "1e", ebuf, 16);
         }
+#endif
         else
         if(*p=='"') {
             u++;
@@ -1689,9 +1765,12 @@ parse(FILE *fp, ob* ch0, ns *ns0)
 
     while(1) {
         ik = getcmd(fp, line, BUFSIZ);
+#if 1
+Echo("getcmd ik %d |%s|\n", ik, line);
+#endif
         if(ik) {
 #if 0
-Echo("getcmd ik %d\n", ik);
+Echo("getcmd ik %d |%s|\n", ik, line);
 #endif
             break;
         }
