@@ -303,7 +303,7 @@ main(int argc, char *argv[])
             skelton_mode = 1;
             break;
         case 'U':
-            spacevisit_mode = 1;
+            movevisit_mode = 1;
             break;
         case 'd':
             draft_mode = 1;

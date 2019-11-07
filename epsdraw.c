@@ -11700,26 +11700,25 @@ P;
     }
     else
     if(u->type==CMD_MOVE) {
-#if 0
-        fprintf(fp, "+   # empty as \"move\"\n");
-        fprintf(fp, "+   box at (%d,%d) width %d height %d \"%d\" invis\n",
-            ox+u->cx, oy+u->cy, u->crx-u->clx, u->cty-u->cby, u->oid);
-#endif
-#if 1
-        if(spacevisit_mode) {
-            fprintf(fp, "%%%%\n");
+        if(movevisit_mode) {
+            int w = u->crx - u->clx;
+            int h = u->cty - u->cby;
+            int aw = w - 3*objunit/10;
+            int ah = h - 3*objunit/10;
+            int ow = (w-aw)/2;
+            int oh = (h-ah)/2;
             fprintf(fp, "gsave\n");
             fprintf(fp, "  0.8 setgray\n");
-            fprintf(fp, "  %d %d translate\n", ox, oy);
-            fprintf(fp, "  %d %d moveto\n", u->clx, u->cby);
-            fprintf(fp, "  %d %d lineto\n", u->crx, u->cby);
-            fprintf(fp, "  %d %d lineto\n", u->crx, u->cty);
-            fprintf(fp, "  %d %d lineto\n", u->clx, u->cty);
-            fprintf(fp, "  closepath\n");
-            fprintf(fp, "  fill\n");
+            fprintf(fp, "  %d %d %d %d %d mrboxfill\n",
+                ox+u->clx+ow, oy+u->cby+oh, aw, ah, objunit/10);
+#if 0
+            fprintf(fp, "  %d setlinewidth\n", objunit/200);
+            fprintf(fp, "  0.5 setgray\n");
+            fprintf(fp, "  %d %d %d %d 0 mrbox\n",
+                ox+u->clx, oy+u->cby, w, h);
+#endif
             fprintf(fp, "grestore\n");
         }
-#endif
     }
     else
     if(u->type==CMD_CLOUD) {
