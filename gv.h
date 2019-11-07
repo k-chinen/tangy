@@ -47,6 +47,7 @@ extern int oidl_mode;
 extern int namel_mode;
 extern int ruler_mode;
 extern int text_mode;
+extern int spacevisit_mode;
 
 extern double def_hollowratio;
 extern double def_shadowgray;

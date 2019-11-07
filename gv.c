@@ -472,6 +472,7 @@ double pbstrgapfactor       = 0.10;
 
 int draft_mode      = 0;
 int skelton_mode    = 0;
+int spacevisit_mode = 0;
 int grid_mode       = 0;
 int bbox_mode       = 0;
 int oidl_mode       = 0;

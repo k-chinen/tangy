@@ -253,7 +253,7 @@ main(int argc, char *argv[])
     pallet = new_default_pallet();
 
     while((flag=getopt(argc, argv,
-            "0hmVPvqpngbSdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
+            "0hmVPvqpngbSUdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -301,6 +301,9 @@ main(int argc, char *argv[])
             break;
         case 'S':
             skelton_mode = 1;
+            break;
+        case 'U':
+            spacevisit_mode = 1;
             break;
         case 'd':
             draft_mode = 1;

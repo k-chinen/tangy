@@ -11705,6 +11705,21 @@ P;
         fprintf(fp, "+   box at (%d,%d) width %d height %d \"%d\" invis\n",
             ox+u->cx, oy+u->cy, u->crx-u->clx, u->cty-u->cby, u->oid);
 #endif
+#if 1
+        if(spacevisit_mode) {
+            fprintf(fp, "%%%%\n");
+            fprintf(fp, "gsave\n");
+            fprintf(fp, "  0.8 setgray\n");
+            fprintf(fp, "  %d %d translate\n", ox, oy);
+            fprintf(fp, "  %d %d moveto\n", u->clx, u->cby);
+            fprintf(fp, "  %d %d lineto\n", u->crx, u->cby);
+            fprintf(fp, "  %d %d lineto\n", u->crx, u->cty);
+            fprintf(fp, "  %d %d lineto\n", u->clx, u->cty);
+            fprintf(fp, "  closepath\n");
+            fprintf(fp, "  fill\n");
+            fprintf(fp, "grestore\n");
+        }
+#endif
     }
     else
     if(u->type==CMD_CLOUD) {
