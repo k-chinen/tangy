@@ -56,7 +56,7 @@ int ss_dump(FILE *ofp, varray_t *ssar);
 #if 0
 int epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int ro, int bgshape, int qbgmargin, int fgcolor, int bgcolor, varray_t *ssar);
 #endif
-int epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int al, int of, int ro, int bgshape, int qbgmargin, int fgcolor, int bgcolor, varray_t *ssar, int ugjust);
+int epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht, int al, int of, int ro, int qof, int bgshape, int qbgmargin, int fgcolor, int bgcolor, varray_t *ssar, int ugjust);
 int epsdraw_circle(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_polygon(FILE *fp, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_ellipse(FILE *fp, int xox, int xoy, ob *xu, ns *xns);

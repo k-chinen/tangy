@@ -207,7 +207,7 @@ psescape(char *dst, int dlen, char* src)
     }
     *q = '\0';
 
-#if 0
+#if 1
 Echo("%s: '%s' <- '%s'\n", __func__, dst, src);
 #endif
 
@@ -5210,6 +5210,21 @@ P;
             fprintf(fp, " %% gx,gy   %7d %7d\n", xu->gx, xu->gy);
 #endif
 
+            /*** BACK ***/
+
+            fprintf(fp, "  gsave\n");
+            changethick(fp, xu->cob.hatchthick);
+            fprintf(fp, "  %d %d translate %% hcnt\n", xu->gx, xu->gy);
+#if 0
+            /* position mark for debug */
+            fprintf(fp, "  gsave newpath 0 0 %d 0 360 arc fill grestore\n", objunit/20);
+#endif
+            epsdraw_hatch(fp, aw, ah, xu->cob.backcolor,
+                xu->cob.backhatch, xu->cob.hatchpitch);
+            fprintf(fp, "  grestore\n");
+
+            /*** FILL ***/
+
             changethick(fp, xu->cob.hatchthick);
             fprintf(fp, "  %d %d translate %% hcnt\n", xu->gx, xu->gy);
 #if 0
@@ -5226,6 +5241,13 @@ P;
             fprintf(fp, " %% no-fill\n");
         }
     }
+#if 0
+    else {
+        fprintf(stderr, "%s: oid %d it is not ULINE\n", __func__, xu->oid);
+    }
+#endif
+
+    /* OUTLINE */
 P;
     fprintf(fp, " gsave\n");
     changecolor(fp, xu->cob.outlinecolor);
@@ -6837,20 +6859,117 @@ ss_dump(FILE *ofp, varray_t *ssar)
     return 0;
 }
 
+int
+epsdraw_s2sstrbgX(FILE *fp, int x, int y, int wd, int ht,
+        int al, int exof, int ro, int qof,
+        int bgshape, int qbgmargin, int fgcolor, int bgcolor,
+        char *src, int ugjust)
+{
+    varray_t *xar;
+    sstr *ns;
+    int   ik;
+    char  tmp[BUFSIZ];
+    char *s;
+    char *p;
+    char *q;
+    int   nl;
+
+    extern int sdumpNZ(FILE*, char*, char*, int);
+
+
+#if 0
+fprintf(stderr, "src |%s|\n", src);
+#endif
+
+    xar = varray_new();
+    if(xar) {
+        varray_entrysprintfunc(xar, ss_sprintf);
+
+#if 0
+        ns = (sstr*) malloc(sizeof(sstr));
+        if(ns) {
+            ns->ssval = strdup(src);
+            ns->ssopt = 0;
+            varray_push(xar, ns);
+#if 1
+            varray_fprint(stdout, xar);
+#endif
+        
+        }
+#endif
+
+        s = src;
+        while(*s) {
+            nl = 0;
+            memset(tmp, 0, sizeof(tmp));
+#if 0
+            sdumpNZ(stderr, "s  ", s, 32);
+#endif
+            p = s;
+            while(*p) {
+#if 0
+                fprintf(stderr, "p  '%c' \t%p\n", *p, p);
+#endif
+                if(*p=='\\' && *(p+1)=='n') {
+                    nl++;
+                    break;
+                }
+                p++;
+            }
+#if 0
+            sdumpNZ(stderr, "tmp", tmp, 32);
+#endif
+            memcpy(tmp, s, p-s);
+#if 0
+            sdumpNZ(stderr, "tmp", tmp, 31);
+            fflush(stderr);
+#endif
+
+            if(tmp[0]) {
+                ns = (sstr*) malloc(sizeof(sstr));
+                if(ns) {
+                    ns->ssval = strdup(tmp);
+                    ns->ssopt = 0;
+                    varray_push(xar, ns);
+#if 0
+                    varray_fprint(stdout, xar);
+#endif
+        
+                }
+            }
+
+            if(nl) {
+                p++;
+                p++;
+            }
+            
+            s = p++;
+        }
+
+
+        ik = epsdraw_sstrbgX(fp, x, y, wd, ht, al, exof, ro, qof,
+            bgshape, qbgmargin, fgcolor, bgcolor, xar, ugjust);
+    }
+    else {
+        ik = -1;
+    }
+
+    return ik;
+}
 
 #define MJ  {fprintf(stderr, "MJ %d i %d justify %d\n", \
         __LINE__, i, justify);}
 
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
-        int al, int exof, int ro,
+        int al, int exof, int ro, int qof,
         int bgshape, int qbgmargin, int fgcolor, int bgcolor,
         varray_t *ssar, int ugjust)
 {
 /*
  * 2pass routine
  *     1st - calcurate width and draw backgound round-box
- *     2nd - draw string
+ *     1nd - draw string
  */
 
     int   i;
@@ -6961,21 +7080,24 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
                         gjust = SJ_CENTER;  imof = 0;                   break;
         }
     }
+    else {
+        gjust = ugjust;
+        imof  = 0;
+    }
 
     offset = exof + imof;
 
-    fprintf(fp, "%% ugjust %d, al %d exof %d -> gjust %d imoff %d offset %d\n",
-        ugjust, al, exof, gjust, imof, offset);
-
-
+    fprintf(fp, "%% ugjust %d, al %d exof %d qof %d -> gjust %d imoff %d offset %d\n",
+        ugjust, al, exof, qof, gjust, imof, offset);
 
 
     fprintf(fp, "gsave %% for sstr\n");
     fprintf(fp, "  %d %d translate\n", x, y);
-#if 1
     fprintf(fp, "  %d %d translate\n", offset, 0);
-#endif
     fprintf(fp, "  %d rotate\n", ro);
+    if(qof!=0) {
+        fprintf(fp, "  %d %d translate\n", qof, 0);
+    }
 
     if(text_mode) {
         fprintf(fp, "  gsave %% textmode\n");
@@ -10849,6 +10971,7 @@ epsdraw_portboard_curve(FILE *fp, ns *xns, int xdir, ob *u)
     double  mu, mv;
     int     ik;
     int     gap;
+    char    astr[BUFSIZ];
 
 #if 0
     fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
@@ -10888,14 +11011,16 @@ fprintf(fp, "%% %s: %d ik %d\n", __func__, __LINE__, ik);
     gap += u->cob.outlinethick/2;
 
     if(u->cob.portstr) {
+        psescape(astr, BUFSIZ, u->cob.portstr);
         fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xlrshow\n",
             px, py, gap, def_textheight,
-                pag, (double)u->cob.portrotate, u->cob.portstr);
+                pag, (double)u->cob.portrotate, astr);
     }
     if(u->cob.boardstr) {
+        psescape(astr, BUFSIZ, u->cob.boardstr);
         fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xrrshow\n",
             px, py, gap, def_textheight,
-                pag, (double)u->cob.boardrotate, u->cob.boardstr);
+                pag, (double)u->cob.boardrotate, astr);
     }
 
     return 0;
@@ -10909,6 +11034,7 @@ epsdraw_portboard_simpleline(FILE *fp, ns *xns, int xdir, ob *u)
     int     ik;
     int     gap;
     varray_t *sar;
+    char    astr[BUFSIZ];
 
 #if 0
     fprintf(fp, "%% %s: enter with xdir %d u %p\n", __func__, xdir, u);
@@ -10941,14 +11067,16 @@ epsdraw_portboard_simpleline(FILE *fp, ns *xns, int xdir, ob *u)
     gap += u->cob.outlinethick/2;
 
     if(u->cob.portstr) {
+        psescape(astr, BUFSIZ, u->cob.portstr);
         fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xlrshow\n",
             px, py, gap, def_textheight,
-                pag, (double)u->cob.portrotate, u->cob.portstr);
+                pag, (double)u->cob.portrotate, astr);
     }
     if(u->cob.boardstr) {
+        psescape(astr, BUFSIZ, u->cob.boardstr);
         fprintf(fp, "%.3f %.3f %d %d %.2f %.2f (%s) xrrshow\n",
             px, py, gap, def_textheight,
-                pag, (double)u->cob.boardrotate, u->cob.boardstr);
+                pag, (double)u->cob.boardrotate, astr);
     }
 
     return 0;
@@ -11067,6 +11195,7 @@ epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
     int ik;
     int px, py;
     int bx, by;
+    char astr[BUFSIZ];
 
     fprintf(fp, "%% %s: enter oid %-3d xdir %4d\n",
         __func__, u->oid, xdir);
@@ -11116,20 +11245,29 @@ epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
     if(u->cob.portstr) {    
         ik = _solve_pbpoint(fp, xns, xdir,  90, u, &px, &py);
         if(ik) {
+            psescape(astr, BUFSIZ, u->cob.portstr);
             fprintf(fp, "      %d %d %d %d %d %d (%s) xlrshow\n",
                 px, py, def_pbstrgap, def_textheight,
-                xdir-90, u->cob.portrotate, u->cob.portstr);
+                xdir-90, u->cob.portrotate, astr);
         }
         else {
             Error("cannot solve %dth obj portpoint\n", u->oid);
         }
+#if 1
+        ik = _solve_pbpoint(fp, xns, xdir, -90, u, &bx, &by);
+        epsdraw_s2sstrbgX(fp, bx, by, objunit, objunit,
+            PO_CENTER, 0, -90, def_pbstrgap,
+            0, 0, u->cob.textcolor, u->cob.textbgcolor, 
+            u->cob.portstr, SJ_LEFT);
+#endif
     }
     if(u->cob.boardstr) {   
         ik = _solve_pbpoint(fp, xns, xdir, -90, u, &bx, &by);
         if(ik) {
+            psescape(astr, BUFSIZ, u->cob.boardstr);
             fprintf(fp, "      %d %d %d %d %d %d (%s) xrrshow\n",
                 bx, by, def_pbstrgap, def_textheight,
-                xdir-90, u->cob.boardrotate, u->cob.boardstr);
+                xdir-90, u->cob.boardrotate, astr);
         }
         else {
             Error("cannot solve %dth obj boardpoint\n", u->oid);
@@ -11622,15 +11760,13 @@ P;
 #if 0
         epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
             PO_CENTER, 0,
-            u->cob.rotateval + u->cob.textrotate,
+            u->cob.rotateval + u->cob.textrotate, 0,
             0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
 #endif
         epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
             u->cob.textalign, u->cob.textoffset,
-            u->cob.rotateval + u->cob.textrotate,
+            u->cob.rotateval + u->cob.textrotate, 0,
             0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
-
-
 
 skip_sstr:
         (void)0;
