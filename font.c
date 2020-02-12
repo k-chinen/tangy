@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "alist.h"
 #include "font.h"
 
@@ -36,3 +37,44 @@ apair_t ff_act_ial[] = {
     {NULL,      -1},
 };
 
+int
+swap_font(int xv, char *xn)
+{
+#if 0
+    char *bfn;
+    char *afn;
+#endif
+    int   i;
+    int   q=0;
+
+    if(xv<0 || !xn) {
+        return -1;
+    }
+
+#if 0
+    bfn  = rassoc(ff_act_ial, xv);
+    fprintf(stderr, "bfn |%s|\n", bfn);
+#endif
+
+    i = 0;
+    while(ff_act_ial[i].name) {
+        if(ff_act_ial[i].value==xv) {
+            ff_act_ial[i].name = strdup(xn);
+            q++;
+            break;
+        }
+        i++;
+    }
+
+#if 0
+    afn  = rassoc(ff_act_ial, FF_SERIF);
+    fprintf(stderr, "afn |%s|\n", afn);
+#endif
+
+    if(q) {
+        return q;
+    }
+    else {
+        return 0;
+    }
+}

@@ -18,4 +18,6 @@ extern apair_t fh_act_ial[];
 extern apair_t ff_ial[];
 extern apair_t ff_act_ial[];
 
+int swap_font(int xv, char *xn);
+
 #endif/*_TANGY_FONT_H_*/

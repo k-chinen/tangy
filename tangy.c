@@ -341,6 +341,33 @@ main(int argc, char *argv[])
 
         case 'F':
             def_fontname = strdup(optarg);
+            ik = swap_font(FF_SERIF, def_fontname);
+            fprintf(stderr, "ik %d\n", ik);
+
+#if 0
+{
+            char *bfn;
+            char *afn;
+            int   i;
+
+            bfn  = rassoc(ff_act_ial, FF_SERIF);
+            fprintf(stderr, "bfn |%s|\n", bfn);
+
+            i = 0;
+            while(ff_act_ial[i].name) {
+                if(ff_act_ial[i].value==FF_SERIF) {
+                    ff_act_ial[i].name = strdup(def_fontname);
+                    break;
+                }
+                i++;
+            }
+
+            afn  = rassoc(ff_act_ial, FF_SERIF);
+            fprintf(stderr, "afn |%s|\n", afn);
+    
+}
+#endif
+
             break;
 
 #if 0
