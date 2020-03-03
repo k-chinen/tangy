@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <iconv.h>
+#include <errno.h>
 #include "varray.h"
 
 #include "tx.h"
@@ -12,6 +14,7 @@
 int tx_trace = 0;
 
 #define Echo    if(tx_trace)printf
+#define INTRACE (tx_trace>0)
 
 #define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
 #define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
@@ -54,9 +57,8 @@ txe_new(int xnt, char *xns)
     return ne;
 }
 
-
 int
-txe_parse(varray_t *ar, char *fs)
+txe_parse1(varray_t *ar, char *fs)
 {
     char *p, *q;
     char  token[BUFSIZ];
@@ -137,6 +139,167 @@ Echo(" cmd  %d '%s'\n", cin, token);
             }
 
     return 0;
+}
+
+static
+int
+dump(FILE *fp, char *pre, char *xx, int len)
+{
+    unsigned char *p;
+    int i;
+
+    fprintf(fp, "%s", pre);
+    p = (unsigned char*)xx;
+    i = 0;
+    while(i<len) {
+        fprintf(fp, " %02x", *p);
+        p++;
+        i++;
+    }
+    fprintf(fp, "\n");
+    fflush(fp);
+
+    return 0;
+}
+
+
+
+
+static
+int
+ins_kanji_shift(char *ds, int dlen, char *ss)
+{
+    iconv_t cq;
+
+    int     ik;
+    char   *is;
+    char   *os;
+    size_t  ilen;
+    size_t  olen;
+
+    char   *ms;
+    int     mlen;
+
+    unsigned char   *p;
+    unsigned char   *q;
+    unsigned char   *u;
+    
+
+    mlen = strlen(ss)*4+1;
+    ms = (char*)alloca(mlen);
+    if(!ms) {
+        fprintf(stderr, "no memory (mlen %d)\n", mlen);
+        return -1;
+    }
+    memset(ms, 0, mlen);
+
+
+    cq = iconv_open("EUC-JP", "UTF-8");
+    if(cq == (iconv_t)-1) {
+        printf("fail iconv_open (%d)\n", errno);
+        return -1;
+    }
+
+    is = (char*)ss;
+    os = (char*)ms;
+
+    ilen = (size_t)strlen(ss);
+    olen = (size_t)mlen;
+
+    Echo("ilen %d\n", (int)ilen);
+    Echo("olen %d\n", (int)mlen);
+
+    ik = iconv(cq, &is, &ilen, &os, &olen);
+
+    Echo("ik %d iconv\n", ik);
+
+    Echo("ilen %d\n", (int)ilen);
+    Echo("olen %d\n", (int)mlen);
+
+    iconv_close(cq);
+
+    if(INTRACE) {
+        dump(stderr, "ms", ms, strlen(ms));
+    }
+
+    p = (unsigned char*)ms;
+    q = (unsigned char*)ds;
+
+    while(*p) {
+        if(*p>=0x80) {
+            u = p;
+            while(*u && *u>=0x80) {
+                u++;
+            }
+#if 0
+fprintf(stderr, "p %p %02x\n", p, *p);
+fprintf(stderr, "u %p %02x\n", u, *u);
+#endif
+            *q++ = '|'; 
+            *q++ = 'K'; 
+            *q++ = 'A'; 
+            *q++ = 'N'; 
+            *q++ = 'J'; 
+            *q++ = 'I'; 
+            *q++ = '|'; 
+            while(p<u) {
+                *q++ = *p & 0x7f;
+                p++;
+            }
+            *q++ = '|'; 
+            *q++ = 'A'; 
+            *q++ = 'S'; 
+            *q++ = 'C'; 
+            *q++ = 'I'; 
+            *q++ = 'I'; 
+            *q++ = '|'; 
+        }
+        else {
+            *q++ = *p++;
+        }
+    }
+    *q = '\0';
+
+    if(INTRACE) {
+        dump(stderr, "ds", ds, strlen(ds));
+    }
+    
+    Echo("ss '%s'\n", ss);
+    Echo("ms '%s'\n", ms);
+    Echo("ds '%s'\n", ds);
+
+    return 0;
+}
+
+int
+txe_parse(varray_t *ar, char *fs)
+{
+    int ik;
+    char *ts;
+    int   il;
+    int   tl;
+
+    il = strlen(fs);
+    tl = (il/2)*14+1;
+    ts = (char*)alloca(tl);
+    if(!ts) {
+        fprintf(stderr, "no memory (il %d, tl %d)\n", il, tl);
+        return -1;
+    }
+
+    memset(ts, 0, tl);
+
+    Echo("fs '%s'\n", fs);
+    Echo("ts '%s'\n", ts);
+
+    ik = ins_kanji_shift(ts, tl, fs);
+
+    Echo("fs '%s'\n", fs);
+    Echo("ts '%s'\n", ts);
+    
+    ik = txe_parse1(ar, ts);
+
+    return ik;
 }
 
 int
@@ -250,9 +413,15 @@ main()
 
     varray_fprint(stdout, tq);
 
+#if 0
     txe_parse(tq, "ground|special|");
     txe_parse(tq, "|large|a\\|b|small|XYZ");
     txe_parse(tq, "|first|any||foo||dummy|end|");
+#endif
+#if 0
+    txe_parse(tq, "ABC\xe8\xb5\xa4\xe9\x9d\x92");
+#endif
+    txe_parse(tq, "ABC\xe8\xb5\xa4\xe9\x9d\x92XYZ");
 
     varray_fprint(stdout, tq);
 

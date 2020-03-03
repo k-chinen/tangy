@@ -12,7 +12,7 @@ OBJS= alist.o varray.o word.o \
 
 all: tangy 
 tangy: a.c $(OBJS)
-	cc $(CFLAGS) -o tangy $(OBJS) -lm
+	cc $(CFLAGS) -o tangy $(OBJS) -lm -liconv
 
 clean:
 	$(RM) tangy *.o

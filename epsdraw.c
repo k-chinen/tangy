@@ -6960,6 +6960,30 @@ fprintf(stderr, "src |%s|\n", src);
 #define MJ  {fprintf(stderr, "MJ %d i %d justify %d\n", \
         __LINE__, i, justify);}
 
+
+char*
+resolv_font(int xmode, int xface)
+{
+    char *rv;
+    apair_t *ls;
+
+    rv = NULL;
+    if(xmode==FM_ASCII) {
+        ls = ff_act_ial;
+    }
+    else {
+        ls = ff_actk_ial;
+    }
+    rv = rassoc(ls, xface);
+
+#if 0
+    Echo("%s: xmode %s(%d) xface %s(%d) -> rv %s\n", __func__,
+        rassoc(fm_ial, xmode), xmode,
+        rassoc(ff_ial, xface),  xface, rv);
+#endif
+    return rv;
+}
+
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
         int al, int exof, int ro, int qof,
@@ -6989,6 +7013,7 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
     char      token[BUFSIZ];
     int       cc;
     char     *p, *q;
+    int   curmode, newmode;
     int   cursize, curface;
     int   newsize, newface;
     char     *afn, *afhs;
@@ -7184,9 +7209,10 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
 
 Echo("  --- calc size 1\n");
 
-        cursize = FH_NORMAL;
+        curmode = FM_ASCII;
         curface = FF_SERIF;
-        hscale    = 100;
+        cursize = FH_NORMAL;
+        hscale  = 100;
 
 
         /* check content existance */
@@ -7228,7 +7254,7 @@ Echo("  --- calc size 1\n");
 
         fprintf(fp, "      %% calc size (width)\n");
         fprintf(fp, "      /sstrw 0 def\n");
-        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
+        fprintf(fp, "      /%s findfont %d scalefont setfont %% default\n",
             def_fontname, fht);
         afh = fht;
 
@@ -7239,6 +7265,7 @@ Echo("  --- calc size 1\n");
             te = tq->slot[j];
             
             if(te->ct==TXE_CMD) {
+                newmode = -1;
                 newface = -1;
                 newsize = -1;
                 p = NULL;
@@ -7252,6 +7279,12 @@ Echo("  --- calc size 1\n");
                     p = draw_word(p, token, BUFSIZ, SSTR_SEPC);
                     if(token[0]) {
 Echo("    token '%s'\n", token);
+                        if(strncasecmp(token,"kanji", 5)==0) {
+                            newmode = FM_KANJI;
+                        }
+                        if(strncasecmp(token,"ascii", 5)==0) {
+                            newmode = FM_ASCII;
+                        }
                         if(strncasecmp(token,"scale", 5)==0) {
                             hscale = atoi(token+5);
 Echo("    hscale %d\n", hscale);
@@ -7280,7 +7313,10 @@ Echo("    hscale %d\n", hscale);
                 if(cursize != newsize || curface != newface) 
 #endif
                 {
-Echo(" newface %d newsize %d\n", newface, newsize);
+Echo(" newface %d newsize %d newmode %d\n", newface, newsize, newmode);
+                    if(newmode>=0) {
+                        curmode = newmode;
+                    }
                     if(newsize>=0) {
 P;
                         cursize = newsize;
@@ -7289,19 +7325,29 @@ P;
 P;
                         curface = newface;
                     }
-Echo(" curface %d cursize %d\n", curface, cursize);
+Echo(" curface %d cursize %d curmode %d\n", curface, cursize, curmode);
+/*
                     afn  = rassoc(ff_act_ial, curface);
+*/
+                    afn  = resolv_font(curmode, curface);
                     afhs = rassoc(fh_act_ial, cursize);
                     afh  = fht;
                     if(afhs!=NULL) {
                         afh = atof(afhs)*fht;
                     }
 
+                    if(curmode==FM_KANJI) {
+                        afh = (int)(afh*akratio);
+                    }
+
 Echo("  afn '%s' afhs '%s' afh %d (max %d)\n", afn, afhs, afh, afhmax);
 
                     if(afn) {
-                        fprintf(fp, "    /%s findfont %d scalefont setfont\n",
+Echo("   setfont!\n");
+                        fprintf(fp, "        /%s findfont %d scalefont setfont\n",
                             afn, afh);
+                    }
+                    else {
                     }
                 }
             }
@@ -7453,9 +7499,10 @@ skip_bgdrawing:
 
 Echo("  --- calc size 2\n");
 
-        cursize = FH_NORMAL;
+        curmode = FM_ASCII;
         curface = FF_SERIF;
-        hscale    = 100;
+        cursize = FH_NORMAL;
+        hscale  = 100;
 
 
         if(mcar[i]<=0) {
@@ -7532,16 +7579,17 @@ Echo("  --- calc size 2\n");
         /*** PASS 2 */
 
 Echo("  --- drawing\n");
-        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
+        fprintf(fp, "      /%s findfont %d scalefont setfont %% default\n",
             def_fontname, fht);
         fprintf(fp, "      0 0 moveto\n");
 #if 1
         changecolor(fp, fgcolor);
 #endif
 
-        cursize = FH_NORMAL;
+        curmode = FM_ASCII;
         curface = FF_SERIF;
-        hscale    = 100;
+        cursize = FH_NORMAL;
+        hscale  = 100;
 
 #if 1
                 fprintf(fp, "      %% justify %d\n", justify);
@@ -7567,13 +7615,26 @@ Echo("  --- drawing\n");
                     fprintf(fp, "      sstrw 2 div neg 0 translate\n");
                     break;
                 }
-                fprintf(fp, " 0 0 moveto\n");
+                    fprintf(fp, "      0 0 moveto\n");
 #endif
+
+#if 0
+        Echo("0 curface %s(%d) cursize %s(%d) curmode %s(%d)\n",
+            rassoc(ff_ial, curface), curface,
+            rassoc(fh_ial, cursize), cursize,
+            rassoc(fm_ial, curmode), curmode);
+#endif
+
+        Echo("0 m/f/h %s(%d) %s(%d) %s(%d)\n",
+            rassoc(fm_ial, curmode), curmode,
+            rassoc(ff_ial, curface), curface,
+            rassoc(fh_ial, cursize), cursize);
 
         for(j=0;j<tq->use;j++) {
             te = tq->slot[j];
             
             if(te->ct==TXE_CMD) {
+                newmode = -1;
                 newface = -1;
                 newsize = -1;
                 p = NULL;
@@ -7586,6 +7647,12 @@ Echo("  --- drawing\n");
                 while(*p) {
                     p = draw_word(p, token, BUFSIZ, SSTR_SEPC);
                     if(token[0]) {
+                        if(strncasecmp(token,"kanji", 5)==0) {
+                            newmode = FM_KANJI;
+                        }
+                        if(strncasecmp(token,"ascii", 5)==0) {
+                            newmode = FM_ASCII;
+                        }
                         if(strncasecmp(token,"scale", 5)==0) {
                             hscale = atoi(token+5);
 Echo("    hscale %d\n", hscale);
@@ -7619,7 +7686,10 @@ Echo("    hscale %d\n", hscale);
                 if(cursize != newsize || curface != newface) 
 #endif
                 {
-Echo(" newface %d newsize %d\n", newface, newsize);
+Echo(" newface %d newsize %d newmode %d\n", newface, newsize, newmode);
+                    if(newmode>=0) {
+                        curmode = newmode;
+                    }
                     if(newsize>=0) {
 P;
                         cursize = newsize;
@@ -7628,20 +7698,30 @@ P;
 P;
                         curface = newface;
                     }
-Echo(" curface %d cursize %d\n", curface, cursize);
+Echo(" curface %d cursize %d curmode %d\n", curface, cursize, curmode);
 
+/*
                     afn  = xrassoc(ff_act_ial, curface);
+*/
+                    afn  = resolv_font(curmode, curface);
                     afhs = xrassoc(fh_act_ial, cursize);
                     afh  = fht;
                     if(afhs!=NULL) {
                         afh = atof(afhs)*fht;
                     }
 
+                    if(curmode==FM_KANJI) {
+                        afh = (int)(afh*akratio);
+                    }
+
 Echo("  afn '%s' afhs '%s' afh %d\n", afn, afhs, afh);
 
                     if(afn) {
-                        fprintf(fp, "      /%s findfont %d scalefont setfont\n",
+Echo("   setfont!\n");
+                        fprintf(fp, "        /%s findfont %d scalefont setfont\n",
                             afn, afh);
+                    }
+                    else {
                     }
 
                 }
@@ -7692,6 +7772,12 @@ P;
                     fprintf(fp, "  gsave %% comp\n");
                     fprintf(fp, "    %.3f 1 scale\n", (double)hscale/100);
                 }
+
+Echo("D m/f/s %s(%d) %s(%d) %s(%d)\n",
+    rassoc(fm_ial, curmode), curmode,
+    rassoc(ff_ial, curface), curface,
+    rassoc(fh_ial, cursize), cursize);
+
                 fprintf(fp, "        (%s) show\n", qs);
                 if(hscale!=100) {
 P;

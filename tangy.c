@@ -41,37 +41,39 @@ print_usage()
     printf("tangy - picture generator according to special language\n");
     printf("usage: tangy [option] [files]\n");
     printf("option:     # unit of length is bigpoint = 1/72inch = 0.3527mm\n");
-    printf("    -h      print this message\n");
-    printf("    -m      print hints for language\n");
-    printf("    -V      print version\n");
-    printf("    -P      print parameters\n");
-    printf("    -o file set output file (current '%s')\n",
+    printf("  -h        print this message\n");
+    printf("  -m        print hints for language\n");
+    printf("  -V        print version\n");
+    printf("  -P        print parameters\n");
+    printf("  -o file   set output file (current '%s')\n",
             outfile);
-    printf("    -u num  set unit by 0.01bp (current %d)\n",
+    printf("  -u num    set unit by 0.01bp (current %d)\n",
             objunit);
-    printf("    -M num  set EPS outside margin by bp (current %d)\n",
+    printf("  -M num    set EPS outside margin by bp (current %d)\n",
             epsoutmargin);
-    printf("    -g      draw grid\n");
-    printf("    -G num  set grid pitch in bp (current %d)\n", 
+    printf("  -g        draw grid\n");
+    printf("  -G num    set grid pitch in bp (current %d)\n", 
             def_gridpitch);
-    printf("    -R num  set grid range; how many times of pitch (current %d)\n",
+    printf("  -R num    set grid range; how many times of pitch (current %d)\n",
         def_gridrange);
-    printf("    -b      draw boundingbox of objects\n");
-    printf("    -i      draw object IDs\n");
-    printf("    -l      print object list for debug\n");
-    printf("    -c      print color list for debug\n");
-    printf("    -F font set default font (current '%s')\n", def_fontname);
+    printf("  -b        draw boundingbox of objects\n");
+    printf("  -i        draw object IDs\n");
+    printf("  -l        print object list for debug\n");
+    printf("  -c        print color list for debug\n");
+    printf("  -F font   set default font (current '%s')\n", def_fontname);
+    printf("  -K font   set kanji font\n");
+    printf("  -k ratio  set ascii/kanji size ratio (current %.3f)\n", akratio);
     printf("following itmes are reserved for future. do not use.\n");
-    printf("    -v      verbose mode (current %d)\n", _t_);
-    printf("    -q      quiet mode\n");
-    printf("    -p      passing trace mode (current %d)\n", _p_);
-    printf("   *-d      draft mode\n");
-    printf("   *-L      draw labels\n");
-    printf("   *-D      debug mode\n");
-    printf("   *-r      draw ruler\n");
-    printf("   *-s num  set scale\n");
-    printf("   *-n      no draw\n");
-    printf("   *-N file set notefile\n");
+    printf("  -v        verbose mode (current %d)\n", _t_);
+    printf("  -q        quiet mode\n");
+    printf("  -p        passing trace mode (current %d)\n", _p_);
+    printf(" *-d        draft mode\n");
+    printf(" *-L        draw labels\n");
+    printf(" *-D        debug mode\n");
+    printf(" *-r        draw ruler\n");
+    printf(" *-s num    set scale\n");
+    printf(" *-n        no draw\n");
+    printf(" *-N file   set notefile\n");
 
     return 0;
 }
@@ -253,7 +255,7 @@ main(int argc, char *argv[])
     pallet = new_default_pallet();
 
     while((flag=getopt(argc, argv,
-            "0hmVPvqpngbSUdiLrtDo:u:G:R:M:F:lcs:"))!=EOF) {
+            "0hmVPvqpngbSUdiLrtDo:u:G:R:M:F:K:k:lcs:"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -341,33 +343,19 @@ main(int argc, char *argv[])
 
         case 'F':
             def_fontname = strdup(optarg);
+#if 0
             ik = swap_font(FF_SERIF, def_fontname);
             fprintf(stderr, "ik %d\n", ik);
-
-#if 0
-{
-            char *bfn;
-            char *afn;
-            int   i;
-
-            bfn  = rassoc(ff_act_ial, FF_SERIF);
-            fprintf(stderr, "bfn |%s|\n", bfn);
-
-            i = 0;
-            while(ff_act_ial[i].name) {
-                if(ff_act_ial[i].value==FF_SERIF) {
-                    ff_act_ial[i].name = strdup(def_fontname);
-                    break;
-                }
-                i++;
-            }
-
-            afn  = rassoc(ff_act_ial, FF_SERIF);
-            fprintf(stderr, "afn |%s|\n", afn);
-    
-}
 #endif
+            ik = swap_Xfont(ff_act_ial, FF_SERIF, def_fontname);
+            break;
 
+        case 'K':
+            ik = swap_Xfont(ff_actk_ial, FF_SERIF, optarg);
+            break;
+
+        case 'k':
+            akratio = atof(optarg);
             break;
 
 #if 0
