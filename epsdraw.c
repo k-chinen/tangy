@@ -192,6 +192,11 @@ psescape(char *dst, int dlen, char* src)
     q = dst;
     c = 0;
     while(*p && c<dlen-2) {
+        if(*p=='\\' && c<dlen-2) {
+            p++;
+            *q++ = '\\'; *q++ = '\\'; c+=2;
+        }
+        else
         if(*p=='(' && c<dlen-4) {
             p++;
             *q++ = '\\'; *q++ = '0'; *q++ = '5'; *q++ = '0'; c+=4;
@@ -202,6 +207,48 @@ psescape(char *dst, int dlen, char* src)
         }
         else {
             *q++ = *p++;
+            c++;
+        }
+    }
+    *q = '\0';
+
+#if 1
+Echo("%s: '%s' <- '%s'\n", __func__, dst, src);
+#endif
+
+    return 0;
+}
+
+/* escape with 7bits thru (8th bit masking) */
+int
+psescape7(char *dst, int dlen, char* src)
+{
+    char *p, *q;
+    int   u;
+    int   c;
+
+    p = src;
+    q = dst;
+    c = 0;
+    while(*p && c<dlen-2) {
+        u = (*p) & 0x7f;
+        if(u=='\\' && c<dlen-2) {
+            p++;
+            *q++ = '\\'; *q++ = '\\'; c+=2;
+        }
+        else
+        if(u=='(' && c<dlen-4) {
+            p++;
+            *q++ = '\\'; *q++ = '0'; *q++ = '5'; *q++ = '0'; c+=4;
+        }
+        else
+        if(u==')' && c<dlen-4) {
+            p++;
+            *q++ = '\\'; *q++ = '0'; *q++ = '5'; *q++ = '1'; c+=4;
+        }
+        else {
+            *q++ = u;
+            p++;
             c++;
         }
     }
@@ -7362,7 +7409,12 @@ Echo("   setfont!\n");
                 }
 #endif
                 txe_extract(mcpart, BUFSIZ, te);
-                psescape(qs, BUFSIZ, mcpart);
+                if(curmode==FM_KANJI) {
+                    psescape7(qs, BUFSIZ, mcpart);
+                }
+                else {
+                    psescape(qs, BUFSIZ, mcpart);
+                }
 
                 if(hscale!=100) {
                     fprintf(fp, "  gsave %% text-scale\n");
@@ -7737,7 +7789,12 @@ Echo("   setfont!\n");
                 }
 #endif
                 txe_extract(mcpart, BUFSIZ, te);
-                psescape(qs, BUFSIZ, mcpart);
+                if(curmode==FM_KANJI) {
+                    psescape7(qs, BUFSIZ, mcpart);
+                }
+                else {
+                    psescape(qs, BUFSIZ, mcpart);
+                }
 
 #if 0
                 fprintf(fp, "      %% justify %d\n", justify);

@@ -77,12 +77,16 @@ Echo("target '%s'\n", fs);
 Echo("\t'%s'\n", token);
 #endif
         if(*p=='\\') {
-#if 0
-            *q++ = *p++;
-#endif
             p++;
             if(*p) {
-                *q++ = *p++;
+                switch(*p) {
+                case 'n':
+                case 'r':
+                    p++;            /* skip */
+                    break;
+                default:
+                    *q++ = *p++;    /* add */
+                }
             }
             continue;
         }
@@ -243,8 +247,7 @@ fprintf(stderr, "u %p %02x\n", u, *u);
             *q++ = 'I'; 
             *q++ = '|'; 
             while(p<u) {
-                *q++ = *p & 0x7f;
-                p++;
+                *q++ = *p++;
             }
             *q++ = '|'; 
             *q++ = 'A'; 
