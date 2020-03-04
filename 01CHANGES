@@ -2,6 +2,13 @@ CHANGES
 
 This file describe remarkable change in user's view.
 
+From 2.060
+  - support UTF-8 source, but care only Japanese
+        using cheap trick, this version parses UTF-8 source.
+        then, this version requires iconv (-liconv).
+        of course it requires some Japanese font.
+        IPAMincho is setted as default.
+
 From 2.052
   - arrange port/board string
         fit them according to curves and lines in

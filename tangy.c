@@ -145,7 +145,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.060\n");
+    printf("tangy version 2.070\n");
     return 0;
 }
 
@@ -237,6 +237,8 @@ test0()
     return 0;
 }
 
+extern int tx_trace;
+
 int
 main(int argc, char *argv[])
 {
@@ -323,6 +325,7 @@ main(int argc, char *argv[])
             oidl_mode = 1;
             ruler_mode = 1;
             text_mode = 1;
+            tx_trace = 1;
             break;
             
         case 'o':
