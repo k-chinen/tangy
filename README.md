@@ -30,7 +30,7 @@ You can change color, hatching and line types.
 
 Tangy accept ASCII, Japanese(UTF-8) and mix of them.
 
-<img src="sample1.png">
+<img src="sample2.png">
 
 Thanks.
 
