@@ -1,0 +1,3 @@
+box "ASCII日本語" width 2u
+move
+box "|sanserif|ASCII日本語" width 2u

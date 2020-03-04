@@ -15,7 +15,7 @@ through Internet.
 
 <img src="sample0.png">
 
-You can change color, background hatching and line types.
+You can change color, hatching and line types.
 
 	drum "A"
 	arrow 
@@ -25,6 +25,10 @@ You can change color, background hatching and line types.
 	arrow linetype zigzag
 	ellipse "D" fillhatch crossed fillcolor 2
 	arrow linetype waved
+
+<img src="sample1.png">
+
+Tangy accept ASCII, Japanese(UTF-8) and mix of them.
 
 <img src="sample1.png">
 
