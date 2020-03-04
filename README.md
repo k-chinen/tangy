@@ -30,6 +30,10 @@ You can change color, hatching and line types.
 
 Tangy accept ASCII, Japanese(UTF-8) and mix of them.
 
+	box "ASCII日本語" width 2u
+	move
+	box "|sanserif|ASCII日本語" width 2u
+
 <img src="sample2.png">
 
 Thanks.
