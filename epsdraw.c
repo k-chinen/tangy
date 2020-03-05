@@ -7835,7 +7835,7 @@ Echo("D m/f/s %s(%d) %s(%d) %s(%d)\n",
     rassoc(ff_ial, curface), curface,
     rassoc(fh_ial, cursize), cursize);
 
-                fprintf(fp, "        (%s) show\n", qs);
+                fprintf(fp, "      (%s) show\n", qs);
                 if(hscale!=100) {
 P;
                     fprintf(fp, "  grestore %% comp\n");

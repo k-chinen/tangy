@@ -420,6 +420,7 @@ Warn("tmp '%s' seems not value\n", tmp);
     newop = (segop*)malloc(sizeof(segop));
     if(!newop) {
 E;
+        Error("%s: no memory\n", __func__);
     }
     memset(newop, 0, sizeof(segop));
     newop->cmd = dt;
@@ -455,6 +456,7 @@ P;
         dmyop = (segop*)malloc(sizeof(segop));
         if(!dmyop) {
 E;
+            Error("%s: no memory\n", __func__);
         }
         memset(dmyop, 0, sizeof(segop));
         dmyop->cmd = OA_THEN;
@@ -635,19 +637,24 @@ skip_number:
 #endif
         }
 
-        if(tmp[0]) {
+        /*
+         * although tmp is empty, the string is be add to array.
+         * because script may expect empty line in the place.
+         */
 #if 0
 fprintf(stderr, "tmp <%s>\n", tmp);
 #endif
-            ns = (sstr*) malloc(sizeof(sstr));
-            if(ns) {
-                ns->ssval = strdup(tmp);
-                ns->ssopt = 0;
-                varray_push(rob->cob.ssar, ns);
+        ns = (sstr*) malloc(sizeof(sstr));
+        if(!ns) {
+            Error("%s: no memory\n", __func__);
+        }
+        else {
+            ns->ssval = strdup(tmp);
+            ns->ssopt = 0;
+            varray_push(rob->cob.ssar, ns);
 #if 0
-                varray_fprint(stdout, rob->cob.ssar);
+            varray_fprint(stdout, rob->cob.ssar);
 #endif
-            }
         }
 
         goto out;
@@ -1419,6 +1426,9 @@ P;
                     ent->val = strdup("");
                     varray_push(nob->cob.segopar, ent);
                 }
+                else {
+                    Error("%s: no memory\n", __func__);
+                }
             }
         }
     }
@@ -1574,6 +1584,10 @@ alias_add(varray_t *ar, char *xsrc, char *xdst)
     alias_cell *c;
 
     c = (alias_cell*)malloc(sizeof(alias_cell));
+    if(!c) {
+        Error("%s: no memory\n", __func__);
+        return -1;
+    }
     memset(c, 0, sizeof(alias_cell));
 
     strcpy(c->src, xsrc);
