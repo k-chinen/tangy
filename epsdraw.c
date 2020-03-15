@@ -7,6 +7,10 @@
 #include "alist.h"
 #include "word.h"
 
+#include <time.h>
+#include <sys/time.h>
+#include "vdict.h"
+
 #include "obj.h"
 #include "gv.h"
 #include "seg.h"
@@ -379,7 +383,6 @@ changenormal(FILE *fp)
     return 0;
 }
 
-
 /* centerized rotated rect */
 static int
 drawCRrectMJ(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg, int sj)
@@ -411,6 +414,7 @@ drawCRrectMJ(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg, int sj
 
     return 0;
 }
+
 static int
 drawCRrectM(FILE *fp, int x1, int y1, int wd, int ht, int ro, char *msg)
 {
@@ -464,6 +468,7 @@ drawCRrectskel(FILE *fp, int x1, int y1, int wd, int ht, int ro)
     return 0;
 }
 
+#if 0
 static int
 drawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 {
@@ -497,8 +502,10 @@ drawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 
     return 0;
 }
+#endif
 
 
+#if 0
 static int
 XdrawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 {
@@ -536,6 +543,7 @@ XdrawCRrectskel2(FILE *fp, int x1, int y1, int wd, int ht, int ro)
 
     return 0;
 }
+#endif
 
 
 static int
@@ -544,6 +552,7 @@ drawCrect(FILE *fp, int x1, int y1, int wd, int ht)
     return drawCRrect(fp, x1, y1, wd, ht, 0);
 }
 
+#if 0
 /* 4courner rect */
 static int
 drawrect(FILE *fp, int x1, int y1, int x2, int y2)
@@ -558,6 +567,7 @@ drawrect(FILE *fp, int x1, int y1, int x2, int y2)
 
     return 0;
 }
+#endif
 
 static int
 drawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
@@ -576,6 +586,7 @@ drawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
     return 0;
 }
 
+#if 0
 static int
 Xdrawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
 {
@@ -595,7 +606,9 @@ Xdrawrectcm(FILE *fp, int x1, int y1, int x2, int y2, char *cm)
 
     return 0;
 }
+#endif
 
+#if 0
 static int
 drawCRrectG(FILE *fp, int x1, int y1, int wd, int ht, int ro, int gl)
 {
@@ -627,6 +640,7 @@ drawCRrectG(FILE *fp, int x1, int y1, int wd, int ht, int ro, int gl)
 
     return 0;
 }
+#endif
 
 
 int
@@ -656,6 +670,7 @@ epsdraw_bbox_glbrt(FILE *fp, ob *xu)
     return 0;
 }
 
+#if 0
 int
 epsdraw_bbox_glbrtB(FILE *fp, ob *xu)
 {
@@ -683,6 +698,7 @@ epsdraw_bbox_glbrtB(FILE *fp, ob *xu)
 
     return 0;
 }
+#endif
 
 int
 epsdraw_bbox_glbrtR(FILE *fp, ob *xu)
@@ -731,6 +747,7 @@ extern int _box_path(FILE *fp, int x1, int y1, int aw, int ah, int r, int op);
     return 0;
 }
 
+#if 0
 int
 epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 {
@@ -757,6 +774,7 @@ epsdraw_bbox_lbrt(FILE *fp, int xox, int xoy, ob *xu)
 
     return 0;
 }
+#endif
 
 int
 epsdraw_bbox_lbrtR(FILE *fp, int xox, int xoy, ob *xu)
@@ -4687,6 +4705,7 @@ drawpath_LT(FILE *fp,
 
 int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
 
+#if 0
 int
 QQ__solve_dir(ns *xns, ob *u, varray_t *opar,
     int X, int *ang)
@@ -4715,6 +4734,7 @@ QQ__solve_dir(ns *xns, ob *u, varray_t *opar,
 
     return 0;
 }
+#endif
 
         
 int
@@ -9917,6 +9937,8 @@ clink_fprint(FILE *fp, clink_t *par, int np)
     return 0;
 }
 
+#include "xlink.c"
+
 int
 epsdraw_thruX(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -10287,6 +10309,7 @@ out:
 }
 
 
+#if 0
 int
 epsdraw_thru(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
 {
@@ -10501,6 +10524,7 @@ P;
 out:
     return 0;
 }
+#endif
 
 
 
@@ -10897,6 +10921,7 @@ epsdraw_mark(FILE *fp, int gx, int gy, int ty)
     return 0;
 }
 
+#if 0
 int
 bumpBB(int gx, int gy, int gw, int gh, int cx, int cy, int cth,
     int *rx, int *ry)
@@ -10959,6 +10984,7 @@ bumpBB(int gx, int gy, int gw, int gh, int cx, int cy, int cth,
 
     return rv;
 }
+#endif
 
 int
 solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
@@ -11762,6 +11788,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     else
     if(u->type==CMD_THRU) {
         epsdraw_thruX(fp, *xdir, ox, oy, u, xns);
+    }
+    else
+    if(u->type==CMD_XLINK) {
+        epsdraw_xlink(fp, *xdir, ox, oy, u, xns);
     }
     else
     if(u->type==CMD_BCURVE || u->type==CMD_XCURVE) {

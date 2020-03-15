@@ -27,7 +27,8 @@ linkchkchunk(ob *xch, ns *xns)
     ob*   curfork;
 
 #define RM(g) \
-  ((g)->type==CMD_GATHER||(g)->type==CMD_SCATTER||(g)->type==CMD_THRU) 
+    ((g)->type==CMD_GATHER||(g)->type==CMD_SCATTER||\
+        (g)->type==CMD_THRU||(g)->type==CMD_XLINK) 
 
 P;
 

@@ -101,6 +101,7 @@ apair_t cmd_ial[] = {
     {"gather",          CMD_GATHER},
     {"scatter",         CMD_SCATTER},
     {"thru",            CMD_THRU},
+    {"xlink",           CMD_XLINK},
     {"traceon",         CMD_TRACEON},
     {"traceoff",        CMD_TRACEOFF},
     {NULL,              -1},

@@ -107,6 +107,7 @@
 #define CMD_GATHER      (3007)
 #define CMD_SCATTER     (3008)
 #define CMD_THRU        (3009)
+#define CMD_XLINK       (3010)
 
 #define CMD_LPAREN      (4001)
 #define CMD_RPAREN      (4002)
@@ -159,7 +160,7 @@ extern apair_t cmd_ial[];
     (ISGLUE(x)||ISATOM(x)||(x)==CMD_NOP) 
 #define MAYEXPAND(x)  \
     ((x)==CMD_SEP||(x)==CMD_PLINE|| \
-     (x)==CMD_SCATTER||(x)==CMD_GATHER||(x)==CMD_THRU|| \
+     (x)==CMD_SCATTER||(x)==CMD_GATHER||(x)==CMD_THRU||(x)==CMD_XLINK|| \
      (x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE \

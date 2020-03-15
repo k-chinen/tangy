@@ -1419,6 +1419,7 @@ P;
             WO;     
             break;
     case CMD_THRU: 
+    case CMD_XLINK: 
             WO;     
             break;
 
@@ -3196,6 +3197,7 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         case CMD_SCATTER:
         case CMD_GATHER:
         case CMD_THRU:
+        case CMD_XLINK:
 #endif
         case CMD_LPAREN:
         case CMD_RPAREN:
