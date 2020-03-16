@@ -1,6 +1,8 @@
-int xlink_trace = 1;
+int xlink_trace = 0;
 
-#define XEcho   if(xlink_trace)printf
+#define XEcho       if(xlink_trace)printf
+#define Trace       if(xlink_trace)printf
+#define XINTRACE    (xlink_trace>0)
 
 #define XMAP_CHILDS (".")
 #define XMAP_RNGS   ("-")
@@ -67,12 +69,347 @@ mob_sprintf(char* dst, int dlen, void* xv)
 
     qmob = (mob*)xv;
     qob = qmob->body;
-    ik = sprintf(dst, "%3d %3d/%-3d %3d/%-3d",
-        qob->oid, qmob->si, qmob->sn, qmob->di, qmob->dn);
+    if(dlen>20) {
+        ik = sprintf(dst, "%3d %3d/%-3d %3d/%-3d",
+            qob->oid, qmob->si, qmob->sn, qmob->di, qmob->dn);
+    }
+    else {
+        return -1;
+    }
 
     return 0;
 }
 
+int
+QLcount(char *src, int sep)
+{
+    register char *p;
+    register int c;
+    c = 0;
+    p = src;
+    if(*p && *p!=(char)sep) {
+        c++;
+    }
+    while(*p) {
+        if(*p==(char)sep) {
+            if(*(p+1)) {
+                c++;
+            }
+        }
+        p++;
+    }
+#if 0
+    Trace("QLcount: |%s| '%c' -> %d\n", src, sep, c);
+#endif
+    return c;
+}
+
+int
+QLfind(char *src, char *name, int sep)
+{
+    char  token[BUFSIZ];
+    char *p;
+
+    p = src;
+    while(p = draw_word(p, token, BUFSIZ, sep)) {
+        if(!token[0]) {
+            break;
+        }
+        if(strcmp(token, name)==0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+
+char*
+QLfindpos(char *src, char *name, int sep)
+{
+    char  token[BUFSIZ];
+    char *p;
+    char *q;
+
+    p = src;
+    q = NULL;
+    while(1) {
+        q = p;
+        p = draw_word(p, token, BUFSIZ, sep);
+        if(!token[0]) {
+            break;
+        }
+        if(strcmp(token, name)==0) {
+            return q;
+        }
+    }
+
+    return NULL; 
+}
+
+
+int
+QLadd(char *dst, int dlen, char *xit, int sep)
+{
+    char *p;
+    int   c;
+    int   w;
+    char *s;
+    char *r;
+
+    w = strlen(xit);
+    p = dst;
+    r = NULL;
+    c = 0;
+    while(*p) {
+        r = p;
+        p++;
+        c++;
+    }
+    if(c>=dlen) {
+        return 1;
+    }
+    if(c+w+1>=dlen) {
+        return 2;
+    }
+
+    if(c>0) {
+        if(r && *r==(char)sep) {
+#if 0
+            Trace("last of list already setted sep, skip\n");
+#endif
+        }
+        else {
+#if 0
+            Trace("set sep in last of list\n");
+#endif
+            *p++ = (char)sep;
+        }
+    }
+
+    s = xit;
+    while(*s) {
+        *p++ = *s++;
+    }
+    *p++ = (char)sep;
+    *p = '\0';
+
+    return 0;
+}
+
+int
+QLuniqadd(char *dst, int dlen, char *xit, int sep)
+{
+    char *p;
+    int   c;
+    int   w;
+    char *s;
+    char *r;
+
+    if(QLfind(dst, xit, sep)==1) {
+        return 0;
+    }
+
+    return QLadd(dst, dlen, xit, sep);
+}
+
+
+
+static int
+cmpfield(const void *x, const void *y)
+{
+    char *xp = *(char**)x;
+    char *yp = *(char**)y;
+#if 0
+    printf("%s vs %s\n", *(char**)x, *(char**)y);
+#endif
+    return strcmp(xp,yp);
+}
+
+static int
+cmpfieldN(const void *x, const void *y)
+{
+    char *xp = *(char**)x;
+    char *yp = *(char**)y;
+    int  xv, yv;
+#if 0
+    printf("%s vs %s\n", *(char**)x, *(char**)y);
+#endif
+    xv = atoi(xp);
+    yv = atoi(yp);
+    return xv-yv;
+}
+
+
+
+int
+_QLsortuniq(char *src, int sep, int numeric)
+{
+    char    token[BUFSIZ];
+    char   *p;
+    char   *u;
+    int     n;
+    int     w,ow;
+    int     i;
+    char   *dst=NULL;
+    char  **s=NULL;
+    int     ck;
+
+#if 0
+    trace_sman = 1;
+#endif
+
+#if 0
+    Trace("sortuniq src %p sep '%c' numeric? %d\n", src, sep, numeric);
+#endif
+
+    if(src==NULL) {
+        return -1;
+    }
+
+    w = strlen(src);
+#if 0
+    Trace("w %d\n", w);
+#endif
+
+    if(w<=0) {
+        goto out;
+    }
+
+    ow = w+2;   /* sometimes dst requires additional area for separators */
+#if 0
+    Trace("ow %d\n", ow);
+#endif
+
+#if 1
+    dst = (char*)malloc(sizeof(char*)*ow);
+    if(dst==NULL) {
+        Error("_QLsortuniq: no memory");
+        goto nomemory;
+    }
+#endif
+#if 0
+    dst = strdup(src);
+    if(dst==NULL) {
+        Error("_QLsortuniq: no memory");
+        goto nomemory;
+    }
+#endif
+
+#if 1
+    /* trim last sep, empty field */
+    while(src[w-1]==sep) {
+#if 0
+        Trace("lastchar '%c'\n", src[w-1]);
+#endif
+        src[w-1]='\0';
+        w--;
+    }
+#endif
+
+    n = QLcount(src, sep);
+#if 0
+    Trace("n %d\n", n);
+#endif
+    if(n<=1) {
+        goto out;
+    }
+
+
+    s = (char**)malloc(sizeof(char*)*n);
+    if(s==NULL) {
+        Error("_QLsortuniq: no memory");
+        goto nomemory;
+    }
+#if 1
+    memset(s, 0, sizeof(char*)*n);
+#endif
+
+
+    p = src;
+    i = 0;
+    while(u = p, p = draw_word(p, token, BUFSIZ, sep)) {
+        if(!token[0]) {
+#if 1
+            if(i<n) {
+                Trace("trim n as %d\n", i);
+                n = i;
+            }
+#endif
+            if(*p=='\0') {
+                break;
+            }
+            else {
+                /* skip empty field */
+                continue;
+            }
+        }
+        s[i] = u;
+        if(u!=src) {
+            *(u-1) = '\0';
+        }
+        i++;
+    }
+
+    /* */
+#if 0
+    for(i=0;i<n;i++) {
+        Trace("u %3d: %s\n", i, s[i]);
+    }
+#endif
+#if 0
+    for(i=MAX(0,n-3);i<n;i++) {
+        Trace("u %3d: %s\n", i, s[i]);
+    }
+#endif
+
+    if(numeric) {
+#if 0
+        Trace("numeric\n");
+#endif
+        qsort(s,n,sizeof(char*),cmpfieldN);
+    }
+    else {
+#if 0
+        Trace("no-numeric\n");
+#endif
+        qsort(s,n,sizeof(char*),cmpfield);
+    }
+
+    /* */
+#if 0
+    for(i=0;i<n;i++) {
+        Trace("v %3d: %s\n", i, s[i]);
+    }
+#endif
+#if 0
+    for(i=MAX(0,n-3);i<n;i++) {
+        Trace("v %3d: %s\n", i, s[i]);
+    }
+#endif
+    dst[0] = '\0';
+    for(i=0;i<n;i++) {
+        ck = QLuniqadd(dst, ow, s[i], sep);
+#if 0
+        if(i>=n-3) {
+            Trace("dst '%s' (%d)\n", dst, ck);
+        }
+#endif
+    }
+    strcpy(src, dst);
+
+    goto fine;
+
+nomemory:
+
+fine:
+    if(dst) free(dst);
+    if(s) free(s);
+
+out:
+    return 0;
+}
 
 
 int
@@ -163,10 +500,6 @@ expand_full(char *dst, int dlen, char *bseq, char *fseq)
     char  tmp[BUFSIZ];
 
     XEcho("%s: '%s' x '%s'\n", __func__, bseq, fseq);
-
-#if 0
-    dst[0] = '\0';
-#endif
 
     p = bseq;
     i = 0;
@@ -272,11 +605,11 @@ expand_bfpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
     int   ik;
     int   e;
 
-    XEcho("%s: xpat |%s|\n", __func__, xpat);
+    vdict_t    *d;
+    vdict_cell *c;
+    int i;
 
-#if 0
-    dst[0] = '\0';
-#endif
+    XEcho("%s: xpat |%s|\n", __func__, xpat);
 
     p = xpat;
     while(p && ((*p>='A' && *p<='Z') || (*p>='a' && *p<='z'))) {
@@ -312,10 +645,6 @@ expand_bfpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
     goto out;
 
 all:
- {
-    vdict_t    *d;
-    vdict_cell *c;
-    int i;
 
     if(base=='f') { d = fdict; }
     else
@@ -332,13 +661,23 @@ all:
             strcat(dst, XMAP_SEPS);
         }
     }
-    fflush(stdout);
- }
+#if 0
+fprintf(stderr, "dst 0 |%s|\n", dst);
+#endif
+	_QLsortuniq(dst, XMAP_SEP, 0);
+#if 0
+fprintf(stderr, "dst 1 |%s|\n", dst);
+#endif
+#if 0
+	_QLsortuniq(dst, XMAP_SEP, 1);
+fprintf(stderr, "dst 2 |%s|\n", dst);
+#endif
 
     goto out;
 
 out:
 
+    fflush(stdout);
     XEcho("     %s: dst '%s'\n", __func__, dst);
 
     return 0;
@@ -361,10 +700,6 @@ expand_sdpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
     int   xls;
 
     XEcho("%s: xpatlist |%s|\n", __func__, xpatlist);
-
-#if 0
-    dst[0] = '\0';
-#endif
 
     p = xpatlist;
     i = 0;
@@ -397,14 +732,214 @@ expand_sdpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
         expand_bfpat(dseq, BUFSIZ, bdict, fdict, dpat);
         XEcho("      dseq |%s|\n", dseq);
 
-#if 0
-        dst[0] = '\0';
-#endif
         ik = expand_full(dst, dlen, sseq, dseq);
     }
 
     XEcho("sdpat xpatlist |%s|\n  dst |%s|\n", xpatlist, dst);
 
+    return 0;
+}
+
+
+
+/*
+ * basically this code expect gather; multi sources and single destination.
+ */
+static
+int
+_drawXlink(varray_t *qar, int xid, int style, int jr,
+    int j, int n, int h1,
+    int sx, int sy, int ssy, int maxsx,
+    int mx, int my,
+    int minex, int ex, int ey, int eey, int dsdir)
+{
+
+    /*
+     *
+     *      maxsx,sy 
+     * sx,sy  +..+........
+     * sx,ssy +--+-----+ .
+     *            h1   | . 
+     *                 | . minex,sy
+     *    maxsx+h1,eey +--------+--+ ex,eey
+     *                   +......+..+ ex,ey
+     *                mx,my 
+     *
+     * + basically, (sx,sy)-(mx,sy)-(mx,ey)-(ex,ey) is drown.
+     * + according to h1, line is shift.
+     */ 
+
+    int rstyle;
+    int focus;
+    int join;
+
+    rstyle = style & LS_M_TYPE;
+    focus  = style & LS_FOCUS;
+    join   = style & LS_JOIN;
+#if 1
+    join   = focus;
+#endif
+
+
+    Echo("%s: ar %p xid %d\n", __func__, qar, xid);
+
+    Echo(
+        "%s: xid %d style %3d %3xH rstyle %3d %3xH focus %d join %d j/n %d/%d\n",
+        __func__, xid, style, style, rstyle, rstyle, focus, join, j, n);
+
+#if 0
+    if(dsdir>0) {
+        path_regsegdir(qar, 180);
+    }
+    if(dsdir<0) {
+        path_regsegdir(qar, -180);
+    }
+#endif
+
+    switch(rstyle) {
+    case LS_STRAIGHT:
+        if(dsdir>=0) {
+            mkpath_1seg(qar, sx, sy, ex, sy);
+        }
+        else {
+            mkpath_1seg(qar, ex, sy, sx, sy);
+        }
+        break;
+
+    case LS_SQUARE:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, mx, sy, mx, ey, ex, ey);
+            }
+            else {
+                mkpath_3seg(qar, ex, ey, mx, ey, mx, sy, sx, sy);
+            }
+#if 0
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+#endif
+            if(join) {  if(j==0 || j==n-1) {}
+                        else { mkpath_addbwcir(qar, mx, sy); }
+            }
+        }
+        else {
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx+h1, sy, maxsx+h1, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, maxsx+h1, eey, maxsx+h1, sy, sx, sy);
+            }
+        }
+        break;
+
+    case LS_COMB:
+        if(focus) {
+            if(dsdir>=0) {
+fprintf(stderr, " pos\n");
+                mkpath_3seg(qar, sx, sy, mx, sy, mx, eey, ex, eey);
+fprintf(stderr, "j/n %d/%d\n", j, n);
+            	if(join && ( j>0 && j<n-1) ) {
+fprintf(stderr, "   draw\n");
+					mkpath_addbwcir(qar, mx, eey);
+				}
+            }
+            else {
+fprintf(stderr, " neg\n");
+                mkpath_3seg(qar, ex, eey, mx, eey, mx, sy, sx, sy);
+            	if(join && j!=0 && j!=n-1) {
+					mkpath_addbwcir(qar, mx, sy);
+				}
+            }
+#if 0
+            if(join) { if(j==0 || j==n-1) {}
+                        else { fprintf(stderr, "draw\n");  mkpath_addbwcir(qar, mx, sy); }
+            }
+#endif
+        }
+        else {
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, mx, sy, mx, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, mx, eey, mx, sy, sx, sy);
+            }
+        }
+        break;
+
+    case LS_CURVE:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_segarcseg2(qar, sx, sy, maxsx, sy,
+                   mx, ey, ex, ey);
+            }
+            else {
+                mkpath_segarcseg2(qar, ex, ey, mx, ey,
+                   maxsx, sy, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            if(dsdir>=0) {
+
+                mkpath_segarcseg2(qar, sx, sy, maxsx, sy, 
+                   mx, eey, ex, eey);
+            }
+            else {
+                mkpath_segarcseg2(qar, ex, eey, mx, eey,
+                   maxsx, sy, sx, sy);
+            }
+        }
+        break;
+
+    case LS_ARC:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                   mx, ey, ex, ey);
+            }
+            else {
+                mkpath_segarcseg(qar, ex, ey, mx, ey, mx, sy,
+                   maxsx, sy, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            if(dsdir>=0) {
+                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                   mx, eey, ex, eey);
+            }
+            else {
+                mkpath_segarcseg(qar, ex, eey, mx, eey, mx, sy,
+                   maxsx, sy, sx, sy);
+            }
+        }
+        break;
+
+    default:
+        fprintf(stderr, "ignore style <%d;%xH>\n", rstyle, rstyle);
+
+    case LS_DIRECT:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx, sy, mx, ey, ex, ey);
+            }
+            else {
+                mkpath_3seg(qar, ex, ey, mx, ey, maxsx, sy, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, mx, eey, maxsx, sy, sx, sy);
+            }
+        }
+        break;
+    }
+
+out:
     return 0;
 }
 
@@ -414,15 +949,63 @@ epsdraw_xlink(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
     ob *pf, *pb;
     ob *fs[FBSLOT_LEN];
     ob *bs[FBSLOT_LEN];
-    ob *pe, *se;
+    ob *pe;
     int ik;
     int i, j;
-    int u, v;
     int am;
     int cm;
-    varray_t *tmpar;
 
     int bxmax, fxmin;
+
+    char btree[BUFSIZ];
+    char ftree[BUFSIZ];
+    vdict_t *bdict;
+    vdict_t *fdict;
+    char rmap[BUFSIZ];
+    char cmap[BUFSIZ];
+
+    char *p;
+    char  mseg[BUFSIZ];
+    char *u;
+    char  src[BUFSIZ];
+    char  mdst[BUFSIZ];
+    char *m;
+    char  dst[BUFSIZ];
+    char  seg[BUFSIZ];
+    vdict_cell *ce;
+    mob  *pse;
+    ob   *se;
+    mob  *pde;
+    ob   *de;
+
+    int sx, sy;
+    int s0x, s0y, six, siy, scx, scy;
+    double sxp;
+    int maxsx;
+
+    int mx;
+    int num_s;
+    int num_d;
+    int sd_gap;
+    double sd_gappitch;
+    int is;
+
+    int dx, dy;
+    int d0x, d0y, dix, diy, dcx, dcy;
+    double dxp;
+    int k;
+    int mindx;
+
+    int bstyle;
+    int xstyle;
+    int cstyle;
+    int xls;
+
+    varray_t *tmpar;
+
+
+
+
 
     am = 4*objunit/10;
     cm = 2*objunit/10;
@@ -448,13 +1031,6 @@ P;
 /***** 
  ***** new code
  *****/
-
-    char btree[BUFSIZ];
-    char ftree[BUFSIZ];
-    vdict_t *bdict;
-    vdict_t *fdict;
-    char rmap[BUFSIZ];
-    char cmap[BUFSIZ];
 
  {
 
@@ -512,44 +1088,8 @@ P;
  }
 
  {
-    char *p;
-    char  mseg[BUFSIZ];
-    char *u;
-    char  src[BUFSIZ];
-    char  mdst[BUFSIZ];
-    int   i;
-    char *m;
-    char  dst[BUFSIZ];
-    char  seg[BUFSIZ];
-    vdict_cell *ce;
-    mob  *pse;
-    ob   *se;
-    mob  *pde;
-    ob   *de;
 
-    int sx, sy;
-    int s0x, s0y, six, siy, scx, scy;
-    double sxp;
-#if 0
-    int q;
-#endif
 
-    int mx;
-    int num_s;
-    int num_d;
-    int sd_gap;
-    double sd_gappitch;
-    int is;
-
-    int dx, dy;
-    int d0x, d0y, dix, diy, dcx, dcy;
-    double dxp;
-    int k;
-
-    int bstyle;
-    int xstyle;
-    int cstyle;
-    int xls;
 
     /* count the number of links per object */
 
@@ -567,7 +1107,7 @@ P;
         if(!mseg[0]) {
             break;
         }
-        XEcho("mseg  |%s|\n", mseg);
+        XEcho("mseg* |%s|\n", mseg);
 
         xls = assoc(ls_ial, mseg);
         XEcho("  xls %d\n", xls);
@@ -657,33 +1197,76 @@ P;
     }
     
 
-
     XEcho("draw links - - -\n");
 
-        {
-            fprintf(fp, "%% PBGRX,GTY\n");
-            fprintf(fp, "gsave\n");
-            fprintf(fp, "  %d %d %d 0 360 arc\n",
-                pb->grx, pb->gty, objunit/20);
-            fprintf(fp, "  fill\n");
-            fprintf(fp, "grestore\n");
-        }
+    qbb_t *stage;
+    stage = qbb_new();
+    qbb_mark(stage, pb->grx, pb->gty);
+    qbb_mark(stage, pb->grx, pb->gby);
+    qbb_mark(stage, pf->glx, pf->gby);
+    qbb_mark(stage, pf->glx, pf->gty);
 
-        {
-            fprintf(fp, "%% PFGLX,GBY\n");
-            fprintf(fp, "gsave\n");
-            fprintf(fp, "  %d %d %d 0 360 arc\n",
-                pf->glx, pf->gby, objunit/20);
-            fprintf(fp, "  fill\n");
-            fprintf(fp, "grestore\n");
-        }
+    if(XINTRACE) {
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  1 0 0 setrgbcolor\n");
+        fprintf(fp, "  %d %d moveto\n", stage->lx, stage->by);
+        fprintf(fp, "  %d %d lineto\n", stage->rx, stage->by);
+        fprintf(fp, "  %d %d lineto\n", stage->rx, stage->ty);
+        fprintf(fp, "  %d %d lineto\n", stage->lx, stage->ty);
+        fprintf(fp, "  closepath\n");
+        fprintf(fp, "  stroke\n");
+        fprintf(fp, "grestore\n");
+    }
 
+#if 0
+    if(XINTRACE) {
+        fprintf(fp, "%% PBGRX,GTY\n");
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d %d %d 0 360 arc\n",
+            pb->grx, pb->gty, objunit/20);
+        fprintf(fp, "  fill\n");
+        fprintf(fp, "grestore\n");
+    }
+
+    if(XINTRACE) {
+        fprintf(fp, "%% PFGLX,GBY\n");
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d %d %d 0 360 arc\n",
+            pf->glx, pf->gby, objunit/20);
+        fprintf(fp, "  fill\n");
+        fprintf(fp, "grestore\n");
+    }
+#endif
+
+    maxsx = pb->grx;
+    mindx = pf->glx;
     sd_gap = pf->glx - pb->grx ;
     sd_gappitch = ((double)sd_gap)/(num_s+1);
+#if 0
+    sd_gappitch = ((double)sd_gap)/(num_s+3);
+#endif
 
     XEcho("num_s %d pb grx %d pf glx %d; sd_gap %d sd_gappitch %f\n",
         num_s, pb->grx, pf->glx,
         sd_gap, sd_gappitch);
+
+    if(XINTRACE) {
+
+        int z;
+        int x;
+        int y;
+        for(z=0;z<=num_s+1;z++) {
+            fprintf(fp, "%% z %d\n", z);
+            fprintf(fp, "gsave\n");
+            fprintf(fp, "  %d %d %d 0 360 arc\n",
+                pb->grx+(int)(sd_gappitch*z), pb->gty, objunit/20);
+            fprintf(fp, "  fill\n");
+            fprintf(fp, "grestore\n");
+        }
+
+    }
+
+
 
     cstyle = bstyle;
     p = cmap;
@@ -701,6 +1284,9 @@ P;
             cstyle = xstyle;
             continue;
         }
+
+        tmpar = varray_new();
+        varray_entrysprintfunc(tmpar, seg_sprintf);
 
         u = mseg;
         u = draw_word(u, src, BUFSIZ, XMAP_SD);
@@ -742,15 +1328,16 @@ P;
         }
 
         mx = pb->grx + (int)((double)(is+1)*sd_gappitch);
+#if 0
+        mx = pb->grx + (int)((double)(is+2)*sd_gappitch);
+#endif
     
-
         sxp = (((double)se->ty-se->by))/(pse->sc+1);
         s0x = se->grx;
         s0y = se->gty;
 
         scx = s0x;
         scy = se->gy;
-
 
         m = mdst;
         i = 0;
@@ -801,14 +1388,16 @@ P;
 
             fprintf(fp, "%% thru part %d - %d\n", se->oid, de->oid);
 
-            fprintf(fp, "gsave\n");
-            fprintf(fp, "  0.01 setlinewidth\n");
-            fprintf(fp, "  1 0 0 setrgbcolor\n");
-            fprintf(fp, "  newpath\n");
-            fprintf(fp, "  %d %d moveto\n", se->gx, se->gy);
-            fprintf(fp, "  %d %d lineto\n", de->gx, de->gy);
-            fprintf(fp, "  stroke\n");
-            fprintf(fp, "grestore\n");
+            if(XINTRACE) {
+                fprintf(fp, "gsave\n");
+                fprintf(fp, "  0.01 setlinewidth\n");
+                fprintf(fp, "  1 0 0 setrgbcolor\n");
+                fprintf(fp, "  newpath\n");
+                fprintf(fp, "  %d %d moveto\n", se->gx, se->gy);
+                fprintf(fp, "  %d %d lineto\n", de->gx, de->gy);
+                fprintf(fp, "  stroke\n");
+                fprintf(fp, "grestore\n");
+            }
 
             {
 
@@ -821,46 +1410,49 @@ P;
 
                 fprintf(fp, "gsave\n");
 
-                fprintf(fp, "  0.1 setlinewidth\n");
 
-                for(k=0;k<pse->sc;k++) {
-                    six = s0x;
-                    siy = s0y-sxp*(k+1);
+                if(XINTRACE) {
+                    fprintf(fp, "  0.1 setlinewidth\n");
 
-                    fprintf(fp, "%% six k %d\n", k);
-                    fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
-                    fprintf(fp, "  newpath\n");
+                    for(k=0;k<pse->sc;k++) {
+                        six = s0x;
+                        siy = s0y-sxp*(k+1);
+
+                        fprintf(fp, "%% six k %d\n", k);
+                        fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
+                        fprintf(fp, "  newpath\n");
+                        fprintf(fp, "  %d %d %d 0 360 arc\n",
+                            six-2*objunit/20, siy, objunit/20);
+                        fprintf(fp, "  fill\n");
+
+                    }
+
+                    for(k=0;k<pde->dn;k++) {
+                        dix = d0x;
+                        diy = d0y-dxp*(k+1);
+
+                        fprintf(fp, "%% dix k %d\n", k);
+                        fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
+                        fprintf(fp, "  newpath\n");
+                        fprintf(fp, "  %d %d %d 0 360 arc\n",
+                            dix+2*objunit/20, diy, objunit/20);
+                        fprintf(fp, "  fill\n");
+
+                    }
+
+                    fprintf(fp, "  50 setlinewidth\n");
+                    fprintf(fp, "  1 0 0 setrgbcolor\n");
                     fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        six-2*objunit/20, siy, objunit/20);
+                        scx-4*objunit/20, scy, objunit/20);
+                    fprintf(fp, "  fill\n");
+
+                    fprintf(fp, "  50 setlinewidth\n");
+                    fprintf(fp, "  1 0 0 setrgbcolor\n");
+                    fprintf(fp, "  %d %d %d 0 360 arc\n",
+                        dcx+4*objunit/20, dcy, objunit/20);
                     fprintf(fp, "  fill\n");
 
                 }
-
-                for(k=0;k<pde->dn;k++) {
-                    dix = d0x;
-                    diy = d0y-dxp*(k+1);
-
-                    fprintf(fp, "%% dix k %d\n", k);
-                    fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
-                    fprintf(fp, "  newpath\n");
-                    fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        dix+2*objunit/20, diy, objunit/20);
-                    fprintf(fp, "  fill\n");
-
-                }
-
-                fprintf(fp, "  50 setlinewidth\n");
-                fprintf(fp, "  1 0 0 setrgbcolor\n");
-                fprintf(fp, "  %d %d %d 0 360 arc\n",
-                    scx-4*objunit/20, scy, objunit/20);
-                fprintf(fp, "  fill\n");
-
-                fprintf(fp, "  50 setlinewidth\n");
-                fprintf(fp, "  1 0 0 setrgbcolor\n");
-                fprintf(fp, "  %d %d %d 0 360 arc\n",
-                    dcx+4*objunit/20, dcy, objunit/20);
-                fprintf(fp, "  fill\n");
-
 
                 sx = scx;
                 sy = scy;
@@ -868,22 +1460,24 @@ P;
                 dx = d0x;
                 dy = d0y-dxp*(pde->di+1);
 
-                fprintf(fp, "  200 setlinewidth\n");
-                fprintf(fp, "  0 1 0 setrgbcolor\n");
-                fprintf(fp, "  %d %d %d 0 360 arc\n",
-                    sx, sy, objunit/20);
-                fprintf(fp, "  stroke\n");
+                if(XINTRACE) {
+                    fprintf(fp, "  200 setlinewidth\n");
+                    fprintf(fp, "  0 1 0 setrgbcolor\n");
+                    fprintf(fp, "  %d %d %d 0 360 arc\n",
+                        sx, sy, objunit/20);
+                    fprintf(fp, "  stroke\n");
 
-                fprintf(fp, "  200 setlinewidth\n");
-                fprintf(fp, "  0 1 0 setrgbcolor\n");
-                fprintf(fp, "  %d %d %d 0 360 arc\n",
-                    dx, dy, objunit/15);
-                fprintf(fp, "  stroke\n");
+                    fprintf(fp, "  200 setlinewidth\n");
+                    fprintf(fp, "  0 1 0 setrgbcolor\n");
+                    fprintf(fp, "  %d %d %d 0 360 arc\n",
+                        dx, dy, objunit/15);
+                    fprintf(fp, "  stroke\n");
 
-                fprintf(fp, "  50 setlinewidth\n");
-                fprintf(fp, "  %d %d moveto\n", sx, sy);
-                fprintf(fp, "  %d %d lineto\n", dx, dy);
-                fprintf(fp, "  stroke\n");
+                    fprintf(fp, "  50 setlinewidth\n");
+                    fprintf(fp, "  %d %d moveto\n", sx, sy);
+                    fprintf(fp, "  %d %d lineto\n", dx, dy);
+                    fprintf(fp, "  stroke\n");
+                }
 
 
 XEcho("is %d si %d di %d\n", is, pse->si, pde->di);
@@ -893,8 +1487,35 @@ XEcho("is %d si %d di %d\n", is, pse->si, pde->di);
                 dix = d0x;
                 diy = d0y-dxp*(pde->di+1);
 
+                changecolor(fp, xu->cob.outlinecolor);
+                changethick(fp, xu->cob.outlinethick);
+
+                _drawXlink(tmpar, xu->oid, cstyle, xu->cob.outlinethick*2,
+                    pse->si-1, pse->sc, mx-maxsx,
+                    scx, scy, siy, maxsx,
+                    mx, dcy,
+                    mindx, dcx, dcy, diy, 0);
+
+                if(tmpar->use>0) {
+                    /*** NOTE offset is cared already. do not applay twice */
+                    __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
+                }
+
+#if 0
+
     XEcho("cstyle %d %x\n", cstyle, cstyle);
-    switch(cstyle) {
+    switch(cstyle & LS_M_TYPE) {
+    case LS_ARC:
+                if(1/*focus*/) {
+                    if(1/*dsdir*/) {
+XEcho("arc!\n");
+                        mkpath_segarcseg(tmpar, sx, sy, maxsx, sy, mx, sy,
+                            mx, dy, dx, dy);
+
+                        __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
+                    }
+                }
+                break;
     case LS_DIRECT:
                 /*
                  * direct lines
@@ -933,357 +1554,14 @@ XEcho("is %d si %d di %d\n", is, pse->si, pde->di);
 
     }
 
+#endif
 
                 fprintf(fp, "grestore\n");
             
             }
-
-
-
-            if(xu->cob.linkstyle) {
-            }
-
         }
-
         is++;
     }
-
-
- }
-    
-
-
-
- if(0) 
- {
-    u = 0;
-    for(i=0;i<pb->cch.nch;i++) {
-        pe = (ob*)pb->cch.ch[i];
-        if(EXVISIBLE(pe->type)||ISCHUNK(pe->type)) {
-        }
-        else {
-            continue;
-        }
-        u++;
-        bs[u] = pe;
-        XEcho("i,u %2d %2d: %p oid %d %d\n", i, u, pe, pe->oid, pe->type);
-        if(pe->gx + pe->cwd/2 > bxmax) {
-            bxmax = pe->gx + pe->cwd/2;
-        }
-    }
-
-    v = 0;
-    for(j=0;j<pf->cch.nch;j++) {
-        se = (ob*)pf->cch.ch[j];
-        if(EXVISIBLE(se->type)||ISCHUNK(se->type)) {
-        }
-        else {
-            continue;
-        }
-        v++;
-        fs[v] = se;
-        XEcho("j,v %2d %2d: %p oid %d %d\n", j, v, se, se->oid, se->type);
-        if(se->gx - se->cwd/2 < fxmin) {
-            fxmin = se->gx - se->cwd/2;
-        }
-    }
-    XEcho(" u %d v %d\n", u, v);
-    XEcho(" bxmax %d fxmin %d\n", bxmax, fxmin);
-    fflush(stdout);
-
-
-    for(i=0;i<u;i++) {
-        if(!bs[i]) {
-            XEcho("b %3d: %p\n", i, bs[i]);
-        }
-        else {
-            XEcho("b %3d: %p oid %d type %d\n",
-                i, bs[i], bs[i]->oid, bs[i]->type);
-        }
-    }
-    for(j=0;j<v;j++) {
-        if(!fs[j]) {
-            XEcho("f %3d: %p\n", j, fs[j]);
-        }
-        else {
-            XEcho("f %3d: %p oid %d type %d\n",
-                j, fs[j], fs[j]->oid, fs[j]->type);
-        }
-    }
-
-    if(xu->cob.markguide)
-    {
-    int x1,y1;
-    int fht;
-    fprintf(fp, "      gsave\n");
-
-    /* TEMP */
-    fht = def_textheight;
-    fprintf(fp, "      /%s findfont %d scalefont setfont %% thru backport\n",
-        def_fontname, fht);
-
-    for(i=0;i<=u;i++) {
-        pe = bs[i];
-        if(!pe) {
-            continue;
-        }
-        x1 = pe->gx+pe->cwd/2;
-        y1 = pe->gy;
-        fprintf(fp, "      %d %d %d (%d) rrshow\n",
-            x1, y1, 0, i);
-    }
-
-    for(j=0;j<=v;j++) {
-        pe = fs[j];
-        if(!pe) {
-            continue;
-        }
-        x1 = pe->gx-pe->cwd/2;
-        y1 = pe->gy;
-        fprintf(fp, "      %d %d %d (%d) lrshow\n",
-            x1, y1, 0, j);
-    }
-
-    fprintf(fp, "      grestore\n");
-    }
-
-
-    if(xu->cob.linkmap) {
-        XEcho("%s: oid %d linkmap '%s'\n",
-            __func__, xu->oid, xu->cob.linkmap);
-    }
-    else {
-        XEcho("%s: oid %d no linkmap\n",
-            __func__, xu->oid);
-    }
-    
-  {
-    char *p;
-    char token[BUFSIZ];
-    char cmap[BUFSIZ];
-    int  ss;
-    int  so, sn, eo, en, at;
-    int  af, ac, ab;
-    int  ik;
-    int  cs;
-
-    cmap[0] = '\0';
-
-    if(xu->cob.linkmap) {
-        strcpy(cmap, xu->cob.linkmap);
-    }
-    else {
-        char w[BUFSIZ];
-        int m, h;
-        m = (u<v ? u : v); /* MIN */
-        
-        strcpy(cmap, "solid");
-        for(h=0;h<=m;h++) {
-            sprintf(w, ",b%d:f%d", h, h);
-            strcat(cmap, w);
-        }
-    }
-    XEcho(" oid %d cmap '%s'\n", xu->oid, cmap);
-    p = cmap;
-    ss = xu->cob.outlinetype;
-    at = xu->cob.arrowheadpart;
-    af = xu->cob.arrowforeheadtype;
-    ac = xu->cob.arrowcentheadtype;
-    ab = xu->cob.arrowbackheadtype;
-                XEcho("g ss %d at %d af %d ac %d ab %d\n",
-                    ss, at, af, ac, ab);
-
-#if 0
-    ob** par;
-    par = (ob**)alloca(sizeof(ob*)*(u+v));
-#endif
-
-    int npar;
-    clink_t *par;
-    int i;
-
-    par = (clink_t*)alloca(sizeof(clink_t)*(u+v));
-    if(par) {
-        memset(par, 0, sizeof(clink_t)*(u+v));
-    }
-
-    npar = 0;
-    for(i=0;i<u+v;i++) {
-        par[i].prop.cob.outlinetype     = xu->cob.outlinetype;
-        par[i].prop.cob.arrowheadpart   = xu->cob.arrowheadpart;
-        par[i].prop.cob.arrowforeheadtype = xu->cob.arrowforeheadtype;
-        par[i].prop.cob.arrowcentheadtype = xu->cob.arrowcentheadtype;
-        par[i].prop.cob.arrowbackheadtype = xu->cob.arrowbackheadtype;
-    }   
-
-    if(INTRACE) {
-        fprintf(stdout, "npar %d\n", npar);
-        clink_fprint(stdout, par, u+v);
-        clink_fprint(stdout, par, npar);
-    }
-
-    while(*p) {
-        p = draw_word(p, token, BUFSIZ, XMAP_SEP);
-        XEcho("token '%s'\n", token);
-        if(!token[0]) {
-            continue;
-        }
-        ik = solve_se(token,
-                &so, &sn, &eo, &en, &ss, &at, &af, &ac, &ab);    
-        XEcho("  ik %d; so %d sn %d eo %d en %d; ss %d at %d af %d ac %d ab %d\n",
-            ik, so, sn, eo, en, ss, at, af, ac, ab);
-        fflush(stdout);
-
-        if(ik==1) {
-            int x1, y1, x2, y2, x3, y3, x4, y4;
-            if(so==AR_BACK) { pe = bs[sn]; } else { pe = fs[sn]; }
-            if(eo==AR_BACK) { se = bs[en]; } else { se = fs[en]; }
-
-            if(pe && se) {
-                if(so==AR_BACK) {
-                    x1 = pe->gx + pe->cwd/2;
-                    y1 = pe->gy;
-                    x3 = bxmax + am;
-                    y3 = pe->gy;
-                }
-                else {
-                    x1 = pe->gx - pe->cwd/2;
-                    y1 = pe->gy;
-                    x3 = fxmin - am;
-                    y3 = pe->gy;
-                }
-                if(eo==AR_FORE) {
-                    x2 = se->gx - se->cwd/2;
-                    y2 = se->gy;
-                    x4 = fxmin - am;
-                    y4 = se->gy;
-                }
-                else {
-                    x2 = se->gx + se->cwd/2;
-                    y2 = se->gy;
-                    x4 = bxmax + am;
-                    y4 = se->gy;
-                }
-
-
-                XEcho("b ss %d at %d af %d ac %d ab %d\n",
-                    ss, at, af, ac, ab);
-                if(at<0) {  
-                    ss = xu->cob.outlinetype;
-                    at = xu->cob.arrowheadpart;
-                    af = xu->cob.arrowforeheadtype;
-                    ac = xu->cob.arrowcentheadtype;
-                    ab = xu->cob.arrowbackheadtype;
-                }
-                XEcho("a ss %d at %d af %d ac %d ab %d\n",
-                    ss, at, af, ac, ab);
-
-#if 0
-                fprintf(fp, "newpath %d %d moveto %d %d %d 0 360 arc fill\n",
-                    x3, y3, x3, y3, objunit/20);
-                fprintf(fp, "newpath %d %d moveto %d %d %d 0 360 arc fill\n",
-                    x4, y4, x4, y4, objunit/20);
-#endif
-
-{
-                tmpar = varray_new();
-                varray_entrysprintfunc(tmpar, seg_sprintf);
-
-#if 0
-                varray_fprintv(stdout, tmpar);
-#endif
-
-                path_regsegmoveto(tmpar, x1, y1);
-                path_regseglineto(tmpar, x3, y3);
-                if(x3==x4) {
-                    if(so==AR_BACK) {
-                        path_regsegcurveto(tmpar, x3+am, y3, x4+am, y4, x4, y4);
-                    }
-                    else {
-                        path_regsegcurveto(tmpar, x3-am, y3, x4-am, y4, x4, y4);
-                    }
-                }
-                else {
-                    if(so==AR_BACK) {
-                        path_regsegcurveto(tmpar, x3+cm, y3, x4-cm, y4, x4, y4);
-                    }
-                    else {
-                        path_regsegcurveto(tmpar, x3-cm, y3, x4+cm, y4, x4, y4);
-                    }
-                }
-                path_regseglineto(tmpar, x2, y2);
-
-                if(tmpar->use>0) {
-                    /*** NOTE offset is cared already. do not applay twice */
-fprintf(fp, "%% thruX token '%s'\n", token);
-                    __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
-                }
-
-    
-}
-
-
-                if(npar<u+v) {
-XEcho("ADD\n");
-                    par[npar].so = so;
-                    par[npar].sn = sn;
-                    par[npar].eo = eo;
-                    par[npar].en = en;
-                    par[npar].x1 = x1;
-                    par[npar].y1 = y1;
-                    par[npar].x2 = x2;
-                    par[npar].y2 = y2;
-                    par[npar].x3 = x3;
-                    par[npar].y3 = y3;
-                    par[npar].x4 = x4;
-                    par[npar].y4 = y4;
-
-#if 1
-                    par[npar].prop.cob.outlinetype = ss;
-                    par[npar].prop.cob.arrowheadpart = at;
-                    par[npar].prop.cob.arrowforeheadtype = af;
-                    par[npar].prop.cob.arrowcentheadtype = ac;
-                    par[npar].prop.cob.arrowbackheadtype = ab;
-#endif
-
-#if 0
-                    par[npar].prop.cob.outlinetype = xu->cob.outlinetype;
-                    par[npar].prop.cob.arrowheadpart = xu->cob.arrowheadpart;
-                    par[npar].prop.cob.arrowforeheadtype = xu->cob.arrowforeheadtype;
-                    par[npar].prop.cob.arrowcentheadtype = xu->cob.arrowcentheadtype;
-                    par[npar].prop.cob.arrowbackheadtype = xu->cob.arrowbackheadtype;
-#endif
-
-
-                    npar++;
-
-    if(INTRACE) {
-        fprintf(stdout, "npar %d\n", npar);
-        clink_fprint(stdout, par, u+v);
-        clink_fprint(stdout, par, npar);
-    }
-                }
-            }
-            else {
-                Error("ignore position in '%s'; recognized objects back %d fore %d\n",
-                    token, u, v);
-            }
-        }
-        if(ik==2) {
-#if 0
-            cs = ss;
-#endif
-        }
-    }
-
-
-    if(INTRACE) {
-        fprintf(stdout, "npar %d\n", npar);
-        clink_fprint(stdout, par, u+v);
-        clink_fprint(stdout, par, npar);
-    }
-
-  }
 
  }
 

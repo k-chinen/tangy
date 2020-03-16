@@ -9937,7 +9937,6 @@ clink_fprint(FILE *fp, clink_t *par, int np)
     return 0;
 }
 
-#include "xlink.c"
 
 int
 epsdraw_thruX(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
@@ -10527,6 +10526,7 @@ out:
 #endif
 
 
+#include "xlink.c"
 
 
 

@@ -253,16 +253,18 @@ apair_t sj_ial[] = {
 };
 
 apair_t ls_ial[] = {
-    {"direct",      LS_DIRECT  },
+    {"direct",      LS_DIRECT },
     {"direct1",     LS_DIRECT | LS_FOCUS},
-    {"square",      LS_SQUARE},
+    {"square",      LS_SQUARE },
     {"square1",     LS_SQUARE | LS_FOCUS},
-    {"arc",         LS_ARC},
+    {"arc",         LS_ARC },
     {"arc1",        LS_ARC    | LS_FOCUS},
-    {"curve",       LS_CURVE},
+    {"curve",       LS_CURVE },
     {"curve1",      LS_CURVE    | LS_FOCUS},
-    {"straight",    LS_STRAIGHT},
+    {"straight",    LS_STRAIGHT },
     {"straight1",   LS_STRAIGHT | LS_FOCUS},
+    {"comb",        LS_COMB },
+    {"comb1",       LS_COMB | LS_FOCUS},
     {"man",         LS_MAN},
     {NULL,          -1},
 };
