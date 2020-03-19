@@ -524,7 +524,7 @@ expand_full(char *dst, int dlen, char *bseq, char *fseq)
             strcat(fblk, fn);
             strcat(fblk, XMAP_SEQS);
             
-            XEcho(" %d,%d %s %s\n", i, j, bn, fn);
+            XEcho("        %d,%d %s %s\n", i, j, bn, fn);
         }
             sprintf(tmp, "%s:%s", bn, fblk);
             strcat(dst, tmp);
@@ -664,12 +664,12 @@ all:
 #if 0
 fprintf(stderr, "dst 0 |%s|\n", dst);
 #endif
-	_QLsortuniq(dst, XMAP_SEP, 0);
+    _QLsortuniq(dst, XMAP_SEP, 0);
 #if 0
 fprintf(stderr, "dst 1 |%s|\n", dst);
 #endif
 #if 0
-	_QLsortuniq(dst, XMAP_SEP, 1);
+    _QLsortuniq(dst, XMAP_SEP, 1);
 fprintf(stderr, "dst 2 |%s|\n", dst);
 #endif
 
@@ -709,6 +709,7 @@ expand_sdpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
 
         xls = assoc(ls_ial, epat);
         if(xls>=0) {
+            XEcho("  xpatlist '%s' -> xls %d\n", epat, xls);
             strcat(dst, epat);
             strcat(dst, XMAP_SEPS);
             continue;
@@ -807,23 +808,12 @@ _drawXlink(varray_t *qar, int xid, int style, int jr,
         break;
 
     case LS_SQUARE:
-        if(focus) {
+XEcho("j/n %d/%d\n", j, n);
+XEcho("h1 %d\n", h1);
+        /* SQUARE do not care focus ; always separated */
+        {
             if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, mx, sy, mx, ey, ex, ey);
-            }
-            else {
-                mkpath_3seg(qar, ex, ey, mx, ey, mx, sy, sx, sy);
-            }
-#if 0
-            if(join) { mkpath_addbwcir(qar, mx, my); }
-#endif
-            if(join) {  if(j==0 || j==n-1) {}
-                        else { mkpath_addbwcir(qar, mx, sy); }
-            }
-        }
-        else {
-            if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, maxsx+h1, sy, maxsx+h1, eey, ex, eey);
+                mkpath_3seg(qar, sx, ssy, maxsx+h1, ssy, maxsx+h1, eey, ex, eey);
             }
             else {
                 mkpath_3seg(qar, ex, eey, maxsx+h1, eey, maxsx+h1, sy, sx, sy);
@@ -832,35 +822,25 @@ _drawXlink(varray_t *qar, int xid, int style, int jr,
         break;
 
     case LS_COMB:
-        if(focus) {
+        /* COMB do not care focus ; always concentrated */
+        {
             if(dsdir>=0) {
-fprintf(stderr, " pos\n");
+fprintf(stderr, " comb pos\n");
                 mkpath_3seg(qar, sx, sy, mx, sy, mx, eey, ex, eey);
 fprintf(stderr, "j/n %d/%d\n", j, n);
-            	if(join && ( j>0 && j<n-1) ) {
+                if(join && ( j>0 && j<n-1) ) {
 fprintf(stderr, "   draw\n");
-					mkpath_addbwcir(qar, mx, eey);
-				}
+                    mkpath_addbwcir(qar, mx, eey);
+                    mkpath_addbwcir(qar, mx, sy);
+                }
             }
             else {
-fprintf(stderr, " neg\n");
+fprintf(stderr, " comb neg\n");
                 mkpath_3seg(qar, ex, eey, mx, eey, mx, sy, sx, sy);
-            	if(join && j!=0 && j!=n-1) {
-					mkpath_addbwcir(qar, mx, sy);
-				}
-            }
-#if 0
-            if(join) { if(j==0 || j==n-1) {}
-                        else { fprintf(stderr, "draw\n");  mkpath_addbwcir(qar, mx, sy); }
-            }
-#endif
-        }
-        else {
-            if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, mx, sy, mx, eey, ex, eey);
-            }
-            else {
-                mkpath_3seg(qar, ex, eey, mx, eey, mx, sy, sx, sy);
+                if(join && j!=0 && j!=n-1) {
+                    mkpath_addbwcir(qar, mx, sy);
+                    mkpath_addbwcir(qar, mx, ey);
+                }
             }
         }
         break;
@@ -869,23 +849,24 @@ fprintf(stderr, " neg\n");
         if(focus) {
             if(dsdir>=0) {
                 mkpath_segarcseg2(qar, sx, sy, maxsx, sy,
-                   mx, ey, ex, ey);
+                   mx, eey, ex, eey);
             }
             else {
                 mkpath_segarcseg2(qar, ex, ey, mx, ey,
                    maxsx, sy, sx, sy);
             }
+#if 0
             if(join) { mkpath_addbwcir(qar, mx, my); }
+#endif
         }
         else {
             if(dsdir>=0) {
-
-                mkpath_segarcseg2(qar, sx, sy, maxsx, sy, 
+                mkpath_segarcseg2(qar, sx, ssy, maxsx, ssy, 
                    mx, eey, ex, eey);
             }
             else {
                 mkpath_segarcseg2(qar, ex, eey, mx, eey,
-                   maxsx, sy, sx, sy);
+                   maxsx, ssy, sx, ssy);
             }
         }
         break;
@@ -917,23 +898,28 @@ fprintf(stderr, " neg\n");
     default:
         fprintf(stderr, "ignore style <%d;%xH>\n", rstyle, rstyle);
 
+    case LS_NONE:
     case LS_DIRECT:
         if(focus) {
-            if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, maxsx, sy, mx, ey, ex, ey);
-            }
-            else {
-                mkpath_3seg(qar, ex, ey, mx, ey, maxsx, sy, sx, sy);
-            }
-            if(join) { mkpath_addbwcir(qar, mx, my); }
-        }
-        else {
-            mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
             if(dsdir>=0) {
                 mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
             }
             else {
-                mkpath_3seg(qar, ex, eey, mx, eey, maxsx, sy, sx, sy);
+                mkpath_3seg(qar, ex, ey, mx, ey, maxsx, sy, sx, sy);
+            }
+#if 0
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+#endif
+        }
+        else {
+#if 0
+            mkpath_3seg(qar, sx, ssy, maxsx, ssy, mx, eey, ex, eey);
+#endif
+            if(dsdir>=0) {
+                mkpath_3seg(qar, sx, ssy, maxsx, ssy, mx, eey, ex, eey);
+            }
+            else {
+                mkpath_3seg(qar, ex, eey, mx, eey, maxsx, ssy, sx, ssy);
             }
         }
         break;
@@ -1001,10 +987,11 @@ epsdraw_xlink(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
     int cstyle;
     int xls;
 
+    int ind;
+
     varray_t *tmpar;
 
-
-
+    qbb_t *stage;
 
 
     am = 4*objunit/10;
@@ -1032,7 +1019,6 @@ P;
  ***** new code
  *****/
 
- {
 
     /*
      * collect the name of previous/success objects
@@ -1056,16 +1042,18 @@ P;
     btree[0] = '\0';
     ik = expand_tree(btree, BUFSIZ, bdict, "b", pb);
     XEcho("btree |%s|\n", btree);
+#if 0
     vdict_fshow(bdict, stdout);
+#endif
 
     ftree[0] = '\0';
     ik = expand_tree(ftree, BUFSIZ, fdict, "f", pf);
     XEcho("ftree |%s|\n", ftree);
+#if 0
     vdict_fshow(fdict, stdout);
+#endif
 
- }
  
- {
     rmap[0] = '\0';
     cmap[0] = '\0';
 
@@ -1085,14 +1073,12 @@ P;
         ik = expand_sdpat(cmap, BUFSIZ, bdict, fdict, rmap);
     }
 
- }
-
- {
 
 
 
     /* count the number of links per object */
 
+    XEcho("dummy si\n");
     XEcho("count links - - -\n");
 
     num_s = 0;
@@ -1199,7 +1185,6 @@ P;
 
     XEcho("draw links - - -\n");
 
-    qbb_t *stage;
     stage = qbb_new();
     qbb_mark(stage, pb->grx, pb->gty);
     qbb_mark(stage, pb->grx, pb->gby);
@@ -1208,7 +1193,7 @@ P;
 
     if(XINTRACE) {
         fprintf(fp, "gsave\n");
-        fprintf(fp, "  1 0 0 setrgbcolor\n");
+        fprintf(fp, "  1 0.7 0.7 setrgbcolor\n");
         fprintf(fp, "  %d %d moveto\n", stage->lx, stage->by);
         fprintf(fp, "  %d %d lineto\n", stage->rx, stage->by);
         fprintf(fp, "  %d %d lineto\n", stage->rx, stage->ty);
@@ -1217,26 +1202,6 @@ P;
         fprintf(fp, "  stroke\n");
         fprintf(fp, "grestore\n");
     }
-
-#if 0
-    if(XINTRACE) {
-        fprintf(fp, "%% PBGRX,GTY\n");
-        fprintf(fp, "gsave\n");
-        fprintf(fp, "  %d %d %d 0 360 arc\n",
-            pb->grx, pb->gty, objunit/20);
-        fprintf(fp, "  fill\n");
-        fprintf(fp, "grestore\n");
-    }
-
-    if(XINTRACE) {
-        fprintf(fp, "%% PFGLX,GBY\n");
-        fprintf(fp, "gsave\n");
-        fprintf(fp, "  %d %d %d 0 360 arc\n",
-            pf->glx, pf->gby, objunit/20);
-        fprintf(fp, "  fill\n");
-        fprintf(fp, "grestore\n");
-    }
-#endif
 
     maxsx = pb->grx;
     mindx = pf->glx;
@@ -1258,6 +1223,7 @@ P;
         for(z=0;z<=num_s+1;z++) {
             fprintf(fp, "%% z %d\n", z);
             fprintf(fp, "gsave\n");
+            fprintf(fp, "  0.8 0.8 0.8 setrgbcolor\n");
             fprintf(fp, "  %d %d %d 0 360 arc\n",
                 pb->grx+(int)(sd_gappitch*z), pb->gty, objunit/20);
             fprintf(fp, "  fill\n");
@@ -1319,13 +1285,16 @@ P;
         }
         XEcho("      src oid %d\n", se->oid);
 
-
+#if 0
+XEcho("b si %d\n", pse->si);
         if(pse->si<0) {
             pse->si = 0;
         }
         else {
             pse->si++;
         }
+XEcho("a si %d\n", pse->si);
+#endif
 
         mx = pb->grx + (int)((double)(is+1)*sd_gappitch);
 #if 0
@@ -1379,12 +1348,17 @@ P;
             else {
                 pde->di++;
             }
+#if 1
+XEcho("b si %d\n", pse->si);
             if(pse->si==-1) {
                 pse->si = 0;
+                pse->si = 1;
             }
             else {
                 pse->si++;
             }
+XEcho("a si %d\n", pse->si);
+#endif
 
             fprintf(fp, "%% thru part %d - %d\n", se->oid, de->oid);
 
@@ -1490,71 +1464,34 @@ XEcho("is %d si %d di %d\n", is, pse->si, pde->di);
                 changecolor(fp, xu->cob.outlinecolor);
                 changethick(fp, xu->cob.outlinethick);
 
+                int grd;
+
+
+                if(scx<dcx) {
+                    if(siy>scy) { grd = 1; } else { grd = -1; }
+                }
+                else {
+                    if(siy>scy) { grd = -1; } else { grd = 1; }
+                }
+
+                if(grd>0) {
+                    ind = (int)((sd_gappitch*pse->si)/pse->sc);
+                }
+                else {
+                    ind = (int)((sd_gappitch*(pse->sc-pse->si))/pse->sc);
+                }
+XEcho("grd %d; ind %d\n", grd, ind);
+
                 _drawXlink(tmpar, xu->oid, cstyle, xu->cob.outlinethick*2,
-                    pse->si-1, pse->sc, mx-maxsx,
+                    pse->si-1, pse->sc, ind,
                     scx, scy, siy, maxsx,
                     mx, dcy,
-                    mindx, dcx, dcy, diy, 0);
+                    mindx, dcx, dcy, diy, dcx-scx);
 
                 if(tmpar->use>0) {
-                    /*** NOTE offset is cared already. do not applay twice */
+                    /* NOTE offset is cared already. do not apply twice */
                     __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
                 }
-
-#if 0
-
-    XEcho("cstyle %d %x\n", cstyle, cstyle);
-    switch(cstyle & LS_M_TYPE) {
-    case LS_ARC:
-                if(1/*focus*/) {
-                    if(1/*dsdir*/) {
-XEcho("arc!\n");
-                        mkpath_segarcseg(tmpar, sx, sy, maxsx, sy, mx, sy,
-                            mx, dy, dx, dy);
-
-                        __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
-                    }
-                }
-                break;
-    case LS_DIRECT:
-                /*
-                 * direct lines
-                 */
-                changecolor(fp, xu->cob.outlinecolor);
-                changethick(fp, xu->cob.outlinethick);
-
-                fprintf(fp, "  %d %d moveto\n", six, siy);
-                fprintf(fp, "  %d %d lineto\n", dix, diy);
-                fprintf(fp, "  stroke\n");
-        break;
-
-    default:
-    case LS_SQUARE:
-                /*
-                 * tree shape; thunk is thick, banches are thin.
-                 * 
-                 */
-                changecolor(fp, xu->cob.outlinecolor);
-                changethick(fp, xu->cob.outlinethick*pse->sc);
-
-                fprintf(fp, "  %d %d moveto\n", sx, sy);
-                fprintf(fp, "  %d %d lineto\n", mx, sy);
-                fprintf(fp, "  stroke\n");
-
-                changethick(fp, xu->cob.outlinethick);
-                fprintf(fp, "  %d %d moveto\n", mx, sy);
-                fprintf(fp, "  %d %d lineto\n", mx, dy);
-                fprintf(fp, "  %d %d lineto\n", dx, dy);
-                fprintf(fp, "  stroke\n");
-
-                fprintf(fp, "  %d %d moveto\n", sx, sy);
-                fprintf(fp, "  %d %d rmoveto\n", 
-                    xu->cob.outlinethick*8, xu->cob.outlinethick*8);
-                fprintf(fp, "  (dummy) show\n");
-
-    }
-
-#endif
 
                 fprintf(fp, "grestore\n");
             
@@ -1563,7 +1500,6 @@ XEcho("arc!\n");
         is++;
     }
 
- }
 
 out:
     return 0;

@@ -253,6 +253,7 @@ apair_t sj_ial[] = {
 };
 
 apair_t ls_ial[] = {
+    {"none",        LS_NONE },
     {"direct",      LS_DIRECT },
     {"direct1",     LS_DIRECT | LS_FOCUS},
     {"square",      LS_SQUARE },
