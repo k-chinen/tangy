@@ -421,7 +421,7 @@ expand_tree(char *dst, int dlen, vdict_t *dict, char *prefix, ob *xta)
     char  tmp[BUFSIZ];
     int   u;
 
-#if 0
+#if 1
     XEcho("%s: dst %p dlen %d prefix '%s' ob %p %s(%d)\n",
         __func__, dst, dlen, prefix, (char*)xta,
         rassoc(cmd_ial, xta->type), xta->type);
@@ -476,11 +476,19 @@ fflush(stdout);
         XEcho("    elem  oid %d\n", xta->oid);
 #endif
         if(EXVISIBLE(xta->type)||ISCHUNK(xta->type)) {
-#if 0
+                mob* ppe;
+#if 1
             XEcho("       O  oid %d\n", xta->oid);
 #endif
+            pe = xta;
             sprintf(tmp, "%s0", prefix);
-            strcat(dst, tmp);
+
+                ppe = mob_new_wob(pe);
+                if(ppe) {
+                    vdict_add(dict, tmp, ppe);
+                }
+                strcat(tmp, XMAP_SEPS);
+                strcat(dst, tmp);
         }
         else {
         }
@@ -1007,6 +1015,7 @@ P;
     XEcho("%% pf %p, pb %p\n", pf, pb);
 
     if(!pf || !pb) {
+		XEcho("back or fore is null\n");
         goto out;
     }
     XEcho("pf %p oid %d %d\n", pf, pf->oid, pf->type);
@@ -1042,14 +1051,14 @@ P;
     btree[0] = '\0';
     ik = expand_tree(btree, BUFSIZ, bdict, "b", pb);
     XEcho("btree |%s|\n", btree);
-#if 0
+#if 1
     vdict_fshow(bdict, stdout);
 #endif
 
     ftree[0] = '\0';
     ik = expand_tree(ftree, BUFSIZ, fdict, "f", pf);
     XEcho("ftree |%s|\n", ftree);
-#if 0
+#if 1
     vdict_fshow(fdict, stdout);
 #endif
 
@@ -1120,7 +1129,7 @@ P;
             ce = vdict_findpos(fdict, src);
         }
         if(!ce) {
-        XEcho("      UNKOWN src\n");
+        XEcho("      UNKNOWN src 1\n");
             continue;
         }
         pse = ce->value;
@@ -1156,7 +1165,7 @@ P;
                 ce = vdict_findpos(fdict, dst);
             }
             if(!ce) {
-        XEcho("      UNKOWN dst\n");
+        XEcho("      UNKNOWN dst 1\n");
                 continue;
             }
             pde = ce->value;
@@ -1270,7 +1279,7 @@ P;
             ce = vdict_findpos(fdict, src);
         }
         if(!ce) {
-        XEcho("      UNKOWN src\n");
+        XEcho("      UNKNOWN src 2\n");
             continue;
         }
         pse = ce->value;
@@ -1322,7 +1331,7 @@ XEcho("a si %d\n", pse->si);
                 ce = vdict_findpos(fdict, dst);
             }
             if(!ce) {
-            XEcho("      UNKOWN dst\n");
+            XEcho("      UNKNOWN dst 2\n");
                 continue;
             }
             pde = ce->value;
