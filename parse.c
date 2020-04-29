@@ -804,6 +804,21 @@ skip_note:
         uc++; \
     }
 
+#define RSET(x,y1) \
+    if(oak==(x)) { \
+        p = draw_wordW(p, value, BUFSIZ); \
+        rob->cob.y1 = atof(value); \
+        uc++; \
+    }
+
+#define RSET2(x,y1,y2) \
+    if(oak==(x)) { \
+        p = draw_wordW(p, value, BUFSIZ); \
+        rob->cob.y1 = atof(value); \
+        rob->cob.y2 = atof(value); \
+        uc++; \
+    }
+
 #define LADD(x,y) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
@@ -852,7 +867,7 @@ skip_note:
         uc++; \
     }
 
-    /* integer setting */
+    /* real setting */
 #define GFSET(x,y) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
@@ -977,6 +992,10 @@ P;
     ISET(OA_BACKCHOP,       backchop);
     ISET(OA_BULGE,          bulge);
 
+    SADD(OA_FILE,           filestr);
+    RSET2(OA_FILESCALEXY,   filescalex, filescaley);
+    RSET(OA_FILESCALEX,     filescalex);
+    RSET(OA_FILESCALEY,     filescaley);
 
     GFSET(OA_TEXTHEIGHTFACTOR,      textheightfactor);
     GFSET(OA_ARROWSIZEFACTOR,       arrowsizefactor);
@@ -1665,6 +1684,9 @@ Echo(" 3 *u '%c'\n", *u);
         if(*u=='"') {
             u++;
             while(*u && (*u!='"') ) {
+                if(*u=='\\') {
+                    u++;
+                }
                 *q++ = *u++;
             }
             *q = '\0';
@@ -1693,7 +1715,7 @@ Echo("  third '%s'\n", third);
             strcat(ns, " ");
             strcat(ns, u);
 
-#if 0
+#if 1
 Echo("%s: ns   |%s|\n", __func__, ns);
 #endif
             return 1;

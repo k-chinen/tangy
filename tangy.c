@@ -28,8 +28,8 @@
 
 int linkchk(ob *xch, ns *xns);
 
-int     nodraw = 0;
-char   *outfile = "out.eps";
+int     nodraw   = 0;
+char   *outfile  = "out.eps";
 int     canvaswd = (int)( 8.27 * 72);
 int     canvasht = (int)(11.69 * 72);
 int     canvasrt = 0;
@@ -60,8 +60,8 @@ print_usage()
     printf("  -i        draw object IDs\n");
     printf("  -l        print object list for debug\n");
     printf("  -c        print color list for debug\n");
-    printf("  -F font   set default font (current '%s')\n", def_fontname);
-    printf("  -K font   set kanji font\n");
+    printf("  -F fontspec  set default font (current '%s')\n", def_fontname);
+    printf("  -K fontspec  set kanji font\n");
     printf("  -k ratio  set ascii/kanji size ratio (current %.3f)\n", akratio);
     printf("following itmes are reserved for future. do not use.\n");
     printf("  -v        verbose mode (current %d)\n", _t_);
@@ -344,6 +344,7 @@ main(int argc, char *argv[])
             epsoutmargin = atoi(optarg);
             break;
 
+#if 0
         case 'F':
             def_fontname = strdup(optarg);
 #if 0
@@ -355,6 +356,13 @@ main(int argc, char *argv[])
 
         case 'K':
             ik = swap_Xfont(ff_actk_ial, FF_SERIF, optarg);
+            break;
+#endif
+        case 'F':
+            font_edit(FM_ASCII, optarg);
+            break;
+        case 'K':
+            font_edit(FM_KANJI, optarg);
             break;
 
         case 'k':

@@ -62,6 +62,14 @@ int
 confirm_attr(ob *xo)
 {
     struct obattr *xoa;
+
+    double bp2ip;
+    double ip2bp;
+
+    /* XXX */
+    ip2bp = 0.01;
+    bp2ip = 1.0/ip2bp;
+
     xoa = &xo->vob;
 
 #if 0
@@ -98,6 +106,102 @@ fprintf(stderr, "polygon peak %d\n", xoa->polypeak);
             Info("SET oid %d polygon peak %d -> %d\n",
                 xo->oid, xoa->polypeak, nv);
             xoa->polypeak = nv;
+        }
+    }
+
+    if(xo->type==CMD_OBJLOAD) {
+        if(xoa->filestr) {
+            int    ik;
+            qbb_t *qbb;
+            qbb_t *ibb;
+            int    w0, h0;
+            int    w, h;
+extern int epsparse_fp(char *fname, qbb_t *qbb);
+
+            qbb = qbb_new();
+            if(!qbb) {
+                fprintf(stderr, "no memory\n");
+                return -1;
+            }
+            ik = epsparse_fp(xoa->filestr, qbb);
+#if 0
+            fprintf(stderr, " ik %d: %d %d %d %d\n",
+                ik, qbb->lx, qbb->by, qbb->rx, qbb->ty);
+#endif
+
+            if(ik) {
+                fprintf(stderr, "cannot parse file '%s'\n", xoa->filestr);
+                return -1;
+            }
+
+#if 0
+            fprintf(stderr, "---\n");
+            fprintf(stderr, " 0 oid %-3d wd %6d ht %6d scale %7.3f,%7.3f\n",
+                xo->oid, xo->wd, xo->ht, xoa->filescalex, xoa->filescaley);
+#endif
+
+            ibb = qbb_new();
+            if(!ibb) {
+                fprintf(stderr, "no memory\n");
+                return -1;
+            }
+            qbb_setbb(ibb, (int)(qbb->lx*bp2ip), (int)(qbb->by*bp2ip),
+                (int)(qbb->rx*bp2ip), (int)(qbb->ty*bp2ip));
+
+            w0 = ibb->rx - ibb->lx;
+            h0 = ibb->ty - ibb->by;
+
+            if(xo->wd>0) {
+                if(xo->ht>0) {
+                    xoa->filescalex = ((double)(xo->wd - xoa->imargin*2))/w0;
+                    xoa->filescaley = ((double)(xo->ht - xoa->imargin*2))/h0;
+                }
+                else {
+                    xoa->filescalex = ((double)(xo->wd - xoa->imargin*2))/w0;
+                    xoa->filescaley = xoa->filescalex;
+                    xo->ht = (int)((double)h0*xoa->filescalex) + xoa->imargin*2;
+                }
+            }
+            else
+            if(xo->ht>0) {
+                    xoa->filescaley = ((double)(xo->ht - xoa->imargin*2))/h0;
+                    xoa->filescalex = xoa->filescaley;
+                    xo->wd = (int)((double)w0*xoa->filescaley) + xoa->imargin*2;
+            }
+            else {
+#define RDELTA  (0.00001)
+                if(fabs(xoa->filescalex)>RDELTA) {
+                    if(fabs(xoa->filescaley)>RDELTA) {
+                        xo->wd = xoa->filescalex*w0 + xoa->imargin*2;
+                        xo->ht = xoa->filescaley*h0 + xoa->imargin*2;
+                    }
+                    else {
+                        xo->wd = xoa->filescalex*w0 + xoa->imargin*2;
+                        xo->ht = xoa->filescalex*h0 + xoa->imargin*2;
+                        xoa->filescaley = xoa->filescalex;
+                    }
+                }
+                else
+                if(fabs(xoa->filescaley)>RDELTA) {
+                        xo->wd = xoa->filescaley*w0 + xoa->imargin*2;
+                        xo->ht = xoa->filescaley*h0 + xoa->imargin*2;
+                        xoa->filescalex = xoa->filescaley;
+                }
+                else {
+                    xo->wd = w0 + xoa->imargin*2;
+                    xo->ht = h0 + xoa->imargin*2;
+                    xoa->filescalex = 1.0;
+                    xoa->filescaley = 1.0;
+                }
+            }
+
+#if 0
+            fprintf(stderr, " 1 oid %-3d wd %6d ht %6d scale %7.3f,%7.3f\n",
+                xo->oid, xo->wd, xo->ht, xoa->filescalex, xoa->filescaley);
+#endif
+
+            free(ibb);
+            free(qbb);
         }
     }
 
@@ -775,6 +879,10 @@ P;
 
     qbb_reset(&r->localbb);
     qbb_reset(&r->globalbb);
+
+    r->cob.filestr = NULL;
+    r->cob.filescalex = 0.0;
+    r->cob.filescaley = 0.0;
 
     return r;
 }

@@ -95,6 +95,7 @@ apair_t cmd_ial[] = {
     {"*",               CMD_CHUNKCHILDATTR},
     {"alias",           CMD_ALIAS},
     {"notefile",        CMD_NOTEFILE},
+    {"objload",         CMD_OBJLOAD},
     {"namespace",       CMD_NAMESPACE},
     {"object",          CMD_OBJ},
     {"ruler",           CMD_RULER},
@@ -410,6 +411,11 @@ apair_t objattr_ial[] = {
     {"bwbox",               OA_BWBOX},
     {"bwxss",               OA_BWXSS},
     {"bwpls",               OA_BWPLS},
+
+    {"file",                OA_FILE},
+    {"scale",               OA_FILESCALEXY},
+    {"scalex",              OA_FILESCALEX},
+    {"scaley",              OA_FILESCALEY},
 
     {NULL,                  -1},
 };

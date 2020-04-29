@@ -1378,6 +1378,8 @@ P;
 
     case CMD_CHUNKOBJATTR:  ZZ; break;
 
+    case CMD_OBJLOAD:   RO;     break;
+
     case CMD_LPAREN:    NNO;    break;
     case CMD_RPAREN:    NNO;    break;
     case CMD_LBRACKET:  NNO;    break;

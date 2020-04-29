@@ -74,8 +74,8 @@
 #define CMD_PING        (401)
 #define CMD_PINGPONG    (402)
 
-#define CMD_XCURVE       (501)
-#define CMD_XCURVESELF   (502)
+#define CMD_XCURVE      (501)
+#define CMD_XCURVESELF  (502)
 #define CMD_BCURVE      (511)
 #define CMD_BCURVESELF  (512)
 
@@ -122,6 +122,7 @@
 
 #define CMD_ALIAS       (9007)
 #define CMD_NOTEFILE    (9009)
+#define CMD_OBJLOAD     (9010)
 
 #define CMD_CHUNK               (10000)
 #define CMD_NAMESPACE           (10001)
@@ -154,7 +155,8 @@ extern apair_t cmd_ial[];
      (x)==CMD_POLYGON||(x)==CMD_POINT||(x)==CMD_GEAR|| \
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
-     (x)==CMD_LBRACE||(x)==CMD_RBRACE \
+     (x)==CMD_LBRACE||(x)==CMD_RBRACE|| \
+     (x)==CMD_OBJLOAD \
     )
 #define HASBODY(x)  \
     (ISGLUE(x)||ISATOM(x)||(x)==CMD_NOP) 
@@ -174,7 +176,8 @@ extern apair_t cmd_ial[];
  (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||\
  (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\
- (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF)
+ (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
+ (x)==CMD_OBJLOAD)
 
 #define VISIBLE(x) \
 (EXVISIBLE(x)||(x)==CMD_DOTS||(x)==CMD_SEP)
@@ -410,6 +413,11 @@ extern apair_t lo_ial[];
 #define OA_BWXSS                    (1030)
 #define OA_BWPLS                    (1040)
 
+#define OA_FILE                     (2001)
+#define OA_FILESCALEX               (2011)
+#define OA_FILESCALEY               (2012)
+#define OA_FILESCALEXY              (2013)
+
 extern apair_t objattr_ial[];
 
 
@@ -462,15 +470,15 @@ struct obattr {
     int   hatchthick;
     int   hatchpitch;
 
-    int   imargin;
-    int   gimargin;
+    int   imargin;      /* inside margin */
+    int   gimargin;     /* group inside margin */
 
     int   polypeak;
     int   polyrotate;
     int   concave;
     int   rotateval;
     int   rad;
-    int   length; /* for line family */
+    int   length;       /* for line family */
 
     int   sepcurdir;
     int   sepx1, sepy1, sepx2, sepy2;
@@ -535,7 +543,11 @@ struct obattr {
     int    lanegapv;
     int    lanegaph;
 
-    char   *note[PO_MAX];
+    char  *filestr;
+    double filescalex;
+    double filescaley;
+
+    char  *note[PO_MAX];
 }; 
 
 typedef struct _ch {

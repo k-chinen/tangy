@@ -111,7 +111,7 @@ QLfind(char *src, char *name, int sep)
     char *p;
 
     p = src;
-    while(p = draw_word(p, token, BUFSIZ, sep)) {
+    while((p = draw_word(p, token, BUFSIZ, sep))!=NULL) {
         if(!token[0]) {
             break;
         }
@@ -1015,7 +1015,7 @@ P;
     XEcho("%% pf %p, pb %p\n", pf, pb);
 
     if(!pf || !pb) {
-		XEcho("back or fore is null\n");
+        XEcho("back or fore is null\n");
         goto out;
     }
     XEcho("pf %p oid %d %d\n", pf, pf->oid, pf->type);
@@ -1195,6 +1195,10 @@ P;
     XEcho("draw links - - -\n");
 
     stage = qbb_new();
+    if(!stage) {
+        fprintf(stderr, "no memory\n");
+        return -1;
+    }
     qbb_mark(stage, pb->grx, pb->gty);
     qbb_mark(stage, pb->grx, pb->gby);
     qbb_mark(stage, pf->glx, pf->gby);

@@ -5847,6 +5847,10 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
     int    cw, ch;
 
     qbb = qbb_new();
+    if(!qbb) {
+        fprintf(stderr, "no memory\n");
+        return -1;
+    }
 #if 0
     qbb_fprint(stderr, qbb);
 #endif
@@ -8810,6 +8814,95 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     return 0;
 }
 
+int
+epsdraw_objload(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
+{
+    int ik;
+    qbb_t *qbb;
+    extern int epsparse_fp(char*, qbb_t*);
+
+#if 0
+    fprintf(stderr, "%s:%d\n", __FILE__, __LINE__);
+    fprintf(stderr, " oid %d filestr '%s'\n", xu->oid, xu->cob.filestr);
+#endif
+
+    qbb = qbb_new();
+    if(!qbb) {
+        fprintf(stderr, "no memory\n");
+        return -1;
+    }
+    ik = epsparse_fp(xu->cob.filestr, qbb);
+#if 0
+    fprintf(stderr, " ik %d: %d %d %d %d\n",
+        ik, qbb->lx, qbb->by, qbb->rx, qbb->ty);
+#endif
+
+    if(ik==0) {
+        FILE *ifp;
+        char  line[BUFSIZ];
+        int   c;
+        double ip2bp = 100.0;
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d %d translate %% for gx,gy\n", xu->gx, xu->gy);
+#if 0
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "1 0 0 setrgbcolor\n");
+        fprintf(fp, "0 0 %d 0 360 arc closepath fill\n", objunit/20);
+        fprintf(fp, "grestore\n");
+#endif
+    
+        fprintf(fp, "  %d %d translate %% for wd,ht\n", -xu->wd/2, -xu->ht/2);
+#if 0
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "0 1 0 setrgbcolor\n");
+        fprintf(fp, "%d %d %d %d 5 mrbox\n", 0, 0, xu->wd, xu->ht);
+        fprintf(fp, "grestore\n");
+#endif
+    
+        fprintf(fp, "  %d %d translate %% for imargin\n", xu->cob.imargin, xu->cob.imargin);
+#if 0
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "newpath\n");
+        fprintf(fp, "1 1 0 setrgbcolor\n");
+        fprintf(fp, "0 0 %d 0 360 arc closepath fill\n", objunit/20);
+        fprintf(fp, "grestore\n");
+#endif
+    
+        fprintf(fp, "  %f %f scale\n", 
+            ip2bp*xu->cob.filescalex, ip2bp*xu->cob.filescaley);
+
+        fprintf(fp, "BeginEPSF\n");
+        fprintf(fp, "%%%%BeginDocument: %s\n", xu->cob.filestr);
+
+        c  = -1;
+        ifp = fopen(xu->cob.filestr, "r");
+        if(!ifp) {
+            goto skip;
+        }
+        c = 0;
+        while(fgets(line, BUFSIZ, ifp)) {
+            c++;
+            fputs(line, fp);
+        }
+
+        fclose(ifp);
+
+#if 0
+        fprintf(stderr, " read %d lines\n", c);
+#endif
+
+skip:
+        fprintf(fp, "%%%%EOF\n");
+        fprintf(fp, "%%%%EndDocument\n");
+        fprintf(fp, "EndEPSF\n");
+        fprintf(fp, "grestore\n");
+        return 0;
+    }
+    
+    return 1;
+
+}
 
 int
 _cloud_shape(FILE *fp, double sx, double sy)
@@ -11778,6 +11871,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         /* nothing */
     }
     else
+    if(u->type==CMD_OBJLOAD) {
+        epsdraw_objload(fp, ox, oy, u, xns);
+    }
+    else
     if(u->type==CMD_SCATTER) {
         epsdraw_scatter(fp, *xdir, ox, oy, u, xns);
     }
@@ -12552,15 +12649,86 @@ fprintf(fp, "\
 ");
 #endif
 
+
+    fprintf(fp, "\
+%%\n\
+%% BeginEPSF -\n\
+%%\n\
+/BeginEPSF{\n\
+    /EPSF_save save def\n\
+    /dict_count countdictstack def\n\
+    /op_count count 1 sub def\n\
+    userdict begin\n\
+    /showpage {} def\n\
+    0 setgray\n\
+    0 setlinecap\n\
+    1 setlinewidth\n\
+    0 setlinejoin\n\
+    10 setmiterlimit\n\
+    [] 0 setdash\n\
+    newpath\n\
+    /languagelevel where\n\
+        {pop languagelevel\n\
+        1 ne\n\
+        {false setstrokeadjust false setoverprint} if\n\
+    } if\n\
+} bind def\n\
+\n\
+%%\n\
+%% EndEPSF -\n\
+%%\n\
+/EndEPSF {\n\
+    count op_count sub {pop} repeat\n\
+    countdictstack dict_count sub {end} repeat\n\
+    EPSF_save restore\n\
+} bind def\n\
+\n\
+");
+
+
+
     return 0;
 }
 
+int
+insertfonts(FILE *fp)
+{
+    char *p;
+    char  filename[BUFSIZ];
+    FILE *ifp;
+    char  line[BUFSIZ];
+    
+    p = ext_fontfilelist;
+    while(*p) {
+        p = skipwhite(p);
+        p = draw_word(p, filename, BUFSIZ, ',');
+        if(!filename[0]) {
+            continue;
+        }
+#if 0
+        fprintf(stderr, "file '%s'\n", filename);
+#endif
+
+        ifp = fopen(filename, "r");
+        if(!ifp) {
+            continue;
+        }
+        
+        fprintf(fp,  "%%%%BeginResource:\n");
+        while(fgets(line, BUFSIZ, ifp)) {
+            fputs(line, fp);
+        }
+
+        fclose(ifp);
+
+        fprintf(fp,  "%%%%EndResource:\n");
+    }
+}
 
 /*
  * my tool seems does not care negative bounding box
  * then, I shift objects as 0 0 width height (with margin)
  */
-
 
 int
 epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
@@ -12591,6 +12759,8 @@ P;
         0, 0, epswd, epsht);
 #endif
 
+
+    insertfonts(fp);
 
     printobjlist(fp, "% ", xch);
 

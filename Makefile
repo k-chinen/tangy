@@ -8,7 +8,7 @@ OBJS= alist.o varray.o vdict.o word.o \
    font.o seg.o xns.o \
    xcur.o chs.o chas.o nss.o \
    gv.o epsdraw.o notefile.o \
-   put.o finalize.o linkchk.o parse.o a.o tangy.o
+   put.o finalize.o linkchk.o parse.o epsparse.o a.o tangy.o 
 
 all: tangy 
 tangy: a.c $(OBJS)
