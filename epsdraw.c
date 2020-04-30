@@ -43,10 +43,11 @@ int epsdraftfontsize    = 10;
 int epsdraftgap         =  5;
 
 char *def_fontname      = "Times-Roman";
+char *def_fontspec      = "serif,normal";
 
 int   def_markcolor     = 5;
-int   def_guide1color    = 4;
-int   def_guide2color    = 2;
+int   def_guide1color   = 4;
+int   def_guide2color   = 2;
 #define     def_guidecolor  def_guide1color
 
 int debug_clip = 0;
@@ -12699,6 +12700,9 @@ insertfonts(FILE *fp)
     char  line[BUFSIZ];
     
     p = ext_fontfilelist;
+    if(!p) {
+        goto skip;
+    }
     while(*p) {
         p = skipwhite(p);
         p = draw_word(p, filename, BUFSIZ, ',');
@@ -12723,6 +12727,12 @@ insertfonts(FILE *fp)
 
         fprintf(fp,  "%%%%EndResource:\n");
     }
+
+skip:
+
+out:
+    return 0;
+
 }
 
 /*
@@ -12759,6 +12769,9 @@ P;
         0, 0, epswd, epsht);
 #endif
 
+#if 0
+    fontset_fprint(stderr, "fontset");
+#endif
 
     insertfonts(fp);
 

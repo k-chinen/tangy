@@ -26,11 +26,15 @@ extern apair_t ff_act_ial[];
 extern apair_t ff_actk_ial[];
 
 extern char *def_fontname;
+extern char *def_fontspec;
+
 extern char *ext_fontnamelist;
 extern char *ext_fontfilelist;
 
 int swap_font(int xv, char *xn);
 int swap_Xfont(apair_t *ls, int xv, char *xn);
+
+int fontset_fprint(FILE *fp, char *pmsg);
 int font_edit(int cat, char *opseq);
 
 #endif/*_TANGY_FONT_H_*/

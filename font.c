@@ -194,6 +194,96 @@ out:
     return r;
 }
 
+int
+al_fprint(FILE *fp, apair_t *pl)
+{
+    int i;
+
+#if 1
+    fprintf(stderr, "%s: %p %p\n", __func__, fp, pl);
+#endif
+
+    i = 0;
+    while(pl[i].name) {
+        fprintf(fp, "%3d: %s %d\n", i, pl[i].name, pl[i].value);
+        i++;
+    }
+
+    return 0;
+}
+
+
+#define FSLEN   (8)
+
+int
+fontset_fprint(FILE *fp, char *pmsg)
+{
+    int    i;
+    int    j;
+    char **snl;
+    char **afnl;
+    char **kfnl;
+    char  *sn;
+    int    p;
+
+#if 1
+    fprintf(stderr, "%s: |%s|\n", __func__, pmsg);
+#endif
+
+    snl = (char**)malloc(sizeof(char*)*FSLEN);
+    if(!snl) {  fprintf(stderr, "no memory\n"); return -1; }
+    afnl = (char**)malloc(sizeof(char*)*FSLEN);
+    if(!afnl) { fprintf(stderr, "no memory\n"); return -1; }
+    kfnl = (char**)malloc(sizeof(char*)*FSLEN);
+    if(!kfnl) { fprintf(stderr, "no memory\n"); return -1; }
+
+    memset(snl,  0, sizeof(char*)*FSLEN);
+    memset(afnl, 0, sizeof(char*)*FSLEN);
+    memset(kfnl, 0, sizeof(char*)*FSLEN);
+
+#if 0
+    for(i=0;i<FSLEN;i++) {
+        fprintf(fp, "%2d: %-8s %-32s %-32s\n",
+            i,  (snl[i]  ? snl[i]  : "*"),
+                (afnl[i] ? afnl[i] : "-"),
+                (kfnl[i] ? kfnl[i] : "-"));
+    }
+#endif
+    
+    j = 0;
+    while(ff_act_ial[j].name) {
+        p = ff_act_ial[j].value;
+        if(p>=0 && p<FSLEN) {
+            snl[p]  = rassoc(ff_ial, ff_act_ial[j].value);
+            afnl[p] = ff_act_ial[j].name;
+        }
+        j++;
+    }
+    
+    j = 0;
+    while(ff_actk_ial[j].name) {
+        p = ff_actk_ial[j].value;
+        if(p>=0 && p<FSLEN) {
+            snl[p]  = rassoc(ff_ial, ff_actk_ial[j].value);
+            kfnl[p] = ff_actk_ial[j].name;
+        }
+        j++;
+    }
+
+    for(i=0;i<FSLEN;i++) {
+        fprintf(fp, "%2d: %-8s %-32s %-32s\n",
+            i,  (snl[i]  ? snl[i]  : "*"),
+                (afnl[i] ? afnl[i] : "-"),
+                (kfnl[i] ? kfnl[i] : "-"));
+    }
+
+
+    free(snl);
+    free(afnl);
+    free(kfnl);
+
+    return 0;
+}
 
 int
 font_edit(int cat, char *opseq)
@@ -216,6 +306,10 @@ font_edit(int cat, char *opseq)
     r = -1;
 #if 0
     fprintf(stderr, "%s: cat %d opseq |%s|\n", __func__, cat , opseq);
+#endif
+
+#if 0
+    fontset_fprint(stderr, "before edit");
 #endif
 
     if(!ext_fontnamelist)  {
@@ -259,7 +353,7 @@ font_edit(int cat, char *opseq)
 #endif
 
         if(strcasecmp(key, "default")==0) {
-            def_fontname = strdup(val);
+            def_fontspec = strdup(val);
             continue;
         }
         if(ff<0) {
@@ -308,7 +402,7 @@ font_edit(int cat, char *opseq)
             }
             else
             if(cat==FM_KANJI) {
-                swap_Xfont(ff_act_ial, ff, val);
+                swap_Xfont(ff_actk_ial, ff, val);
             }
             else {
             }
@@ -317,6 +411,8 @@ font_edit(int cat, char *opseq)
     }
 
 #if 0
+    fontset_fprint(stderr, "after  edit");
+
     if(ext_fontnamelist) {
         fprintf(stderr, "ext_fontnamelist |%s|\n", ext_fontnamelist);
     }

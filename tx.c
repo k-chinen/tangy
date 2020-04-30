@@ -11,6 +11,8 @@
 
 #include "tx.h"
 
+extern char *def_fontspec;
+
 int tx_trace = 0;
 
 #define Echo    if(tx_trace)printf
@@ -204,11 +206,20 @@ ins_kanji_shift(char *ds, int dlen, char *ss)
         return -1;
     }
 
-    is = (char*)ss;
-    os = (char*)ms;
-
+    is   = (char*)ss;
+    os   = (char*)ms;
     ilen = (size_t)strlen(ss);
     olen = (size_t)mlen;
+#if 1
+    /* padding default font spec and trancate lengths */
+    if(def_fontspec && *def_fontspec) {
+        int w;
+        sprintf(ms, "|%s|", def_fontspec);
+        w    = strlen(ms);
+        os   = ms+w;
+        olen = mlen-w;
+    }
+#endif
 
     Echo("ilen %d\n", (int)ilen);
     Echo("olen %d\n", (int)mlen);

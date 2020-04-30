@@ -529,9 +529,6 @@ int def_noteisep        =   5;
 int def_pbstrgap        =  72;
 
 
-#if 0
-char *def_fontname      = "Times-Roman";
-#endif
 extern char *def_fontname;
 extern int   def_markcolor;
 
