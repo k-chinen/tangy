@@ -190,8 +190,7 @@ ins_kanji_shift(char *ds, int dlen, char *ss)
     unsigned char   *q;
     unsigned char   *u;
     
-
-    mlen = strlen(ss)*4+1;
+    mlen = strlen(ss)*4+20+1;
     ms = (char*)alloca(mlen);
     if(!ms) {
         fprintf(stderr, "no memory (mlen %d)\n", mlen);
@@ -211,30 +210,54 @@ ins_kanji_shift(char *ds, int dlen, char *ss)
     ilen = (size_t)strlen(ss);
     olen = (size_t)mlen;
 #if 1
+/*
+    memset(ms, 0xaa, mlen);
+*/
+#if 0
+    fprintf(stderr, "    ms %p mlen %d\n", ms, (int)mlen);
+    fprintf(stderr, "  0 os %p olen %d\n", os, (int)olen);
+#endif
+
     /* padding default font spec and trancate lengths */
     if(def_fontspec && *def_fontspec) {
         int w;
+#if 1
         sprintf(ms, "|%s|", def_fontspec);
+#endif
         w    = strlen(ms);
+        ms[w] = '\0';
         os   = ms+w;
         olen = mlen-w;
+
+#if 0
+    fprintf(stderr, "    ms '%s'\n", ms);
+    fprintf(stderr, "    ms[w] '%c'\n", ms[w]);
+    fprintf(stderr, "    w  %d\n", w);
+    fprintf(stderr, "  1 os %p olen %d\n", os, (int)olen);
+#endif
     }
+    if(INTRACE) {
+        dump(stderr, "ms 0", ms, strlen(ms));
+    }
+
 #endif
 
-    Echo("ilen %d\n", (int)ilen);
-    Echo("olen %d\n", (int)mlen);
+#if 0
+    Echo("  b ilen %d\n", (int)ilen);
+    Echo("  b olen %d\n", (int)mlen);
+#endif
 
     ik = iconv(cq, &is, &ilen, &os, &olen);
 
-    Echo("ik %d iconv\n", ik);
+    Echo("  ik %d iconv\n", ik);
 
-    Echo("ilen %d\n", (int)ilen);
-    Echo("olen %d\n", (int)mlen);
+    Echo("  a ilen %d\n", (int)ilen);
+    Echo("  a olen %d\n", (int)mlen);
 
     iconv_close(cq);
 
     if(INTRACE) {
-        dump(stderr, "ms", ms, strlen(ms));
+        dump(stderr, "ms 1", ms, strlen(ms));
     }
 
     p = (unsigned char*)ms;
@@ -275,7 +298,7 @@ fprintf(stderr, "u %p %02x\n", u, *u);
     *q = '\0';
 
     if(INTRACE) {
-        dump(stderr, "ds", ds, strlen(ds));
+        dump(stderr, "ds -", ds, strlen(ds));
     }
     
     Echo("ss '%s'\n", ss);
@@ -303,13 +326,13 @@ txe_parse(varray_t *ar, char *fs)
 
     memset(ts, 0, tl);
 
-    Echo("fs '%s'\n", fs);
-    Echo("ts '%s'\n", ts);
+    Echo("b fs '%s'\n", fs);
+    Echo("b ts '%s'\n", ts);
 
     ik = ins_kanji_shift(ts, tl, fs);
 
-    Echo("fs '%s'\n", fs);
-    Echo("ts '%s'\n", ts);
+    Echo("a fs '%s'\n", fs);
+    Echo("a ts '%s'\n", ts);
     
     ik = txe_parse1(ar, ts);
 
