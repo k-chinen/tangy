@@ -61,6 +61,7 @@ print_usage()
     printf("  -l        print object list for debug\n");
     printf("  -c        print color list for debug\n");
     printf("  -F fontspec  set default font (current '%s')\n", def_fontname);
+    printf("                -F \"default=sanserif,large;sanserif=Courier\"\n");
     printf("  -K fontspec  set kanji font\n");
     printf("  -k ratio  set ascii/kanji size ratio (current %.3f)\n", akratio);
     printf("following itmes are reserved for future. do not use.\n");
