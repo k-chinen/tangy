@@ -147,6 +147,10 @@ apair_t hatchtype_ial[] = {
     {"bigchecked",          HT_BIGCHECKED},
     {"hex",                 HT_HEX},
     {"seigaiha",            HT_SEIGAIHA},
+    {"uroko",               HT_UROKO},
+    {"shippo",              HT_SHIPPO},
+    {"sippo",               HT_SHIPPO},
+    {"mameshibori",         HT_MAMESHIBORI},
     {"dummy",               HT_DUMMY},
     {NULL,                  -1},
 };

@@ -6321,9 +6321,9 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
 
     case HT_HLINED:
-        x1 = -2*aw;
-        x2 =  2*aw;
-        for(y1=-2*ah;y1<2*ah;y1+=hp) {
+        x1 = -aw/2;
+        x2 =  aw/2;
+        for(y1=-ah/2;y1<ah/2;y1+=hp) {
             y2 = y1;
             fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -6331,9 +6331,9 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
 
     case HT_VLINED:
-        y1 = -2*aw;
-        y2 =  2*aw;
-        for(x1=-2*aw;x1<2*aw;x1+=hp) {
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=-aw/2;x1<aw/2;x1+=hp) {
             x2=x1;
             fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -6341,16 +6341,16 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
     
     case HT_CROSSED:
-        x1 = -2*aw;
-        x2 =  2*aw;
-        for(y1=-2*ah;y1<2*ah;y1+=hp) {
+        x1 = -aw/2;
+        x2 =  aw/2;
+        for(y1=-ah/2;y1<ah/2;y1+=hp) {
             y2 = y1;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
         }
-        y1 = -2*aw;
-        y2 =  2*aw;
-        for(x1=-2*aw;x1<2*aw;x1+=hp) {
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=-aw/2;x1<aw/2;x1+=hp) {
             x2=x1;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -6375,27 +6375,37 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
                 x2, y1, x1, y2);
         }
 #endif
-        y1 = -ah*6/10;
-        y2 =  ah*6/10;
-        for(x1=-2*aw;x1<aw*2+ah*2;x1+=hp) {
-            x2 = x1-ah*6/10*2;
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=-aw/2-hp;x1<aw/2+ah+hp;x1+=hp) {
+            x2 = x1-ah;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
         }
-        y1 = -ah*6/10;
-        y2 =  ah*6/10;
-        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=hp) {
-            x2 = x1-ah*6/10*2;
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=-aw/2-hp;x1<aw/2+ah+hp;x1+=hp) {
+            x2 = x1-ah;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x2, y1, x1, y2);
         }
 
         break;
 
+    case HT_SLASHED:
+        y1 = -ah*6/10;
+        y2 =  ah*6/10;
+        for(x1=-aw*6/10;x1<aw*6/10+ah*11/10;x1+=hp) {
+            x2 = x1-ah*6/10*2;
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x2, y1, x1, y2);
+        }
+        break;
+
     case HT_BACKSLASHED:
         y1 = -ah*6/10;
         y2 =  ah*6/10;
-        for(x1=-2*aw;x1<aw*2+ah*2;x1+=hp) {
+        for(x1=-aw*6/10;x1<aw*6/10+ah*11/10;x1+=hp) {
             x2 = x1-ah*6/10*2;
             fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
                 x1, y1, x2, y2);
@@ -6472,22 +6482,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         idx = (int)dx;
         i = 0;
         for(x1=-aw/2-idx;x1<aw/2+idx;x1+=idx*2) {
-            fprintf(fp, "    %d %d moveto\n", x1, -ah);
-            for(y1=-ah;y1<ah;y1+=hp*3) {
-                x2=x1+def_hatchthick;
+            fprintf(fp, "    %d %d moveto\n", x1, -ah/2-hp);
+            for(y1=0;y1<ah+2*hp;y1+=hp*3) {
                 fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
                     -idx, hp/2, 0, hp);
                 fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
                      idx, hp/2, 0, hp);
-                y2=y1;
             }
-            fprintf(fp, "    %d %d moveto\n", x1, -ah);
-            for(y1=-ah;y1<ah;y1+=hp*3) {
+            fprintf(fp, "    %d %d moveto\n", x1, -ah/2-hp);
+            for(y1=0;y1<ah+2*hp;y1+=hp*3) {
                 fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
                      idx, hp/2, 0, hp);
                 fprintf(fp, "      %d %d rlineto %d %d rlineto\n",
                     -idx, hp/2, 0, hp);
-                y2=y1;
             }
             fprintf(fp, "    stroke\n");
             i++;
@@ -6509,6 +6516,73 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
       }
         break;
+
+    case HT_UROKO:
+        {
+        int i;
+        int r;
+        double dx;
+        int idx;
+        r  = hp*2;
+        dx = sqrt(2)/2.0*r;
+        idx = (int)dx;
+        i = 0;
+        for(y1=0;y1<ah+2*r;y1+=idx) {
+            for(x1=-aw/2-idx;x1<aw/2+idx;x1+=r) {
+                if(i%2==0) {
+                    fprintf(fp,
+                        "    %d %d moveto\n", x1, -ah/2-r+i*idx);
+                }   
+                else {
+                    fprintf(fp,
+                        "    %d %d moveto\n", x1-r/2, -ah/2-r+i*idx);
+                }
+                fprintf(fp,
+                    "    %d %d rlineto %d %d rlineto closepath fill\n",
+                    r, 0, -r/2, idx);
+            }
+            i++;
+        }
+        }
+        break;
+
+    case HT_SHIPPO:
+        {
+        int i;
+        int r;
+        r  = hp*2;
+        i = 0;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r) {
+            for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+                if(i%2==0) {
+                    x2 = x1;
+                }   
+                else {
+                    x2 = x1 + r;
+                }
+                fprintf(fp,
+                    "    %d %d moveto %d %d %d 0 360 arc closepath stroke\n",
+                        x2+r, y1, x2, y1, r);
+            }
+            i++;
+        }
+        }
+        break;
+
+    case HT_MAMESHIBORI:
+        {
+        int r;
+        r = hp;
+        for(x1=-aw/2-r;x1<aw/2+r;x1+=r*4) {
+            for(y1=-ah/2-r;y1<ah/2+r;y1+=r*4) {
+                x2=x1+def_hatchthick;
+                y2=y1;
+                fprintf(fp, "      %d %d moveto %d %d %d 0 360 arc fill \n",
+                    x1+r, y1, x1, y2, r);
+            }
+        }
+        }
+        break;
     
     default:
     case HT_NONE:
@@ -6521,15 +6595,6 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
 #if 0
 #endif
-    case HT_SLASHED:
-        y1 = -ah*6/10;
-        y2 =  ah*6/10;
-        for(x1=-aw*6/10;x1<aw*6/10+ah*2;x1+=hp) {
-            x2 = x1-ah*6/10*2;
-            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
-                x2, y1, x1, y2);
-        }
-        break;
 
     }
 
@@ -8752,7 +8817,12 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             changecolor(fp, xu->cob.fillcolor);
             changethick(fp, xu->cob.hatchthick);
             ik = drawpathN(fp, 0, 0, 0, xu, xns);
-            fprintf(fp, "  clip\n");
+            if(debug_clip) {
+                fprintf(fp, "  stroke\n");
+            }
+            else {
+                fprintf(fp, "  clip\n");
+            }
 
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
