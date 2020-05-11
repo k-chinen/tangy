@@ -6494,6 +6494,21 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         }
         break;
+
+    case HT_SEIGAIHA:
+      {
+        int r;
+        r = hp*4;
+        for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+            for(y1=-ah/2-r;y1<ah/2+r;y1+=r) {
+                fprintf(fp, "%d %d %d _seigaiha\n",
+                    x1, y1, r);
+                fprintf(fp, "%d %d %d _seigaiha\n",
+                    x1+r, y1-r/2, r);
+            }
+        }
+      }
+        break;
     
     default:
     case HT_NONE:
@@ -12649,6 +12664,36 @@ fprintf(fp, "\
 } def\n\
 ");
 #endif
+
+    fprintf(fp, "\
+%% x y r _seigaiha -\n\
+/_seigaiha {\n\
+  /r  exch def\n\
+  /y  exch def\n\
+  /x  exch def\n\
+  gsave\n\
+    x y translate\n\
+    /r2 r 1.05 mul def\n\
+    r neg r 2 div moveto\n\
+    r neg r 2 div neg r 90 0 arcn\n\
+    r r 2 div neg r 180 90 arcn\n\
+    r r2 lineto\n\
+    r neg r2 lineto\n\
+    closepath\n\
+    clip\n\
+    r 10 div setlinewidth\n\
+    0.2 0.26 1.00 {\n\
+      /rr exch def\n\
+      /rp r rr mul def\n\
+      newpath\n\
+      rp 0 moveto\n\
+      0 0 rp 0 180 arc\n\
+      stroke\n\
+    } for\n\
+  grestore\n\
+} def\n\
+");
+
 
 
     fprintf(fp, "\
