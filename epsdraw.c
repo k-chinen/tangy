@@ -6502,6 +6502,29 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+    case HT_BRICK:
+        {
+        int i;
+        int r;
+        r  = hp*2;
+        i = 0;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r) {
+            for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+                if(i%2==0) {
+                    x2 = x1;
+                }   
+                else {
+                    x2 = x1 + r;
+                }
+                fprintf(fp,
+                    "    %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto 0 %d rlineto closepath stroke\n",
+                        x2+r, y1, r*2, r, r*(-2), r*(-1));
+            }
+            i++;
+        }
+        }
+        break;
+
     case HT_SEIGAIHA:
       {
         int r;
@@ -6546,7 +6569,59 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+    case HT_NFUROKO:
+        {
+        int i;
+        int r;
+        double dx;
+        int idx;
+        r  = hp*2;
+        dx = sqrt(2)/2.0*r;
+        idx = (int)dx;
+        i = 0;
+        for(y1=0;y1<ah+2*r;y1+=idx) {
+            for(x1=-aw/2-idx;x1<aw/2+idx;x1+=r) {
+                if(i%2==0) {
+                    fprintf(fp,
+                        "    %d %d moveto\n", x1, -ah/2-r+i*idx);
+                }   
+                else {
+                    fprintf(fp,
+                        "    %d %d moveto\n", x1-r/2, -ah/2-r+i*idx);
+                }
+                fprintf(fp,
+                    "    %d %d rlineto %d %d rlineto closepath stroke\n",
+                    r, 0, -r/2, idx);
+            }
+            i++;
+        }
+        }
+        break;
+
     case HT_SHIPPO:
+        {
+        int i;
+        int r;
+        r  = hp*2;
+        i = 0;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r*2) {
+            for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+                fprintf(fp, "    gsave\n");
+                fprintf(fp, "      %d %d %d 0 360 arc\n",   x1,y1,r);
+                fprintf(fp, "      %d %d %d 180 270 arc\n", x1+r,y1+r,r);
+                fprintf(fp, "      %d %d %d 90 180 arc\n",  x1+r,y1-r,r);
+                fprintf(fp, "      %d %d %d 0 90 arc\n",    x1-r,y1-r,r);
+                fprintf(fp, "      %d %d %d 270 0 arc\n",   x1-r,y1+r,r);
+                fprintf(fp, "      closepath clip\n");
+                fprintf(fp, "      %d %d %d 0 360 arc fill\n",  x1,y1,r);
+                fprintf(fp, "    grestore\n");
+            }
+            i++;
+        }
+        }
+        break;
+
+    case HT_NFSHIPPO:
         {
         int i;
         int r;
@@ -6569,6 +6644,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+
+
     case HT_MAMESHIBORI:
         {
         int r;
@@ -6584,6 +6661,22 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
     
+    case HT_NFMAMESHIBORI:
+        {
+        int r;
+        r = hp;
+        for(x1=-aw/2-r;x1<aw/2+r;x1+=r*4) {
+            for(y1=-ah/2-r;y1<ah/2+r;y1+=r*4) {
+                x2=x1+def_hatchthick;
+                y2=y1;
+                fprintf(fp, "      %d %d moveto %d %d %d 0 360 arc stroke \n",
+                    x1+r, y1, x1, y2, r);
+            }
+        }
+        }
+        break;
+    
+
     default:
     case HT_NONE:
         break;

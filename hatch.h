@@ -16,10 +16,14 @@
 #define HT_CHECKED          (17)
 #define HT_BIGCHECKED       (18)
 #define HT_HEX              (20)
+#define HT_BRICK            (21)
 #define HT_SEIGAIHA         (30)
 #define HT_UROKO            (31)
-#define HT_SHIPPO           (32)
-#define HT_MAMESHIBORI      (33)
+#define HT_NFUROKO          (32)
+#define HT_SHIPPO           (33)
+#define HT_NFSHIPPO         (34)
+#define HT_MAMESHIBORI      (35)
+#define HT_NFMAMESHIBORI    (36)
 #define HT_DUMMY            (41)
 
 extern apair_t hatchtype_ial[];
