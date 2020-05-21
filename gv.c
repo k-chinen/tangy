@@ -148,6 +148,7 @@ apair_t hatchtype_ial[] = {
     {"hex",                 HT_HEX},
     {"brick",               HT_BRICK},
     {"hishi",               HT_HISHI},
+    {"raimon",              HT_RAIMON},
     {"seigaiha",            HT_SEIGAIHA},
     {"uroko",               HT_UROKO},
     {"nfuroko",             HT_NFUROKO},

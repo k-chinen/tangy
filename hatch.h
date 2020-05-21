@@ -18,6 +18,7 @@
 #define HT_HEX              (20)
 #define HT_BRICK            (21)
 #define HT_HISHI            (22)
+#define HT_RAIMON           (25)
 #define HT_SEIGAIHA         (30)
 #define HT_UROKO            (31)
 #define HT_NFUROKO          (32)

@@ -6676,6 +6676,19 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+    case HT_RAIMON:
+        {
+        int p=hp/4;
+        int mw=28*p;
+        int mh=14*p;
+        for(y1=-ah/2;y1<ah/2+mh;y1+=mh) {
+            for(x1=-aw/2;x1<aw/2+mw;x1+=mw) {
+                fprintf(fp, "  %d %d %d raimon\n", x1, y1, p);
+            }
+        }
+        }
+        break;
+
     case HT_HISHI:
         {
         int i;
@@ -13011,6 +13024,49 @@ fprintf(fp, "\
         ex2 ey2 lineto mx2 my2 lineto closepath fill\n\
     } for\n\
   grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x y b raimon -\n\
+/raimon {\n\
+    /b exch def\n\
+    /y exch def\n\
+    /x exch def\n\
+    gsave\n\
+    x y translate\n\
+    b b scale\n\
+    1 setlinewidth\n\
+    6.5 6 moveto\n\
+    1.5 0 rlineto\n\
+    0 2 rlineto\n\
+    -3 0 rlineto\n\
+    0 -4 rlineto\n\
+    5 0 rlineto\n\
+    0 6 rlineto\n\
+    -7 0 rlineto\n\
+    0 -8 rlineto\n\
+    9  0 rlineto\n\
+    0 10 rlineto\n\
+    -11 0 rlineto\n\
+    0 -12 rlineto\n\
+    13 0 rlineto\n\
+    0 12 rlineto\n\
+    13 0 rlineto\n\
+    0 -12 rlineto\n\
+    -11 0 rlineto\n\
+    0 10 rlineto\n\
+        9 0 rlineto\n\
+    0 -8 rlineto\n\
+    -7 0 rlineto\n\
+    0 6 rlineto\n\
+    5 0 rlineto\n\
+    0 -4 rlineto\n\
+    -3 0 rlineto\n\
+    0 2 rlineto\n\
+    1.5 0 rlineto\n\
+    stroke\n\
+    grestore\n\
 } def\n\
 ");
 
