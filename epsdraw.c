@@ -6675,7 +6675,71 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         }
         break;
-    
+
+    case HT_HISHI:
+        {
+        int i;
+        int r;
+        r  = hp*2;
+        i = 0;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r/2) {
+            for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+                if(i%2==0) {
+                    x2 = x1;
+                }   
+                else {
+                    x2 = x1 + r;
+                }
+                fprintf(fp,
+                    "    %d %d moveto %d %d rlineto %d %d rlineto %d %d rlineto closepath stroke\n",
+                        x2-r, y1, r, -r/2, r, r/2, -r, r/2);
+            }
+            i++;
+        }
+        }
+        break;
+
+    case HT_KANOKOSHIBORI:
+        {
+        int i;
+        int r;
+        r  = hp*2;
+        i = 0;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r) {
+            for(x1=-aw/2-r;x1<aw/2+r;x1+=r*2) {
+                if(i%2==0) {
+                    x2 = x1;
+                }   
+                else {
+                    x2 = x1 + r;
+                }
+                fprintf(fp,
+                    "    %d %d %d %d %d _kanokoshibori\n",
+                        x2, y1, r*8/10, r*2/10, r*3/10);
+            }
+            i++;
+        }
+        }
+        break;
+
+    case HT_CONCENTRATION:
+        {
+            int effrad = (int)(sqrt(aw*aw+ah*ah));
+            int effpth = 6;
+            fprintf(fp, "  %d %d %d %d %d focuslinecircle\n",
+                0, 0, ah*4/10, effrad, effpth);
+        }
+        break;
+
+    case HT_CONCENTRIC:
+        {
+            int effrad = (int)(sqrt(aw*aw+ah*ah));
+            int r;
+            for(r=0;r<=effrad;r+=hp) {
+                fprintf(fp, "  %d %d %d 0 360 arc closepath stroke\n", 0, 0, r);
+            }
+        }
+        break;
 
     default:
     case HT_NONE:
@@ -12829,6 +12893,34 @@ fprintf(fp, "\
 #endif
 
     fprintf(fp, "\
+%% x y r1 r2 rdia -\n\
+/rdia {\n\
+  /r2 exch def\n\
+  /r1 exch def\n\
+  /y exch def\n\
+  /x exch def\n\
+  /pp r1 r2 2 mul sub def\n\
+  /mm r2 1.414 mul def\n\
+  gsave\n\
+    x y translate\n\
+    gsave\n\
+    0 r2 add r1 neg r2 add moveto\n\
+    pp pp rlineto\n\
+    pp 0 mm -45 45 arc\n\
+    pp neg pp rlineto\n\
+    0 pp mm 45 135 arc\n\
+    pp neg pp neg rlineto\n\
+    pp neg 0 mm 135 225 arc\n\
+    pp pp neg rlineto\n\
+    0 pp neg mm 225 -45 arc\n\
+    closepath\n\
+    fill\n\
+    grestore\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
 %% x y r _seigaiha -\n\
 /_seigaiha {\n\
   /r  exch def\n\
@@ -12857,6 +12949,70 @@ fprintf(fp, "\
 } def\n\
 ");
 
+    fprintf(fp, "\
+%% x y r1 r2 r3 _kanokoshibori -\n\
+/_kanokoshibori {\n\
+  /r3 exch def\n\
+  /r2 exch def\n\
+  /r1 exch def\n\
+  /y exch def\n\
+  /x exch def\n\
+  /pp r1 r2 2 mul sub def\n\
+  /mm r2 1.414 mul def\n\
+  gsave\n\
+    x y translate\n\
+    gsave\n\
+      0 r2 add r1 neg r2 add moveto\n\
+      pp pp rlineto\n\
+      pp 0 mm -45 45 arc\n\
+      pp neg pp rlineto\n\
+      0 pp mm 45 135 arc\n\
+      pp neg pp neg rlineto\n\
+      pp neg 0 mm 135 225 arc\n\
+      pp pp neg rlineto\n\
+      0 pp neg mm 225 -45 arc\n\
+      r3 0 moveto\n\
+      0 0 r3 360 0 arcn\n\
+      clip\n\
+      0 0 r1 0 360 arc\n\
+      fill\n\
+    grestore\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x y r1 r2 ap focuslinecircle -\n\
+/focuslinecircle {\n\
+  /ap exch def\n\
+  /r2 exch def\n\
+  /r1 exch def\n\
+  /y  exch def\n\
+  /x  exch def\n\
+  gsave\n\
+    x y translate\n\
+    0 ap 360 {\n\
+      /th exch def\n\
+      /w1 currentlinewidth 1.5 mul def\n\
+      /w2 currentlinewidth 2 mul def\n\
+      /sx th cos r1 mul def\n\
+      /sy th sin r1 mul def\n\
+      /ex th cos r2 mul def\n\
+      /ey th sin r2 mul def\n\
+      /mx1 th cos r1 mul 2 mul th 90 add cos w1 mul add def\n\
+      /my1 th sin r1 mul 2 mul th 90 add sin w1 mul add def\n\
+      /mx2 th cos r1 mul 2 mul th 90 sub cos w1 mul add def\n\
+      /my2 th sin r1 mul 2 mul th 90 sub sin w1 mul add def\n\
+      /ex1 th cos r2 mul th 90 add cos w2 mul add def\n\
+      /ey1 th sin r2 mul th 90 add sin w2 mul add def\n\
+      /ex2 th cos r2 mul th 90 sub cos w2 mul add def\n\
+      /ey2 th sin r2 mul th 90 sub sin w2 mul add def\n\
+      sx sy moveto mx1 my1 lineto ex1 ey1 lineto \n\
+        ex2 ey2 lineto mx2 my2 lineto closepath fill\n\
+    } for\n\
+  grestore\n\
+} def\n\
+");
 
 
     fprintf(fp, "\

@@ -17,6 +17,7 @@
 #define HT_BIGCHECKED       (18)
 #define HT_HEX              (20)
 #define HT_BRICK            (21)
+#define HT_HISHI            (22)
 #define HT_SEIGAIHA         (30)
 #define HT_UROKO            (31)
 #define HT_NFUROKO          (32)
@@ -24,7 +25,10 @@
 #define HT_NFSHIPPO         (34)
 #define HT_MAMESHIBORI      (35)
 #define HT_NFMAMESHIBORI    (36)
-#define HT_DUMMY            (41)
+#define HT_KANOKOSHIBORI    (37)
+#define HT_CONCENTRATION    (41)
+#define HT_CONCENTRIC       (42)
+#define HT_DUMMY            (99)
 
 extern apair_t hatchtype_ial[];
 #endif/*_TANGY_HATCH_H_*/

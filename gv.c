@@ -147,6 +147,7 @@ apair_t hatchtype_ial[] = {
     {"bigchecked",          HT_BIGCHECKED},
     {"hex",                 HT_HEX},
     {"brick",               HT_BRICK},
+    {"hishi",               HT_HISHI},
     {"seigaiha",            HT_SEIGAIHA},
     {"uroko",               HT_UROKO},
     {"nfuroko",             HT_NFUROKO},
@@ -156,6 +157,13 @@ apair_t hatchtype_ial[] = {
     {"nfsippo",             HT_NFSHIPPO},
     {"mameshibori",         HT_MAMESHIBORI},
     {"nfmameshibori",       HT_NFMAMESHIBORI},
+    {"kanokoshibori",       HT_KANOKOSHIBORI},
+/*
+#define HT_CONCENTRATION    (41)
+#define HT_CONCENTRIC       (42)
+*/
+    {"concentration",       HT_CONCENTRATION},
+    {"concentric",          HT_CONCENTRIC},
     {"dummy",               HT_DUMMY},
     {NULL,                  -1},
 };
