@@ -50,7 +50,10 @@ int   def_guide1color   = 4;
 int   def_guide2color   = 2;
 #define     def_guidecolor  def_guide1color
 
-int debug_clip = 0;
+#ifndef DEBUG_CLIP
+#define DEBUG_CLIP (0)
+#endif
+int debug_clip = DEBUG_CLIP;
 
 #define PP  fprintf(fp, "%% PASS %s:%d\n", __func__, __LINE__); fflush(fp);
 
@@ -6413,8 +6416,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
 
     case HT_DOTTED:
-        for(x1=-aw;x1<aw;x1+=hp) {
-            for(y1=-ah;y1<ah;y1+=hp) {
+        for(x1=-aw/2;x1<aw/2;x1+=hp) {
+            for(y1=-ah/2;y1<ah/2;y1+=hp) {
                 x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
@@ -6424,8 +6427,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         break;
 
     case HT_SPARSEDOTTED:
-        for(x1=-aw;x1<aw;x1+=hp*2) {
-            for(y1=-ah;y1<ah;y1+=hp*2) {
+        for(x1=-aw/2;x1<aw/2;x1+=hp*2) {
+            for(y1=-ah/2;y1<ah/2;y1+=hp*2) {
                 x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
@@ -6436,11 +6439,11 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 
     case HT_CHECKED:
       {
-            int u, v;
+        int u, v;
         u = 0;
-        for(x1=-aw;x1<aw;x1+=hp) {
+        for(x1=-aw/2-hp;x1<aw/2+hp;x1+=hp) {
             v = 0;
-            for(y1=-ah;y1<ah;y1+=hp) {
+            for(y1=-ah/2-hp;y1<ah/2+hp;y1+=hp) {
                 
                 if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
                     fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
@@ -6456,11 +6459,11 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 
     case HT_BIGCHECKED:
       {
-            int u, v;
+        int u, v;
         u = 0;
-        for(x1=-aw;x1<aw;x1+=hp*2) {
+        for(x1=-aw/2-hp;x1<aw/2+hp;x1+=hp*2) {
             v = 0;
-            for(y1=-ah;y1<ah;y1+=hp*2) {
+            for(y1=-ah/2-hp;y1<ah/2+hp;y1+=hp*2) {
                 
                 if((u%2==0 && v%2==0) || (u%2==1 && v%2==1)) {
                     fprintf(fp, "      %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill\n",
@@ -6649,10 +6652,9 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
     case HT_MAMESHIBORI:
         {
         int r;
-        r = hp;
+        r = hp/2;
         for(x1=-aw/2-r;x1<aw/2+r;x1+=r*4) {
             for(y1=-ah/2-r;y1<ah/2+r;y1+=r*4) {
-                x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d %d 0 360 arc fill \n",
                     x1+r, y1, x1, y2, r);
@@ -6664,10 +6666,9 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
     case HT_NFMAMESHIBORI:
         {
         int r;
-        r = hp;
+        r = hp/2;
         for(x1=-aw/2-r;x1<aw/2+r;x1+=r*4) {
             for(y1=-ah/2-r;y1<ah/2+r;y1+=r*4) {
-                x2=x1+def_hatchthick;
                 y2=y1;
                 fprintf(fp, "      %d %d moveto %d %d %d 0 360 arc stroke \n",
                     x1+r, y1, x1, y2, r);
@@ -6681,8 +6682,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         int p=hp/4;
         int mw=28*p;
         int mh=14*p;
-        for(y1=-ah/2;y1<ah/2+mh;y1+=mh) {
-            for(x1=-aw/2;x1<aw/2+mw;x1+=mw) {
+        for(y1=-ah/2-mh/2;y1<ah/2+mh/2;y1+=mh) {
+            for(x1=-aw/2-mw/2;x1<aw/2+mw/2;x1+=mw) {
                 fprintf(fp, "  %d %d %d raimon\n", x1, y1, p);
             }
         }
@@ -6710,6 +6711,67 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
             i++;
         }
         }
+        break;
+
+    case HT_HIGAKI:
+        {
+        int b;
+        int r;
+        int n;
+        b = hp;
+        r = b*sqrt(2);
+        n = (aw+2*r)/(2*r)+1;
+        x1 = - aw/2 - r ;
+        for(y1=-ah/2-r;y1<ah/2+r;y1+=r) {
+                fprintf(fp,
+                    "    %d %d %d %d _higakiline\n",
+                        x1, y1, b, n);
+        }
+        }
+        break;
+
+    case HT_DIAMONDPLATE:
+      {
+        int u, v;
+        u = 0;
+        for(x1=-aw/2-hp;x1<aw/2+hp;x1+=hp*2) {
+            v = 0;
+            for(y1=-ah/2-hp;y1<ah/2+hp;y1+=hp) {
+                if(v%2==0) {
+                    fprintf(fp, "      %d %d %d 45 true _diaplate\n",
+                        x1, y1, (14*hp)/10);
+                }
+                else {
+                    fprintf(fp, "      %d %d %d 135 true _diaplate\n",
+                        x1+hp, y1, (14*hp)/10);
+                }
+                v++;
+            }
+            u++;
+        }
+      }
+        break;
+
+    case HT_NFDIAMONDPLATE:
+      {
+        int u, v;
+        u = 0;
+        for(x1=-aw/2-hp;x1<aw/2+hp;x1+=hp*2) {
+            v = 0;
+            for(y1=-ah/2-hp;y1<ah/2+hp;y1+=hp) {
+                if(v%2==0) {
+                    fprintf(fp, "      %d %d %d 45 false _diaplate\n",
+                        x1, y1, (14*hp)/10);
+                }
+                else {
+                    fprintf(fp, "      %d %d %d 135 false _diaplate\n",
+                        x1+hp, y1, (14*hp)/10);
+                }
+                v++;
+            }
+            u++;
+        }
+      }
         break;
 
     case HT_KANOKOSHIBORI:
@@ -6750,6 +6812,120 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
             int r;
             for(r=0;r<=effrad;r+=hp) {
                 fprintf(fp, "  %d %d %d 0 360 arc closepath stroke\n", 0, 0, r);
+            }
+        }
+        break;
+    
+    case HT_SQRING11:
+    case HT_SQRING11WRAP:
+        {
+        int r;
+        r = hp/4;
+        for(x1=-aw/2-r*8;x1<aw/2+r*8;x1+=r*16) {
+            for(y1=-ah/2-r*8;y1<ah/2+r*8;y1+=r*16) {
+                x2=x1+def_hatchthick;
+                y2=y1;
+                fprintf(fp, "      %d %d 11 %d sqring\n",
+                    x1, y1, r);
+                
+                if(hty==HT_SQRING11WRAP) {
+                    fprintf(fp, "      %d %d 11 %d sqring\n",
+                        x1+r*8, y1+r*8, r);
+                }
+            }
+        }
+        }
+        break;
+    
+    case HT_SQRING9:
+    case HT_SQRING9WRAP:
+        {
+        int r;
+        r = hp/4;
+        for(x1=-aw/2-r*6;x1<aw/2+r*6;x1+=r*12) {
+            for(y1=-ah/2-r*6;y1<ah/2+r*6;y1+=r*12) {
+                x2=x1+def_hatchthick;
+                y2=y1;
+                fprintf(fp, "      %d %d 9 %d sqring\n",
+                    x1, y1, r);
+                
+                if(hty==HT_SQRING9WRAP) {
+                    fprintf(fp, "      %d %d 9 %d sqring\n",
+                        x1+r*6, y1+r*6, r);
+                }
+            }
+        }
+        }
+        break;
+    
+    case HT_SQRING7:
+    case HT_SQRING7WRAP:
+        {
+        int r;
+        r = hp/2;
+        for(x1=-aw/2-r*4;x1<aw/2+r*4;x1+=r*8) {
+            for(y1=-ah/2-r*4;y1<ah/2+r*4;y1+=r*8) {
+                x2=x1+def_hatchthick;
+                y2=y1;
+                fprintf(fp, "      %d %d 7 %d sqring\n",
+                    x1, y1, r);
+                
+                if(hty==HT_SQRING7WRAP) {
+                    fprintf(fp, "      %d %d 7 %d sqring\n",
+                        x1+r*4, y1+r*4, r);
+                }
+            }
+        }
+        }
+        break;
+
+    case HT_FUNDO:
+    {
+        int b;
+        int u, v;
+        b = hp*2;
+        v = 0;
+        for(y1=-ah/2-b;y1<ah/2+b;y1+=b) {
+            y2 = y1+b;
+            u = 0;
+            for(x1=-aw/2-b;x1<aw/2+b*2;x1+=b) {
+                if(v%2==1) {
+                    if(u%2==0) {
+                        fprintf(fp, "%d %d %d 270 0 arc\n", x1, y2, b);
+                    }
+                    else {
+                        fprintf(fp, "%d %d %d 90 0 arcn\n", x1, y1, b);
+                    }
+                }
+                if(v%2==0) {
+                    if(u%2==0) {
+                        fprintf(fp, "%d %d %d 180 90 arcn\n", x1, y1, b);
+                    }
+                    else {
+                        fprintf(fp, "%d %d %d 180 270 arc\n", x1, y2, b);
+                    }
+                }
+                u++;
+            }
+            fprintf(fp, "stroke\n");
+            v++;
+        }
+    }
+        break;
+
+    case HT_YAGASURI:
+        {
+            int w=hp*2;
+            int h=hp*6;
+            int u;
+            u = 0;
+            for(x1=-aw/2-w;x1<aw/2+w;x1+=w) {
+                for(y1=-ah/2-(3*h)/2;y1<ah/2+h;y1+=h) {
+                    if(u%2==0) { y2 = y1; } else { y2 = y1+h/2; }
+                    fprintf(fp, "%d %d %d %d %d _yagata\n",
+                        x1, y2, w, h, w/5);
+                }
+                u++;
             }
         }
         break;
@@ -13030,9 +13206,9 @@ fprintf(fp, "\
     fprintf(fp, "\
 %% x y b raimon -\n\
 /raimon {\n\
-    /b exch def\n\
-    /y exch def\n\
-    /x exch def\n\
+  /b exch def\n\
+  /y exch def\n\
+  /x exch def\n\
     gsave\n\
     x y translate\n\
     b b scale\n\
@@ -13066,7 +13242,133 @@ fprintf(fp, "\
     0 2 rlineto\n\
     1.5 0 rlineto\n\
     stroke\n\
-    grestore\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x y w b sqring\n\
+/sqring {\n\
+  /b exch def\n\
+  /w exch def\n\
+  /y exch def\n\
+  /x exch def\n\
+  gsave\n\
+    x y translate\n\
+    0 0 moveto\n\
+    w b mul 0 rlineto\n\
+    0 w b mul rlineto\n\
+    w b mul neg 0 rlineto\n\
+    0 w b mul neg rlineto\n\
+    b b moveto\n\
+    0 w 2 sub b mul rlineto\n\
+    w 2 sub b mul 0 rlineto\n\
+    0 w 2 sub b mul neg rlineto\n\
+    w 2 sub b mul neg 0 rlineto\n\
+    fill\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x0 y0 b n _higakiline\n\
+/_higakiline {\n\
+  /n exch def\n\
+  /b exch def\n\
+  /y0 exch def\n\
+  /x0 exch def\n\
+  /hb b 2 div def\n\
+  /db b 2 mul def\n\
+  /sq2 2 sqrt def\n\
+  gsave\n\
+    x0 y0 translate\n\
+    /x 0 def\n\
+    /y 0 def\n\
+    45 rotate\n\
+    n {\n\
+      x y moveto\n\
+      db 0 rlineto\n\
+      0 b neg rlineto\n\
+      db neg 0 rlineto\n\
+      0 b rlineto\n\
+      closepath\n\
+      stroke\n\
+      x b add y b sub moveto\n\
+      b 0 rlineto\n\
+      0 db neg rlineto\n\
+      b neg 0 rlineto\n\
+      0 db rlineto\n\
+      closepath\n\
+      stroke\n\
+      /x x db add def\n\
+      /y y db sub def\n\
+    } repeat\n\
+    stroke\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x y b d ford _diaplate -\n\
+/_diaplate {\n\
+  /ford exch def\n\
+  /d exch def\n\
+  /b exch def\n\
+  /y exch def\n\
+  /x exch def\n\
+  /r1 b 2 div def\n\
+  /r2 b 8 div def\n\
+  gsave\n\
+    x y translate\n\
+    d rotate\n\
+    r1 neg 0 moveto\n\
+    0 r2 neg lineto\n\
+    r1 0 lineto\n\
+    0 r2 lineto \n\
+    closepath\n\
+    ford {\n\
+      fill\n\
+    }\n\
+    {\n\
+      stroke\n\
+    } ifelse\n\
+  grestore\n\
+} def\n\
+");
+
+    fprintf(fp, "\
+%% x y w q h _yagata -\n\
+/_yagata {\n\
+  /q exch def\n\
+  /h exch def\n\
+  /w exch def\n\
+  /y exch def\n\
+  /x exch def\n\
+  /a h 2 div def\n\
+  /b w 2 div def\n\
+  /m b q 2 div sub def\n\
+  gsave\n\
+    x y translate\n\
+    m 0 moveto\n\
+    q 0 rlineto\n\
+    0 a rlineto\n\
+    q neg 0 rlineto\n\
+    closepath\n\
+    fill\n\
+    m q add a moveto\n\
+    m m rlineto\n\
+    0 a rlineto\n\
+    m neg m neg rlineto\n\
+    closepath\n\
+    fill\n\
+    m a moveto\n\
+    0 a rlineto\n\
+    m neg m rlineto\n\
+    0 a neg rlineto\n\
+    m m neg rlineto\n\
+    closepath\n\
+    fill\n\
+  grestore\n\
 } def\n\
 ");
 
