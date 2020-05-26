@@ -6528,6 +6528,129 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+
+    case HT_GRID:
+
+        x1 = -aw/2;
+        x2 =  aw/2;
+        for(y1=0; y1<ah/2; y1 += hp) {
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x2, y1);
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, -y1, x2, -y1);
+        }
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=0; x1<aw/2; x1 += hp) {
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x1, y2);
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                -x1, y1, -x1, y2);
+        }
+
+        fprintf(fp, "  gsave currentlinewidth 2.5 mul setlinewidth\n");
+        x1 = -aw/2;
+        x2 =  aw/2;
+        for(y1=0; y1<ah/2; y1 += hp*5) {
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x2, y1);
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, -y1, x2, -y1);
+        }
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=0; x1<aw/2; x1 += hp*5) {
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x1, y2);
+            fprintf(fp, "       %d %d moveto %d %d lineto stroke\n",
+                -x1, y1, -x1, y2);
+        }
+        fprintf(fp, "  grestore\n");
+
+        break;
+
+    case HT_UGRID005:
+    case HT_UGRID010:
+    case HT_UGRID020:
+    case HT_UGRID025:
+    case HT_UGRID050:
+    case HT_UGRID100:
+    case HT_UGRID200:
+    {
+        int up;
+
+        switch(hty) {
+        case HT_UGRID005: up = objunit/20;  break;
+        case HT_UGRID010: up = objunit/10;  break;
+        case HT_UGRID020: up = objunit/5;   break;
+        case HT_UGRID050: up = objunit/2;   break;
+        case HT_UGRID100: up = objunit;     break;
+        case HT_UGRID200: up = objunit*2;   break;
+        default:
+        case HT_UGRID025: up = objunit/4;   break;
+        }
+
+#if 0
+        fprintf(fp, "      gsave currentlinewidth 2 div setlinewidth\n");
+#endif
+        fprintf(fp, "      gsave\n");
+
+        x1 = -aw/2;
+        x2 =  aw/2;
+        for(y1=0; y1<=ah/2 ; y1+= up ) {
+            fprintf(fp, "        %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x2, y1);
+            fprintf(fp, "        %d %d moveto %d %d lineto stroke\n",
+                x1, -y1, x2, -y1);
+        }
+
+        y1 = -ah/2;
+        y2 =  ah/2;
+        for(x1=0; x1<=aw/2; x1+= up ) {
+            fprintf(fp, "        %d %d moveto %d %d lineto stroke\n",
+                x1, y1, x1, y2);
+            fprintf(fp, "        %d %d moveto %d %d lineto stroke\n",
+                -x1, y1, -x1, y2);
+        }
+
+        fprintf(fp, "      grestore\n");
+
+
+        switch(hty) {
+        case HT_UGRID010: up = objunit/2;   break;
+        case HT_UGRID020: up = objunit;     break;
+        case HT_UGRID025: up = objunit/2;   break;
+        case HT_UGRID050: up = objunit;     break;
+        default:
+        case HT_UGRID005: goto skip_dots;   break;
+        case HT_UGRID100: goto skip_dots;   break;
+        case HT_UGRID200: goto skip_dots;   break;
+        }
+
+
+        fprintf(fp, "      gsave\n");
+
+        for(y1=0; y1<=ah/2 ; y1 += up ) {
+            for(x1=0; x1<aw/2; x1 += up ) {
+fprintf(fp, "        %d %d currentlinewidth 2 mul 0 360 arc fill\n",
+                    x1, y1);
+fprintf(fp, "        %d %d currentlinewidth 2 mul 0 360 arc fill\n",
+                    -x1, y1);
+fprintf(fp, "        %d %d currentlinewidth 2 mul 0 360 arc fill\n",
+                    x1, -y1);
+fprintf(fp, "        %d %d currentlinewidth 2 mul 0 360 arc fill\n",
+                    -x1, -y1);
+            }
+        }
+
+        fprintf(fp, "      grestore\n");
+skip_dots:
+        (void)0;
+
+    }
+        break;
+    
+
     case HT_SEIGAIHA:
       {
         int r;

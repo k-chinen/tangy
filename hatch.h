@@ -28,6 +28,16 @@
 #define HT_SQRING7          (35)
 #define HT_SQRING7WRAP      (36)
 
+#define HT_GRID             (50)
+
+#define HT_UGRID005         (51)
+#define HT_UGRID010         (52)
+#define HT_UGRID020         (53)
+#define HT_UGRID025         (54)
+#define HT_UGRID050         (55)
+#define HT_UGRID100         (56)
+#define HT_UGRID200         (57)
+
 #define HT_HISHI            (101)
 #define HT_HIGAKI           (102)
 #define HT_RAIMON           (103)

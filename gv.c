@@ -147,6 +147,25 @@ apair_t hatchtype_ial[] = {
     {"bigchecked",          HT_BIGCHECKED},
     {"hex",                 HT_HEX},
     {"brick",               HT_BRICK},
+    {"concentration",       HT_CONCENTRATION},
+    {"concentric",          HT_CONCENTRIC},
+
+    {"grid",                HT_GRID},
+
+    {"ugrid",               HT_UGRID025},
+    {"ugrid005",            HT_UGRID005},
+    {"ugrid010",            HT_UGRID010},
+    {"ugrid020",            HT_UGRID020},
+    {"ugrid025",            HT_UGRID025},
+    {"ugrid050",            HT_UGRID050},
+    {"ugrid100",            HT_UGRID100},
+    {"ugrid200",            HT_UGRID200},
+    {"ugrid5",              HT_UGRID005},
+    {"ugrid10",             HT_UGRID010},
+    {"ugrid20",             HT_UGRID020},
+    {"ugrid25",             HT_UGRID025},
+    {"ugrid50",             HT_UGRID050},
+
     {"hishi",               HT_HISHI},
     {"higaki",              HT_HIGAKI},
     {"raimon",              HT_RAIMON},
@@ -162,12 +181,6 @@ apair_t hatchtype_ial[] = {
     {"mameshibori",         HT_MAMESHIBORI},
     {"nfmameshibori",       HT_NFMAMESHIBORI},
     {"kanokoshibori",       HT_KANOKOSHIBORI},
-/*
-#define HT_CONCENTRATION    (41)
-#define HT_CONCENTRIC       (42)
-*/
-    {"concentration",       HT_CONCENTRATION},
-    {"concentric",          HT_CONCENTRIC},
     {"sqring11",            HT_SQRING11},
     {"sqring11wrap",        HT_SQRING11WRAP},
     {"sqring9",             HT_SQRING9},
