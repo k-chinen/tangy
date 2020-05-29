@@ -38,6 +38,11 @@
 #define HT_UGRID100         (56)
 #define HT_UGRID200         (57)
 
+#define HT_HSTRIPE          (71)
+#define HT_VSTRIPE          (72)
+#define HT_HVSTRIPE         (73)
+#define HT_PLUSSTRIPE       (74)
+
 #define HT_HISHI            (101)
 #define HT_HIGAKI           (102)
 #define HT_RAIMON           (103)

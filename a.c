@@ -219,8 +219,16 @@ dump_objattr(struct obattr xo)
 #endif
     printf("  fillcolor        %d\n", xo.fillcolor);
     printf("  fillhatch        %d\n", xo.fillhatch);
+    printf("  fillthick        %d\n", xo.fillthick);
+    printf("  fillpitch        %d\n", xo.fillpitch);
+    printf("  backcolor        %d\n", xo.backcolor);
+    printf("  backhatch        %d\n", xo.backhatch);
+    printf("  backthick        %d\n", xo.backthick);
+    printf("  backpitch        %d\n", xo.backpitch);
+#if 0
     printf("    hatchthick     %d\n", xo.hatchthick);
     printf("    hatchpitch     %d\n", xo.hatchpitch);
+#endif
 #if 0
     printf("  filllevel        %d\n", xo.filllevel);
     printf("  imargin          %d\n", xo.imargin);

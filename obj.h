@@ -290,8 +290,13 @@ extern apair_t lo_ial[];
 
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
+#define OA_FILLTHICK        (13)
+#define OA_FILLPITCH        (14)
+
 #define OA_BACKCOLOR        (15)
 #define OA_BACKHATCH        (16)
+#define OA_BACKTHICK        (17)
+#define OA_BACKPITCH        (18)
 
 #define OA_HATCHTHICK       (21)
 #define OA_HATCHPITCH       (22)
@@ -460,15 +465,24 @@ struct obattr {
     int   arrowbackheadtype;
     double arrowcentheadpos;
 
-    int   backcolor;
-    int   backhatch;
 
     int   fillcolor;
     int   fillhatch;
+    int   fillpitch;
+    int   fillthick;
+#if 0
     int   filllevel;
+#endif
 
+    int   backcolor;
+    int   backhatch;
+    int   backpitch;
+    int   backthick;
+
+#if 0
     int   hatchthick;
     int   hatchpitch;
+#endif
 
     int   imargin;      /* inside margin */
     int   gimargin;     /* group inside margin */

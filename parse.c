@@ -940,13 +940,21 @@ P;
     ISET(OA_LINETHICK,      outlinethick);
     AISETN(OA_LINETYPE, linetype_ial, outlinetype);
 
-    ISET(OA_BACKCOLOR,      backcolor);
-    AISETX(OA_BACKHATCH, hatchtype_ial, backhatch, HT_XCROSSED);
-
     ISET(OA_FILLCOLOR,      fillcolor);
     AISETX(OA_FILLHATCH, hatchtype_ial, fillhatch, HT_XCROSSED);
+    ISET(OA_FILLTHICK,      fillthick);
+    ISET(OA_FILLPITCH,      fillpitch);
+
+    ISET(OA_BACKCOLOR,      backcolor);
+    AISETX(OA_BACKHATCH, hatchtype_ial, backhatch, HT_XCROSSED);
+    ISET(OA_BACKTHICK,      backthick);
+    ISET(OA_BACKPITCH,      backpitch);
+#if 0
     ISET(OA_HATCHTHICK,     hatchthick);
     ISET(OA_HATCHPITCH,     hatchpitch);
+#endif
+    ISET2(OA_HATCHTHICK,    fillthick, backthick);
+    ISET2(OA_HATCHPITCH,    fillpitch, backpitch);
 
     ISET(OA_TEXTCOLOR,      textcolor);
     ISET(OA_TEXTBGCOLOR,    textbgcolor);
@@ -1281,12 +1289,18 @@ parseobj(char *p)
     /* common init */
     nob->cob.outlinecolor   = def_fgcolor;
     nob->cob.outlinethick   = def_linethick;
-    nob->cob.hatchpitch     = def_hatchpitch;
-    nob->cob.hatchthick     = def_hatchthick;
-    nob->cob.backcolor      = def_bgcolor;
-    nob->cob.backhatch      = HT_NONE;
     nob->cob.fillcolor      = def_fgcolor;
     nob->cob.fillhatch      = HT_NONE;
+    nob->cob.fillpitch      = def_hatchpitch;
+    nob->cob.fillthick      = def_hatchthick;
+    nob->cob.backcolor      = def_bgcolor;
+    nob->cob.backhatch      = HT_NONE;
+    nob->cob.backpitch      = def_hatchpitch;
+    nob->cob.backthick      = def_hatchthick;
+#if 0
+    nob->cob.hatchpitch     = def_hatchpitch;
+    nob->cob.hatchthick     = def_hatchthick;
+#endif
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
     nob->cob.textalign      = PO_CENTER;

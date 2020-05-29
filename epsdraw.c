@@ -5284,26 +5284,26 @@ P;
             /*** BACK ***/
 
             fprintf(fp, "  gsave\n");
-            changethick(fp, xu->cob.hatchthick);
+            changethick(fp, xu->cob.backthick);
             fprintf(fp, "  %d %d translate %% hcnt\n", xu->gx, xu->gy);
 #if 0
             /* position mark for debug */
             fprintf(fp, "  gsave newpath 0 0 %d 0 360 arc fill grestore\n", objunit/20);
 #endif
             epsdraw_hatch(fp, aw, ah, xu->cob.backcolor,
-                xu->cob.backhatch, xu->cob.hatchpitch);
+                xu->cob.backhatch, xu->cob.backpitch);
             fprintf(fp, "  grestore\n");
 
             /*** FILL ***/
 
-            changethick(fp, xu->cob.hatchthick);
+            changethick(fp, xu->cob.fillthick);
             fprintf(fp, "  %d %d translate %% hcnt\n", xu->gx, xu->gy);
 #if 0
             /* position mark for debug */
             fprintf(fp, "  gsave newpath 0 0 %d 0 360 arc fill grestore\n", objunit/20);
 #endif
             epsdraw_hatch(fp, aw, ah, xu->cob.fillcolor,
-                xu->cob.fillhatch, xu->cob.hatchpitch);
+                xu->cob.fillhatch, xu->cob.fillpitch);
 
             fprintf(fp, " grestore\n");
         }
@@ -5816,7 +5816,7 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
  if(xu->cob.fillcolor>=0) {
     fprintf(fp, "gsave\n");
     changecolor(fp, xu->cob.fillcolor);
-    changethick(fp, xu->cob.hatchthick);
+    changethick(fp, xu->cob.fillthick);
 
     fprintf(fp, "%d %d moveto\n", Lpt[0].x1, Lpt[0].y1);
     for(i=1;i<=xu->cob.segar->use;i++) {
@@ -5885,7 +5885,7 @@ Echo("    x1,y1 %d,%d\n", x1, y1);
     fprintf(fp, "%d %d translate\n", ccx, ccy);
 
     epsdraw_hatch(fp, cw, ch, xu->cob.fillcolor,
-        xu->cob.fillhatch, xu->cob.hatchpitch);
+        xu->cob.fillhatch, xu->cob.fillpitch);
  }
 #endif
 
@@ -6802,7 +6802,7 @@ skip_dots:
 
     case HT_RAIMON:
         {
-        int p=hp/4;
+        int p=hp/3;
         int mw=28*p;
         int mh=14*p;
         for(y1=-ah/2-mh/2;y1<ah/2+mh/2;y1+=mh) {
@@ -7052,6 +7052,169 @@ skip_dots:
             }
         }
         break;
+
+    case HT_DUMMY:
+        {
+        int r;
+        int u;
+        r = hp;
+        y1 = -ah/2;
+        y2 =  ah/2;
+        u = 0;
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+        for(x1=-aw/2;x1<=aw/2;x1+=r) {
+            switch(u%11) {
+            case 0:
+            case 2:
+            case 6:
+            case 7:
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x1, y2);
+                break;
+            default:
+                break;
+            }
+            u++;
+        }
+        fprintf(fp, "grestore\n");
+        }
+        break;
+
+    case HT_HSTRIPE:
+        {
+        int r;
+        int u;
+        r = hp;
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+
+        y1 = -ah/2;
+        y2 =  ah/2;
+        u = -1; /* XXX */
+        for(x1=-aw/2;x1<=aw/2;x1+=r) {
+            if(u%2==1) {
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x1, y2);
+            }
+            u++;
+        }
+
+        fprintf(fp, "grestore\n");
+        }
+        break;
+
+    case HT_VSTRIPE:
+        {
+        int r;
+        int u;
+        r = hp;
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+
+        x1 = -aw/2;
+        x2 =  aw/2;
+        u = -1; /* XXX */
+        for(y1=-ah/2;y1<=ah/2;y1+=r) {
+            if(u%2==1) {
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y1);
+            }
+            u++;
+        }
+
+        fprintf(fp, "grestore\n");
+        }
+        break;
+
+    case HT_HVSTRIPE:
+        {
+        int r;
+        int u;
+        r = hp;
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+
+        y1 = -ah/2;
+        y2 =  ah/2;
+        u = -1; /* XXX */
+        for(x1=-aw/2;x1<=aw/2;x1+=r) {
+            if(u%2==1) {
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x1, y2);
+            }
+            u++;
+        }
+
+        x1 = -aw/2;
+        x2 =  aw/2;
+        u = -1; /* XXX */
+        for(y1=-ah/2;y1<=ah/2;y1+=r) {
+            if(u%2==1) {
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y1);
+            }
+            u++;
+        }
+
+        fprintf(fp, "grestore\n");
+        }
+        break;
+
+    case HT_PLUSSTRIPE:
+        {
+        int r;
+        int u;
+        r = hp/2;
+
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+
+        y1 = -ah/2;
+        y2 =  ah/2;
+        u = -1; /* XXX */
+        for(x1=-aw/2;x1<=aw/2;x1+=r) {
+            switch(u%10) {
+            case 4:
+            case 6:
+            case 8:
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x1, y2);
+                break;
+            default:
+                break;
+            }
+            u++;
+        }
+
+        x1 = -aw/2;
+        x2 =  aw/2;
+        u = -1; /* XXX */
+        for(y1=-ah/2;y1<=ah/2;y1+=r) {
+            switch(u%10) {
+            case 1:
+            case 3:
+            case 5:
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y1);
+                break;
+            default:
+                break;
+            }
+            u++;
+        }
+
+
+        fprintf(fp, "grestore\n");
+        }
+        break;
+
+
+
+
 
     default:
     case HT_NONE:
@@ -8483,7 +8646,7 @@ P;
         fprintf(fp, "  clip\n");
     }
     epsdraw_hatch(fp, xu->wd, xu->ht*2,
-                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.fillpitch);
 
     if(debug_clip) {
         fprintf(fp, "  initclip\n");
@@ -9226,7 +9389,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         fprintf(fp, "  gsave    %% for shadow\n");
         fprintf(fp, "    %d -%d translate\n", objunit/10, objunit/10);
         fprintf(fp, "    %.2f setgray\n", def_shadowgray);
+#if 0
         changethick(fp, xu->cob.hatchthick);
+#endif
+        changethick(fp, xu->cob.fillthick);
         ik = drawpathN(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  fill     %% for shadow\n");
         fprintf(fp, "  grestore %% for shadow\n");
@@ -9238,12 +9404,12 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     if(xu->cob.backhatch != HT_NONE && xu->cob.backcolor>=0) {
         fprintf(fp, "  gsave %% for back\n");
         changecolor(fp, xu->cob.backcolor);
-        changethick(fp, xu->cob.hatchthick);
+        changethick(fp, xu->cob.backthick);
         ik = drawpathN(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  clip\n");
 
         epsdraw_hatch(fp, xu->wd, xu->ht,
-          xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+          xu->cob.backcolor, xu->cob.backhatch, xu->cob.backpitch);
 
         fprintf(fp, "  grestore\n");
     }
@@ -9259,7 +9425,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             fprintf(fp, "  gsave %% for fill + hollow\n");
 
             changecolor(fp, xu->cob.fillcolor);
-            changethick(fp, xu->cob.hatchthick);
+            changethick(fp, xu->cob.fillthick);
             ik = drawpathN_woclose(fp, 0, 0, 0, xu, xns);
 
 #if 0
@@ -9277,14 +9443,14 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
                 1.0/def_hollowratio, 1.0/def_hollowratio);
 
             epsdraw_hatch(fp, xu->wd, xu->ht,
-              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.fillpitch);
 
             fprintf(fp, "  grestore %% for fill + hollow\n");
          }
          else {
             fprintf(fp, "  gsave %% for fill\n");
             changecolor(fp, xu->cob.fillcolor);
-            changethick(fp, xu->cob.hatchthick);
+            changethick(fp, xu->cob.fillthick);
             ik = drawpathN(fp, 0, 0, 0, xu, xns);
             if(debug_clip) {
                 fprintf(fp, "  stroke\n");
@@ -9294,7 +9460,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             }
 
             epsdraw_hatch(fp, xu->wd, xu->ht,
-              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+              xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.fillpitch);
 
             fprintf(fp, "  grestore %% for fill\n");
         }
@@ -9349,7 +9515,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         fprintf(fp, " %% deco |%s|\n", xu->cob.deco);
         fprintf(fp, " gsave %% for deco\n");
         changecolor(fp, xu->cob.fillcolor);
-        changethick(fp, xu->cob.hatchthick);
+        changethick(fp, xu->cob.fillthick);
         ik = drawpathN(fp, 0, 0, 0, xu, xns);
         fprintf(fp, "  clip\n");
         _dcolor = xu->cob.decocolor;
@@ -9569,8 +9735,8 @@ apply:
 
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
-        xu->cob.outlinecolor, xu->cob.fillhatch,
-        xu->cob.hatchthick, xu->cob.hatchpitch);
+        xu->cob.fillcolor, xu->cob.fillhatch,
+        xu->cob.fillthick, xu->cob.fillpitch);
 
     fprintf(fp, "gsave %% for inside\n");
 
@@ -9604,9 +9770,9 @@ apply:
         fprintf(fp, " %.6f %.6f scale\n", 1.0/gws, 1.0/ghs);
 
         changecolor(fp, xu->cob.backcolor);
-        changethick(fp, xu->cob.hatchthick);
+        changethick(fp, xu->cob.backthick);
         epsdraw_hatch(fp, aw, ah,
-                xu->cob.backcolor, xu->cob.backhatch, xu->cob.hatchpitch);
+                xu->cob.backcolor, xu->cob.backhatch, xu->cob.backpitch);
 
         if(xu->cob.deco) {
             fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
@@ -9645,9 +9811,9 @@ apply:
         fprintf(fp, " %.6f %.6f scale\n", 1.0/gws, 1.0/ghs);
 
         changecolor(fp, xu->cob.fillcolor);
-        changethick(fp, xu->cob.hatchthick);
+        changethick(fp, xu->cob.fillthick);
         epsdraw_hatch(fp, aw, ah,
-                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.hatchpitch);
+                xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.fillpitch);
 
         if(xu->cob.deco) {
             fprintf(fp, "%% deco |%s|\n", xu->cob.deco);
@@ -11207,8 +11373,8 @@ apply:
 
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
-        xu->cob.outlinecolor, xu->cob.fillhatch,
-        xu->cob.hatchthick, xu->cob.hatchpitch);
+        xu->cob.fillcolor, xu->cob.fillhatch,
+        xu->cob.fillthick, xu->cob.fillpitch);
 
     double cx1, cx2;
     double r1, r2;
@@ -11311,8 +11477,8 @@ apply:
 
     fprintf(fp, "%% inside\n");
     fprintf(fp, "%%     fill color %d hatch %d; hatch thick %d pitch %d\n",
-        xu->cob.outlinecolor, xu->cob.fillhatch,
-        xu->cob.hatchthick, xu->cob.hatchpitch);
+        xu->cob.fillcolor, xu->cob.fillhatch,
+        xu->cob.fillthick, xu->cob.fillpitch);
 
     if(xu->cob.outlinecolor>=0 && xu->cob.outlinethick>0) {
         fprintf(fp, "gsave\n");
