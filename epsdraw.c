@@ -5309,7 +5309,7 @@ Zepsdraw_ulinearrow(FILE *fp,
     int aw, ah;
 P;
 #if 1
-Echo("%s: enter\n", __func__);
+Echo("%s: enter oid %d type %d\n", __func__, xu->oid, xu->type);
 #endif
 
     if(!xu->cob.originalshape) {
@@ -11688,6 +11688,90 @@ out:
     return 0;
 }
 
+int
+epsdraw_auxline(FILE *fp, int sdir, int ndir,
+    int bsx, int bsy, int bex, int bey,
+    int msx, int msy, int mex, int mey,
+    int osx, int osy, int oex, int oey,
+    ob *u, int opt)
+{
+    int mcx, mcy;
+    int bcx, bcy;
+
+    Echo("%s: oid %d type %d\n", __func__, u->oid, u->cauxlinetype);
+    fprintf(fp, "%% %s oid %d type %d\n", __func__, u->oid, u->cauxlinetype);
+
+    mcx = (msx + mex) / 2;
+    mcy = (msy + mey) / 2;
+    bcx = (bsx + bex) / 2;
+    bcy = (bsy + bey) / 2;
+
+    fprintf(fp, "gsave\n");
+
+    /* draw marks */
+    if(opt) {
+        fprintf(fp, "  gsave\n");
+
+        fprintf(fp, "    0 1 1 setrgbcolor\n");
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
+            bsx, bsy, bsx, bsy, objunit/10);
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
+            bex, bey, bex, bey, objunit/10);
+
+        fprintf(fp, "    1 0 0 setrgbcolor\n");
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
+            msx, msy, msx, msy, objunit/10);
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
+            mex, mey, mex, mey, objunit/10);
+
+        fprintf(fp, "    0 1 0 setrgbcolor\n");
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
+            osx, osy, osx, osy, objunit/10);
+        fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
+            oex, oey, oex, oey, objunit/10);
+
+        fprintf(fp, "  grestore\n");
+    }
+
+    changecolor(fp, u->cob.outlinecolor);
+    changethick(fp, u->cob.outlinethick);
+
+    switch(u->cauxlinetype) {
+    case ALT_BRACKET:
+        fprintf(fp, "  %d %d moveto %d %d lineto %d %d lineto %d %d lineto stroke \n",
+            bsx, bsy, msx, msy, mex, mey, bex, bey);
+        break;
+    case ALT_PAREN:
+            _bez_solid(fp, u, bsx, bsy, msx, msy, mex, mey, bex, bey);
+        break;
+    case ALT_BRACE:
+            _bez_solid(fp, u, bsx, bsy, msx, msy, bcx, bcy, mcx, mcy);
+            _bez_solid(fp, u, mcx, mcy, bcx, bcy, mex, mey, bex, bey);
+        break;
+    case ALT_RANGE:
+    default:
+        fprintf(fp, "  gsave\n");
+        fprintf(fp, "    %d setlinewidth\n", u->cob.outlinethick/2); 
+        fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
+            bsx, bsy, osx, osy);
+        fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
+            bex, bey, oex, oey);
+        fprintf(fp, "  grestore\n");
+        /* falldown */
+    case ALT_BESIDE:
+        fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
+            msx, msy, mex, mey);
+        epsdraw_arrowhead(fp, u->cob.arrowforeheadtype,
+            sdir+180, u->cob.outlinecolor, msx, msy);
+        epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
+            sdir, u->cob.outlinecolor, mex, mey);
+    }
+
+    fprintf(fp, "grestore\n");
+
+    return 0;
+}
+
 
 int
 epsdraw_sep(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -12300,7 +12384,7 @@ epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
         else {
             Error("cannot solve %dth obj portpoint\n", u->oid);
         }
-#if 1
+#if 0
         ik = _solve_pbpoint(fp, xns, xdir, -90, u, &bx, &by);
         epsdraw_s2sstrbgX(fp, bx, by, objunit, objunit,
             PO_CENTER, 0, -90, def_pbstrgap,
@@ -12535,6 +12619,9 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     int wd, ht;
     int g;
     int oldxdir;
+    int ax, ay;
+    double sdir; /* segment direction */
+    int auxdirgap;
 
     Echo("%s: arg xdir %d oxy %d,%d|u oid %d xy %d,%d gxy %d,%d\n",
         __func__, *xdir, ox, oy, u->oid, u->x, u->y, u->gx, u->gy);
@@ -12560,6 +12647,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         u->oid, rassoc(cmd_ial, u->type));
 #endif
 
+
     wd = u->crx-u->clx;
     ht = u->cty-u->cby;
 
@@ -12580,6 +12668,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
         goto out;
     }
+
 
     if(draft_mode) {
         fprintf(fp, "gsave\n");
@@ -12642,6 +12731,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
     }
 
+    /* BODY */
+
+    sdir = *xdir;
+
 #if 0
     changenormal(fp); /* for faill safe */
 #endif
@@ -12693,6 +12786,85 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
         Zepsdraw_xcurveselfarrow(fp, *xdir, ox, oy, u, xns);
     }
 #endif
+
+    else
+    if( u->type==CMD_AUXLINE ) {
+        int ar;
+        double ndir; /* normal  direction */
+        int isdir;
+        int indir;
+
+        /*
+         *           outline
+         * osx,osy  +........+  oex,oey
+         *          |auxline |
+         * msx,msy  +---->---+  mex,mey
+         *          |        |
+         * bsx,bsy  +--------+  bex,bey
+         *           baseline
+         */
+        int bsx, bsy, bex, bey;
+        int msx, msy, mex, mey;
+        int osx, osy, oex, oey;
+
+P;
+#if 0
+fprintf(stderr, "#before Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
+#endif
+        Echo("Q oid %d ox,oy %d,%d ox,oy %d,%d fx,fy %d,%d dx,dy %d,%d\n",
+            u->oid, ox, oy, u->ox, u->oy, u->fx, u->fy,
+            u->dx, u->dy);
+
+        /*
+         * to solve start pos from end post seems strange.
+         * but it is true. because to analyze from in segs is so difficult.
+         */
+#if 0
+        bsx = ox+u->cx+u->cox;
+        bsy = oy+u->cy+u->coy;
+#endif
+        bex = ox+u->cx+u->fx;
+        bey = oy+u->cy+u->fy;
+        bsx = bex - u->dx;      
+        bsy = bey - u->dy;
+
+        sdir = atan2(u->dy, u->dx);
+        ndir = sdir + M_PI/2.0;
+        isdir = (int)(sdir / rf);
+        indir = (int)(ndir / rf);
+
+        auxdirgap = (int)isdir;
+fprintf(fp, "%% isdir %d auxdirgap %d\n", isdir, auxdirgap);
+
+        ar = u->cauxlinedistance;
+
+        ax = (int)((double)ar*cos(ndir));
+        ay = (int)((double)ar*sin(ndir));
+
+        msx = bsx + ax;
+        msy = bsy + ay;
+        mex = bex + ax;
+        mey = bey + ay;
+        osx = bsx + 2*ax;
+        osy = bsy + 2*ay;
+        oex = bex + 2*ax;
+        oey = bey + 2*ay;
+
+        Echo("Q oid %d dx,dy %d,%d -> sdir %.2f ndir %.2f indir %d\n",
+            u->oid, u->dx, u->dy,
+            sdir, ndir, indir);
+        Echo("Q oid %d indir %d ar %d -> ax,ay %d,%d\n",
+            u->oid, indir, ar, ax, ay);
+
+        epsdraw_auxline(fp, isdir, indir,
+            bsx, bsy, bex, bey, msx, msy, mex, mey, osx, osy, oex, oey,
+            u, 0);
+
+#if 0
+fprintf(stderr, "#after  Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
+#endif
+    }
+
     else
     if((u->type==CMD_LINK) || (u->type==CMD_LINE) ||
             (u->type==CMD_ARROW)) {
@@ -12705,6 +12877,7 @@ fprintf(stderr, "#before Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
 fprintf(stderr, "#after  Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
 #endif
     }
+
     else
     if(u->type==CMD_ULINE) {
 P;
@@ -12833,20 +13006,18 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
             _tbgc = u->cob.textbgcolor;
         }
 
-#if 0
-        Echo("text angle %d\n",
-            u->cob.rotateval + u->cob.textrotate);
-#endif
-#if 0
-        epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
-            PO_CENTER, 0,
-            u->cob.rotateval + u->cob.textrotate, 0,
-            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
-#endif
-        epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
-            u->cob.textalign, u->cob.textoffset,
-            u->cob.rotateval + u->cob.textrotate, 0,
-            0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+        if(u->type==CMD_AUXLINE) {
+            epsdraw_sstrbgX(fp, u->gx+ax, u->gy+ay, u->wd, u->ht,
+                u->cob.textalign, u->cob.textoffset,
+                u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
+                0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+        }
+        else {
+            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
+                u->cob.textalign, u->cob.textoffset,
+                u->cob.rotateval + u->cob.textrotate, 0,
+                0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+        }
 
 skip_sstr:
         (void)0;
@@ -12854,7 +13025,15 @@ skip_sstr:
 
     ik = epsdraw_note(fp, u);
     if(u->cob.portstr || u->cob.boardstr) {
+P;
         ik = epsdraw_portboard(fp, xns, *xdir, u);
+
+#if 0
+        if(u->type == CMD_AUXLINE) {
+P;
+            ik = epsdraw_portboard(fp, xns, sdir, u);
+        }
+#endif
     }
 
     u->drawed = 1;

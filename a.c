@@ -875,6 +875,8 @@ P;
     r->cob.fillcolor    = def_bgcolor;
 
     r->cob.rad      = -1;
+    r->cauxlinedistance = objunit/4;
+    r->cauxlinetype = ALT_RANGE;
     
     r->cob.ssar     = varray_new();
     r->cob.segopar  = varray_new();

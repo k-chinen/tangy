@@ -24,6 +24,7 @@
 #include "geom.h"
 
 #include "ltype.h"
+#include "altype.h"
 #include "ahead.h"
 #include "hatch.h"
 
@@ -116,6 +117,8 @@
 #define CMD_LBRACE      (4005)
 #define CMD_RBRACE      (4006)
 
+#define CMD_AUXLINE     (5001)
+
 #define CMD_DMY1        (9001)
 #define CMD_DMY2        (9002)
 #define CMD_DMY3        (9003)
@@ -156,7 +159,7 @@ extern apair_t cmd_ial[];
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE|| \
-	 (x)==CMD_PING||(x)==CMD_PINGPONG|| \
+     (x)==CMD_PING||(x)==CMD_PINGPONG|| \
      (x)==CMD_OBJLOAD \
     )
 #define HASBODY(x)  \
@@ -288,6 +291,9 @@ extern apair_t lo_ial[];
 #define OA_LINEDECOTHICK     (4)
 #define OA_LINEDECOPITCH     (5)
 #define OA_WLINETHICK        (6)
+
+#define OA_AUXLINEDISTANCE   (8)
+#define OA_AUXLINETYPE       (9)
 
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
@@ -455,6 +461,9 @@ struct obattr {
     int   outlinethick;
     int   outlinethickmode;
 
+    int   auxlinetype;
+    int   auxlinedistance;
+
     int   wlinethick;
     int   forechop;
     int   backchop;
@@ -465,7 +474,6 @@ struct obattr {
     int   arrowcentheadtype;
     int   arrowbackheadtype;
     double arrowcentheadpos;
-
 
     int   fillcolor;
     int   fillhatch;
@@ -604,6 +612,7 @@ typedef struct _ob {
     int  ex, ey;        /* area end */
     int  ox, oy;        /* offset or pen start */
     int  fx, fy;        /* pen end; final point, sometime be used to draw next object */
+    int  dx, dy;        /* delta; end-start, it is used to solve direction */
 
     int  x, y;          /* center */
     int  lx, rx;        /* BB lx, rx left right  */
@@ -674,6 +683,9 @@ typedef struct _ob {
 #define cgby    gby
 #define cgrx    grx
 #define cgty    gty
+
+#define cauxlinedistance vob.auxlinedistance
+#define cauxlinetype     vob.auxlinetype
 
 #define cafrom  vob.afrom
 #define cato    vob.ato

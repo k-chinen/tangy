@@ -940,6 +940,7 @@ P;
     ISET(OA_LINETHICK,      outlinethick);
     AISETN(OA_LINETYPE, linetype_ial, outlinetype);
 
+
     ISET(OA_FILLCOLOR,      fillcolor);
     AISETX(OA_FILLHATCH, hatchtype_ial, fillhatch, HT_XCROSSED);
     ISET(OA_FILLTHICK,      fillthick);
@@ -994,6 +995,9 @@ P;
 
     OISET(OA_WIDTH,         wd);
     OISET(OA_HEIGHT,        ht);
+
+    AISETN(OA_AUXLINETYPE,  auxlinetype_ial, auxlinetype);
+    OISET(OA_AUXLINEDISTANCE,      cauxlinedistance);
 
     ISET2(OA_CHOP,          forechop, backchop);
     ISET(OA_FORECHOP,       forechop);

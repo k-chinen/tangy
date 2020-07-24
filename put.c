@@ -238,7 +238,8 @@ find_to_last(ob *xob, int *riex, int *riey)
 int
 est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
-    int *rfx, int *rfy)
+    int *rfx, int *rfy,
+    int *risx, int *risy, int *riex, int *riey)
 {
     int     x, y;
     int     _lx, _by, _rx, _ty;
@@ -264,6 +265,7 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
 
     int     c;
     int     jc;
+    int     mmf, mmt;
 
     int     isset_final;
 
@@ -271,7 +273,7 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
 
     rv = 0;
 
-Echo("%s:\n", __func__);
+Echo("%s: oid %d\n", __func__, (u? u->oid : -1) );
 #if 0
     varray_fprint(stdout, opar);
 #endif
@@ -289,6 +291,10 @@ Echo("%s:\n", __func__);
 #if 0
         MARK("a0", x, y);
 #endif
+
+    mmt = mmf = 0;
+    isx = iex = 0;
+    isy = iey = 0;
 
 #if 1
     int adjbyfrom=0;
@@ -525,11 +531,13 @@ P;
 
 P;
             if(e->cmd==OA_FROM) {
+                mmf++;
                 isx = mx;
                 isy = my;
             }
 P;
             if(e->cmd==OA_TO) {
+                mmt++;
                 iex = mx;
                 iey = my;
             }
@@ -866,8 +874,15 @@ Echo("set final as specified position\n");
         varray_fprintv(stdout, segar);
     }
 
+    *risx = isx;
+    *risy = isy;
+    *riex = iex;
+    *riey = iey;
+
 #if 1
 Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
+Echo("%s: oid %d %d %d %d %d isx,y %d,%d iex,y %d,%d\n",
+     __func__, u->oid, *rlx, *rby, *rrx, *rty, *risx, *risy, *riex, *riey);
 #endif
     return rv;
 }
@@ -876,7 +891,8 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 int
 est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
-    int *rfx, int *rfy)
+    int *rfx, int *rfy,
+    int *risx, int *risy, int *riex, int *riey)
 {
     int     rv;
     qbb_t   sbb;
@@ -963,9 +979,17 @@ Echo("  bm %d bmx,y %d,%d\n", bm, bmx, bmy);
     *rrx = sbb.rx;
     *rty = sbb.ty;
 
+
+    *risx = isx;
+    *risy = isy;
+    *riex = iex;
+    *riey = iey;
+
 #if 1
     Echo("%s: oid %d lbb %6d %6d %6d %6d\n",
         __func__, u->oid, *rlx, *rby, *rrx, *rty);
+Echo("%s: oid %d %d %d %d %d isx,y %d,%d iex,y %d,%d\n",
+     __func__, u->oid, *rlx, *rby, *rrx, *rty, *risx, *risy, *riex, *riey);
 #endif
     return rv;
 
@@ -1515,14 +1539,17 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
         {
             int ik;
             int lx, by, rx, ty, fx, fy;
+            int misx, misy, miex, miey;
 
             if(u->cob.originalshape) {
                 ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
-                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy,
+                    &misx, &misy, &miex, &miey);
             }
             else {
                 ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
-                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy,
+                    &misx, &misy, &miex, &miey);
             }
 
             u->clx = lx;
@@ -1546,6 +1573,7 @@ Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
         }
         break;
 
+    case CMD_AUXLINE:
     case CMD_LINE:     
     case CMD_ARROW:
     case CMD_WLINE:
@@ -1555,19 +1583,29 @@ Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
         {
             int ik;
             int lx, by, rx, ty, fx, fy;
+            int misx, misy, miex, miey;
 
             if(u->cob.originalshape) {
                 ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
-                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy,
+                    &misx, &misy, &miex, &miey);
+
+
             }
             else {
                 ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
-                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy);
+                    u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy,
+                    &misx, &misy, &miex, &miey);
             }
 
 #if 1
-Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d\n",
-        u->oid, lx, by, rx, ty, fx, fy);
+u->dx = miex - misx;
+u->dy = miey - misy;
+#endif
+
+#if 1
+Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
+        u->oid, lx, by, rx, ty, fx, fy, *gdir);
 #endif
 
             u->clx = lx;

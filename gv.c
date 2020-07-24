@@ -89,6 +89,8 @@ apair_t cmd_ial[] = {
     {"\"}\"",           CMD_RBRACE},
     {"gear",            CMD_GEAR},
 
+    {"auxline",         CMD_AUXLINE},
+
     {"chunk",           CMD_CHUNK},
     {"[",               CMD_CHUNK},
     {".",               CMD_CHUNKOBJATTR},
@@ -128,6 +130,15 @@ apair_t linetype_ial[] = {
     {"arrowcentered",       LT_ARROWCENTERED},
 #endif
     {NULL,                  -1},
+};
+
+apair_t auxlinetype_ial[] = {
+    {"range",               ALT_RANGE},
+    {"beside",              ALT_BESIDE},
+    {"paren",               ALT_PAREN},
+    {"bracket",             ALT_BRACKET},
+    {"brace",               ALT_BRACE},
+    {NULL,              -1},
 };
 
 apair_t hatchtype_ial[] = {
@@ -355,6 +366,9 @@ apair_t objattr_ial[] = {
 
     {"linkstyle",           OA_LINKSTYLE},
     {"linkmap",             OA_LINKMAP},
+
+    {"auxlinedistance",     OA_AUXLINEDISTANCE},
+    {"auxlinetype",         OA_AUXLINETYPE},
 
     {"width",               OA_WIDTH},
     {"height",              OA_HEIGHT},

@@ -120,7 +120,9 @@ int applywith(ob *u, char *xpos, int *rx, int *ry);
 int find_from(ob *xob, int *risx, int *risy);
 int find_to_first(ob *xob, int *riex, int *riey);
 int find_to_last(ob *xob, int *riex, int *riey);
+#if 0
 int est_seg(ns *xns, ob *u, varray_t *opar, varray_t *segar, int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty, int *rfx, int *rfy);
+#endif
 int takelastobjpos(ob *lob, int pos, int kp, int *nx, int *ny, int *dir);
 int OP_GDUMP(const char *pre, char *mid, ob *u);
 int OP_LDUMP(const char *pre, char *mid, ob *u);
