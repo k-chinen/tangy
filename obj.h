@@ -144,7 +144,7 @@ extern apair_t cmd_ial[];
      (x)==CMD_WLINE||(x)==CMD_WARROW||\
      (x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
      (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||\
-     (x)==CMD_PING||(x)==CMD_PINGPONG|| \
+     (x)==CMD_DMY1||(x)==CMD_DMY2|| \
      (x)==CMD_BARROW||(x)==CMD_PLINE \
     )
 #define ISATOM(x)   \
@@ -156,6 +156,7 @@ extern apair_t cmd_ial[];
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE|| \
+	 (x)==CMD_PING||(x)==CMD_PINGPONG|| \
      (x)==CMD_OBJLOAD \
     )
 #define HASBODY(x)  \
