@@ -417,5 +417,43 @@ path_lastvisible(varray_t *segar)
     return v;
 }
 
+int
+path_middlevisible(varray_t *segar)
+{
+    int v;
+    int p;
+    int i;
+    seg *e;
+    int c;
+    int m;
+    int n;
+
+    c = 0;
+    v = -1;
+    for(i=0;i<segar->use;i++) {
+        e = segar->slot[i];
+        if(SEG_VISIBLE(e->ptype)) {
+            c++;
+        }
+    }
+    n = c;
+    m = n/2;
+    c = 0;
+    for(i=0;i<segar->use;i++) {
+        e = segar->slot[i];
+        if(SEG_VISIBLE(e->ptype)) {
+            if(m==c) {
+                v = i;
+                break;
+            }
+            c++;
+        }
+    }
+
+Echo("%s: n %d m %d ; v %d\n", __func__, n, m, v);
+
+    return v;
+}
+
 
 

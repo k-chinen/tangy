@@ -59,7 +59,14 @@ int path_regsegdir(varray_t *segar, int);
      (x)==OA_RIGHT||(x)==OA_LEFT||(x)==OA_UP||(x)==OA_DOWN||\
      (x)==OA_FORWARD||(x)==OA_ARC||(x)==OA_ARCN||(x)==OA_JOIN)
 
+#define TMP_SEG_VISIBLE(x) \
+    ((x)==OA_LINETO||(x)==OA_RLINETO||(x)==OA_LINE||\
+     (x)==OA_CURVETO||(x)==OA_RCURVETO||\
+     (x)==OA_RIGHT||(x)==OA_LEFT||(x)==OA_UP||(x)==OA_DOWN||\
+     (x)==OA_ARC||(x)==OA_ARCN||(x)==OA_JOIN)
+
 int path_firstvisible(varray_t *segar);
+int path_middlevisible(varray_t *segar);
 int path_lastvisible(varray_t *segar);
 
 #endif/*_TANGY_SEG_H_*/

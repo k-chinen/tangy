@@ -1352,7 +1352,7 @@ Echo("CHECK CHUNK attr\n");
             nob->cob.rad = (objunit*3)/2;
         }
         else {
-            nob->cob.arrowcentheadpos   = 0.9;
+            nob->cob.arrowcentheadpos   = 0.5;
         }
         break;
 

@@ -464,7 +464,15 @@ Echo("  ldir %.2f new  :%d\n", ldir, __LINE__);
             if(c>0) {
                 r = seg_new();
                 r->coordtype = REL_COORD;
+#if 0
                 r->ptype = OA_FORWARD;
+#endif
+                if(e->cmd==OA_FROM) {
+                    r->ptype = OA_MOVETO;
+                }
+                else {
+                    r->ptype = OA_FORWARD;
+                }
                 r->x1 = x - lx;
                 r->y1 = y - ly;
                 varray_push(segar, r);
@@ -538,7 +546,10 @@ Echo("mark final position %d,%d\n", mx, my);
 
 P;
             if(e->cmd==OA_FROM) {
+#if 0
                 FREG1(OA_FORWARD, jc, ABS_COORD, COORD_FROM, mx, my, rad, an);
+#endif
+                FREG1(OA_MOVETO, jc, ABS_COORD, COORD_FROM, mx, my, rad, an);
                 rv |= COORD_FROM;
             }
             else

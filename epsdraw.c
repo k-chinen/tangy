@@ -821,9 +821,9 @@ _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
     double  dx, dy;
     double  r2;
 
-#if 0
-    fprintf(fp, "%% arrowhead atype %d xdir %.2f lc %d x,y %.3f,%.3f\n",
-        atype, xdir, lc, x, y);
+#if 1
+    fprintf(fp, "%% %s atype %d xdir %.2f lc %d x,y %.3f,%.3f\n",
+        __func__, atype, xdir, lc, x, y);
 #endif
     fprintf(fp, "gsave %% for AH\n");
 
@@ -1020,6 +1020,7 @@ _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
         fprintf(fp, "%.3f %.3f lineto\n", x+dx, y+dy);
         fprintf(fp, "closepath fill\n");
     
+P;
         epsdraw_arrowhead(fp, AH_NORMAL,
             xdir, lc, x+(dx2+dx1)/2, y+(dy2+dy1)/2);
       }
@@ -2034,6 +2035,7 @@ epsdraw_segline(FILE *fp, int ltype, int lt, int lc,
 #endif
             x3   = (x1+x2)/2;
             y3   = (y1+y2)/2;
+P;
             rv = epsdraw_arrowhead(fp, AH_NORMAL, xdir, lc, x3, y3);
         }
 #endif
@@ -2275,6 +2277,7 @@ P;
     }
     if(xahpart & AR_BACK) {
         xdir = (int)(atan2((y1-y2),(x1-x2))/rf);
+P;
         epsdraw_arrowhead(fp, xahback, xdir, xlc, x1, y1);
     }
 
@@ -2283,6 +2286,7 @@ P;
         x3 = (x1+x2)/2;
         y3 = (y1+y2)/2;
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+P;
         epsdraw_arrowhead(fp, xahcent, xdir, xlc, x3, y3);
     }
 #endif
@@ -2297,6 +2301,7 @@ P;
     }
     if(xahpart & AR_FORE) {
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
+P;
         epsdraw_arrowhead(fp, xahfore, xdir, xlc, x2, y2);
     }
 
@@ -2892,7 +2897,7 @@ _drawpathX(FILE *fp,
     int  qcx, qcy;
 
     int  actfh, actch, actbh;
-    int  ahbpos, ahfpos;
+    int  ahbpos, ahcpos, ahfpos;
 
     int  bwmsz;
 
@@ -2934,8 +2939,15 @@ varray_fprintv(stderr, qar);
     }
 
     ahbpos = path_firstvisible(qar);
+    ahcpos = path_middlevisible(qar);
     ahfpos = path_lastvisible(qar);
-    Echo("  oid %d ahbpos %d ahfpos %d\n", xu->oid, ahbpos, ahfpos);
+    Echo("  %s:%d oid %d ah %d/%d/%d ; ahbpos %d ahcpos %d ahfpos %d use %d\n",
+        __FILE__, __LINE__,
+        xu->oid,
+        xu->cob.arrowbackheadtype,
+        xu->cob.arrowcentheadtype,
+        xu->cob.arrowforeheadtype,
+        ahbpos, ahcpos, ahfpos, qar->use);
 
     if(f_new) {
         fprintf(fp, "    newpath\n");
@@ -3449,14 +3461,30 @@ next:
         if(i==ahfpos && xu->cob.arrowforeheadtype) {
 Echo("AH F oid %d seg %d cdir %d\n", xu->oid, i, cdir);
             fprintf(fp, "gsave\n");
+P;
             epsdraw_arrowhead(fp,
                 xu->cob.arrowforeheadtype, cdir,
                 xu->cob.outlinecolor, x2, y2);
             fprintf(fp, "grestore\n");
         }
+
+        if(i==ahcpos && xu->cob.arrowcentheadtype) {
+Echo("AH C oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            int mx, my;
+            mx = (x1+x2)/2;
+            my = (y1+y2)/2;
+            fprintf(fp, "gsave\n");
+P;
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowcentheadtype, cdir,
+                xu->cob.outlinecolor, mx, my);
+            fprintf(fp, "grestore\n");
+        }
+
         if(i==ahbpos && xu->cob.arrowbackheadtype) {
 Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
             fprintf(fp, "gsave\n");
+P;
             epsdraw_arrowhead(fp,
                 xu->cob.arrowbackheadtype, cdir-180,
                 xu->cob.outlinecolor, x1, y1);
@@ -3848,7 +3876,7 @@ __drawpath_LT(FILE *fp,
     int    gsym, gpitch;
 
     int    actfh, actch, actbh;
-    int    ahbpos, ahfpos;
+    int    ahbpos, ahcpos, ahfpos;
 
     int    bwmsz;
 
@@ -3921,8 +3949,11 @@ Echo("%s: ydir %d xox %d xoy %d linetype %d\n",
     Echo("    qar.use %d\n", qar->use);
 
     ahbpos = path_firstvisible(qar);
+    ahcpos = path_middlevisible(qar);
     ahfpos = path_lastvisible(qar);
-    Echo("  oid %d ahbpos %d ahfpos %d\n", xu->oid, ahbpos, ahfpos);
+    Echo("  %s:%d oid %d ahbpos %d ahfpos %d use %d\n",
+        __FILE__, __LINE__,
+        xu->oid, ahbpos, ahfpos, qar->use);
 
 #if 0
     changethick(fp, xu->vob.outlinethick);
@@ -4114,11 +4145,13 @@ P;
                 px = arcx + s->rad*cos((cdir+(s->ang/2)-90)*rf);
                 py = arcy + s->rad*sin((cdir+(s->ang/2)-90)*rf);
                 if(actch>0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir+(s->ang/2),
                         xu->cob.outlinecolor, px, py);
                 }
                 if(actch<0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir+(s->ang/2) + 180,
                         xu->cob.outlinecolor, px, py);
@@ -4126,11 +4159,13 @@ P;
             }
 
             if(actfh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, cdir+s->ang-ve/2,
                     xu->cob.outlinecolor, x2, y2);
             }
             if(actbh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowbackheadtype, cdir-180+vs/2,
                     xu->cob.outlinecolor, x1, y1);
@@ -4236,11 +4271,13 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
                 px = arcx + s->rad*cos((cdir-(s->ang/2)+90)*rf);
                 py = arcy + s->rad*sin((cdir-(s->ang/2)+90)*rf);
                 if(actch>0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir-(s->ang/2),
                         xu->cob.outlinecolor, px, py);
                 }
                 if(actch<0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir-(s->ang/2) + 180,
                         xu->cob.outlinecolor, px, py);
@@ -4248,11 +4285,13 @@ Echo("us %.3f vs %.3f; ue %.3f ve %.3f; etrip %.3f vi %.3f s->ang %.3f\n",
             }
 
             if(actfh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowforeheadtype, (int)(cdir-(s->ang-ve/2)),
                     xu->cob.outlinecolor, x2, y2);
             }
             if(actbh>0) {
+P;
                 epsdraw_arrowhead(fp,
                     xu->cob.arrowbackheadtype, cdir-180-vs/2,
                     xu->cob.outlinecolor, x1, y1);
@@ -4556,11 +4595,13 @@ fprintf(fp, "%% line %d cdir %d\n", __LINE__, cdir);
                 px = x1 + (x2-x1)/2;
                 py = y1 + (y2-y1)/2;
                 if(actch>0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir,
                         xu->cob.outlinecolor, px, py);
                 }
                 if(actch<0) {
+P;
                     epsdraw_arrowhead(fp,
                         xu->cob.arrowcentheadtype, cdir+180,
                         xu->cob.outlinecolor, px, py);
@@ -4596,17 +4637,32 @@ next:
             markfdot(xu->cob.outlinecolor, x1, y1);
         }
 
+Echo("i %d ahfpos %d ahcpos %d ahbpos %d\n", i, ahfpos, ahcpos, ahbpos);
+
         if(i==ahfpos && xu->cob.arrowforeheadtype) {
 Echo("AH F oid %d seg %d cdir %d\n", xu->oid, i, cdir);
             fprintf(fp, "gsave\n");
+P;
             epsdraw_arrowhead(fp,
                 xu->cob.arrowforeheadtype, cdir,
                 xu->cob.outlinecolor, x2, y2);
             fprintf(fp, "grestore\n");
         }
+
+        if(i==ahcpos && xu->cob.arrowcentheadtype) {
+Echo("AH C oid %d seg %d cdir %d\n", xu->oid, i, cdir);
+            fprintf(fp, "gsave\n");
+P;
+            epsdraw_arrowhead(fp,
+                xu->cob.arrowcentheadtype, cdir,
+                xu->cob.outlinecolor, x2, y2);
+            fprintf(fp, "grestore\n");
+        }
+
         if(i==ahbpos && xu->cob.arrowbackheadtype) {
 Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
             fprintf(fp, "gsave\n");
+P;
             epsdraw_arrowhead(fp,
                 xu->cob.arrowbackheadtype, cdir-180,
                 xu->cob.outlinecolor, x1, y1);
@@ -5060,10 +5116,12 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
 #endif
 
     if(xu->cob.arrowheadpart & AR_BACK) {
+P;
         epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
             (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
     }
     if(xu->cob.arrowheadpart & AR_FORE) {
+P;
         epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
             (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
     }
@@ -5078,8 +5136,10 @@ Zepsdraw_bcurveselfarrow(FILE *fp,
         else {
             nt = 0.5;
         }
+Echo("%s: nt %f arrowcentheadpos %f\n", __func__, nt, xu->cob.arrowcentheadpos);
         _bez_posdir(&nx, &ny, &na, nt, ux, uy, px, py, qx, qy, vx, vy);
 
+P;
         epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
             (int)(na/rf), xu->cob.outlinecolor, nx, ny);
     }
@@ -5205,10 +5265,12 @@ pos_done:
 body_done:
 
     if(xu->cob.arrowheadpart & AR_BACK) {
+P;
         epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
             (int)(mu/rf)+180, xu->cob.outlinecolor, ux, uy);
     }
     if(xu->cob.arrowheadpart & AR_FORE) {
+P;
         epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
             (int)(mv/rf)+180, xu->cob.outlinecolor, vx, vy);
     }
@@ -5224,9 +5286,11 @@ body_done:
         else {
             nt = 0.5;
         }
+Echo("%s: nt %f arrowcentheadpos %f\n", __func__, nt, xu->cob.arrowcentheadpos);
         _bez_posdir(&nx, &ny, &na, nt, ux, uy, tx, ty, tx, ty, vx, vy);
 
-        epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+P;
+        epsdraw_arrowhead(fp, xu->cob.arrowcentheadtype,
             (int)(na/rf), xu->cob.outlinecolor, nx, ny);
     }
 #endif
@@ -7081,7 +7145,7 @@ skip_dots:
         }
         break;
 
-    case HT_HSTRIPE:
+    case HT_VSTRIPE:
         {
         int r;
         int u;
@@ -7105,7 +7169,7 @@ skip_dots:
         }
         break;
 
-    case HT_VSTRIPE:
+    case HT_HSTRIPE:
         {
         int r;
         int u;
