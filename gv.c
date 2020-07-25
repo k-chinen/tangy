@@ -133,12 +133,18 @@ apair_t linetype_ial[] = {
 };
 
 apair_t auxlinetype_ial[] = {
-    {"range",               ALT_RANGE},
-    {"beside",              ALT_BESIDE},
+    {"line",                ALT_LINE},
     {"paren",               ALT_PAREN},
     {"bracket",             ALT_BRACKET},
     {"brace",               ALT_BRACE},
-    {NULL,              -1},
+    {NULL,                  -1},
+};
+
+apair_t auxlineopt_ial[] = {
+    {"nline",               ALO_NLINE},
+    {"blinewrap",           ALO_BLINEWRAP},
+    {"basepoint",           ALO_BASEPOINT},
+    {NULL,                  -1},
 };
 
 apair_t hatchtype_ial[] = {
@@ -367,8 +373,9 @@ apair_t objattr_ial[] = {
     {"linkstyle",           OA_LINKSTYLE},
     {"linkmap",             OA_LINKMAP},
 
-    {"auxlinedistance",     OA_AUXLINEDISTANCE},
     {"auxlinetype",         OA_AUXLINETYPE},
+    {"auxlineopt",          OA_AUXLINEOPT},
+    {"auxlinedistance",     OA_AUXLINEDISTANCE},
 
     {"width",               OA_WIDTH},
     {"height",              OA_HEIGHT},

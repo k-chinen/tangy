@@ -11734,6 +11734,69 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
     }
 
     changecolor(fp, u->cob.outlinecolor);
+    changethick(fp, u->cob.outlinethick/2);
+    
+    Echo("auxlineopt %p\n", u->cob.auxlineopt);
+    if(u->cob.auxlineopt) {
+        char token[BUFSIZ];
+        char *p;
+        int mx, my;
+        int mr;
+        p = u->cob.auxlineopt;
+        while(1) {
+            p = draw_word(p, token, BUFSIZ, DECO_SEPC);
+            if(!token[0]) {
+                break;
+            }
+
+            Echo("token |%s|\n", token);
+
+            if(strcasecmp(token, "nline")==0) {
+                fprintf(fp, "  %% nline\n"); 
+                fprintf(fp, "  gsave\n");
+#if 0
+                fprintf(fp, "    %d setlinewidth\n", u->cob.outlinethick/2); 
+#endif
+                fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
+                    bsx, bsy, osx, osy);
+                fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
+                    bex, bey, oex, oey);
+                fprintf(fp, "  grestore\n");
+            }
+
+            if(strcasecmp(token, "blinewrap")==0) {
+
+                mx = (int)((double)u->cob.auxlinedistance*cos((sdir+180)*rf));
+                my = (int)((double)u->cob.auxlinedistance*sin((sdir+180)*rf));
+
+                fprintf(fp, "  %% blinewrap\n"); 
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d moveto %d %d rlineto stroke\n",
+                    bsx, bsy, mx, my);
+                fprintf(fp, "    %d %d moveto %d %d rlineto stroke\n",
+                    bex, bey, -mx, -my);
+                fprintf(fp, "  grestore\n");
+            }
+
+            if(strcasecmp(token, "basepoint")==0) {
+
+                mr = objunit/20;
+
+                fprintf(fp, "  %% basepoint\n"); 
+                fprintf(fp, "  gsave\n");
+                fprintf(fp, "    %d %d moveto %d %d %d 0 360 arc fill\n",
+                    bsx, bsy, bsx, bsy, mr);
+                fprintf(fp, "    %d %d moveto %d %d %d 0 360 arc fill\n",
+                    bex, bey, bex, bey, mr);
+                fprintf(fp, "  grestore\n");
+            }
+
+        }
+    }
+
+skip_opt:
+    (void)0;
+
     changethick(fp, u->cob.outlinethick);
 
     switch(u->cauxlinetype) {
@@ -11748,8 +11811,10 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
             _bez_solid(fp, u, bsx, bsy, msx, msy, bcx, bcy, mcx, mcy);
             _bez_solid(fp, u, mcx, mcy, bcx, bcy, mex, mey, bex, bey);
         break;
-    case ALT_RANGE:
-    default:
+    case ALT_LINE:
+    case ALT_BESIDE:
+
+#if 0
         fprintf(fp, "  gsave\n");
         fprintf(fp, "    %d setlinewidth\n", u->cob.outlinethick/2); 
         fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
@@ -11757,14 +11822,17 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
         fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
             bex, bey, oex, oey);
         fprintf(fp, "  grestore\n");
-        /* falldown */
-    case ALT_BESIDE:
+#endif
+
         fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
             msx, msy, mex, mey);
         epsdraw_arrowhead(fp, u->cob.arrowforeheadtype,
             sdir+180, u->cob.outlinecolor, msx, msy);
         epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
             sdir, u->cob.outlinecolor, mex, mey);
+        break;
+    default:
+        fprintf(stderr, "strange auxlinetype\n");
     }
 
     fprintf(fp, "grestore\n");

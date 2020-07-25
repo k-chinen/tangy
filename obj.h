@@ -292,8 +292,9 @@ extern apair_t lo_ial[];
 #define OA_LINEDECOPITCH     (5)
 #define OA_WLINETHICK        (6)
 
+#define OA_AUXLINETYPE       (7)
 #define OA_AUXLINEDISTANCE   (8)
-#define OA_AUXLINETYPE       (9)
+#define OA_AUXLINEOPT        (9)
 
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
@@ -463,6 +464,7 @@ struct obattr {
 
     int   auxlinetype;
     int   auxlinedistance;
+    char *auxlineopt;
 
     int   wlinethick;
     int   forechop;

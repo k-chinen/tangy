@@ -876,7 +876,7 @@ P;
 
     r->cob.rad      = -1;
     r->cauxlinedistance = objunit/4;
-    r->cauxlinetype = ALT_RANGE;
+    r->cauxlinetype = ALT_LINE;
     
     r->cob.ssar     = varray_new();
     r->cob.segopar  = varray_new();

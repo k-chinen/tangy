@@ -998,6 +998,8 @@ P;
 
     AISETN(OA_AUXLINETYPE,  auxlinetype_ial, auxlinetype);
     OISET(OA_AUXLINEDISTANCE,      cauxlinedistance);
+    LADD(OA_AUXLINEOPT,     auxlineopt);
+    
 
     ISET2(OA_CHOP,          forechop, backchop);
     ISET(OA_FORECHOP,       forechop);
