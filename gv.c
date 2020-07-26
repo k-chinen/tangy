@@ -133,7 +133,10 @@ apair_t linetype_ial[] = {
 };
 
 apair_t auxlinetype_ial[] = {
+    {"unknown",             ALT_UNKNOWN},
+    {"none",                ALT_NONE},
     {"line",                ALT_LINE},
+    {"arrow",               ALT_ARROW},
     {"paren",               ALT_PAREN},
     {"bracket",             ALT_BRACKET},
     {"brace",               ALT_BRACE},

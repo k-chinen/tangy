@@ -1,7 +1,10 @@
 #ifndef _TANGY_ALTYPE_
 #define _TANGY_ALTYPE_
 
-#define ALT_LINE            (0)
+#define ALT_UNKNOWN         (0)
+#define ALT_ARROW           (1)
+#define ALT_LINE            (2)
+#define ALT_NONE            (3)
 #define ALT_PAREN           (10)
 #define ALT_BRACKET         (11)
 #define ALT_BRACE           (12)

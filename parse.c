@@ -1341,6 +1341,10 @@ Echo("CHECK CHUNK attr\n");
         nob->ignore = 1;
         break;
 
+#if 0
+    case CMD_AUXLINE:
+        nob->cob.auxlinetype       = ALT_ARROW;
+#endif
     case CMD_ARROW:
     case CMD_WARROW:
         nob->cob.arrowheadpart     = AR_FORE;

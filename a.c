@@ -82,6 +82,16 @@ confirm_attr(ob *xo)
         xo->floated = 1;
     }
 #endif
+
+#if 1
+    if(xo->type==CMD_AUXLINE) {
+        if(xo->cauxlinetype == ALT_UNKNOWN) {
+            xo->cauxlinetype          = ALT_ARROW;
+            xo->cob.arrowheadpart     = AR_FORE;
+            xo->cob.arrowforeheadtype = AH_NORMAL;
+        }
+    }
+#endif
     
     if(xo->type==CMD_POLYGON) {
         if(xoa->polypeak<3) {
@@ -876,7 +886,10 @@ P;
 
     r->cob.rad      = -1;
     r->cauxlinedistance = objunit/4;
-    r->cauxlinetype = ALT_LINE;
+    r->cauxlinetype = ALT_UNKNOWN;
+#if 0
+    r->cauxlinetype = ALT_ARROW;
+#endif
     
     r->cob.ssar     = varray_new();
     r->cob.segopar  = varray_new();

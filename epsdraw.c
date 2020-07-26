@@ -11698,8 +11698,14 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
     int mcx, mcy;
     int bcx, bcy;
 
-    Echo("%s: oid %d type %d\n", __func__, u->oid, u->cauxlinetype);
-    fprintf(fp, "%% %s oid %d type %d\n", __func__, u->oid, u->cauxlinetype);
+    Echo("%s: oid %d type %s(%d)\n",
+        __func__, u->oid, 
+        rassoc(auxlinetype_ial, u->cauxlinetype),
+        u->cauxlinetype);
+    fprintf(fp, "%% %s oid %d type %s(%d)\n",
+        __func__, u->oid, 
+        rassoc(auxlinetype_ial, u->cauxlinetype),
+        u->cauxlinetype);
 
     mcx = (msx + mex) / 2;
     mcy = (msy + mey) / 2;
@@ -11808,6 +11814,7 @@ skip_opt:
             _bez_solid(fp, u, mcx, mcy, bcx, bcy, mex, mey, bex, bey);
         break;
     case ALT_LINE:
+    case ALT_ARROW:
         fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
             msx, msy, mex, mey);
         if(u->cob.arrowheadpart & AR_FORE) {
@@ -11819,8 +11826,11 @@ skip_opt:
                 sdir+180, u->cob.outlinecolor, msx, msy);
         }
         break;
+    case ALT_NONE:
+        /* nothing */
+        break;
     default:
-        fprintf(stderr, "strange auxlinetype\n");
+        fprintf(stderr, "strange auxlinetype (%d)\n", u->cauxlinetype);
     }
 
     fprintf(fp, "grestore\n");
@@ -13063,7 +13073,7 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
         }
 
         if(u->type==CMD_AUXLINE) {
-            epsdraw_sstrbgX(fp, u->gx+ax, u->gy+ay, u->wd, u->ht,
+            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
                 u->cob.textalign, u->cob.textoffset,
                 u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
                 0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
