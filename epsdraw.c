@@ -11754,9 +11754,6 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
             if(strcasecmp(token, "nline")==0) {
                 fprintf(fp, "  %% nline\n"); 
                 fprintf(fp, "  gsave\n");
-#if 0
-                fprintf(fp, "    %d setlinewidth\n", u->cob.outlinethick/2); 
-#endif
                 fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
                     bsx, bsy, osx, osy);
                 fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
@@ -11765,7 +11762,6 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
             }
 
             if(strcasecmp(token, "blinewrap")==0) {
-
                 mx = (int)((double)u->cob.auxlinedistance*cos((sdir+180)*rf));
                 my = (int)((double)u->cob.auxlinedistance*sin((sdir+180)*rf));
 
@@ -11812,24 +11808,16 @@ skip_opt:
             _bez_solid(fp, u, mcx, mcy, bcx, bcy, mex, mey, bex, bey);
         break;
     case ALT_LINE:
-    case ALT_BESIDE:
-
-#if 0
-        fprintf(fp, "  gsave\n");
-        fprintf(fp, "    %d setlinewidth\n", u->cob.outlinethick/2); 
-        fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
-            bsx, bsy, osx, osy);
-        fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
-            bex, bey, oex, oey);
-        fprintf(fp, "  grestore\n");
-#endif
-
         fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
             msx, msy, mex, mey);
-        epsdraw_arrowhead(fp, u->cob.arrowforeheadtype,
-            sdir+180, u->cob.outlinecolor, msx, msy);
-        epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
-            sdir, u->cob.outlinecolor, mex, mey);
+        if(u->cob.arrowheadpart & AR_FORE) {
+            epsdraw_arrowhead(fp, u->cob.arrowforeheadtype,
+                sdir, u->cob.outlinecolor, mex, mey);
+        }
+        if(u->cob.arrowheadpart & AR_BACK) {
+            epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
+                sdir+180, u->cob.outlinecolor, msx, msy);
+        }
         break;
     default:
         fprintf(stderr, "strange auxlinetype\n");

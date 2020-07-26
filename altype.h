@@ -5,7 +5,6 @@
 #define ALT_PAREN           (10)
 #define ALT_BRACKET         (11)
 #define ALT_BRACE           (12)
-#define ALT_BESIDE          (1000)
 
 #define ALO_NLINE           (0x01)
 #define ALO_BLINEWRAP       (0x02)
