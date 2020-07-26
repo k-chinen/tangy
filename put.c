@@ -235,6 +235,95 @@ find_to_last(ob *xob, int *riex, int *riey)
     return r;
 }
 
+/*
+        bbreconfirm_seg(u, isx, isy, iex, iey, rlx, rby, rrx, rty);
+*/
+int
+bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
+    int *rlx, int *rby, int *rrx, int *rty)
+{
+    double sdir;
+    double ndir;
+    int    isdir;
+    int    indir;
+    int    ar;
+    int    ax,ay;
+    int    msx, msy, mex, mey;
+    int    osx, osy, oex, oey;
+    int    ssx, ssy, eex, eey;
+
+    sdir = atan2(ey-sy, ex-sx);
+    ndir = sdir + M_PI/2.0;
+    isdir = (int)(sdir / rf);
+    indir = (int)(ndir / rf);
+
+    ar = u->cauxlinedistance;
+
+    ax = (int)((double)ar*cos(ndir));
+    ay = (int)((double)ar*sin(ndir));
+
+    msx = sx + ax;
+    msy = sy + ay;
+    mex = ex + ax;
+    mey = ey + ay;
+    osx = sx + 2*ax;
+    osy = sy + 2*ay;
+    oex = ex + 2*ax;
+    oey = ey + 2*ay;
+
+
+    ssx = sx + (int)((double)ar*cos(sdir-M_PI));
+    ssy = sy + (int)((double)ar*sin(sdir-M_PI));
+    eex = ex + (int)((double)ar*cos(sdir));
+    eey = ey + (int)((double)ar*sin(sdir));
+
+    Echo("%s: sx,sy %d,%d ex,ey %d,%d\n",
+        __func__, sx, sy, ex, ey);
+    Echo("%s: isdir %d indir %d\n",
+        __func__, isdir, indir);
+    Echo("%s: ssx,ssy %d,%d eex,eey %d,%d\n",
+        __func__, ssx, ssy, eex, eey);
+    Echo("%s: msx,msy %d,%d mex,mey %d,%d\n",
+        __func__, msx, msy, mex, mey);
+    Echo("%s: osx,osy %d,%d oex,oey %d,%d\n",
+        __func__, osx, osy, oex, oey);
+
+    qbb_t sbb;
+    qbb_reset(&sbb);
+    qbb_setbb(&sbb, *rlx, *rby, *rrx, *rty);
+
+#if 0
+    qbb_fprint(stderr, &sbb);
+#endif
+    qbb_mark(&sbb, sx, sy);
+    qbb_mark(&sbb, ex, ey);
+#if 0
+    qbb_fprint(stderr, &sbb);
+#endif
+    qbb_mark(&sbb, msx, msy);
+    qbb_mark(&sbb, mex, mey);
+#if 0
+    qbb_fprint(stderr, &sbb);
+#endif
+    qbb_mark(&sbb, osx, osy);
+    qbb_mark(&sbb, oex, oey);
+#if 0
+    qbb_fprint(stderr, &sbb);
+#endif
+    qbb_mark(&sbb, ssx, ssy);
+    qbb_mark(&sbb, eex, eey);
+#if 0
+    qbb_fprint(stderr, &sbb);
+#endif
+
+    *rlx = sbb.lx;
+    *rby = sbb.by;
+    *rrx = sbb.rx;
+    *rty = sbb.ty;
+
+    return 0;   
+}
+
 int
 est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
@@ -841,6 +930,13 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
 
     Echo("MARK*oid %d (%d %d %d %d)\n",
         u->oid, *rlx, *rby, *rrx, *rty);
+#if 1
+    if(u->type==CMD_AUXLINE) {
+        bbreconfirm_seg(u, isx, isy, iex, iey, rlx, rby, rrx, rty);
+    Echo("MARK#oid %d (%d %d %d %d)\n",
+        u->oid, *rlx, *rby, *rrx, *rty);
+    }
+#endif
 
 #if 0
     Echo("opar\n");
