@@ -267,6 +267,19 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
     xch->grx = _rx;
     xch->gby = _by;
     xch->gty = _ty;
+
+#if 1
+    xch->lx = xch->glx;
+    xch->rx = xch->grx;
+    xch->by = xch->gby;
+    xch->ty = xch->gty;
+#endif
+
+#if 1
+    xch->wd = xch->rx - xch->lx;
+    xch->ht = xch->ty - xch->by;
+#endif
+
 #if 0
     u->gx  = (_lx+_rx)/2;
     u->gy  = (_by+_ty)/2;

@@ -235,9 +235,6 @@ find_to_last(ob *xob, int *riex, int *riey)
     return r;
 }
 
-/*
-        bbreconfirm_seg(u, isx, isy, iex, iey, rlx, rby, rrx, rty);
-*/
 int
 bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
     int *rlx, int *rby, int *rrx, int *rty)
@@ -305,16 +302,38 @@ bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
 #if 0
     qbb_fprint(stderr, &sbb);
 #endif
-    qbb_mark(&sbb, osx, osy);
-    qbb_mark(&sbb, oex, oey);
+
+    if(u->cob.auxlineopt) {
+        char token[BUFSIZ];
+        char *p;
+        int mx, my;
+        int mr;
+        p = u->cob.auxlineopt;
+        while(1) {
+            p = draw_word(p, token, BUFSIZ, DECO_SEPC);
+            if(!token[0]) {
+                break;
+            }
+
+            Echo("token |%s|\n", token);
+
+            if(strcasecmp(token, "nline")==0) {
+                qbb_mark(&sbb, osx, osy);
+                qbb_mark(&sbb, oex, oey);
 #if 0
-    qbb_fprint(stderr, &sbb);
+                qbb_fprint(stderr, &sbb);
 #endif
-    qbb_mark(&sbb, ssx, ssy);
-    qbb_mark(&sbb, eex, eey);
+            }
+            if(strcasecmp(token, "blinewrap")==0) {
+                qbb_mark(&sbb, ssx, ssy);
+                qbb_mark(&sbb, eex, eey);
 #if 0
-    qbb_fprint(stderr, &sbb);
+                qbb_fprint(stderr, &sbb);
 #endif
+            }
+        }
+
+    }
 
     *rlx = sbb.lx;
     *rby = sbb.by;

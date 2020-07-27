@@ -12689,6 +12689,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     double sdir; /* segment direction */
     int auxdirgap;
 
+#if 1
+    int mcx, mcy;
+#endif
+
     Echo("%s: arg xdir %d oxy %d,%d|u oid %d xy %d,%d gxy %d,%d\n",
         __func__, *xdir, ox, oy, u->oid, u->x, u->y, u->gx, u->gy);
 
@@ -12911,6 +12915,10 @@ fprintf(fp, "%% isdir %d auxdirgap %d\n", isdir, auxdirgap);
         msy = bsy + ay;
         mex = bex + ax;
         mey = bey + ay;
+
+        mcx = (msx+mex)/2;
+        mcy = (msy+mey)/2;
+
         osx = bsx + 2*ax;
         osy = bsy + 2*ay;
         oex = bex + 2*ax;
@@ -13073,10 +13081,18 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
         }
 
         if(u->type==CMD_AUXLINE) {
+#if 1
+            epsdraw_sstrbgX(fp, mcx, mcy, u->wd, u->ht,
+                u->cob.textalign, u->cob.textoffset,
+                u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
+                0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+#endif
+#if 0
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
                 u->cob.textalign, u->cob.textoffset,
                 u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
                 0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+#endif
         }
         else {
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
