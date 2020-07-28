@@ -25,6 +25,7 @@
 #include "xcur.h"
 #include "epsdraw.h"
 
+#include "sstr.h"
 #include "qbb.h"
 
 #define _umo(lv,hv,av) \
@@ -7654,6 +7655,7 @@ epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist)
     return 0;
 }
 
+#if 0
 int
 ss_strip(char *dst, int dlen, varray_t *ssar)
 {
@@ -7691,7 +7693,6 @@ Echo(" %2d: %3d '%s'\n", i, w, uu->ssval);
     return 0;
 }
 
-
 int
 ss_dump(FILE *ofp, varray_t *ssar)
 {
@@ -7706,6 +7707,7 @@ ss_dump(FILE *ofp, varray_t *ssar)
 
     return 0;
 }
+#endif
 
 int
 epsdraw_s2sstrbgX(FILE *fp, int x, int y, int wd, int ht,
@@ -7809,6 +7811,7 @@ fprintf(stderr, "src |%s|\n", src);
         __LINE__, i, justify);}
 
 
+#if 0
 char*
 resolv_font(int xmode, int xface)
 {
@@ -7831,6 +7834,7 @@ resolv_font(int xmode, int xface)
 #endif
     return rv;
 }
+#endif
 
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,

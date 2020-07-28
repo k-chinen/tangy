@@ -36,5 +36,6 @@ int swap_Xfont(apair_t *ls, int xv, char *xn);
 
 int fontset_fprint(FILE *fp, char *pmsg);
 int font_edit(int cat, char *opseq);
+char* resolv_font(int xmode, int xface);
 
 #endif/*_TANGY_FONT_H_*/

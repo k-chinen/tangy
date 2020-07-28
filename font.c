@@ -427,3 +427,25 @@ out:
     return r;
 }
 
+char*
+resolv_font(int xmode, int xface)
+{
+    char *rv;
+    apair_t *ls;
+
+    rv = NULL;
+    if(xmode==FM_ASCII) {
+        ls = ff_act_ial;
+    }
+    else {
+        ls = ff_actk_ial;
+    }
+    rv = rassoc(ls, xface);
+
+#if 0
+    Echo("%s: xmode %s(%d) xface %s(%d) -> rv %s\n", __func__,
+        rassoc(fm_ial, xmode), xmode,
+        rassoc(ff_ial, xface),  xface, rv);
+#endif
+    return rv;
+}

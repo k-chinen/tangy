@@ -9,10 +9,15 @@
 #include "notefile.h"
 #include "a.h"
 
+#include "tx.h"
+#include "font.h"
 #include "xcur.h"
+#include "sstr.h"
 
 int xatoi(char *src);
 char* draw_word(char *src, char *dst, int wlen, int sep);
+
+#include "sshd.c"
 
 
 #if 0
@@ -235,6 +240,26 @@ find_to_last(ob *xob, int *riex, int *riey)
     return r;
 }
 
+        /*
+         *            outline
+         * osx,osy  +..........+  oex,oey
+         *          | auxline  |
+         * msx,msy  +----->----+  mex,mey
+         *          |          |
+         * bsx,bsy  +----------+  bex,bey
+         *            baseline
+         */
+
+        /*
+         *             outline
+         *          +..........+ 
+         *          |  ******  |
+         *          +--*sstr*--+  
+         *          |  ******  |
+         *          +----------+  
+         *             baseline
+         */
+
 int
 bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
     int *rlx, int *rby, int *rrx, int *rty)
@@ -248,6 +273,7 @@ bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
     int    msx, msy, mex, mey;
     int    osx, osy, oex, oey;
     int    ssx, ssy, eex, eey;
+    qbb_t sbb;
 
     sdir = atan2(ey-sy, ex-sx);
     ndir = sdir + M_PI/2.0;
@@ -285,7 +311,6 @@ bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
     Echo("%s: osx,osy %d,%d oex,oey %d,%d\n",
         __func__, osx, osy, oex, oey);
 
-    qbb_t sbb;
     qbb_reset(&sbb);
     qbb_setbb(&sbb, *rlx, *rby, *rrx, *rty);
 
@@ -334,6 +359,53 @@ bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
         }
 
     }
+
+#if 0
+int
+sstr_heightdepth(FILE *fp, int x, int y, int wd, int ht,
+        int al, int exof, int ro, int qof,
+        int bgshape, int qbgmargin, int fgcolor, int bgcolor,
+        varray_t *ssar, int ugjust, int opt, int *rht, int *rdp)
+#endif
+        if(u->cob.ssar) 
+        {
+            FILE *dmyfp;
+            int   ik;
+            int   qht, qdp;
+            int   tx, ty;
+            int   bx, by;
+
+            qht = -999;
+            qdp =  999;
+    
+            dmyfp = fopen("/dev/null", "w");
+
+            ik = sstr_heightdepth(dmyfp,
+                /* x, y, wd, ht, al, exof, ro, qof */
+                   0, 0,  0,  0,  0,    0,  0,   0,
+                /* bgshape, gbgmargin, fgcolor, bgcolor, */
+                         0,         0,      -1,      -1,
+                /*     ssar, ugjust,  opt,  rht,  rdp */
+                u->cob.ssar,      0,    1, &qht, &qdp);
+
+            Echo("ik %d , qht %d, qdp %d, by sstr_heightdepth\n",
+                ik, qht, qdp);
+
+            tx = (int)((double)qht*cos(ndir));
+            ty = (int)((double)qht*sin(ndir));
+            bx = (int)((double)qdp*cos(ndir));
+            by = (int)((double)qdp*sin(ndir));
+
+            Echo("qht %6d indir %d -> tx,ty %6d,%-6d\n",
+                qht, indir, tx, ty);
+            Echo("qdp %6d indir %d -> bx,by %6d,%-6d\n",
+                qdp, indir, bx, by);
+
+            qbb_mark(&sbb, msx+tx, msy+ty);
+            qbb_mark(&sbb, msx+bx, msy+by);
+            qbb_mark(&sbb, mex+tx, mey+ty);
+            qbb_mark(&sbb, mex+bx, mey+by);
+        }
 
     *rlx = sbb.lx;
     *rby = sbb.by;
@@ -950,10 +1022,13 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
     Echo("MARK*oid %d (%d %d %d %d)\n",
         u->oid, *rlx, *rby, *rrx, *rty);
 #if 1
+
     if(u->type==CMD_AUXLINE) {
         bbreconfirm_seg(u, isx, isy, iex, iey, rlx, rby, rrx, rty);
-    Echo("MARK#oid %d (%d %d %d %d)\n",
-        u->oid, *rlx, *rby, *rrx, *rty);
+        Echo("MARK#oid %d (%d %d %d %d)\n",
+            u->oid, *rlx, *rby, *rrx, *rty);
+
+
     }
 #endif
 
