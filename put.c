@@ -1861,7 +1861,7 @@ Echo("\t  3 u wd %d ht %d\n", u->wd, u->ht);
     }
     if(u->type==CMD_POINT) {
         if(u->cob.rad<=0) {
-            u->cob.rad = objunit/5;
+            u->cob.rad = objunit/10;
         }
         if(u->cob.rad>0) {
             u->wd = u->cob.rad*2;
