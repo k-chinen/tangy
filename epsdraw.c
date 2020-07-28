@@ -2181,11 +2181,13 @@ epsdraw_segwline(FILE *fp,
 
 
 int
-epsdraw_Xseglinearrow(FILE *fp,
+epsdraw_Xseglinearrow_chop(FILE *fp,
     int xox, int xoy, 
     int x1, int y1, int x2, int y2,
-    int xltype, int xlt, int xlc, int xahpart, int xahfore, int xahcent, int xahback)
+    int xltype, int xlt, int xlc,
+    int xahpart, int xahfore, int xahcent, int xahback, int fchop, int bchop)
 {
+
     ob* pf;
     ob* pt;
     int r;
@@ -2195,10 +2197,16 @@ epsdraw_Xseglinearrow(FILE *fp,
     int x1i, y1i;
     int x2i, y2i;
     int x3, y3;
+    int x1m, y1m;
+    int x2m, y2m;
 
     /*
-     *   x1,y1 x1i,y1i x3,y3 x2i,y2i  x2,y2
-     *     <---+---------+------+---->
+     *   x1,y1 x1i,y1i x3,y3 x2i,y2i x2,y2
+     *     <----+--------+--------+---->
+     *     |  |bchop                |  |fchop
+     *        <--*-+-----+-----+-*-->
+     *     x1,y1 x1i,y1i   x2i,y2i  x2,y2
+     *        x1m,y1m         x2m,y2m
      */
 
     Echo("%s: enter\n", __func__);
@@ -2223,20 +2231,28 @@ epsdraw_Xseglinearrow(FILE *fp,
         fprintf(fp, "    grestore\n");
     }
 
+    if(bchop>0) {
+P;
+        dx = bchop*cos((xdir)*rf);
+        dy = bchop*sin((xdir)*rf);
+        x1 += dx;
+        y1 += dy;
+    }
 
     if(xahpart & AR_BACK) {
         if( (xahback==AH_REVNORMAL)||
             (xahback==AH_REVWIRE)) {
             goto no_backhead;
         }
-#if 0
-        dx = def_arrowsize*2*cos((xdir)*rf);
-        dy = def_arrowsize*2*sin((xdir)*rf);
-#endif
+P;
         dx = def_arrowsize*cos((xdir)*rf);
         dy = def_arrowsize*sin((xdir)*rf);
         x1i = x1 + dx;
         y1i = y1 + dy;
+        dx = def_arrowsize/2*cos((xdir)*rf);
+        dy = def_arrowsize/2*sin((xdir)*rf);
+        x1m = x1 + dx;
+        y1m = y1 + dy;
     }
     else {
 no_backhead:
@@ -2244,19 +2260,28 @@ no_backhead:
         y1i = y1;
     }
 
+    if(fchop>0) {
+P;
+        dx = bchop*cos((xdir+180)*rf);
+        dy = bchop*sin((xdir+180)*rf);
+        x2 += dx;
+        y2 += dy;
+    }
+
     if((xahpart & AR_FORE)) {
         if((xahfore==AH_REVNORMAL)||
             (xahfore==AH_REVWIRE)) {
             goto no_forehead;
         }
-#if 0
-        dx = def_arrowsize*2*cos((xdir+180)*rf);
-        dy = def_arrowsize*2*sin((xdir+180)*rf);
-#endif
+P;
         dx = def_arrowsize*cos((xdir+180)*rf);
         dy = def_arrowsize*sin((xdir+180)*rf);
         x2i = x2 + dx;
         y2i = y2 + dy;
+        dx = def_arrowsize/2*cos((xdir+180)*rf);
+        dy = def_arrowsize/2*sin((xdir+180)*rf);
+        x2m = x2 + dx;
+        y2m = y2 + dy;
     }
     else {
 no_forehead:
@@ -2264,21 +2289,25 @@ no_forehead:
         y2i = y2;
     }
 
-
 P;
     /*** MAIN LINE */
     epsdraw_segline(fp, xltype, xlt, xlc, x1i, y1i, x2i, y2i);
 
     /*** BACK ARROW HEAD */
     if(x1i!=x1 || y1i!=y1) {
-        fprintf(fp, "%% back arrow head\n");
+        fprintf(fp, "%% back arrow head-main\n");
         fprintf(fp, "newpath\n");
+#if 0
         fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
             x1, y1, x1i, y1i);
+#endif
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            x1m, y1m, x1i, y1i);
     }
     if(xahpart & AR_BACK) {
         xdir = (int)(atan2((y1-y2),(x1-x2))/rf);
 P;
+        fprintf(fp, "%% back arrow head\n");
         epsdraw_arrowhead(fp, xahback, xdir, xlc, x1, y1);
     }
 
@@ -2294,15 +2323,20 @@ P;
 
     /*** FORE ARROW HEAD */
     if(x2i!=x2 || y2i!=y2) {
-        fprintf(fp, "%% fore arrow head\n");
+        fprintf(fp, "%% fore arrow head-main\n");
         fprintf(fp, "newpath\n");
+#if 0
         fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
             x2i, y2i, x2, y2);
+#endif
+        fprintf(fp, "%d %d moveto %d %d lineto stroke\n",
+            x2i, y2i, x2m, y2m);
 P;
     }
     if(xahpart & AR_FORE) {
         xdir = (int)(atan2((y2-y1),(x2-x1))/rf);
 P;
+        fprintf(fp, "%% fore arrow head\n");
         epsdraw_arrowhead(fp, xahfore, xdir, xlc, x2, y2);
     }
 
@@ -2311,6 +2345,18 @@ out:
     return 0;
 }
 
+
+int
+epsdraw_Xseglinearrow(FILE *fp,
+    int xox, int xoy, 
+    int x1, int y1, int x2, int y2,
+    int xltype, int xlt, int xlc,
+    int xahpart, int xahfore, int xahcent, int xahback)
+{
+    return epsdraw_Xseglinearrow_chop(fp, xox, xoy,
+        x1, y1, x2, y2, xltype, xlt, xlc,
+        xahpart, xahfore, xahcent, xahback, 0, 0);
+}
 
 
 int
@@ -11645,6 +11691,7 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
     int osx, int osy, int oex, int oey,
     ob *u, int opt)
 {
+    int ik;
     int mcx, mcy;
     int bcx, bcy;
 
@@ -11690,7 +11737,7 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
     }
 
     changecolor(fp, u->cob.outlinecolor);
-    changethick(fp, u->cob.outlinethick/2);
+    changethick(fp, u->cob.outlinethick/4);
     
     Echo("auxlineopt %p\n", u->cob.auxlineopt);
     if(u->cob.auxlineopt) {
@@ -11765,6 +11812,7 @@ skip_opt:
         break;
     case ALT_LINE:
     case ALT_ARROW:
+#if 0
         fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
             msx, msy, mex, mey);
         if(u->cob.arrowheadpart & AR_FORE) {
@@ -11775,6 +11823,23 @@ skip_opt:
             epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
                 sdir+180, u->cob.outlinecolor, msx, msy);
         }
+#endif
+
+#if 1
+P;
+        ik = epsdraw_Xseglinearrow_chop(fp,
+            0, 0,
+            msx, msy, mex, mey,
+            u->cob.outlinetype,
+            u->cob.outlinethick,
+            u->cob.outlinecolor,
+            u->cob.arrowheadpart,
+            u->cob.arrowforeheadtype,
+            u->cob.arrowcentheadtype,
+            u->cob.arrowbackheadtype,
+            u->cob.forechop, u->cob.backchop);
+#endif
+
         break;
     case ALT_NONE:
         /* nothing */
