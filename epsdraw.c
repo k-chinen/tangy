@@ -7655,60 +7655,6 @@ epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist)
     return 0;
 }
 
-#if 0
-int
-ss_strip(char *dst, int dlen, varray_t *ssar)
-{
-    int   i;
-    sstr *uu;
-    int   cc;
-    int   w;
-
-    dst[0] = '\0';
-    cc = 0;
-
-    for(i=0;i<ssar->use;i++) {
-        uu = (sstr*)ssar->slot[i];
-        if(uu && uu->ssval && *(uu->ssval) ) {
-            w = strlen(uu->ssval);
-#if 0
-Echo(" %2d: %3d '%s'\n", i, w, uu->ssval);
-#endif
-            if(cc+w+1<dlen-1) {
-                if(dst[0]) {
-                    strcat(dst, "/");
-                    cc += 1;
-                }
-                else {
-                }
-                strcat(dst, uu->ssval);
-                cc += w;
-            }
-            else {
-                return 1;
-            }
-        }
-    }
-
-    return 0;
-}
-
-int
-ss_dump(FILE *ofp, varray_t *ssar)
-{
-    int   i;
-    sstr *uu;
-
-    for(i=0;i<ssar->use;i++) {
-        uu = (sstr*)ssar->slot[i];
-        fprintf(ofp, "ss %2d: val '%s' opt %d\n",
-            i, uu->ssval, uu->ssopt);
-    }
-
-    return 0;
-}
-#endif
-
 int
 epsdraw_s2sstrbgX(FILE *fp, int x, int y, int wd, int ht,
         int al, int exof, int ro, int qof,

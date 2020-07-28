@@ -754,21 +754,6 @@ newnamespace_child(ns*pns)
 
 int hide_serial=1;
 
-#if 0
-int
-ss_sprintf(char*dst, int dlen, void* xv, int opt)
-{
-    int ik;
-    sstr *sv;
-
-    if(!xv) return -1;
-    sv = (sstr*)xv;
-    ik = sprintf(dst, "<'%s' %x>", sv->ssval, sv->ssopt);
-
-    return ik;
-}
-#endif
-
 int
 segop_sprintf(char*dst, int dlen, void* xv, int opt)
 {
