@@ -1222,3 +1222,29 @@ recalcsizeparam()
 
     return 0;
 }
+
+
+int
+auxlineparams_fprintf(FILE *fp, auxlineparams_t *ps, char *msg)
+{
+    if(!ps) {
+        return -1;
+    }
+    fprintf(fp, "ps %p; datasrc %p; phase %d; %s\n",
+        ps, ps->datasrc, ps->phase, msg ? msg : "none");
+    fprintf(fp, "  ar    %7d; chop %d, %d\n",
+        ps->ar, ps->chop_back, ps->chop_fore);
+    fprintf(fp, "  sdir %.2f %d ; ndir %.2f %d\n",
+        ps->sdir, ps->isdir, ps->ndir, ps->indir);
+    fprintf(fp, "  base  %7d,%-7d %7s %7s %7d,%-7d\n", 
+                    ps->bsx, ps->bsy, "", "", ps->bex, ps->bey);
+    fprintf(fp, "  ibase %7d,%-7d %7s %7s %7d,%-7d\n", 
+                    ps->bisx, ps->bisy, "", "", ps->biex, ps->biey);
+    fprintf(fp, "  main  %7d,%-7d %7d,%-7d %7d,%-7d\n", 
+                    ps->msx, ps->msy, ps->mcx, ps->mcy, ps->mex, ps->mey);
+    fprintf(fp, "  imain %7d,%-7d %7s %7s %7d,%-7d\n", 
+                    ps->misx, ps->misy, "", "", ps->miex, ps->miey);
+    fprintf(fp, "  out   %7d,%-7d %7s %7s %7d,%-7d\n",
+                    ps->osx, ps->osy, "", "", ps->oex, ps->oey);
+    return 0;
+}

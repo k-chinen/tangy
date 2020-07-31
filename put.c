@@ -260,6 +260,145 @@ find_to_last(ob *xob, int *riex, int *riey)
          *             baseline
          */
 
+
+int
+_solve_auxparams(ob* u, int bsx, int bsy, int bex, int bey, int opt)
+{
+    int ar;
+    double sdir;
+    double ndir; /* normal  direction */
+    int isdir;
+    int indir;
+    int auxdirgap;
+    auxlineparams_t *ap;
+
+    ap = (auxlineparams_t*)malloc(sizeof(auxlineparams_t));
+    if(ap) {
+        memset(ap, 0, sizeof(auxlineparams_t));
+    }
+#if 0
+    auxlineparams_fprintf(stdout, ap, "init");
+#endif
+
+    printf("%s: enter with %d,%d %d,%d opt %d\n",
+        __func__, bsx, bsy, bex, bey, opt);
+
+    /*
+     *           outline
+     * osx,osy  +........+  oex,oey
+     *          |auxline |
+     * msx,msy  +---->---+  mex,mey
+     *          |        |
+     * bsx,bsy  +--------+  bex,bey
+     *           baseline
+     */
+
+#if 0
+    int bsx, bsy, bex, bey;
+#endif
+    int bcx, bcy;
+    int msx, msy, mex, mey;
+    int mcx, mcy;
+    int osx, osy, oex, oey;
+    int ax, ay;
+
+
+P;
+#if 0
+fprintf(stderr, "#before Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
+#endif
+#if 0
+    Echo("Q oid %d ox,oy %d,%d ox,oy %d,%d fx,fy %d,%d dx,dy %d,%d\n",
+        u->oid, ox, oy, u->ox, u->oy, u->fx, u->fy,
+        u->dx, u->dy);
+#endif
+
+#if 0
+    /*
+     * to solve start pos from end post seems strange.
+     * but it is true. because to analyze from in segs is so difficult.
+     */
+    bex = ox+u->cx+u->fx;
+    bey = oy+u->cy+u->fy;
+    bsx = bex - u->dx;      
+    bsy = bey - u->dy;
+#endif
+
+    sdir = atan2(u->dy, u->dx);
+    ndir = sdir + M_PI/2.0;
+    isdir = (int)(sdir / rf);
+    indir = (int)(ndir / rf);
+
+    auxdirgap = (int)isdir;
+#if 0
+fprintf(fp, "%% isdir %d auxdirgap %d\n", isdir, auxdirgap);
+#endif
+
+    ar = u->cauxlinedistance;
+
+    ax = (int)((double)ar*cos(ndir));
+    ay = (int)((double)ar*sin(ndir));
+
+    msx = bsx + ax;
+    msy = bsy + ay;
+    mex = bex + ax;
+    mey = bey + ay;
+
+    mcx = (msx+mex)/2;
+    mcy = (msy+mey)/2;
+
+    bcx = (bsx+bex)/2;
+    bcy = (bsy+bey)/2;
+
+    osx = bsx + 2*ax;
+    osy = bsy + 2*ay;
+    oex = bex + 2*ax;
+    oey = bey + 2*ay;
+
+    Echo("Q oid %d dx,dy %d,%d -> sdir %.2f ndir %.2f indir %d\n",
+        u->oid, u->dx, u->dy,
+        sdir, ndir, indir);
+    Echo("Q oid %d indir %d ar %d -> ax,ay %d,%d\n",
+        u->oid, indir, ar, ax, ay);
+
+    /* */
+    ap->ar = ar;
+    ap->bsx = bsx;
+    ap->bsy = bsy;
+    ap->bex = bex;
+    ap->bey = bey;
+    ap->chop_back = 0;
+    ap->chop_fore = 0;
+    
+    ap->sdir = sdir;
+    ap->isdir = isdir;
+    ap->ndir = ndir;
+    ap->bcx = bcx;
+    ap->bcy = bcy;
+    ap->msx = msx;
+    ap->msy = msy;
+    ap->mex = mex;
+    ap->mey = mey;
+    ap->mcx = mcx;
+    ap->mcy = mcy;
+    ap->osx = osx;
+    ap->osy = osy;
+    ap->oex = oex;
+    ap->oey = oey;
+
+    ap->phase = 1;
+
+    ap->datasrc = (void*)u;
+#if 0
+    auxlineparams_fprintf(stdout, ap, "done");
+#endif
+    u->cob.auxlineparams = *ap;
+    auxlineparams_fprintf(stdout,
+        &(u->cob.auxlineparams), "done");
+
+    return 0;
+}
+
 int
 bbreconfirm_seg(ob *u, int sx, int sy, int ex, int ey,
     int *rlx, int *rby, int *rrx, int *rty)
@@ -1022,13 +1161,10 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
     Echo("MARK*oid %d (%d %d %d %d)\n",
         u->oid, *rlx, *rby, *rrx, *rty);
 #if 1
-
     if(u->type==CMD_AUXLINE) {
         bbreconfirm_seg(u, isx, isy, iex, iey, rlx, rby, rrx, rty);
         Echo("MARK#oid %d (%d %d %d %d)\n",
             u->oid, *rlx, *rby, *rrx, *rty);
-
-
     }
 #endif
 
@@ -1531,6 +1667,7 @@ putobj(ob *u, ns *xns, int *gdir)
     int    dir;
     int    re;
 
+
 #if 1
     if(u) {
         Echo("%s: oid %d type %s(%d)\n",
@@ -1792,6 +1929,10 @@ Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
 u->dx = miex - misx;
 u->dy = miey - misy;
 #endif
+
+            if(u->type==CMD_AUXLINE) {
+                _solve_auxparams(u, misx, misy, miex, miey, 0);
+            }
 
 #if 1
 Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",

@@ -444,6 +444,50 @@ extern apair_t objattr_ial[];
 
 
 
+/*
+ *           outline
+ * osx,osy  +........+  oex,oey
+ *          |auxline |
+ * msx,msy  +---->---+  mex,mey
+ *          |mcx,mcy |
+ * bsx,bsy  +--------+  bex,bey
+ *           baseline
+ */
+
+/*
+ *           outline
+ * osx,osy  +........+  oex,oey
+ *          |        |
+ *          +-x-->-x-+  mex,mey
+ *    misx,misy    miex,miey 
+ *          |        |
+ *          +-x----x-+
+ *    bisx,misy    biex,miey 
+ *           baseline
+ */
+
+typedef struct {
+    /* work */
+    int phase;
+    void *datasrc;
+
+    /* given */
+    int bsx, bsy, bex, bey;
+    int ar;
+    int chop_back, chop_fore;
+
+    /* result */
+    double sdir, ndir;
+    int isdir, indir;
+    int bcx, bcy;
+    int msx, msy, mex, mey;
+    int mcx, mcy;
+    int osx, osy, oex, oey;
+    int misx, misy, miex, miey;
+    int bisx, bisy, biex, biey;
+} auxlineparams_t;
+
+int auxlineparams_fprintf(FILE *fp, auxlineparams_t *ps, char *msg);
 
 
 
@@ -461,6 +505,8 @@ struct obattr {
     int   outlinetype;
     int   outlinethick;
     int   outlinethickmode;
+
+    auxlineparams_t auxlineparams;
 
     int   auxlinetype;
     int   auxlinedistance;

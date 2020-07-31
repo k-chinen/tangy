@@ -11684,16 +11684,21 @@ out:
     return 0;
 }
 
+
+
 int
-epsdraw_auxline(FILE *fp, int sdir, int ndir,
-    int bsx, int bsy, int bex, int bey,
-    int msx, int msy, int mex, int mey,
-    int osx, int osy, int oex, int oey,
-    ob *u, int opt)
+_epsdraw_auxline(FILE *fp, ob *u, int ox, int oy, int opt)
 {
+    auxlineparams_t *ap;
     int ik;
-    int mcx, mcy;
-    int bcx, bcy;
+
+    if(!u) {
+        return -1;
+    }
+    ap = &(u->cob.auxlineparams);
+    if(!ap) {
+        return -2;
+    }
 
     Echo("%s: oid %d type %s(%d)\n",
         __func__, u->oid, 
@@ -11704,12 +11709,9 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
         rassoc(auxlinetype_ial, u->cauxlinetype),
         u->cauxlinetype);
 
-    mcx = (msx + mex) / 2;
-    mcy = (msy + mey) / 2;
-    bcx = (bsx + bex) / 2;
-    bcy = (bsy + bey) / 2;
-
     fprintf(fp, "gsave\n");
+
+    fprintf(fp, "    %d %d translate\n", ox, oy); /* XXX */
 
     /* draw marks */
     if(opt) {
@@ -11717,21 +11719,21 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
 
         fprintf(fp, "    0 1 1 setrgbcolor\n");
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
-            bsx, bsy, bsx, bsy, objunit/10);
+            ap->bsx, ap->bsy, ap->bsx, ap->bsy, objunit/10);
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
-            bex, bey, bex, bey, objunit/10);
+            ap->bex, ap->bey, ap->bex, ap->bey, objunit/10);
 
         fprintf(fp, "    1 0 0 setrgbcolor\n");
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
-            msx, msy, msx, msy, objunit/10);
+           ap->msx,ap->msy,ap->msx,ap->msy, objunit/10);
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
-            mex, mey, mex, mey, objunit/10);
+           ap->mex,ap->mey,ap->mex,ap->mey, objunit/10);
 
         fprintf(fp, "    0 1 0 setrgbcolor\n");
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc stroke\n",
-            osx, osy, osx, osy, objunit/10);
+            ap->osx, ap->osy, ap->osx, ap->osy, objunit/10);
         fprintf(fp, "    newpath %d %d moveto %d %d %d 0 360 arc fill\n",
-            oex, oey, oex, oey, objunit/10);
+            ap->oex, ap->oey, ap->oex, ap->oey, objunit/10);
 
         fprintf(fp, "  grestore\n");
     }
@@ -11758,22 +11760,22 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
                 fprintf(fp, "  %% nline\n"); 
                 fprintf(fp, "  gsave\n");
                 fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
-                    bsx, bsy, osx, osy);
+                    ap->bsx, ap->bsy, ap->osx, ap->osy);
                 fprintf(fp, "    %d %d moveto %d %d lineto stroke\n",
-                    bex, bey, oex, oey);
+                    ap->bex, ap->bey, ap->oex, ap->oey);
                 fprintf(fp, "  grestore\n");
             }
 
             if(strcasecmp(token, "blinewrap")==0) {
-                mx = (int)((double)u->cob.auxlinedistance*cos((sdir+180)*rf));
-                my = (int)((double)u->cob.auxlinedistance*sin((sdir+180)*rf));
+                mx = (int)((double)u->cob.auxlinedistance*cos((ap->sdir+180)*rf));
+                my = (int)((double)u->cob.auxlinedistance*sin((ap->sdir+180)*rf));
 
                 fprintf(fp, "  %% blinewrap\n"); 
                 fprintf(fp, "  gsave\n");
                 fprintf(fp, "    %d %d moveto %d %d rlineto stroke\n",
-                    bsx, bsy, mx, my);
+                    ap->bsx, ap->bsy, mx, my);
                 fprintf(fp, "    %d %d moveto %d %d rlineto stroke\n",
-                    bex, bey, -mx, -my);
+                    ap->bex, ap->bey, -mx, -my);
                 fprintf(fp, "  grestore\n");
             }
 
@@ -11784,9 +11786,9 @@ epsdraw_auxline(FILE *fp, int sdir, int ndir,
                 fprintf(fp, "  %% basepoint\n"); 
                 fprintf(fp, "  gsave\n");
                 fprintf(fp, "    %d %d moveto %d %d %d 0 360 arc fill\n",
-                    bsx, bsy, bsx, bsy, mr);
+                    ap->bsx, ap->bsy, ap->bsx, ap->bsy, mr);
                 fprintf(fp, "    %d %d moveto %d %d %d 0 360 arc fill\n",
-                    bex, bey, bex, bey, mr);
+                    ap->bex, ap->bey, ap->bex, ap->bey, mr);
                 fprintf(fp, "  grestore\n");
             }
 
@@ -11801,35 +11803,23 @@ skip_opt:
     switch(u->cauxlinetype) {
     case ALT_BRACKET:
         fprintf(fp, "  %d %d moveto %d %d lineto %d %d lineto %d %d lineto stroke \n",
-            bsx, bsy, msx, msy, mex, mey, bex, bey);
+            ap->bsx, ap->bsy, ap->msx, ap->msy, ap->mex, ap->mey, ap->bex, ap->bey);
         break;
     case ALT_PAREN:
-            _bez_solid(fp, u, bsx, bsy, msx, msy, mex, mey, bex, bey);
+            _bez_solid(fp, u, ap->bsx, ap->bsy, ap->msx, ap->msy, ap->mex, ap->mey, ap->bex, ap->bey);
         break;
     case ALT_BRACE:
-            _bez_solid(fp, u, bsx, bsy, msx, msy, bcx, bcy, mcx, mcy);
-            _bez_solid(fp, u, mcx, mcy, bcx, bcy, mex, mey, bex, bey);
+            _bez_solid(fp, u, ap->bsx, ap->bsy, ap->msx, ap->msy, ap->bcx, ap->bcy, ap->mcx, ap->mcy);
+            _bez_solid(fp, u, ap->mcx, ap->mcy, ap->bcx, ap->bcy, ap->mex, ap->mey, ap->bex, ap->bey);
         break;
     case ALT_LINE:
     case ALT_ARROW:
-#if 0
-        fprintf(fp, "  %d %d moveto %d %d lineto stroke\n",
-            msx, msy, mex, mey);
-        if(u->cob.arrowheadpart & AR_FORE) {
-            epsdraw_arrowhead(fp, u->cob.arrowforeheadtype,
-                sdir, u->cob.outlinecolor, mex, mey);
-        }
-        if(u->cob.arrowheadpart & AR_BACK) {
-            epsdraw_arrowhead(fp, u->cob.arrowbackheadtype,
-                sdir+180, u->cob.outlinecolor, msx, msy);
-        }
-#endif
 
 #if 1
 P;
         ik = epsdraw_Xseglinearrow_chop(fp,
             0, 0,
-            msx, msy, mex, mey,
+            ap->msx, ap->msy, ap->mex, ap->mey,
             u->cob.outlinetype,
             u->cob.outlinethick,
             u->cob.outlinecolor,
@@ -11853,6 +11843,23 @@ P;
     return 0;
 }
 
+int
+Xepsdraw_auxline(FILE *fp, int ox, int oy, ob *u, int opt)
+{
+    auxlineparams_t *ap;
+    ap = &(u->cob.auxlineparams);
+
+#if 0
+    _epsdraw_auxline(fp, ap->isdir, ap->indir,
+        ap->bsx, ap->bsy, ap->bex, ap->bey+objunit/4,   /* XXX */
+        ap->msx, ap->msy, ap->mex, ap->mey,
+        ap->osx, ap->osy, ap->oex, ap->oey, 
+        u, 0);
+#endif
+    _epsdraw_auxline(fp, u, ox, oy, 0);
+
+    return 0;
+}
 
 int
 epsdraw_sep(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -12874,84 +12881,7 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 
     else
     if( u->type==CMD_AUXLINE ) {
-        int ar;
-        double ndir; /* normal  direction */
-        int isdir;
-        int indir;
-
-        /*
-         *           outline
-         * osx,osy  +........+  oex,oey
-         *          |auxline |
-         * msx,msy  +---->---+  mex,mey
-         *          |        |
-         * bsx,bsy  +--------+  bex,bey
-         *           baseline
-         */
-        int bsx, bsy, bex, bey;
-        int msx, msy, mex, mey;
-        int osx, osy, oex, oey;
-
-P;
-#if 0
-fprintf(stderr, "#before Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
-#endif
-        Echo("Q oid %d ox,oy %d,%d ox,oy %d,%d fx,fy %d,%d dx,dy %d,%d\n",
-            u->oid, ox, oy, u->ox, u->oy, u->fx, u->fy,
-            u->dx, u->dy);
-
-        /*
-         * to solve start pos from end post seems strange.
-         * but it is true. because to analyze from in segs is so difficult.
-         */
-#if 0
-        bsx = ox+u->cx+u->cox;
-        bsy = oy+u->cy+u->coy;
-#endif
-        bex = ox+u->cx+u->fx;
-        bey = oy+u->cy+u->fy;
-        bsx = bex - u->dx;      
-        bsy = bey - u->dy;
-
-        sdir = atan2(u->dy, u->dx);
-        ndir = sdir + M_PI/2.0;
-        isdir = (int)(sdir / rf);
-        indir = (int)(ndir / rf);
-
-        auxdirgap = (int)isdir;
-fprintf(fp, "%% isdir %d auxdirgap %d\n", isdir, auxdirgap);
-
-        ar = u->cauxlinedistance;
-
-        ax = (int)((double)ar*cos(ndir));
-        ay = (int)((double)ar*sin(ndir));
-
-        msx = bsx + ax;
-        msy = bsy + ay;
-        mex = bex + ax;
-        mey = bey + ay;
-
-        mcx = (msx+mex)/2;
-        mcy = (msy+mey)/2;
-
-        osx = bsx + 2*ax;
-        osy = bsy + 2*ay;
-        oex = bex + 2*ax;
-        oey = bey + 2*ay;
-
-        Echo("Q oid %d dx,dy %d,%d -> sdir %.2f ndir %.2f indir %d\n",
-            u->oid, u->dx, u->dy,
-            sdir, ndir, indir);
-        Echo("Q oid %d indir %d ar %d -> ax,ay %d,%d\n",
-            u->oid, indir, ar, ax, ay);
-
-        epsdraw_auxline(fp, isdir, indir,
-            bsx, bsy, bex, bey, msx, msy, mex, mey, osx, osy, oex, oey,
-            u, 0);
-
-#if 0
-fprintf(stderr, "#after  Zepsdraw_ulinearrow oid %d xdir %d\n", u->oid, *xdir);
-#endif
+        Xepsdraw_auxline(fp, ox, oy, u, 0);
     }
 
     else
@@ -13096,18 +13026,14 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
         }
 
         if(u->type==CMD_AUXLINE) {
-#if 1
-            epsdraw_sstrbgX(fp, mcx, mcy, u->wd, u->ht,
+            epsdraw_sstrbgX(fp, 
+                u->cob.auxlineparams.mcx + ox,
+                u->cob.auxlineparams.mcy + oy,
+                u->wd, u->ht,
                 u->cob.textalign, u->cob.textoffset,
-                u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
+                u->cob.rotateval + u->cob.textrotate +
+                    u->cob.auxlineparams.isdir, 0,
                 0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
-#endif
-#if 0
-            epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
-                u->cob.textalign, u->cob.textoffset,
-                u->cob.rotateval + u->cob.textrotate + auxdirgap, 0,
-                0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
-#endif
         }
         else {
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
