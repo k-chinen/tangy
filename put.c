@@ -280,8 +280,10 @@ _solve_auxparams(ob* u, int bsx, int bsy, int bex, int bey, int opt)
     auxlineparams_fprintf(stdout, ap, "init");
 #endif
 
+#if 0
     printf("%s: enter with %d,%d %d,%d opt %d\n",
         __func__, bsx, bsy, bex, bey, opt);
+#endif
 
     /*
      *           outline
@@ -393,8 +395,11 @@ fprintf(fp, "%% isdir %d auxdirgap %d\n", isdir, auxdirgap);
     auxlineparams_fprintf(stdout, ap, "done");
 #endif
     u->cob.auxlineparams = *ap;
+
+#if 0
     auxlineparams_fprintf(stdout,
         &(u->cob.auxlineparams), "done");
+#endif
 
     return 0;
 }

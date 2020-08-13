@@ -2262,8 +2262,8 @@ no_backhead:
 
     if(fchop>0) {
 P;
-        dx = bchop*cos((xdir+180)*rf);
-        dy = bchop*sin((xdir+180)*rf);
+        dx = fchop*cos((xdir+180)*rf);
+        dy = fchop*sin((xdir+180)*rf);
         x2 += dx;
         y2 += dy;
     }
@@ -11815,7 +11815,11 @@ skip_opt:
     case ALT_LINE:
     case ALT_ARROW:
 
-#if 1
+#if 0
+        auxlineparams_fprintf(stdout, ap, "draw!");
+        fprintf(stdout, "forechop %d backchop %d\n",
+            u->cob.forechop, u->cob.backchop);
+#endif
 P;
         ik = epsdraw_Xseglinearrow_chop(fp,
             0, 0,
@@ -11828,7 +11832,6 @@ P;
             u->cob.arrowcentheadtype,
             u->cob.arrowbackheadtype,
             u->cob.forechop, u->cob.backchop);
-#endif
 
         break;
     case ALT_NONE:
