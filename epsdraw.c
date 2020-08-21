@@ -9442,6 +9442,91 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
         MX(0, 0, 0);
     }
 
+
+    if(xu->cob.slittype==OA_HSLIT) {
+    /*        
+     * +-----------+ 
+     * |           |
+     * +-----------+ h2 80%
+     *             :
+     * +-----------+ h1 70%
+     * |     x    ||
+     * |          ||
+     * |          || 
+     * +-----------+
+     *
+     */
+    int w,h;
+    int h1, h2;
+    int g;
+    g = objunit/5;
+    h = objunit;
+    w = xu->wd;
+    h1= h*7/10;
+    h2= h*8/10;
+
+    fprintf(fp, "%% slit test\n");
+    fprintf(fp, "0 0 moveto\n");
+    fprintf(fp, "newpath\n");
+    fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
+    fprintf(fp, "%d 0 rlineto\n", w+g*2);
+    fprintf(fp, "0  %d rlineto\n", h1+g);
+    fprintf(fp, "%d 0 rlineto\n", -w-g*2);
+    fprintf(fp, "0  %d rlineto\n", -h1-g);
+    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "0  %d rlineto\n",  h+g*2);
+    fprintf(fp, "%d 0 rlineto\n", -w-g*2);
+    fprintf(fp, "0  %d rlineto\n", -(h-h2)-g);
+    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "clip\n");
+
+    }
+
+
+    if(xu->cob.slittype==OA_VSLIT) {
+    /*        w1  w2
+     *       70%  80%
+     * +-------+  +-+
+     * |       |  | |
+     * |     x |  | |
+     * |       |  | |
+     * +=======+..+-+
+     * 0%           100%
+     *              w
+     */
+    int w,h;
+    int w1, w2;
+    int g;
+    g = objunit/5;
+    h = objunit;
+    w = xu->wd;
+    w1= w*7/10;
+    w2= w*8/10;
+
+    fprintf(fp, "%% slit test\n");
+    fprintf(fp, "0 0 moveto\n");
+    fprintf(fp, "newpath\n");
+    fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
+    fprintf(fp, "%d 0 rlineto\n", w1+g);
+    fprintf(fp, "0  %d rlineto\n", h+g*2);
+    fprintf(fp, "%d 0 rlineto\n", -w1-g);
+    fprintf(fp, "0  %d rlineto\n", -h-g*2);
+    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "0  %d rlineto\n",  h+g*2);
+    fprintf(fp, "%d 0 rlineto\n", -(w-w2)-g);
+    fprintf(fp, "0  %d rlineto\n", -h-g*2);
+    fprintf(fp, "clip\n");
+
+    }
+
+
+
+
+
+
+
+
+
     /*****
      ***** SHADE
      *****/

@@ -334,6 +334,10 @@ extern apair_t lo_ial[];
 #define OA_GIMARGIN         (78)
 #define OA_ROTATE           (79)
 
+#define OA_NOSLIT           (80)
+#define OA_VSLIT            (81)
+#define OA_HSLIT            (82)
+
 #define OA_DECO             (90)
 #define OA_DECOCOLOR        (91)
 
@@ -540,6 +544,8 @@ struct obattr {
     int   hatchthick;
     int   hatchpitch;
 #endif
+
+    int   slittype;
 
     int   imargin;      /* inside margin */
     int   gimargin;     /* group inside margin */

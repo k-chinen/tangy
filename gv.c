@@ -396,6 +396,10 @@ apair_t objattr_ial[] = {
     {"deco",                OA_DECO},
     {"decocolor",           OA_DECOCOLOR},
 
+    {"noslit",              OA_NOSLIT},
+    {"vslit",               OA_VSLIT},
+    {"hslit",               OA_HSLIT},
+
     {"at",                  OA_AT},
     {"with",                OA_WITH},
     {"from",                OA_FROM},

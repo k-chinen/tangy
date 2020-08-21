@@ -966,6 +966,10 @@ P;
     ONSET(OA_HOLLOW,        hollow);
     ONSET(OA_SHADOW,        shadow);
 
+    if(oak==OA_NOSLIT) {    rob->cob.slittype = OA_NOSLIT; };
+    if(oak==OA_HSLIT) {     rob->cob.slittype = OA_HSLIT; };
+    if(oak==OA_VSLIT) {     rob->cob.slittype = OA_VSLIT; };
+
     AISET(OA_LINKSTYLE, ls_ial, linkstyle);
     SADD(OA_LINKMAP,        linkmap);
 
