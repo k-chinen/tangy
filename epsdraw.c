@@ -9474,7 +9474,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     h1= h*7/10;
     h2= h*8/10;
 
-    fprintf(fp, "%% slit test\n");
+    fprintf(fp, "%% hslit\n");
     fprintf(fp, "0 0 moveto\n");
     fprintf(fp, "newpath\n");
     fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
@@ -9490,7 +9490,6 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     fprintf(fp, "clip\n");
 
     }
-
 
     if(xu->cob.slittype==OA_VSLIT) {
     /*        w1  w2
@@ -9512,7 +9511,7 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     w1= w*7/10;
     w2= w*8/10;
 
-    fprintf(fp, "%% slit test\n");
+    fprintf(fp, "%% vslit\n");
     fprintf(fp, "0 0 moveto\n");
     fprintf(fp, "newpath\n");
     fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
@@ -9524,6 +9523,62 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     fprintf(fp, "0  %d rlineto\n",  h+g*2);
     fprintf(fp, "%d 0 rlineto\n", -(w-w2)-g);
     fprintf(fp, "0  %d rlineto\n", -h-g*2);
+    fprintf(fp, "clip\n");
+
+    }
+
+    if(xu->cob.slittype==OA_VWSLIT) {
+    /*        w1  w2
+     *       70%  80%
+     * +-------+  +-+
+     * |       |  | |
+     * |     x |  | |
+     * |       |  | |
+     * +=======+..+-+
+     * 0%           100%
+     *              w
+     */
+    int w,h;
+    int w1, w2;
+    int g;
+    g = objunit/5;
+    h = objunit;
+    w = xu->wd;
+#if 0
+    w1= w*7/10;
+    w2= w*8/10;
+#endif
+#if 0
+    w1= w*1/2-h/20;
+    w2= w*1/2+h/20;
+#endif
+#if 1
+    w1= w*3/4-h/20;
+    w2= w*3/4+h/20;
+#endif
+
+    fprintf(fp, "%% vwslit\n");
+    fprintf(fp, "0 0 moveto\n");
+    fprintf(fp, "newpath\n");
+    fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
+    fprintf(fp, "%d 0 rlineto\n", w1+g);
+    fprintf(fp, "0  %d rlineto\n", g);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/10, 2*h/10,  h/10, 3*h/10, 0, 5*h/10);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/10, 2*h/10, -h/10, 3*h/10, 0, 5*h/10);
+    fprintf(fp, "0  %d rlineto\n", g);
+    fprintf(fp, "%d 0 rlineto\n", -w1-g);
+    fprintf(fp, "0  %d rlineto\n", -h-g*2);
+    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "0  %d rlineto\n",  h+g*2);
+    fprintf(fp, "%d 0 rlineto\n", -(w-w2)-g);
+    fprintf(fp, "0  %d rlineto\n",  -g);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/10, -2*h/10, -h/10, -3*h/10, 0, -5*h/10);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/10, -2*h/10,  h/10, -3*h/10, 0, -5*h/10);
+    fprintf(fp, "0  %d rlineto\n",  -g);
     fprintf(fp, "clip\n");
 
     }

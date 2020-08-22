@@ -350,6 +350,7 @@ extern apair_t lo_ial[];
 #define OA_NOSLIT           (80)
 #define OA_VSLIT            (81)
 #define OA_HSLIT            (82)
+#define OA_VWSLIT           (83)
 
 #define OA_DECO             (90)
 #define OA_DECOCOLOR        (91)
