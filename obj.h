@@ -245,7 +245,16 @@ extern apair_t cmd_ial[];
 #define PO_WI               (151)
 #define PO_WO               (152)
 
-#define PO_MAX              (57)
+#define PO_NI               (211)
+#define PO_NO               (212)
+#define PO_SI               (221)
+#define PO_SO               (222)
+#define PO_CN               (231)
+#define PO_CS               (232)
+#define PO_CNO              (233)
+#define PO_CSO              (234)
+
+#define PO_MAX              (255)
 
 extern apair_t pos_ial[];
 
@@ -314,9 +323,13 @@ extern apair_t lo_ial[];
 
 #define OA_TEXTCOLOR        (31)
 #define OA_TEXTBGCOLOR      (32)
-#define OA_TEXTALIGN        (33)
-#define OA_TEXTOFFSET       (34)
-#define OA_TEXTROTATE       (35)
+#define OA_TEXTROTATE       (33)
+#define OA_TEXTPOSITION     (35)
+#if 0
+#define OA_TEXTOFFSET       (36)
+#endif
+#define OA_TEXTHOFFSET      (37)
+#define OA_TEXTVOFFSET      (38)
 
 #define OA_WIDTH            (41)
 #define OA_HEIGHT           (42)
@@ -575,8 +588,9 @@ struct obattr {
     varray_t *ssar;         /* surface string ; text */
     int   textcolor;
     int   textbgcolor;
-    int   textalign;
-    int   textoffset;
+    int   textposition;
+    int   texthoffset;
+    int   textvoffset;
     int   textrotate;
 
     char  *portstr;

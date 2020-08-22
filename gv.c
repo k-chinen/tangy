@@ -304,6 +304,7 @@ apair_t pos_ial[] = {
     {"WIC",                 PO_WIC},
     {"WIR",                 PO_WIR},
 
+    /* text align/position */
     {"EI",                  PO_EI},
     {"EO",                  PO_EO},
     {"WI",                  PO_WI},
@@ -312,6 +313,15 @@ apair_t pos_ial[] = {
     {"CEO",                 PO_CEO},
     {"CW",                  PO_CW},
     {"CWO",                 PO_CWO},
+
+    {"NI",                  PO_NI},
+    {"NO",                  PO_NO},
+    {"SI",                  PO_SI},
+    {"SO",                  PO_SO},
+    {"CS",                  PO_CS},
+    {"CN",                  PO_CN},
+    {"CSO",                 PO_CSO},
+    {"CNO",                 PO_CNO},
 
     {NULL,                  -1},
 };
@@ -370,8 +380,11 @@ apair_t objattr_ial[] = {
     {"hatchpitch",          OA_HATCHPITCH},
     {"textcolor",           OA_TEXTCOLOR},
     {"textbgcolor",         OA_TEXTBGCOLOR},
-    {"textalign",           OA_TEXTALIGN},
-    {"textoffset",          OA_TEXTOFFSET},
+    {"textalign",           OA_TEXTPOSITION},   /* backword compatible */
+    {"textposition",        OA_TEXTPOSITION},
+    {"textoffset",          OA_TEXTHOFFSET},
+    {"texthoffset",         OA_TEXTHOFFSET},
+    {"textvoffset",         OA_TEXTVOFFSET},
 
     {"linkstyle",           OA_LINKSTYLE},
     {"linkmap",             OA_LINKMAP},

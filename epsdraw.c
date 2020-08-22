@@ -7703,7 +7703,7 @@ epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist)
 
 int
 epsdraw_s2sstrbgX(FILE *fp, int x, int y, int wd, int ht,
-        int al, int exof, int ro, int qof,
+        int al, int exhof, int exvof, int ro, int qhof, int qvof,
         int bgshape, int qbgmargin, int fgcolor, int bgcolor,
         char *src, int ugjust)
 {
@@ -7789,7 +7789,7 @@ fprintf(stderr, "src |%s|\n", src);
         }
 
 
-        ik = epsdraw_sstrbgX(fp, x, y, wd, ht, al, exof, ro, qof,
+        ik = epsdraw_sstrbgX(fp, x, y, wd, ht, al, exhof, exvof, ro, qhof, qvof,
             bgshape, qbgmargin, fgcolor, bgcolor, xar, ugjust);
     }
     else {
@@ -7802,35 +7802,9 @@ fprintf(stderr, "src |%s|\n", src);
 #define MJ  {fprintf(stderr, "MJ %d i %d justify %d\n", \
         __LINE__, i, justify);}
 
-
-#if 0
-char*
-resolv_font(int xmode, int xface)
-{
-    char *rv;
-    apair_t *ls;
-
-    rv = NULL;
-    if(xmode==FM_ASCII) {
-        ls = ff_act_ial;
-    }
-    else {
-        ls = ff_actk_ial;
-    }
-    rv = rassoc(ls, xface);
-
-#if 0
-    Echo("%s: xmode %s(%d) xface %s(%d) -> rv %s\n", __func__,
-        rassoc(fm_ial, xmode), xmode,
-        rassoc(ff_ial, xface),  xface, rv);
-#endif
-    return rv;
-}
-#endif
-
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
-        int al, int exof, int ro, int qof,
+        int pos, int exhof, int exvof, int ro, int qhof, int qvof,
         int bgshape, int qbgmargin, int fgcolor, int bgcolor,
         varray_t *ssar, int ugjust)
 {
@@ -7869,14 +7843,17 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
     char    mcpart[BUFSIZ];
     int     mcar[BUFSIZ];
     int     gjust;
-    int     imof;
-    int     offset;
+    int     imhof;
+    int     imvof;
+    int     hoffset;
+    int     voffset;
     int     jsar[BUFSIZ];
     
     if(!ssar) {
         E;
         return -1;
     }
+
 
     memset(jsar, 0, sizeof(jsar));
 
@@ -7893,8 +7870,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
 #endif
 
 #if 1
-    Echo("%s: x,y %d,%d wd,ht %d,%d al %d exof %d ro %d '%s' ugj %d\n",
-        __func__, x, y, wd, ht, al, exof, ro, mcontall, ugjust);
+    Echo("%s: x,y %d,%d wd,ht %d,%d pos %d exhof %d ro %d '%s' ugj %d\n",
+        __func__, x, y, wd, ht, pos, exhof, ro, mcontall, ugjust);
 #endif
 
 #if 0
@@ -7923,8 +7900,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
     py = fht;
     rh = ht-(n*py+bgmargin*2);
 
-    fprintf(fp, "%%  fht %d, ht %d, n %d, rh %d, py %d\n",
-        fht, ht, n, rh, py);
+    fprintf(fp, "%%  fht %d, ht %d, n %d, rh %d, py %d, bgmargin %d\n",
+        fht, ht, n, rh, py, bgmargin);
 
     Echo("ht %d use %d -> py %d\n", 
         ht, ssar->use, py);
@@ -7933,39 +7910,67 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
 fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
 #endif
 
+    imhof = 0;
+    imvof = 0;
+    gjust = SJ_CENTER;
+
     if(ugjust<0) {
-        switch(al) {
-        case PO_WEST:   gjust = SJ_LEFT;    imof = -wd/2;               break;
-        case PO_WI:     gjust = SJ_LEFT;    imof = -wd/2 + 2*bgmargin;  break;
-        case PO_WO:     gjust = SJ_RIGHT;   imof = -wd/2 - 2*bgmargin;  break;
-        case PO_EAST:   gjust = SJ_RIGHT;   imof = wd/2;                break;
-        case PO_EI:     gjust = SJ_RIGHT;   imof = wd/2 - 2*bgmargin;   break;
-        case PO_EO:     gjust = SJ_LEFT;    imof = wd/2 + 2*bgmargin;   break;
-        case PO_CE:     gjust = SJ_LEFT;    imof = 0;                   break;
-        case PO_CEO:    gjust = SJ_LEFT;    imof = 0 + 2*bgmargin;      break;
-        case PO_CW:     gjust = SJ_RIGHT;   imof = 0;                   break;
-        case PO_CWO:    gjust = SJ_RIGHT;   imof = 0 - 2*bgmargin;      break;
+        switch(pos) {
+        case PO_WEST:   gjust = SJ_LEFT;    imhof = -wd/2;               break;
+        case PO_WI:     gjust = SJ_LEFT;    imhof = -wd/2 + 2*bgmargin;  break;
+        case PO_WO:     gjust = SJ_RIGHT;   imhof = -wd/2 - 2*bgmargin;  break;
+        case PO_EAST:   gjust = SJ_RIGHT;   imhof = wd/2;                break;
+        case PO_EI:     gjust = SJ_RIGHT;   imhof = wd/2 - 2*bgmargin;   break;
+        case PO_EO:     gjust = SJ_LEFT;    imhof = wd/2 + 2*bgmargin;   break;
+        case PO_CE:     gjust = SJ_LEFT;    imhof = 0;                   break;
+        case PO_CEO:    gjust = SJ_LEFT;    imhof = 0 + 2*bgmargin;      break;
+        case PO_CW:     gjust = SJ_RIGHT;   imhof = 0;                   break;
+        case PO_CWO:    gjust = SJ_RIGHT;   imhof = 0 - 2*bgmargin;      break;
+
+        case PO_NORTH:  imvof =  ht/2 - py/2;               break;
+        case PO_NI:     imvof =  ht/2 - py/2 - 2*bgmargin;  break;
+        case PO_NO:     imvof =  ht/2 + py/2 + 2*bgmargin;  break;
+
+        case PO_SOUTH:  imvof = -ht/2 + py/2;               break;
+        case PO_SI:     imvof = -ht/2 + py/2 + 2*bgmargin;  break;
+        case PO_SO:     imvof = -ht/2 - py/2 - 2*bgmargin;  break;
+
+        case PO_CN:     imvof =  py/2;                      break;
+        case PO_CNO:    imvof =  py/2 + 2*bgmargin;         break;
+        case PO_CS:     imvof = -py/2;                      break;
+        case PO_CSO:    imvof = -py/2 - 2*bgmargin;         break;
+
+#if 0
         default:
-                        gjust = SJ_CENTER;  imof = 0;                   break;
+                        gjust = SJ_CENTER;  imhof = 0;                   break;
+#endif
         }
     }
     else {
         gjust = ugjust;
-        imof  = 0;
+        imhof  = 0;
     }
 
-    offset = exof + imof;
+    hoffset = exhof + imhof;
+    voffset = exvof + imvof;
 
-    fprintf(fp, "%% ugjust %d, al %d exof %d qof %d -> gjust %d imoff %d offset %d\n",
-        ugjust, al, exof, qof, gjust, imof, offset);
+    fprintf(fp,
+    "%% ugjust %d, pos %d exhof %d qhof %d -> gjust %d imhoff %d hoffset %d\n",
+        ugjust, pos, exhof, qhof, gjust, imhof, hoffset);
+    fprintf(fp,
+    "%% ugjust %d, pos %d exvof %d qvof %d -> gjust %d imvoff %d voffset %d\n",
+        ugjust, pos, exvof, qvof, gjust, imvof, voffset);
 
 
     fprintf(fp, "gsave %% for sstr\n");
-    fprintf(fp, "  %d %d translate\n", x, y);
-    fprintf(fp, "  %d %d translate\n", offset, 0);
+    fprintf(fp, "  %d %d translate%% xy\n", x, y);
+    fprintf(fp, "  %d %d translate%% hvoff\n", hoffset, voffset);
     fprintf(fp, "  %d rotate\n", ro);
-    if(qof!=0) {
-        fprintf(fp, "  %d %d translate\n", qof, 0);
+    if(qhof!=0) {
+        fprintf(fp, "  %d %d translate\n", qhof, 0);
+    }
+    if(qvof!=0) {
+        fprintf(fp, "  %d %d translate\n", 0, qvof);
     }
 
     if(text_mode) {
@@ -7988,7 +7993,7 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
         fprintf(fp, "  grestore %% textmode\n");
     }
 
-    fprintf(fp, "  %% text offset\n");
+    fprintf(fp, "  %% text voffset\n");
 #if 0
     fprintf(fp, "  %d %d translate\n", 0, ht/2-rh/2);
 #endif
@@ -8295,8 +8300,13 @@ Echo("   setfont!\n");
             fprintf(fp, "      gsave %% textbg\n");
             changecolor(fp, bgcolor);
 
+#if 0
             fprintf(fp, "        0 %d neg sstrw %d %d mrboxfill\n",
                 pyb, pyb+afhmax, bgmargin);
+#else
+            fprintf(fp, "        0 %d neg sstrw %d %d mrboxfill\n",
+                pyb, afhmax, bgmargin);
+#endif
 
 #if 0
             MTF(1, 0, afhmax, 0);
@@ -8659,7 +8669,6 @@ skip_label:
 
     return 0;
 }
-
 
 
 
@@ -13118,15 +13127,15 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
                 u->cob.auxlineparams.mcx + ox,
                 u->cob.auxlineparams.mcy + oy,
                 u->wd, u->ht,
-                u->cob.textalign, u->cob.textoffset,
+                u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
                 u->cob.rotateval + u->cob.textrotate +
-                    u->cob.auxlineparams.isdir, 0,
+                    u->cob.auxlineparams.isdir, 0, 0,
                 0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
         }
         else {
             epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
-                u->cob.textalign, u->cob.textoffset,
-                u->cob.rotateval + u->cob.textrotate, 0,
+                u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
+                u->cob.rotateval + u->cob.textrotate, 0, 0,
                 0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
         }
 

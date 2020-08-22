@@ -960,8 +960,9 @@ P;
     ISET(OA_TEXTCOLOR,      textcolor);
     ISET(OA_TEXTBGCOLOR,    textbgcolor);
     ISET(OA_TEXTROTATE,     textrotate);
-    AISETXD(OA_TEXTALIGN,  pos_ial, textalign, PO_CENTER);
-    ISET(OA_TEXTOFFSET,    textoffset);
+    AISETXD(OA_TEXTPOSITION,  pos_ial, textposition, PO_CENTER);
+    ISET(OA_TEXTHOFFSET,    texthoffset);
+    ISET(OA_TEXTVOFFSET,    textvoffset);
 
     ONSET(OA_HOLLOW,        hollow);
     ONSET(OA_SHADOW,        shadow);
@@ -1313,8 +1314,9 @@ parseobj(char *p)
 #endif
     nob->cob.textcolor      = def_fgcolor;
     nob->cob.textbgcolor    = def_bgcolor;
-    nob->cob.textalign      = PO_CENTER;
-    nob->cob.textoffset     = 0;
+    nob->cob.textposition   = PO_CENTER;
+    nob->cob.texthoffset    = 0;
+    nob->cob.textvoffset    = 0;
     nob->cob.textrotate     = 0;
     nob->cob.decocolor      = -1;
 
