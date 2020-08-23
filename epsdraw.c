@@ -9544,18 +9544,8 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     g = objunit/5;
     h = objunit;
     w = xu->wd;
-#if 0
-    w1= w*7/10;
-    w2= w*8/10;
-#endif
-#if 0
-    w1= w*1/2-h/20;
-    w2= w*1/2+h/20;
-#endif
-#if 1
-    w1= w*3/4-h/20;
-    w2= w*3/4+h/20;
-#endif
+    w1= w*3/4-h/15;
+    w2= w*3/4+h/15;
 
     fprintf(fp, "%% vwslit\n");
     fprintf(fp, "0 0 moveto\n");
@@ -9563,10 +9553,34 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
     fprintf(fp, "%d 0 rlineto\n", w1+g);
     fprintf(fp, "0  %d rlineto\n", g);
+#if 0
+    /* 1.0T */
     fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
          h/10, 2*h/10,  h/10, 3*h/10, 0, 5*h/10);
     fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
         -h/10, 2*h/10, -h/10, 3*h/10, 0, 5*h/10);
+#endif
+#if 0
+    /* 1.5T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/9, h/9, -h/9, 2*h/9, 0, 3*h/9);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/9, h/9,  h/9, 2*h/9, 0, 3*h/9);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/9, h/9, -h/9, 2*h/9, 0, 3*h/9);
+#endif
+#if 1
+    /* 2.0T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/12, h/12,  h/12, 2*h/12, 0, 3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/12, h/12, -h/12, 2*h/12, 0, 3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/12, h/12,  h/12, 2*h/12, 0, 3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/12, h/12, -h/12, 2*h/12, 0, 3*h/12);
+#endif
+
     fprintf(fp, "0  %d rlineto\n", g);
     fprintf(fp, "%d 0 rlineto\n", -w1-g);
     fprintf(fp, "0  %d rlineto\n", -h-g*2);
@@ -9574,11 +9588,38 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     fprintf(fp, "0  %d rlineto\n",  h+g*2);
     fprintf(fp, "%d 0 rlineto\n", -(w-w2)-g);
     fprintf(fp, "0  %d rlineto\n",  -g);
+#if 0
+    /* 1.0T */
     fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
         -h/10, -2*h/10, -h/10, -3*h/10, 0, -5*h/10);
     fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
          h/10, -2*h/10,  h/10, -3*h/10, 0, -5*h/10);
+#endif
+#if 0
+    /* 1.5T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/9, -h/9, -h/9, -2*h/9, 0, -3*h/9);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/9, -h/9,  h/9, -2*h/9, 0, -3*h/9);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/9, -h/9, -h/9, -2*h/9, 0, -3*h/9);
+#endif
+#if 1
+    /* 2.0T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/12, -h/12, -h/12, -2*h/12, 0, -3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/12, -h/12,  h/12, -2*h/12, 0, -3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -h/12, -h/12, -h/12, -2*h/12, 0, -3*h/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         h/12, -h/12,  h/12, -2*h/12, 0, -3*h/12);
+#endif
+
     fprintf(fp, "0  %d rlineto\n",  -g);
+#if 0
+    fprintf(fp, "stroke\n");
+#endif
     fprintf(fp, "clip\n");
 
     }
