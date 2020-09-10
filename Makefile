@@ -1,7 +1,7 @@
 ### 
 ### temporary Makefile for tangy
 ###
-CFLAGS=-g -O0 -Wall
+CFLAGS=-g -O0 #-Wall
 
 OBJS= alist.o varray.o vdict.o word.o \
    tx.o sstr.o qbb.o bez.o color.o \

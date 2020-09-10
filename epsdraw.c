@@ -9375,6 +9375,78 @@ P;
     return 0;
 }
 
+int
+mkpath_parallelogram(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+#if 0
+    if(rad<=0) {
+        path_regsegmoveto(sar,  -wd/2, -ht/2);
+        path_regsegrlineto(sar,    wd,     0);
+        path_regsegrlineto(sar,     0,    ht);
+        path_regsegrlineto(sar,   -wd,     0);
+        path_regsegrlineto(sar,     0,   -ht);
+    }
+    else {
+        path_regsegmoveto(sar,  -wd/2+rad,        -ht/2);
+        path_regsegforward(sar,  wd-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  ht-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  wd-2*rad);
+        path_regsegarc(sar,      rad,   90);
+        path_regsegforward(sar,  ht-2*rad);
+        path_regsegarc(sar,      rad,   90);
+    }
+#endif
+    path_regsegmoveto(sar,  -wd/2, -ht/2);
+    path_regsegrlineto(sar,    wd-ht/2,     0);
+    path_regsegrlineto(sar,     ht/2,    ht);
+    path_regsegrlineto(sar,   -(wd-ht/2),     0);
+    path_regsegrlineto(sar,     -ht/2,   -ht);
+
+    path_regsegclose(sar);
+
+    return 0;
+}
+
+
+int
+mkpath_Rparallelogram(varray_t *sar, int wd, int ht, int rad)
+{
+P;
+#if 0
+    if(rad<=0) {
+        path_regsegmoveto(sar,   wd/2, -ht/2);
+        path_regsegrlineto(sar,   -wd,     0);
+        path_regsegrlineto(sar,     0,    ht);
+        path_regsegrlineto(sar,    wd,     0);
+        path_regsegrlineto(sar,     0,   -ht);
+    }
+    else {
+        path_regsegmoveto(sar,  -wd/2+rad, -ht/2);
+        path_regsegdir(sar,     180);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, ht-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, wd-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, ht-2*rad);
+        path_regsegarcn(sar,    rad,    90);
+        path_regsegforward(sar, wd-2*rad);
+    }
+#endif
+    path_regsegmoveto(sar,  wd/2-ht/2, -ht/2);
+    path_regsegrlineto(sar,    -(wd-ht/2),     0);
+    path_regsegrlineto(sar,     ht/2,    ht);
+    path_regsegrlineto(sar,   (wd-ht/2),     0);
+    path_regsegrlineto(sar,     -ht/2,   -ht);
+
+    path_regsegclose(sar);
+
+    return 0;
+}
+
 
 int
 epsdraw_bodyX(FILE *fp, int xox, int xoy, ob *xu, ns *xns)
@@ -9457,6 +9529,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     case CMD_PIPE:
         ik = mkpath_pipe(xu->cob.segar,  awd, aht, xu->cob.rad);
         ik = mkpath_Rpipe(xu->cob.seghar, awd, aht, xu->cob.rad);
+        break;
+    case CMD_PARALLELOGRAM:
+        ik = mkpath_parallelogram(xu->cob.segar, awd, aht, xu->cob.rad);
+        ik = mkpath_Rparallelogram(xu->cob.seghar, awd, aht, xu->cob.rad);
         break;
     default:
         fprintf(fp, "%% unknown type '%s'(%d)\n",
@@ -13263,7 +13339,8 @@ fprintf(stderr, "aw %d ah %d\n", aw, ah);
         u->type==CMD_ELLIPSE ||
         u->type==CMD_PAPER || u->type==CMD_CARD || u->type==CMD_DIAMOND ||
         u->type==CMD_HOUSE || u->type==CMD_POLYGON || u->type==CMD_GEAR ||
-        u->type==CMD_DRUM  || u->type==CMD_PIPE) {
+        u->type==CMD_DRUM  || u->type==CMD_PIPE ||
+        u->type==CMD_PARALLELOGRAM) {
         epsdraw_bodyX(fp, ox, oy, u, xns);
     }
     else {

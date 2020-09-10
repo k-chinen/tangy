@@ -61,6 +61,7 @@
 #define CMD_DIAMOND     (54)
 #define CMD_HOUSE       (55)
 #define CMD_CLOUD       (60)
+#define CMD_PARALLELOGRAM (71)
 
 #define CMD_LINE        (101)
 #define CMD_ARROW       (103)
@@ -156,6 +157,7 @@ extern apair_t cmd_ial[];
      (x)==CMD_DOTS||(x)==CMD_ULINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
      (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
      (x)==CMD_POLYGON||(x)==CMD_POINT||(x)==CMD_GEAR|| \
+     (x)==CMD_PARALLELOGRAM|| \
      (x)==CMD_SEP||(x)==CMD_LPAREN||(x)==CMD_RPAREN|| \
      (x)==CMD_LBRACKET||(x)==CMD_RBRACKET|| \
      (x)==CMD_LBRACE||(x)==CMD_RBRACE|| \
@@ -177,6 +179,7 @@ extern apair_t cmd_ial[];
  (x)==CMD_POLYGON||(x)==CMD_ULINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
  (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||(x)==CMD_GEAR||\
+ (x)==CMD_PARALLELOGRAM|| \
  (x)==CMD_LINE||(x)==CMD_ARROW||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||\
  (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\

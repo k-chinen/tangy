@@ -39,6 +39,8 @@ apair_t cmd_ial[] = {
     {"circle",          CMD_CIRCLE},
     {"ellipse",         CMD_ELLIPSE},
     {"polygon",         CMD_POLYGON},
+    {"parallelogram",   CMD_PARALLELOGRAM},
+
     {"uline",           CMD_ULINE},
     {"line",            CMD_LINE},
     {"arrow",           CMD_ARROW},

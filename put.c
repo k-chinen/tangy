@@ -1643,6 +1643,7 @@ insboxpath(varray_t *xar, int xwd, int xht)
  /*
   * name    size        description
   *-----
+  * WWO     2.0  x 1.0  wide wide
   * WO      1.5  x 1.0  wide
   * RO      1.0  x 1.0  square
   * NO      0.5  x 1.0  narrow
@@ -1655,6 +1656,7 @@ insboxpath(varray_t *xar, int xwd, int xht)
   */
  
 
+#define WWO     {wd = objunit*2;    ht = objunit;   }
 #define WO      {wd = objunit*3/2;  ht = objunit;   }
 #define RO      {wd = objunit;      ht = objunit;   }
 #define NO      {wd = objunit/2;    ht = objunit;   }
@@ -1771,6 +1773,8 @@ P;
     case CMD_POINT:     SO;     break;
     case CMD_POLYGON:   RO;     break;
     case CMD_GEAR:      RO;     break;
+
+    case CMD_PARALLELOGRAM:       WWO;     break;
 
 #if 0
     case CMD_DMY1:      WO;     break;
