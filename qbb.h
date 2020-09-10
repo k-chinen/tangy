@@ -24,6 +24,7 @@ typedef struct {
 int qbb_reset(qbb_t *qb);
 qbb_t *qbb_new();
 int qbb_setbb(qbb_t *qb, int x1, int y1, int x2, int y2);
+int qbb_shift(qbb_t *qb, int mx, int my);
 int qbb_fprint(FILE *fp, qbb_t *qb);
 int qbb_mark(qbb_t *qb, int tx, int ty);
 int qbb_getcenter(qbb_t *qb, int *rx, int *ry);

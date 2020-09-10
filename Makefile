@@ -1,7 +1,7 @@
 ### 
 ### temporary Makefile for tangy
 ###
-CFLAGS=-g -O0
+CFLAGS=-g -O0 -Wall
 
 OBJS= alist.o varray.o vdict.o word.o \
    tx.o sstr.o qbb.o bez.o color.o \
@@ -27,7 +27,7 @@ chs.o: a.h chas.h gv.h notefile.h obj.h seg.h
 color.o: color.h varray.h 
 epsdraw.o: a.h alist.h bez.h chas.h epsdraw.h font.h gv.h notefile.h \
     obj.h put.h qbb.h seg.h sstr.h tx.h vdict.h word.h xcur.h xlink.c \
-    xns.h 
+    xns.h sbb.c
 epsparse.o: qbb.h word.h 
 finalize.o: a.h alist.h chas.h gv.h notefile.h obj.h seg.h 
 font.o: alist.h font.h word.h 

@@ -7802,6 +7802,10 @@ fprintf(stderr, "src |%s|\n", src);
 #define MJ  {fprintf(stderr, "MJ %d i %d justify %d\n", \
         __LINE__, i, justify);}
 
+
+#include "sbb.c"
+
+
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
         int pos, int exhof, int exvof, int ro, int qhof, int qvof,
@@ -7848,6 +7852,8 @@ epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
     int     hoffset;
     int     voffset;
     int     jsar[BUFSIZ];
+
+    int lbg_h, lbg_b, lbg_t;
     
     if(!ssar) {
         E;
@@ -7964,6 +7970,28 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
 
     fprintf(fp, "gsave %% for sstr\n");
     fprintf(fp, "  %d %d translate%% xy\n", x, y);
+
+#if 0
+ {
+    qbb_t *mbb;
+    mbb = qbb_new();
+    est_sstrbb(fp, -1, x, y, wd, ht, pos, exhof, exvof, ro, qhof, qvof,
+        bgshape, qbgmargin, fgcolor, bgcolor, ssar, ugjust, mbb);
+    
+    fprintf(fp, "%% mbb %d %d %d %d\n", mbb->lx, mbb->by, mbb->rx, mbb->ty);
+
+    fprintf(fp, "gsave %% for sstrbb\n");
+    fprintf(fp, " 0 1 0 setrgbcolor\n");
+    fprintf(fp, " %d %d moveto\n", mbb->lx, mbb->by);
+    fprintf(fp, " %d %d lineto\n", mbb->rx, mbb->by);
+    fprintf(fp, " %d %d lineto\n", mbb->rx, mbb->ty);
+    fprintf(fp, " %d %d lineto\n", mbb->lx, mbb->ty);
+    fprintf(fp, " closepath stroke\n");
+    fprintf(fp, "grestore %% for sstrbb\n");
+ }
+#endif
+
+
     fprintf(fp, "  %d %d translate%% hvoff\n", hoffset, voffset);
     fprintf(fp, "  %d rotate\n", ro);
     if(qhof!=0) {
@@ -8018,7 +8046,6 @@ fprintf(stderr, "wd %d bgmargin %d\n", wd, bgmargin);
 
     tq = NULL;
 
-    int lbg_h, lbg_b, lbg_t;
 
     lbg_h = 0;
     lbg_b = 0;
@@ -12894,6 +12921,44 @@ fprintf(stderr, "amcont |%s|\n", amcont);
 }
 
 int
+_drawqbb(FILE *fp, qbb_t *b)
+{
+    fprintf(fp, "    %d %d moveto\n", b->lx, b->by);
+    fprintf(fp, "    %d %d lineto\n", b->rx, b->by);
+    fprintf(fp, "    %d %d lineto\n", b->rx, b->ty);
+    fprintf(fp, "    %d %d lineto\n", b->lx, b->ty);
+    fprintf(fp, "    closepath stroke %% %s\n", __func__);
+}
+
+int
+_drawqbbN(FILE *fp, qbb_t *b, int k)
+{
+    fprintf(fp, "    %d %d moveto\n", b->lx-k, b->by-k);
+    fprintf(fp, "    %d %d lineto\n", b->rx+k, b->by-k);
+    fprintf(fp, "    %d %d lineto\n", b->rx+k, b->ty+k);
+    fprintf(fp, "    %d %d lineto\n", b->lx-k, b->ty+k);
+    fprintf(fp, "    closepath stroke %% %s %d\n", __func__, k);
+}
+
+int
+_drawqbbX(FILE *fp, qbb_t *b, int k)
+{
+    fprintf(fp, "    %d %d moveto\n", b->lx-k, b->by);
+    fprintf(fp, "    %d %d lineto\n", b->rx+k, b->by);
+
+    fprintf(fp, "    %d %d moveto\n", b->rx, b->by-k);
+    fprintf(fp, "    %d %d lineto\n", b->rx, b->ty+k);
+
+    fprintf(fp, "    %d %d moveto\n", b->rx+k, b->ty);
+    fprintf(fp, "    %d %d lineto\n", b->lx-k, b->ty);
+
+    fprintf(fp, "    %d %d moveto\n", b->lx, b->ty+k);
+    fprintf(fp, "    %d %d lineto\n", b->lx, b->by-k);
+    fprintf(fp, "    closepath stroke %% %s %d\n", __func__, k);
+}
+
+
+int
 epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 {
     int ik;
@@ -13004,6 +13069,16 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
 #if 0
     if(bbox_mode) {
         epsdraw_bbox(fp, u);
+    }
+#endif
+
+#if 0
+    {
+        fprintf(fp, "  gsave %% obj VISBB %d oid %d\n", __LINE__, u->oid);
+        fprintf(fp, "    %d setlinewidth\n", objunit/20);
+        fprintf(fp, "    1 0.5 0.5 setrgbcolor\n");
+        _drawqbb(fp, &u->visbb);
+        fprintf(fp, "  grestore %% visbb\n");
     }
 #endif
 
@@ -13290,6 +13365,45 @@ P;
     fprintf(fp, "%% start chunk oid %d\n", xch->oid);
 
     cha_reset(&xch->cch);
+
+#if 0
+    {
+        int k;
+        k = objunit/10;
+        fprintf(fp, "  gsave %% chunk VISBB %d oid %d\n", __LINE__, xch->oid);
+        if(xch->oid==1) {
+            k = k*2;
+            fprintf(fp, "    %% special bb because it is oid 1\n");
+            fprintf(fp, "    %d setlinewidth\n", objunit/10);
+            fprintf(fp, "    1 0.7 0.3 setrgbcolor\n");
+        }
+        else {
+            fprintf(fp, "    %d setlinewidth\n", objunit/20);
+            fprintf(fp, "    0.5 0.5 1 setrgbcolor\n");
+        }
+#if 0
+        _drawqbb(fp, &xch->visbb);
+        _drawqbbN(fp, &xch->visbb, k);
+#endif
+        _drawqbbX(fp, &xch->visbb, k);
+        fprintf(fp, "  grestore %% visbb\n");
+    }
+#endif
+#if 0
+    for(i=0;i<xch->cch.nch;i++) {
+        int k;
+        k = objunit/10;
+        u = (ob*)xch->cch.ch[i];
+        if(!u) { continue; }
+        if(!VISIBLE(u->type)) { continue; }
+
+        fprintf(fp, "  gsave %% chunk-obj VISBB %d oid %d\n", __LINE__, u->oid);
+        fprintf(fp, "    %d setlinewidth\n", objunit/25);
+        fprintf(fp, "    0.5 1.0 0.5 setrgbcolor\n");
+        _drawqbb(fp, &u->visbb);
+        fprintf(fp, "  grestore %% visbb\n");
+    }
+#endif
 
     if(xch->cob.markbb || bbox_mode) {
         fprintf(fp, "  gsave %% markbb\n");
@@ -14216,6 +14330,7 @@ epsdraw(FILE *fp, int cwd, int cht, int crt, double csc,
 {
     int ik;
     int epswd, epsht;
+    int vwd, vht;
 
 P;
     Echo("%s: cwd %d cht %d crt %d csc %.3f\n",
@@ -14228,8 +14343,14 @@ P;
     epsdraftfontsize = (int)((double)10/100*objunit);
     epsdraftgap      = (int)((double)5/100*objunit);
 
+#if 0
     epswd = (int)(csc*xch->wd)+epsoutmargin*2;
     epsht = (int)(csc*xch->ht)+epsoutmargin*2;
+#endif
+    vwd = xch->visbb.rx - xch->visbb.lx;
+    vht = xch->visbb.ty - xch->visbb.by;
+    epswd = (int)(csc*vwd)+epsoutmargin*2;
+    epsht = (int)(csc*vht)+epsoutmargin*2;
 
     Echo(" %d %d %d %d\n", 0, 0, epswd, epsht);
 
@@ -14260,7 +14381,10 @@ P;
 
     fprintf(fp, "%d %d translate %% margin\n", epsoutmargin, epsoutmargin);
     fprintf(fp, "%.3f %.3f scale\n", csc, csc);
+#if 0
     fprintf(fp, "%d %d translate %% bbox\n", -xch->lx, -xch->by);
+#endif
+    fprintf(fp, "%d %d translate %% bbox\n", -xch->visbb.lx, -xch->visbb.by);
 
 #if 1
     fprintf(fp, "/%s findfont %d scalefont setfont %% font (fail-safe)\n",

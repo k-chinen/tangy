@@ -97,9 +97,10 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     Echo("= oid %d type %d x,y %d,%d: gx,gy %d,%d\n",
         u->oid, u->type, u->cx, u->cy, u->cgx, u->cgy);
 
-#if 1
-    Echo("obb oid %-4d s1 %6d %6d %6d %6d\n",
+#if 0
+    Echo("oid %-4d obb s1 %6d %6d %6d %6d\n",
         u->oid, _lx, _by, _rx, _ty);
+    fflush(stdout);
 #endif
 
 #if 0
@@ -126,8 +127,10 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     MARK("objcLB",  ox+u->lx,   oy+u->by);
     MARK("objcRT",  ox+u->rx,   oy+u->ty);
 
-    Echo("obb oid %-4d s2 %6d %6d %6d %6d ; %6d x %6d\n",
+#if 0
+    printf("oid %-4d obb s2 %6d %6d %6d %6d ; %6d x %6d\n",
         u->oid, _lx, _by, _rx, _ty, (_rx-_lx), (_ty-_by));
+#endif
 
 #if 0
 assert(_lx<=_rx);
@@ -145,14 +148,37 @@ assert(_by<=_ty);
 #endif
 
 #if 0
-    Echo("obb oid %d s3 %d %d: %d %d %d %d\n",
+    printf("oid %-4d obb s3 %6d %6d: %6d %6d %6d %6d\n",
         u->oid, u->gx, u->gy, u->glx, u->gby, u->grx, u->gty);
 #endif
 
-    Echo("%s: oid %-3d finalized %6d %6d: gbb %6d %6d %6d %6d\n",
+#if 0
+    printf("%s: oid %-3d finalized %6d %6d: gbb %6d %6d %6d %6d\n",
         __func__, u->oid, u->gx, u->gy, u->glx, u->gby, u->grx, u->gty);
-    Echo("%s: oid %-3d finalized wdxht %6d %6d\n",
+    printf("%s: oid %-3d finalized wdxht %6d %6d\n",
         __func__, u->oid, u->grx - u->glx, u->gty - u->gby);
+#endif
+
+#if 0
+    qbb_setbb(&u->visbb, u->glx, u->gby, u->rx, u->ty);
+#endif
+    qbb_setbb(&u->visbb, u->glx, u->gby, u->grx, u->gty);
+    qbb_setbb(&u->visbb, u->lx, u->by, u->rx, u->ty);
+
+    if(u->cob.ssbb.cc==0) {
+    }
+    else {
+        qbb_shift(&u->cob.ssbb, u->gx, u->gy);
+        qbb_mark(&u->visbb, u->cob.ssbb.lx, u->cob.ssbb.by);
+        qbb_mark(&u->visbb, u->cob.ssbb.rx, u->cob.ssbb.ty);
+    }
+
+#if 0
+    printf("oid %d s . ", u->oid);
+    qbb_fprint(stdout, &u->cob.ssbb);
+    printf("oid %d v . ", u->oid);
+    qbb_fprint(stdout, &u->visbb);
+#endif
 
     u->finalized++;
 
@@ -200,6 +226,8 @@ P;
     xch->cgx  = gox+xch->cx;    xch->cgy  = goy+xch->cy;
     xch->cgsx = gox+xch->csx;   xch->cgsy = goy+xch->csy;
     xch->cgex = gox+xch->cex;   xch->cgey = goy+xch->cey;
+
+    qbb_reset(&xch->visbb);
 
 Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
 
@@ -255,9 +283,18 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
             MARK("c-objlb", u->glx, u->gby);
             MARK("c-objrt", u->grx, u->gty);
 #endif
+
+
         }
             Echo("cbb oid %d-%d oid %d: %d %d %d %d\n",
                 xch->oid, i, u->oid, _lx, _by, _rx, _ty);
+
+        qbb_mark(&xch->visbb, u->glx, u->gby);
+        qbb_mark(&xch->visbb, u->grx, u->gty);
+#if 1
+        qbb_mark(&xch->visbb, u->visbb.lx, u->visbb.by);
+        qbb_mark(&xch->visbb, u->visbb.rx, u->visbb.ty);
+#endif
     }
 
     Echo("cbb oid %d-e: -: %d %d %d %d\n",
@@ -289,10 +326,18 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
     xch->gy  = (_by+_ty)/2;
 #endif
 
+    qbb_mark(&xch->visbb, xch->gx, xch->gy);
+
 success:
     Echo("%s: oid %d finalized %d %d: %d %d %d %d\n",
         __func__, xch->oid,
         xch->gx, xch->gy, xch->glx, xch->gby, xch->grx, xch->gty);
+
+#if 0
+    fprintf(stdout, "oid %d ", xch->oid);
+    qbb_fprint(stdout, &xch->visbb);
+#endif
+
     xch->finalized++;
 
 out:

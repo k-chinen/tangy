@@ -2044,6 +2044,53 @@ Echo("\toid %d u a wd %d ht %d solved? %d\n",
         __func__, u->oid, dir, u->wd, u->ht,
         u->x, u->y, re);
 #endif
+#if 1
+    {
+        qbb_t sbb;
+int
+est_sstrbb(FILE *fp, int xoid, int x, int y, int wd, int ht,
+        int pos, int exhof, int exvof, int ro, int qhof, int qvof,
+        int bgshape, int qbgmargin, int fgcolor, int bgcolor,
+        varray_t *ssar, int ugjust, qbb_t *obb);
+
+/*
+    epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
+        u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
+        u->cob.rotateval + u->cob.textrotate, 0, 0,
+        0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
+*/
+        
+#if 0
+        fprintf(stdout, "before check sstrbb\n");
+        qbb_setbb(&u->visbb, u->clx, u->cby, u->crx, u->cty);
+        fprintf(stdout, "oid %d v b ", u->oid);
+        qbb_fprint(stdout, &u->visbb);
+        fflush(stdout);
+#endif
+
+        qbb_reset(&sbb);
+        est_sstrbb(NULL, u->oid, u->gx, u->gy, u->wd, u->ht,
+            u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
+            u->cob.rotateval + u->cob.textrotate, 0, 0,
+            0, 2, u->cob.textcolor, -1, u->cob.ssar, -1, &sbb);
+
+#if 0
+        fprintf(stdout, "after  check sstrbb\n");
+        fprintf(stdout, "oid %d s a ", u->oid);
+        qbb_fprint(stdout, &sbb);
+        fflush(stdout);
+#endif
+        u->cob.ssbb = sbb;
+
+#if 0
+        qbb_mark(&u->visbb, u->gx + sbb->lx, u->gy + sbb->ty);
+        qbb_mark(&u->visbb, u->gx + sbb->rx, u->gy + sbb->by);
+        qbb_fprint(stdout, &u->visbb);
+        fprintf(stdout, "end    check sstrbb\n");
+        fflush(stdout);
+#endif
+    }
+#endif
 
 #if 1
     OP_LDUMP(__func__, "a", u);

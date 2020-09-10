@@ -116,6 +116,21 @@ qbb_mark(qbb_t *qb, int tx, int ty)
     if(tx>qb->rx) qb->rx = tx;
     if(ty<qb->by) qb->by = ty;
     if(ty>qb->ty) qb->ty = ty;
+    qb->cc++;
+
+    return 0;
+}
+
+int
+qbb_shift(qbb_t *qb, int mx, int my)
+{
+    if(!qb) {
+        return -1;
+    }
+    qb->lx += mx;
+    qb->rx += mx;
+    qb->by += my;
+    qb->ty += my;
 
     return 0;
 }

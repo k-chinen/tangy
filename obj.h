@@ -594,6 +594,8 @@ struct obattr {
     int   textvoffset;
     int   textrotate;
 
+    qbb_t  ssbb;
+
     char  *portstr;
     int    portrotate;
     char  *boardstr;
@@ -709,6 +711,7 @@ typedef struct _ob {
     int  gby, gty;
 
     qbb_t globalbb;
+    qbb_t visbb;
 
     ch  vch;
     struct obattr vob;
