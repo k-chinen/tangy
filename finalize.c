@@ -159,11 +159,7 @@ assert(_by<=_ty);
         __func__, u->oid, u->grx - u->glx, u->gty - u->gby);
 #endif
 
-#if 0
-    qbb_setbb(&u->visbb, u->glx, u->gby, u->rx, u->ty);
-#endif
     qbb_setbb(&u->visbb, u->glx, u->gby, u->grx, u->gty);
-    qbb_setbb(&u->visbb, u->lx, u->by, u->rx, u->ty);
 
     if(u->cob.ssbb.cc==0) {
     }
