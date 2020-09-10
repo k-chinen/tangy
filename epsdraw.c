@@ -13443,7 +13443,8 @@ P;
 
     cha_reset(&xch->cch);
 
-#if 0
+#if 1
+    if(visbbox_mode) 
     {
         int k;
         k = objunit/10;
@@ -13458,27 +13459,23 @@ P;
             fprintf(fp, "    %d setlinewidth\n", objunit/20);
             fprintf(fp, "    0.5 0.5 1 setrgbcolor\n");
         }
-#if 0
-        _drawqbb(fp, &xch->visbb);
-        _drawqbbN(fp, &xch->visbb, k);
-#endif
         _drawqbbX(fp, &xch->visbb, k);
         fprintf(fp, "  grestore %% visbb\n");
-    }
-#endif
-#if 0
-    for(i=0;i<xch->cch.nch;i++) {
-        int k;
-        k = objunit/10;
-        u = (ob*)xch->cch.ch[i];
-        if(!u) { continue; }
-        if(!VISIBLE(u->type)) { continue; }
 
-        fprintf(fp, "  gsave %% chunk-obj VISBB %d oid %d\n", __LINE__, u->oid);
-        fprintf(fp, "    %d setlinewidth\n", objunit/25);
-        fprintf(fp, "    0.5 1.0 0.5 setrgbcolor\n");
-        _drawqbb(fp, &u->visbb);
-        fprintf(fp, "  grestore %% visbb\n");
+        for(i=0;i<xch->cch.nch;i++) {
+            int k;
+            k = objunit/10;
+            u = (ob*)xch->cch.ch[i];
+            if(!u) { continue; }
+            if(!VISIBLE(u->type)) { continue; }
+
+            fprintf(fp, "  gsave %% chunk-obj VISBB %d oid %d\n",
+                __LINE__, u->oid);
+            fprintf(fp, "    %d setlinewidth\n", objunit/25);
+            fprintf(fp, "    0.5 1.0 0.5 setrgbcolor\n");
+            _drawqbb(fp, &u->visbb);
+            fprintf(fp, "  grestore %% visbb\n");
+        }
     }
 #endif
 

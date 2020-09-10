@@ -43,6 +43,7 @@ extern int draft_mode;
 extern int skelton_mode;
 extern int grid_mode;
 extern int bbox_mode;
+extern int visbbox_mode;
 extern int oidl_mode;
 extern int namel_mode;
 extern int ruler_mode;

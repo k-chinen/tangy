@@ -57,6 +57,8 @@ print_usage()
     printf("  -R num    set grid range; how many times of pitch (current %d)\n",
         def_gridrange);
     printf("  -b        draw boundingbox of objects\n");
+    printf("  -B        draw visible boundingbox of objects\n");
+    printf("  -U        draw invisible object MOVE\n");
     printf("  -i        draw object IDs\n");
     printf("  -l        print object list for debug\n");
     printf("  -c        print color list for debug\n");
@@ -258,7 +260,7 @@ main(int argc, char *argv[])
     pallet = new_default_pallet();
 
     while((flag=getopt(argc, argv,
-            "0hmVPvqpngbSUdiLrtDo:u:G:R:M:F:K:k:lcs:"))!=EOF) {
+            "0hmVPvqpngbBSUdiLrtDo:u:G:R:M:F:K:k:lcs:"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -297,6 +299,9 @@ main(int argc, char *argv[])
             break;
         case 'b':
             bbox_mode = 1;
+            break;
+        case 'B':
+            visbbox_mode = 1;
             break;
         case 'i':
             oidl_mode = 1;
