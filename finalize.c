@@ -301,28 +301,14 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
     xch->gby = _by;
     xch->gty = _ty;
 
-#if 0
-    xch->lx = xch->glx;
-    xch->rx = xch->grx;
-    xch->by = xch->gby;
-    xch->ty = xch->gty;
-#endif
-
-#if 0
-    xch->wd = xch->rx - xch->lx;
-    xch->ht = xch->ty - xch->by;
-#endif
-
-#if 0
-    u->gx  = (_lx+_rx)/2;
-    u->gy  = (_by+_ty)/2;
-#endif
-#if 1
     xch->gx  = (_lx+_rx)/2;
     xch->gy  = (_by+_ty)/2;
-#endif
 
     qbb_mark(&xch->visbb, xch->gx, xch->gy);
+#if 1
+    qbb_mark(&xch->visbb, xch->clx, xch->cby);
+    qbb_mark(&xch->visbb, xch->crx, xch->cty);
+#endif
 
 success:
     Echo("%s: oid %d finalized %d %d: %d %d %d %d\n",
