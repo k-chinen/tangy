@@ -27,7 +27,7 @@ chs.o: a.h chas.h gv.h notefile.h obj.h seg.h
 color.o: color.h varray.h 
 epsdraw.o: a.h alist.h bez.h chas.h epsdraw.h font.h gv.h notefile.h \
     obj.h put.h qbb.h seg.h sstr.h tx.h vdict.h word.h xcur.h xlink.c \
-    xns.h sbb.c
+    xns.h 
 epsparse.o: qbb.h word.h 
 finalize.o: a.h alist.h chas.h gv.h notefile.h obj.h seg.h 
 font.o: alist.h font.h word.h 
@@ -37,7 +37,7 @@ notefile.o: color.h gv.h notefile.h obj.h varray.h word.h
 nss.o: alist.h gv.h obj.h 
 parse.o: a.h alist.h chas.h gv.h notefile.h obj.h seg.h varray.h \
     word.h 
-put.o: a.h alist.h chas.h font.h gv.h notefile.h obj.h seg.h sshd.c \
+put.o: a.h alist.h chas.h font.h gv.h notefile.h obj.h seg.h sshd.c ssbb.c \
     sstr.h tx.h xcur.h 
 qbb.o: qbb.h 
 seg.o: gv.h obj.h seg.h 

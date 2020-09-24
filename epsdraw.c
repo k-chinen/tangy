@@ -7803,9 +7803,6 @@ fprintf(stderr, "src |%s|\n", src);
         __LINE__, i, justify);}
 
 
-#include "sbb.c"
-
-
 int
 epsdraw_sstrbgX(FILE *fp, int x, int y, int wd, int ht,
         int pos, int exhof, int exvof, int ro, int qhof, int qvof,
@@ -13004,6 +13001,7 @@ _drawqbb(FILE *fp, qbb_t *b)
     fprintf(fp, "    %d %d lineto\n", b->rx, b->ty);
     fprintf(fp, "    %d %d lineto\n", b->lx, b->ty);
     fprintf(fp, "    closepath stroke %% %s\n", __func__);
+	return 0;
 }
 
 int
@@ -13014,6 +13012,7 @@ _drawqbbN(FILE *fp, qbb_t *b, int k)
     fprintf(fp, "    %d %d lineto\n", b->rx+k, b->ty+k);
     fprintf(fp, "    %d %d lineto\n", b->lx-k, b->ty+k);
     fprintf(fp, "    closepath stroke %% %s %d\n", __func__, k);
+	return 0;
 }
 
 int
@@ -13031,6 +13030,7 @@ _drawqbbX(FILE *fp, qbb_t *b, int k)
     fprintf(fp, "    %d %d moveto\n", b->lx, b->ty+k);
     fprintf(fp, "    %d %d lineto\n", b->lx, b->by-k);
     fprintf(fp, "    closepath stroke %% %s %d\n", __func__, k);
+	return 0;
 }
 
 

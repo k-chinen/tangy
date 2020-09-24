@@ -18,7 +18,7 @@ int xatoi(char *src);
 char* draw_word(char *src, char *dst, int wlen, int sep);
 
 #include "sshd.c"
-
+#include "ssbb.c"
 
 #if 0
 char debuglog[BUFSIZ*10]="";
