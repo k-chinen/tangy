@@ -1,0 +1,9 @@
+alias ent "box fillcolor 15 fillhatch solid"
+box width 0 height 2u linecolor -1
+ent "preamble"			:NOC "8"
+ent "ethernet" "header"		:NOC "14"
+ent "IP" "header"		:NOC "20+"
+ent "TCP" "header"		:NOC "20+"
+ent "data" width 2u vwslit	:NOC "6..1460"
+ent "FCS"  width .8u		:NOC "4"
+ent "IFG" 			:NOC "12"
