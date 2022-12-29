@@ -13,12 +13,12 @@
 #include "font.h"
 #include "xcur.h"
 #include "sstr.h"
+#include "gsstr.h"
+#include "gptbd.h"
 
-int xatoi(char *src);
+int parsedimen(char *src);
 char* draw_word(char *src, char *dst, int wlen, int sep);
 
-#include "sshd.c"
-#include "ssbb.c"
 
 #if 0
 char debuglog[BUFSIZ*10]="";
@@ -674,7 +674,7 @@ P;
         }
 
         if(e->val[0]) {
-            m = xatoi(e->val);
+            m = parsedimen(e->val);
         }
         else {
             m = (int)objunit;
@@ -685,10 +685,10 @@ P;
             p = e->val;
             p = draw_word(p, tmp, BUFSIZ, SEG_SEPC);
             if(tmp[0]) {
-                rad = xatoi(tmp);
+                rad = parsedimen(tmp);
                 p = draw_word(p, tmp, BUFSIZ, SEG_SEPC);
                 if(tmp[0]) {
-                    an  = xatoi(tmp);
+                    an  = parsedimen(tmp);
                 }
                 else {
                     an  = 90;
@@ -973,7 +973,7 @@ P;
 
 
 #define PICK(vn) \
-    if(*p) { p = draw_word(p, tmp, BUFSIZ, SEG_SEPC); vn = xatoi(tmp); }
+    if(*p) { p = draw_word(p, tmp, BUFSIZ, SEG_SEPC); vn = parsedimen(tmp); }
                 
                 p = e->val;
                 PICK(x2); PICK(y2);
@@ -1230,7 +1230,10 @@ est_simpleseg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int     r;
     int     ddir;
     int     isx, isy, iex, iey; /* from and to */
-    int     bm, bmx, bmy;   /* beam and its offset for size */
+    int     bm, bmx, bmy;       /* beam and its offset for size */
+
+    int     havep1=0, p1x, p1y;
+    int     havep2=0, p2x, p2y;
 
     rv = 0;
 
@@ -1256,7 +1259,7 @@ Echo("  zdir %4d ; ddir %4d\n", *zdir, ddir);
             break;
         }
 #endif
-            r = objunit*3/2;
+        r = objunit*3/2;
     }
 Echo("  u->cob.length %d r %d\n", u->cob.length, r);
 
@@ -1277,6 +1280,52 @@ Echo("  isx,y %d,%d iex,y %d,%d\n", isx, isy, iex, iey);
         else {
             bm = objunit/2;
         }
+        break;
+    case CMD_BCURVE:
+    case CMD_XCURVE:
+        if(u->cob.arrowforeheadtype>0 || u->cob.arrowcentheadtype>0
+            || u->cob.arrowbackheadtype>0) {
+            bm = objunit/8;
+        }
+        else {
+            bm = objunit/20;
+        }
+
+ {
+
+    int solve_curve_points_pure(
+        double xbulge, int c1, int c2,
+        double *pmu, double *pmv,
+        int *p1x, int *p1y,
+        int *p2x, int *p2y,
+        int *p3x, int *p3y,
+        int *p4x, int *p4y);
+
+    int ik;
+    double mu, mv;
+    int ux, uy, t1x, t1y, t2x, t2y, vx, vy;
+
+    ux = isx;
+    uy = isy;
+    vx = iex;
+    vy = iey;
+
+    ik = solve_curve_points_pure(
+            u->cob.bulge, 0, 0,
+            &mu, &mv, &ux, &uy, &t1x, &t1y, &t2x, &t2y, &vx, &vy);
+
+    Echo("u  %d,%d\n", ux, uy);
+    Echo("t1 %d,%d\n", t1x, t1y);
+    Echo("t2 %d,%d\n", t2x, t2y);
+    Echo("v  %d,%d\n", vx, vy);
+
+    havep1 = 1; p1x = t1x; p1y = t1y;
+    havep2 = 1; p2x = t2x; p2y = t2y;
+    Echo("p1 %d %d,%d\n", havep1, p1x, p1y);
+    Echo("p2 %d %d,%d\n", havep2, p2x, p2y);
+ }
+
+
         break;
     default:
         if(u->cob.arrowforeheadtype>0 || u->cob.arrowcentheadtype>0
@@ -1302,6 +1351,9 @@ Echo("  bm %d bmx,y %d,%d\n", bm, bmx, bmy);
     qbb_mark(&sbb, iex-bmx, iey+bmy);
     qbb_mark(&sbb, iex+bmx, iey-bmy);
 
+    if(havep1) { qbb_mark(&sbb, p1x, p1y); }
+    if(havep2) { qbb_mark(&sbb, p2x, p2y); }
+
     *rfx = iex;
     *rfy = iey;
 
@@ -1309,7 +1361,6 @@ Echo("  bm %d bmx,y %d,%d\n", bm, bmx, bmy);
     *rby = sbb.by;
     *rrx = sbb.rx;
     *rty = sbb.ty;
-
 
     *risx = isx;
     *risy = isy;
@@ -1640,6 +1691,68 @@ insboxpath(varray_t *xar, int xwd, int xht)
 }
 
 
+
+int
+solve_crank_points(ob *xu, ns *xns,
+    double *pmu, double *pmv,
+    int *p1x, int *p1y,
+    int *p2x, int *p2y)
+{
+    int    x1, x2, y1, y2;
+    double mu, mv;
+P;
+
+    __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+
+#if 0
+    printf("crank oid %d x1,y1 %d,%d x2,y2 %d,%d -> gx,y %d,%d\n",
+        xu->oid, x1, y1, x2, y2, xu->gx, xu->gy);
+#endif
+
+Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
+    x1, y1, x2, y2);
+
+    *pmu = mu;
+    *pmv = mv;
+    *p1x = x1;
+    *p1y = y1;
+    *p2x = x2;
+    *p2y = y2;
+
+    return 0;
+}
+
+int
+MARK_crank(ob *xu, ns *xns,
+    int *_sx, int *_sy, int *_ex, int *_ey,
+    int *_lx, int *_by, int *_rx, int *_ty)
+{
+    int     ux, uy, vx, vy;
+    double  mu, mv;
+    int     ik;
+    qbb_t   bez_bb;
+
+    ik = solve_crank_points(xu, xns,
+        &mu, &mv, &ux, &uy, &vx, &vy);
+
+    qbb_reset(&bez_bb);
+    qbb_mark(&bez_bb, ux, uy);
+    qbb_mark(&bez_bb, vx, vy);
+    
+    *_sx = ux;
+    *_sy = uy;
+    *_ex = vx;
+    *_ey = vy;
+
+    *_lx = bez_bb.lx;
+    *_by = bez_bb.by;
+    *_rx = bez_bb.rx;
+    *_ty = bez_bb.ty;
+
+    return 0;
+}
+
+
  /*
   * name    size        description
   *-----
@@ -1661,8 +1774,9 @@ insboxpath(varray_t *xar, int xwd, int xht)
 #define RO      {wd = objunit;      ht = objunit;   }
 #define NO      {wd = objunit/2;    ht = objunit;   }
 #define NNO     {wd = objunit/4;    ht = objunit;   }
+#define NNNN    {wd = objunit/4;    ht = objunit/4; }
 #define VO      {wd = 0;            ht = objunit;   }
-#define HO      {wd = objunit       ht = 0;         }
+#define HO      {wd = objunit;      ht = 0;         }
 #define ZZ      {wd = 0;            ht = 0;         }
 #define SO      {wd = objunit/5;    ht = objunit/5; }
 
@@ -1771,6 +1885,7 @@ P;
 
     case CMD_CIRCLE:    RO;     break;
     case CMD_POINT:     SO;     break;
+    case CMD_PIE:       RO;     break;
     case CMD_POLYGON:   RO;     break;
     case CMD_GEAR:      RO;     break;
 
@@ -1797,48 +1912,41 @@ P;
             break;
 
     case CMD_PLINE:
+#if 0
             VO;
+#endif
+            ZZ;
 Echo("PLINE oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
     case CMD_SEP:     
+#if 0
             NNO;
+#endif
+            NNNN;
 Echo("SEP oid %d dir %d\n", u->oid ,dir);
             u->cob.sepcurdir = dir;
             break;
 
-    case CMD_XCURVE:
-    case CMD_XCURVESELF:
-    case CMD_BCURVE:
-    case CMD_BCURVESELF:
+    case CMD_VCRANK:
+    case CMD_VELBOW:
+    case CMD_HCRANK:
+    case CMD_HELBOW:
         if(u->cob.originalshape) {
         }
         else {
-            WO;     
+            NO;     
             break;
         }
             {
             int ik;
             int _sx, _sy, _ex, _ey;
             int _lx, _by, _rx, _ty, fx, fy;
-            if(u->type==CMD_XCURVE || u->type==CMD_BCURVE) {
-                ik = MARK_bcurveX(u, xns,
-                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
-            }
-            else
-            if(u->type==CMD_XCURVESELF || u->type==CMD_BCURVESELF) {
-                ik = MARK_bcurveself(u, xns,
-#if 0
-                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
-#endif
-                        &_lx, &_by, &_rx, &_ty);
-            }
-            else {
-                break;
-            }
+            ik = MARK_crank(u, xns,
+                    &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
 P;
 #if 1
-Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
+Echo("\tcrank/elbow original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
         u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
 #endif
             u->csx = _sx;
@@ -1854,22 +1962,107 @@ Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n
             wd = _rx - _lx;
             ht = _ty - _by;
 
-#if 0
-            u->fx = wd;
-            u->fy = ht;
-#endif
-#if 0
-            u->fx = fx - lx;
-            u->fy = fy - by;
-#endif
-#if 0
-            u->ox = -wd/2;
-            u->oy = -ht/2;
-#endif
-
             re = 1;
             }
             break;
+
+    case CMD_XCURVE:
+    case CMD_XCURVESELF:
+    case CMD_BCURVE:
+    case CMD_BCURVESELF:
+#if 0
+        if(u->cob.originalshape) {
+        }
+        else {
+            WO;     
+            break;
+        }
+#endif
+        {
+            int ik;
+            int _sx, _sy, _ex, _ey;
+            int _lx, _by, _rx, _ty, fx, fy;
+
+    if(u->cob.originalshape) {
+
+
+            if(u->type==CMD_XCURVE || u->type==CMD_BCURVE) {
+                ik = MARK_bcurveX(u, xns,
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+            }
+            else
+            if(u->type==CMD_XCURVESELF || u->type==CMD_BCURVESELF) {
+                ik = MARK_bcurveself(u, xns,
+#if 0
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+#endif
+                        &_lx, &_by, &_rx, &_ty);
+            }
+            else {
+                printf("ERROR ignore type %d oid %d\n", u->type, u->oid);
+                break;
+            }
+P;
+#if 1
+Echo("\tcurve original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
+#endif
+Echo("\tcurve-original oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
+        u->oid, _lx, _by, _rx, _ty, fx, fy, *gdir);
+    }
+    else {
+            int misx, misy, miex, miey;
+
+            ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
+                    u->cob.keepdir, gdir, &_lx, &_by, &_rx, &_ty, &fx, &fy,
+                    &misx, &misy, &miex, &miey);
+#if 1
+Echo("\tcurve simple oid %d misx,y %d,%d miex,y %d,%d\n",
+        u->oid, misx, misy, miex, miey);
+#endif
+            _sx = misx;
+            _sy = misy;
+            _ex = miex;
+            _ey = miey;
+#if 1
+Echo("\tcurve simple oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
+#endif
+Echo("\tcurve-simple oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
+        u->oid, _lx, _by, _rx, _ty, fx, fy, *gdir);
+    }
+
+
+            u->csx = _sx;
+            u->csy = _sy;
+            u->cex = _ex;
+            u->cey = _ey;
+
+            u->clx = _lx;
+            u->cby = _by;
+            u->crx = _rx;
+            u->cty = _ty;
+
+            wd = _rx - _lx;
+            ht = _ty - _by;
+
+Echo("\tcurve 1 wd %d ht %d\n", wd, ht);
+
+#if 1
+            u->fx = fx;
+            u->fy = fy;
+
+            u->ox = -wd/2;
+            u->oy = -ht/2;
+
+Echo("\tcurve 1 u; ox,oy %d,%d fx,fy %d,%d\n",
+    u->ox, u->oy, u->fx, u->fy);
+#endif
+        
+
+            re = 1;
+        }
+        break;
 
     case CMD_ULINE:
         {
@@ -1925,8 +2118,6 @@ Echo("ULINEs oid %d u->ox %d, u->oy %d\n", u->oid, u->ox, u->oy);
                 ik = est_seg(xns, u, u->cob.segopar, u->cob.segar,
                     u->cob.keepdir, gdir, &lx, &by, &rx, &ty, &fx, &fy,
                     &misx, &misy, &miex, &miey);
-
-
             }
             else {
                 ik = est_simpleseg(xns, u, u->cob.segopar, u->cob.segar,
@@ -1944,7 +2135,7 @@ u->dy = miey - misy;
             }
 
 #if 1
-Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
+Echo("\tline oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
         u->oid, lx, by, rx, ty, fx, fy, *gdir);
 #endif
 
@@ -1957,7 +2148,7 @@ Echo("\tseg original oid %d bb (%d %d %d %d) fxy %d,%d gdir %d\n",
             ht = ty - by;
 
 #if 1
-Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
+Echo("\tline 1 wd %d ht %d\n", wd, ht);
 #endif
 
             u->fx = fx;
@@ -1967,7 +2158,7 @@ Echo("\tseg original 1 wd %d ht %d\n", wd, ht);
             u->oy = -ht/2;
 
 #if 1
-Echo("\tseg original 1 u; ox,oy %d,%d fx,fy %d,%d\n",
+Echo("\tline 1 u; ox,oy %d,%d fx,fy %d,%d\n",
     u->ox, u->oy, u->fx, u->fy);
 #endif
 
@@ -2000,7 +2191,8 @@ Echo("\t  3 u wd %d ht %d\n", u->wd, u->ht);
 
 #if 1
     /*** FIX ***/
-    if(u->type==CMD_CIRCLE || u->type==CMD_POLYGON || u->type==CMD_GEAR) {
+    if(u->type==CMD_CIRCLE || u->type==CMD_PIE ||
+            u->type==CMD_POLYGON || u->type==CMD_GEAR) {
         if(u->cob.rad<=0) {
             u->cob.rad = objunit/2;
         }
@@ -2050,53 +2242,84 @@ Echo("\toid %d u a wd %d ht %d solved? %d\n",
 #endif
 #if 1
     {
-        qbb_t sbb;
-int
-est_sstrbb(FILE *fp, int xoid, int x, int y, int wd, int ht,
-        int pos, int exhof, int exvof, int ro, int qhof, int qvof,
-        int bgshape, int qbgmargin, int fgcolor, int bgcolor,
-        varray_t *ssar, int ugjust, qbb_t *obb);
-
-/*
-    epsdraw_sstrbgX(fp, u->gx, u->gy, u->wd, u->ht,
-        u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
-        u->cob.rotateval + u->cob.textrotate, 0, 0,
-        0, 2, u->cob.textcolor, _tbgc, u->cob.ssar, -1);
-*/
+        qbb_t ssbb;
         
-#if 0
-        fprintf(stdout, "before check sstrbb\n");
-        qbb_setbb(&u->visbb, u->clx, u->cby, u->crx, u->cty);
-        fprintf(stdout, "oid %d v b ", u->oid);
-        qbb_fprint(stdout, &u->visbb);
-        fflush(stdout);
-#endif
-
-        qbb_reset(&sbb);
+        qbb_reset(&ssbb);
         est_sstrbb(NULL, u->oid, u->gx, u->gy, u->wd, u->ht,
             u->cob.textposition, u->cob.texthoffset, u->cob.textvoffset,
             u->cob.rotateval + u->cob.textrotate, 0, 0,
-            0, 2, u->cob.textcolor, -1, u->cob.ssar, -1, &sbb);
+            0, 2, u->cob.textcolor, -1, u->cob.ssar, -1, &ssbb);
 
-#if 0
-        fprintf(stdout, "after  check sstrbb\n");
-        fprintf(stdout, "oid %d s a ", u->oid);
-        qbb_fprint(stdout, &sbb);
-        fflush(stdout);
-#endif
-        u->cob.ssbb = sbb;
-
-#if 0
-        qbb_mark(&u->visbb, u->gx + sbb->lx, u->gy + sbb->ty);
-        qbb_mark(&u->visbb, u->gx + sbb->rx, u->gy + sbb->by);
-        qbb_fprint(stdout, &u->visbb);
-        fprintf(stdout, "end    check sstrbb\n");
-        fflush(stdout);
-#endif
+        u->cob.ssbb = ssbb;
     }
 #endif
 
-#if 1
+    if(u->cob.portstr) {
+        int   tdir;
+        qbb_t ptbb;
+        int   ik;
+        int   ax, ay, bx, by, cx, cy, dx, dy;
+
+        if(u->cob.hasfrom && u->cob.hasto) {
+            tdir = (int)(atan2(u->cey - u->csy, u->cex - u->csx) * 180.0/M_PI);
+        }
+        else {
+            tdir = dir;
+        }
+
+        qbb_reset(&ptbb);
+
+        ik = est_portboard4c(xns, tdir, u, OA_PORT,
+                &ax, &ay, &bx, &by, &cx, &cy, &dx, &dy);
+#if 0
+    fprintf(stderr, "%s:%d oid %d ik %d\n", __FILE__, __LINE__, u->oid, ik);
+#endif
+
+        qbb_mark(&ptbb, ax, ay);
+        qbb_mark(&ptbb, bx, by);
+        qbb_mark(&ptbb, cx, cy);
+        qbb_mark(&ptbb, cx, dy);
+
+        u->cob.ptbb = ptbb;
+    }
+
+    if(u->cob.boardstr) {
+        int   tdir;
+        qbb_t bdbb;
+        int   ik;
+        int   ax, ay, bx, by, cx, cy, dx, dy;
+
+        if(u->cob.hasfrom && u->cob.hasto) {
+            tdir = (int)(atan2(u->cey - u->csy, u->cex - u->csx) * 180.0/M_PI);
+        }
+        else {
+            tdir = dir;
+        }
+
+        qbb_reset(&bdbb);
+
+        ik = est_portboard4c(xns, tdir, u, OA_BOARD,
+                &ax, &ay, &bx, &by, &cx, &cy, &dx, &dy);
+fprintf(stderr, "%s:%d oid %d ik %d\n", __FILE__, __LINE__, u->oid, ik);
+
+        qbb_mark(&bdbb, ax, ay);
+        qbb_mark(&bdbb, bx, by);
+        qbb_mark(&bdbb, cx, cy);
+        qbb_mark(&bdbb, cx, dy);
+
+        u->cob.bdbb = bdbb;
+    }
+
+
+#if 0
+    {
+        qbb_t bdbb;
+        qbb_reset(&bdbb);
+        u->cob.bdbb = bdbb;
+    }
+#endif
+
+#if 0
     OP_LDUMP(__func__, "a", u);
 #endif
 
@@ -2221,6 +2444,7 @@ fitobj_wdht(ob *u, int xxdir, int *x, int *y, ns *xns)
     double q, qx, qy;
     int r;
     int hh;
+    double thrad;
     double th;
     int    wd, ht;
     char   f1, f2, f3;
@@ -2277,12 +2501,12 @@ Echo("xxdir %d dir %d\n", xxdir, dir);
     wd = u->wd;
     ht = u->ht;
 
-    th = atan2(ht, wd);
-    th = th/rf;
+    thrad = atan2(ht, wd);
+    th = thrad/rf;
 
-#if 0
+#if 1
     Echo("th %.3f (rad %.3f) <- %dx%d oid %d v.s. dir %d\n",
-        th, th*rf, wd, ht, u->oid, dir);
+        th, thrad, wd, ht, u->oid, dir);
 #endif
 
     /* atan2 returns -180 to +180 */
@@ -2348,12 +2572,20 @@ Echo("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
         }
 
     }
-#if 0
-    Echo("dx,dy %f,%f f %c\n", dx, dy, f);
+#if 1
+    Echo("dx,dy %f,%f f %c%c%c\n", dx, dy, f1,f2,f3);
 #endif
-#if 0
+#if 1
     Echo("oid %-3d th %.3f dir %4d f %c%c%c q %.3f,%.3f q %.3f dx,dy %.3f,%.3f\n",
         u->oid, th, dir, f1, f2, f3, qx, qy, q, dx, dy);
+#endif
+
+#if 1
+    Echo("%s: oid %d (%d %d %d %d) b-let\n",
+        __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
+    Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
+        __func__, u->oid,
+        u->cx, u->cy, u->csx, u->csy, u->cex, u->cey, u->ox, u->coy);
 #endif
 
     u->cx = *x+dx;
@@ -2382,8 +2614,9 @@ Echo("qx %f q %f v.s. QLIMIT %f\n", qx, q, QLIMIT);
 #if 0
     Echo("  oldx,y %d,%d\n", oldx, oldy);
 #endif
+
 #if 1
-    Echo("%s: oid %d (%d %d %d %d)\n",
+    Echo("%s: oid %d (%d %d %d %d) a-let\n",
         __func__, u->oid, u->clx, u->cby, u->crx, u->cty);
     Echo("%s: a oid %d - %d,%d s %d,%d e %d,%d o %d,%d\n",
         __func__, u->oid,
@@ -2516,11 +2749,11 @@ bumpH(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
         (gy>=y2 && gy<=y1));
 
     ik = isinside(x1, x2, y1, y2, gx, gy);
-    Echo("  ik %d\n", ik);
-    ik = isinside2(x1, x2, y1, y2, gx, gy);
-    Echo("  ik %d\n", ik);
+    Echo("  ik  %d\n", ik);
+    ik2 = isinside2(x1, x2, y1, y2, gx, gy);
+    Echo("  ik2 %d\n", ik);
 
-    if(ik2) {
+    if(ik && ik2) {
         Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
@@ -2569,11 +2802,11 @@ bumpV(int x1, int y1, int x2, int y2, int cx, int cy, int cdir,
         (gy>=y2 && gy<=y1));
 
     ik = isinside(x1, x2, y1, y2, gx, gy);
-    Echo("  ik %d\n", ik);
-    ik = isinside2(x1, x2, y1, y2, gx, gy);
-    Echo("  ik %d\n", ik);
+    Echo("  ik  %d\n", ik);
+    ik2 = isinside2(x1, x2, y1, y2, gx, gy);
+    Echo("  ik2 %d\n", ik);
 
-    if(ik2) {
+    if(ik && ik2) {
         Echo("  bumped INSIDE\n");
         *rgx = (int)gx;
         *rgy = (int)gy;
@@ -2660,15 +2893,32 @@ expand_sep(int bx, int by, int w, int h, int ox, int oy, ob* u)
     int mx[4], my[4];
 
 #define A   \
-    if(ik) { \
-        if(c>=2) Echo("ERROR too many bump point\n"); \
+    { \
+    Echo("  got ik %d\n", ik); \
+    } \
+    if(ik>0) { \
+        Echo("    bump %d\n", c); \
+        if(c>=2) { \
+            Echo("ERROR too many bump point\n"); \
+        } \
         mx[c] = qx-ox; my[c] = qy-oy; c++; \
+    } \
+    else { \
+        Echo("    no-bump\n"); \
     }
 
 
 Echo("%s: bx,by %d,%d w,h %d,%d ox,oy %d,%d\n",
         __func__, bx, by, w, h, ox, oy);
 Echo("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
+
+    {
+        int u;
+            Echo("  c %d\n", c);
+        for(u=0;u<4;u++) {
+            Echo("  u %d %d,%d\n", u, mx[u], my[u]);
+        }
+    }
 
     c = 0;
 
@@ -2693,6 +2943,14 @@ Echo("  vs oid %d cx,cy %d,%d\n", u->oid, u->cx, u->cy);
     A;
 
     Echo("  c %d\n", c);
+
+    {
+        int u;
+            Echo("  c %d\n", c);
+        for(u=0;u<4;u++) {
+            Echo("  u %d %d,%d\n", u, mx[u], my[u]);
+        }
+    }
 
     u->cob.sepx1 = mx[0]; u->cob.sepy1 = my[0];
     u->cob.sepx2 = mx[1]; u->cob.sepy2 = my[1];
@@ -3517,12 +3775,12 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
             u = (ob*)xch->cch.ch[i];
 #if 1
             Echo("\t%3d: %3d: %d: %6d %6d %6d %6d : %6d %6d %6d %6d\n",
-                i, u->oid, u->ignore, 
+                i, u->oid, u->invisible, 
                 u->cx, u->cy,
                 u->cox, u->coy,
                 u->clx, u->cby, u->crx, u->cty);
 #endif
-            if(u->ignore) {
+            if(u->invisible) {
 #if 0
     Echo("oid %d ignored\n", u->oid);
 #endif
@@ -3546,11 +3804,23 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
                     u->crx-u->clx, u->cty-u->cby,
                     u->cwd, u->cht);
 
-#if 1
+#if 0
             if(u->floated) {
                 /* nothing */
             }
             else {
+                if(u->clx<minx) { minx = u->clx; }
+                if(u->crx<minx) { minx = u->crx; }
+                if(u->clx>maxx) { maxx = u->clx; }
+                if(u->crx>maxx) { maxx = u->crx; }
+                if(u->cby<miny) { miny = u->cby; }
+                if(u->cty<miny) { miny = u->cty; }
+                if(u->cby>maxy) { maxy = u->cby; }
+                if(u->cty>maxy) { maxy = u->cty; }
+            }
+#endif
+#if 1
+            {
                 if(u->clx<minx) { minx = u->clx; }
                 if(u->crx<minx) { minx = u->crx; }
                 if(u->clx>maxx) { maxx = u->clx; }
@@ -3607,6 +3877,8 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     Echo("  zx,zy %d,%d\n", zx, zy);
     Echo("  wxh %dx%d\n", xch->wd, xch->ht);
     Echo("  oxy %d,%d\n", xch->ox, xch->oy);
+    Echo("  bb c %6d %6d %6d %6d\n",
+        xch->clx, xch->cby, xch->crx, xch->cty);
 #endif
 
     /***
@@ -3660,11 +3932,10 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     xch->ox = -zx;
     xch->oy = -zy;
 
-        xch->clx = minx-xch->cgimargin;
-        xch->cby = miny-xch->cgimargin;
-        xch->crx = maxx+xch->cgimargin;
-        xch->cty = maxy+xch->cgimargin;
-
+    xch->clx = minx-xch->cgimargin;
+    xch->cby = miny-xch->cgimargin;
+    xch->crx = maxx+xch->cgimargin;
+    xch->cty = maxy+xch->cgimargin;
 
 #if 1
     Echo("  gimargin %d\n", xch->cgimargin);
@@ -3675,7 +3946,6 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
     Echo("  oxy %d,%d\n", xch->ox, xch->oy);
 #endif
 
-
 #if 1
     Echo("  new ox,oy %d,%d\n", xch->ox, xch->oy);
 
@@ -3685,16 +3955,11 @@ Echo("xch ox,oy %d, %d\n", xch->ox, xch->oy);
         xch->lx, xch->by, xch->rx, xch->ty, v, c, xch->wd, xch->ht);
 #endif
 
-
     xch->sizesolved++;
 
 #if 0
 Echo("chunk oid %d solved\n", xch->oid);
-
 #endif
-
-
-
 
 out:
 

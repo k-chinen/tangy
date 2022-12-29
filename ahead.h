@@ -28,4 +28,9 @@
 
 extern apair_t arrowhead_ial[];
 
+/* some arrow head needs chopping */
+#define AH_MUSTCHOP(x) \
+    ((x)==AH_NORMAL||(x)==AH_ARROW3||(x)==AH_ARROW5|| \
+    (x)==AH_ARROW6||(x)==AH_SHIP)
+
 #endif/*_TANGE_AHEAD_H_*/

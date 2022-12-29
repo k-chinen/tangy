@@ -25,6 +25,8 @@ finalizeobj(ob *u, int *xdir, int ox, int oy, ns *xns)
     ob* np;
     int nx, ny;
     int _lx, _rx, _ty, _by;
+    int sig1, sig2;
+
 P;
     if(u->finalized) {
 Echo("%s: oid %d finalized skip\n", __func__, u->oid);
@@ -142,10 +144,8 @@ assert(_by<=_ty);
     u->grx = _rx;
     u->gty = _ty;
 
-#if 1
     u->gx  = (_lx+_rx)/2;
     u->gy  = (_by+_ty)/2;
-#endif
 
 #if 0
     printf("oid %-4d obb s3 %6d %6d: %6d %6d %6d %6d\n",
@@ -161,12 +161,77 @@ assert(_by<=_ty);
 
     qbb_setbb(&u->visbb, u->glx, u->gby, u->grx, u->gty);
 
+    sig1 = qbb_sig(&u->visbb);
+
     if(u->cob.ssbb.cc==0) {
+#if 0
+        fprintf(stderr, "no content ssbb oid %d\n", u->oid);
+#endif
     }
     else {
+#if 0
+        fprintf(stderr, "have content ssbb oid %d\n", u->oid);
+        qbb_fprint(stderr, &u->visbb);
+#endif
         qbb_shift(&u->cob.ssbb, u->gx, u->gy);
         qbb_mark(&u->visbb, u->cob.ssbb.lx, u->cob.ssbb.by);
         qbb_mark(&u->visbb, u->cob.ssbb.rx, u->cob.ssbb.ty);
+#if 0
+        qbb_fprint(stderr, &u->visbb);
+#endif
+    }
+
+    if(u->cob.ptbb.cc==0) {
+#if 0
+        fprintf(stderr, "no content ptbb oid %d\n", u->oid);
+#endif
+    }
+    else {
+#if 0
+        fprintf(stderr, "have content ptbb oid %d\n", u->oid);
+        qbb_fprint(stderr, &u->visbb);
+#endif
+        qbb_shift(&u->cob.ptbb, u->gx, u->gy);
+        qbb_mark(&u->visbb, u->cob.ptbb.lx, u->cob.ptbb.by);
+        qbb_mark(&u->visbb, u->cob.ptbb.rx, u->cob.ptbb.ty);
+#if 0
+        qbb_fprint(stderr, &u->visbb);
+#endif
+    }
+
+    if(u->cob.bdbb.cc==0) {
+#if 0
+        fprintf(stderr, "no content bdbb oid %d\n", u->oid);
+#endif
+    }
+    else {
+#if 0
+        fprintf(stderr, "have content bdbb oid %d\n", u->oid);
+        qbb_fprint(stderr, &u->visbb);
+#endif
+        qbb_shift(&u->cob.bdbb, u->gx, u->gy);
+        qbb_mark(&u->visbb, u->cob.bdbb.lx, u->cob.bdbb.by);
+        qbb_mark(&u->visbb, u->cob.bdbb.rx, u->cob.bdbb.ty);
+#if 0
+        qbb_fprint(stderr, &u->visbb);
+#endif
+    }
+    
+    sig2 = qbb_sig(&u->visbb);
+#if 0
+        fprintf(stderr, "sig1 %x\n", sig1);
+        fprintf(stderr, "sig2 %x\n", sig2);
+#endif
+    if(sig1!=sig2) {
+#if 0
+        fprintf(stderr, "visbb changed maybe ss, pt or br\n");
+        qbb_fprint(stderr, &u->visbb);
+#endif
+    }
+    else {
+#if 0
+        fprintf(stderr, "visbb NOT changed\n");
+#endif
     }
 
 #if 0
@@ -262,7 +327,7 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
         }
         else {
 #if 1
-            if(u->ignore) {
+            if(u->invisible) {
                 continue;
             }
 #endif
@@ -305,7 +370,7 @@ Echo("chunk shift %d,%d oid %d\n", gox, goy, xch->oid);
     xch->gy  = (_by+_ty)/2;
 
     qbb_mark(&xch->visbb, xch->gx, xch->gy);
-#if 1
+#if 0
     qbb_mark(&xch->visbb, xch->clx, xch->cby);
     qbb_mark(&xch->visbb, xch->crx, xch->cty);
 #endif

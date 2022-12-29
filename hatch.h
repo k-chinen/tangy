@@ -27,6 +27,8 @@
 #define HT_SQRING9WRAP      (34)
 #define HT_SQRING7          (35)
 #define HT_SQRING7WRAP      (36)
+#define HT_MIKUZUSI         (37)
+#define HT_RMIKUZUSI        (38)
 
 #define HT_GRID             (50)
 
@@ -37,6 +39,8 @@
 #define HT_UGRID050         (55)
 #define HT_UGRID100         (56)
 #define HT_UGRID200         (57)
+
+#define HT_CGRID            (59)
 
 #define HT_HSTRIPE          (71)
 #define HT_VSTRIPE          (72)

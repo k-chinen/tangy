@@ -355,6 +355,111 @@ ux, uy, px, py, qx, qy, vx, vy);
     return 0;
 }
 
+
+/* pure - no xu and xns */
+int
+solve_curve_points_pure(
+    double xbulge, int c1, int c2,
+    double *pmu, double *pmv,
+    int *p1x, int *p1y,
+    int *p2x, int *p2y,
+    int *p3x, int *p3y,
+    int *p4x, int *p4y)
+{
+    int    x1, x2, y1, y2;
+    int    cx, cy, tx, ty;
+    double th;
+    double ph;
+    double mu, mv;
+    double d;
+    double r;
+    double q;
+    int    ux, uy, vx, vy;
+
+    ph = xbulge*rf;
+
+P;
+Echo("%s: enter\n", __func__);
+Echo("%s: ph %f (%f) c1 %d c2 %d\n",
+    __func__, ph, ph/rf, c1, c2);
+#if 0
+#endif
+
+    x1 = *p1x;
+    y1 = *p1y;
+    x2 = *p4x;
+    y2 = *p4y;
+
+    cx = (x1+x2)/2;
+    cy = (y1+y2)/2;
+Echo(" cx,y %d,%d\n", cx, cy);
+
+
+    d  = SQRT_2DD_I2D(x1,y1,x2,y2);
+    r  = d/2;
+    q  = r/cos(ph);
+Echo(" d %f r %f q %f\n", d, r, q);
+
+    th = (double)(atan2((y2-y1),(x2-x1)));
+
+    /*
+     *             + tx,ty
+     *            / \
+     *           /   + vx,vy
+     *    ux,uy +     \
+     *         /:ph ___+ x2,y2
+     *        / :__+ cx,cy
+     * x1,y1 +-- :th
+     *
+     *      mu = th + ph
+     */
+
+    mu = th + ph;
+    mv = th + M_PI - ph;
+
+    tx = x1+q*cos(mu);
+    ty = y1+q*sin(mu);
+#if 0
+    printf("curve x1,y1 %d,%d x2,y2 %d,%d -> gx,y %d,%d\n",
+        x1, y1, x2, y2, xu->gx, xu->gy);
+#endif
+    if(c1>0) {
+        ux = x1+c1*cos(mu);
+        uy = y1+c1*sin(mu);
+    }
+    else {
+        ux = x1;
+        uy = y1;
+    }
+    if(c2>0) {
+        vx = x2+c2*cos(mv);
+        vy = y2+c2*sin(mv);
+    }
+    else {
+        vx = x2;
+        vy = y2;
+    }
+
+Echo(" th %.3f (%.1f) ph %.3f (%.1f) mu %.3f (%.1f) mv %.3f (%.1f)\n",
+th, th/rf, ph, ph/rf, mu, mu/rf, mv, mv/rf);
+
+Echo(" ux,y %d,%d tx,y %d,%d vx,y %d,%d\n",
+ux, uy, tx, ty, vx, vy);
+
+    *pmu = mu;
+    *pmv = mv;
+    *p1x = ux;
+    *p1y = uy;
+    *p2x = tx;
+    *p2y = ty;
+    *p3x = tx;
+    *p3y = ty;
+    *p4x = vx;
+    *p4y = vy;
+
+    return 0;
+}
+
 int
 solve_curve_points(ob *xu, ns *xns,
     double *pmu, double *pmv,
@@ -388,15 +493,30 @@ Echo("%s: ph %f (%f) c1 %d c2 %d\n",
     __func__, ph, ph/rf, c1, c2);
 #endif
 
+#if 1
     __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+#endif
 
 #if 0
-Echo("%s: - FROM %d,%d TO %d,%d\n", __func__,
+    if(!xu->cob.originalshape) {
+        x1 = xu->csx;
+        y1 = xu->csy;
+        x2 = xu->cex;
+        y2 = xu->cey;
+    }
+    else {
+        __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+    }
+#endif
+
+
+#if 1
+Echo("%s: %d - FROM %d,%d TO %d,%d\n", __func__, xu->oid,
     xu->csx, xu->csy, xu->cex, xu->cey);
-Echo("%s: g FROM %d,%d TO %d,%d\n", __func__,
+Echo("%s: %d g FROM %d,%d TO %d,%d\n", __func__, xu->oid,
     xu->gsx, xu->gsy, xu->gex, xu->gey);
 #endif
-Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
+Echo("%s: %d ? FROM %d,%d TO %d,%d\n", __func__, xu->oid,
     x1, y1, x2, y2);
 
     cx = (x1+x2)/2;
@@ -416,9 +536,11 @@ Echo(" d %f r %f q %f\n", d, r, q);
      *            / \
      *           /   + vx,vy
      *    ux,uy +     \
-     *         /   ____+ x2,y2
-     *        / __+ cx,cy
-     * x1,y1 +--
+     *         /:ph ___+ x2,y2
+     *        / :__+ cx,cy
+     * x1,y1 +-- :th
+     *
+     *      mu = th + ph
      */
 
     mu = th + ph;
@@ -426,9 +548,13 @@ Echo(" d %f r %f q %f\n", d, r, q);
 
     tx = x1+q*cos(mu);
     ty = y1+q*sin(mu);
-#if 1
+#if 0
     xu->gx = tx;
     xu->gy = ty;
+#endif
+#if 0
+    printf("curve oid %d x1,y1 %d,%d x2,y2 %d,%d -> gx,y %d,%d\n",
+        xu->oid, x1, y1, x2, y2, xu->gx, xu->gy);
 #endif
     if(c1>0) {
         ux = x1+c1*cos(mu);

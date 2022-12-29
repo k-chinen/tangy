@@ -11,6 +11,8 @@
 #include "a.h"
 #include "gv.h"
 
+#include "color.h"
+
 
 int
 __sdumpNZ(FILE *fp, char *msg, char *s, int n, int zb)
@@ -89,15 +91,15 @@ trimdoublequote(char *s)
 {
     char *os;
     os = s;
-#if 0
+#if 1
     sdumpNZ(stderr, "b", os, 16);
 #endif
     if(*s=='"') {
-#if 0
+#if 1
         sdumpNZ(stderr, "0s", s, 16);
 #endif
         memmove(s, s+1, strlen(s+1)+1);
-#if 0
+#if 1
         sdumpNZ(stderr, "1s", s, 16);
 #endif
         while(*s) {
@@ -109,7 +111,7 @@ trimdoublequote(char *s)
         }
     }
     *s = '\0';
-#if 0
+#if 1
     sdumpNZ(stderr, "a", os, 16);
 #endif
     return 0;
@@ -141,7 +143,7 @@ fEcho(stderr, "w %d\n", w);
 }
 
 int
-xatoi(char *src)
+parsedimen(char *src)
 {
     extern int objunit;
     char  *p, *q;
@@ -208,6 +210,206 @@ skip_m:
     return m;
 }
 
+int
+parsergb(char *src, int *xr, int *xg, int *xb)
+{
+    int   rv;
+    char *hexstr="0123456789ABCDEF";
+    char *p;
+    char  m;
+    char *u;
+    int  yr, yg, yb;
+
+    rv = -1;
+    p = src;
+
+    if(*p>='a'&&*p<='f') { m = *p - 32; }
+    else { m = *p; }
+
+    yr = -1;
+    u = hexstr;
+    while(*u) {
+        if(m==*u) {
+            yr = u - hexstr;
+            break;
+        }
+        u++;
+    }
+
+    p++;
+    if(!*p) {
+        goto out;
+    }
+
+    if(*p>='a'&&*p<='f') { m = *p - 32; }
+    else { m = *p; }
+
+    yg = -1;
+    u = hexstr;
+    while(*u) {
+        if(m==*u) {
+            yg = u - hexstr;
+            break;
+        }
+        u++;
+    }
+
+    p++;
+    if(!*p) {
+        goto out;
+    }
+
+    if(*p>='a'&&*p<='f') { m = *p - 32; }
+    else { m = *p; }
+
+    yb = -1;
+    u = hexstr;
+    while(*u) {
+        if(m==*u) {
+            yb = u - hexstr;
+            break;
+        }
+        u++;
+    }
+
+out:
+    if(yr>=0) { *xr = yr; }
+    if(yg>=0) { *xg = yg; }
+    if(yb>=0) { *xb = yb; }
+
+    if(yr>=0 && yg>=0 && yb>=0) { rv = 0; }
+
+#if 0
+    fprintf(stderr, "%s: src |%s| %d/%d/%d r %d g %d b %d ; rv %d\n", 
+            __func__, src, yr, yg, yb, *xr, *xg, *xb, rv);
+#endif
+
+    return rv;   
+}
+
+int
+parsecolor(pallet_t *ar, char *src)
+{
+    int   rv = -1;
+    int   m = 0;
+    int   maydec, mayhex;
+    char *p;
+    char *q;
+    int   c;
+    char  buf[BUFSIZ];
+    color_t *cpos;
+
+    maydec = mayhex = 0;
+    cpos = NULL;
+
+    p = src;
+    while(*p && (*p>='0' && *p<='9')) {
+        p++;
+    }
+    if(*p=='\0') {
+        maydec = 1;
+    
+        if(maydec) {
+            rv = atoi(src);
+            m = 1;
+            goto out;
+        }
+    }
+
+    p = src;
+    q = buf;
+    c = 0;
+    while(*p && c<BUFSIZ && ((*p>='0' && *p<='9') || (*p>='a' && *p<='f') || (*p>='A' && *p<='F'))) {
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+#if 0
+        fprintf(stderr, "buf |%s| c %d\n", buf, c);
+#endif
+    if((*p=='h' ||*p=='H') && *(p+1)=='\0') {
+        mayhex = 1;
+        m += 10;
+#if 0
+        fprintf(stderr, "hex buf |%s| c %d\n", buf, c);
+#endif
+        if(c==3) {
+            int vr, vg, vb;
+            int ik;
+
+            vr = vg = vb = 9999;
+            ik = parsergb(src, &vr, &vg, &vb);
+#if 0
+            cpos = pallet_findwrgb(ar, vr, vg, vb);
+#endif
+            cpos = pallet_findaddwrgb(ar, vr, vg, vb);
+            if(cpos) {
+#if 0
+                fprintf(stderr, "FOUND such color; addr %p\n", cpos);
+#endif
+                rv = cpos->num;
+                m += 100;
+            }
+            else {
+                fprintf(stderr, "NOT found such color\n");
+                m += 1000;
+            }
+        }
+        else {
+            fprintf(stderr, "ignore length. expected 3 RGB letters\n");
+        }
+    }
+    else {
+        char *ref;
+
+        if(*src=='-') {
+            rv = -1;
+#if 0
+            fprintf(stderr,
+                "explicit negative color; no-draw or transparent\n");
+#endif
+            goto out2;
+        }
+
+        ref = src;
+        if(*src=='"') { 
+            char *p;
+            char *q;
+
+            /* trim " */
+            p = src+1;
+            q = buf;
+            c = 0;
+            while(*p&& c<BUFSIZ && *p!='"') {
+                *q++ = *p++;
+                c++;
+            }
+            *q = '\0';
+            ref = buf;
+        }
+#if 0
+        fprintf(stderr, "it('%s') is name of color, maybe\n", ref);
+#endif
+        cpos = pallet_findwname(ar, ref);
+        if(cpos) {
+            rv = cpos->num;
+            m += 10000;
+        }
+    }
+
+out:
+#if 0
+    fprintf(stderr, "%s: src |%s| maydec %d mayhex %d ; m %d rv %d\n",
+        __func__, src, maydec, mayhex, m, rv);
+#endif
+    if(rv<0) {
+        Error("unknown or undefined color '%s'\n", src);
+        fflush(stdout);
+    }
+out2:
+
+    return rv;
+}
 
 
 
@@ -722,47 +924,6 @@ skip_note:
         &rob->cob.arrowcentheadtype,
         &rob->cob.arrowbackheadtype, 0);
 
-#if 0
-    if(strcasecmp(name, "--")==0)     {
-        rob->cob.arrowheadpart     = AR_NONE;
-        rob->cob.arrowforeheadtype = AH_NONE;
-        rob->cob.arrowbackheadtype = AH_NONE;
-        goto out;
-    }
-    if(strcasecmp(name, "->")==0)     {
-        rob->cob.arrowheadpart     = AR_FORE;
-        rob->cob.arrowforeheadtype = AH_NORMAL;
-        rob->cob.arrowbackheadtype = AH_NONE;
-        goto out;
-    }
-    if(strcasecmp(name, "<-")==0)     {
-        rob->cob.arrowheadpart     = AR_BACK;
-        rob->cob.arrowforeheadtype = AH_NONE;
-        rob->cob.arrowbackheadtype = AH_NORMAL;
-        goto out;
-    }
-    if(strcasecmp(name, "<->")==0)     {
-        rob->cob.arrowheadpart     = AR_BOTH;
-        rob->cob.arrowforeheadtype = AH_NORMAL;
-        rob->cob.arrowbackheadtype = AH_NORMAL;
-        goto out;
-    }
-    if(strcasecmp(name, "->-")==0)     {
-        rob->cob.arrowheadpart     = AR_CENT;
-        rob->cob.arrowforeheadtype = AH_NONE;
-        rob->cob.arrowcentheadtype = AH_NORMAL;
-        rob->cob.arrowbackheadtype = AH_NONE;
-        goto out;
-    }
-    if(strcasecmp(name, "-<-")==0)     {
-        rob->cob.arrowheadpart     = AR_CENT;
-        rob->cob.arrowforeheadtype = AH_NONE;
-        rob->cob.arrowcentheadtype = AH_REVNORMAL;
-        rob->cob.arrowbackheadtype = AH_NONE;
-        goto out;
-    }
-#endif
-
     oak = assoc(objattr_ial, name);
     if(oak<0) {
 #if 0
@@ -792,15 +953,15 @@ skip_note:
 #define ISET(x,y) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
-        rob->cob.y = xatoi(value); \
+        rob->cob.y = parsedimen(value); \
         uc++; \
     }
 
 #define ISET2(x,y1,y2) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
-        rob->cob.y1 = xatoi(value); \
-        rob->cob.y2 = xatoi(value); \
+        rob->cob.y1 = parsedimen(value); \
+        rob->cob.y2 = parsedimen(value); \
         uc++; \
     }
 
@@ -840,10 +1001,29 @@ skip_note:
 
 #define SADD(x,y) \
     if(oak==(x)) { \
-        /*fprintf(stderr, "call draw_wordW <%s>\n", p);*/ \
+        /* fprintf(stderr, "call draw_wordW <%s>\n", p); */ \
         p = draw_wordW(p, value, BUFSIZ); \
-        if(value[0]){ trimdoublequote(value); } \
-        /*fprintf(stderr, "value  |%s|\n", value);*/ \
+        /* fprintf(stderr, "value  |%s|\n", value); */ \
+        if(rob->cob.y==NULL) { \
+            rob->cob.y = strdup(value); \
+        } \
+        else { \
+            char atmp[BUFSIZ]; \
+            strcpy(atmp, rob->cob.y); \
+            strcat(atmp, MAP_SEPS); \
+            strcat(atmp, value); \
+            free(rob->cob.y); \
+            rob->cob.y = strdup(atmp); \
+        } \
+        /*fprintf(stderr, "result |%s|\n", rob->cob.y);*/ \
+        uc++; \
+    }
+
+#define XSADD(x,y) \
+    if(oak==(x)) { \
+        /* fprintf(stderr, "call draw_wordDQ <%s>\n", p); */ \
+        p = draw_wordDQ(p, value, BUFSIZ); \
+        /* fprintf(stderr, "value  |%s|\n", value); */ \
         if(rob->cob.y==NULL) { \
             rob->cob.y = strdup(value); \
         } \
@@ -863,7 +1043,7 @@ skip_note:
 #define OISET(x,y) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
-        rob->y = xatoi(value); \
+        rob->y = parsedimen(value); \
         uc++; \
     }
 
@@ -934,15 +1114,32 @@ skip_note:
         uc++;   \
     }
 
+#define AISETC(N,P) \
+    if(oak==(N)) {  \
+        p = draw_wordW(p, value, BUFSIZ); \
+        /* fprintf(stderr, "value  |%s|\n", value); */ \
+        x = parsecolor(pallet, value); \
+        rob->cob.P = x; \
+        /* fprintf(stderr, "setted |%d|\n", rob->cob.P); */ \
+        uc++;   \
+    }
+
 P;
     uc = 0;
+#if 0
     ISET(OA_LINECOLOR,      outlinecolor);
+#endif
+    AISETC(OA_LINECOLOR,    outlinecolor);
     ISET(OA_LINETHICK,      outlinethick);
-    AISETN(OA_LINETYPE, linetype_ial, outlinetype);
+    AISETN(OA_LINETYPE,     linetype_ial, outlinetype);
 
+    ISET(OA_WLINETHICK,     wlinethick);
 
+#if 0
     ISET(OA_FILLCOLOR,      fillcolor);
-    AISETX(OA_FILLHATCH, hatchtype_ial, fillhatch, HT_XCROSSED);
+#endif
+    AISETC(OA_FILLCOLOR,    fillcolor);
+    AISETX(OA_FILLHATCH,    hatchtype_ial, fillhatch, HT_XCROSSED);
     ISET(OA_FILLTHICK,      fillthick);
     ISET(OA_FILLPITCH,      fillpitch);
 
@@ -984,6 +1181,10 @@ P;
     ISET(OA_GIMARGIN,       gimargin);
     ISET(OA_ROTATE,         rotateval);
 
+    ISET(OA_PIESTART,       piestart);
+    ISET(OA_PIEEND,         pieend);
+    ONSET(OA_OUTLINEONLY,   outlineonly);
+
     LADD(OA_DECO,           deco);
     ISET(OA_DECOCOLOR,      decocolor);
 
@@ -993,14 +1194,19 @@ P;
     ISET(OA_LANEGAPH,       lanegaph);
     ISET2(OA_LANEGAP,       lanegapv, lanegaph);
 
-    SADD(OA_PORT,           portstr);
+    XSADD(OA_PORT,          portstr);
     ISET(OA_PORTROTATE,     portrotate);
-    SADD(OA_STARBOARD,      boardstr);
+    ISET(OA_PORTOFFSET,     portoffset);
+    XSADD(OA_STARBOARD,     boardstr);
     ISET(OA_BOARDROTATE,    boardrotate);
+    ISET(OA_BOARDOFFSET,    boardoffset);
+
     SADD(OA_BGSHAPE,        bgshape);
 
     OISET(OA_WIDTH,         wd);
     OISET(OA_HEIGHT,        ht);
+
+    ISET(OA_CRANKPOS,       crankpos);
 
     AISETN(OA_AUXLINETYPE,  auxlinetype_ial, auxlinetype);
     OISET(OA_AUXLINEDISTANCE,      cauxlinedistance);
@@ -1011,6 +1217,7 @@ P;
     ISET(OA_FORECHOP,       forechop);
     ISET(OA_BACKCHOP,       backchop);
     ISET(OA_BULGE,          bulge);
+    ONSET(OA_ARROWEVERY,    arrowevery);
 
     SADD(OA_FILE,           filestr);
     RSET2(OA_FILESCALEXY,   filescalex, filescaley);
@@ -1218,6 +1425,10 @@ Info("sub-command '%s' argument skip\n", name);
         rob->cob.markbb = 1;
         uc++;
     }
+    else if(oak==OA_MARKGUIDE) {
+        rob->cob.markguide = 1;
+        uc++;
+    }
     else if(oak==OA_MARKPATH) {
         rob->cob.markpath = 1;
         uc++;
@@ -1323,6 +1534,8 @@ parseobj(char *p)
 
     nob->cob.arrowevery     = 0;
 
+    nob->cob.crankpos       = 50;
+
     nob->cob.wlinethick     = def_wlinethick;
     
     /* for automatic, set negative size as unsolved */
@@ -1343,9 +1556,10 @@ Echo("CHECK CHUNK attr\n");
     case CMD_RESTORE:
     case CMD_PUSH:
     case CMD_POP:
+    case CMD_AGAIN:
     case CMD_BACK:
     case CMD_HBACK:
-        nob->ignore = 1;
+        nob->invisible = 1;
         break;
 
 #if 0
@@ -1389,16 +1603,16 @@ Echo("CHECK CHUNK attr\n");
     case CMD_RIGHT:
     case CMD_UP:
     case CMD_LEFT:
-        nob->ignore = 1;
+        nob->invisible = 1;
         break;
 
     case CMD_NOTEFILE:
-        nob->ignore = 1;
+        nob->invisible = 1;
         break;
 
     case CMD_TRACEON:
     case CMD_TRACEOFF:
-        nob->ignore = 1;
+        nob->invisible = 1;
         break;
 
     default:
@@ -1995,6 +2209,38 @@ sdump(stdout, "raw p ", p);
             och = chs_pop();
             curch = och;
         }
+#if 1
+        else
+        if(strncasecmp(p, "namedcolor", 10)==0) {
+            char  xcmd[BUFSIZ];
+            char  xname[BUFSIZ];
+            char  xvalue[BUFSIZ];
+            char *k;
+            int   ik;
+            color_t *cpos;
+            int   vr, vg, vb;
+
+            k = p;
+            k = draw_wordW(k, xcmd, BUFSIZ);
+            k = draw_wordW(k, xname, BUFSIZ);
+            k = draw_wordW(k, xvalue, BUFSIZ);
+#if 0
+            fprintf(stderr, "xcmd |%s| xname |%s| xvalue |%s|\n",
+                xcmd, xname, xvalue);
+#endif
+            
+            ik = parsergb(xvalue, &vr, &vg, &vb);
+            if(ik>=0) {
+                cpos = pallet_addnamedcolor(pallet, xname, vr, vg, vb);
+            }
+            else {
+#if 1
+                fprintf(stderr, "ik %d by for namedcolor\n", ik);
+#endif
+                cpos = pallet_addnamedneg(pallet, xname);
+            }
+        }
+#endif
         else {
     /*****
      *****

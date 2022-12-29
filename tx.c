@@ -13,6 +13,7 @@
 
 extern char *def_fontspec;
 
+
 int tx_trace = 0;
 
 #define Echo    if(tx_trace)printf
@@ -20,6 +21,37 @@ int tx_trace = 0;
 
 #define Error   printf("ERROR %s:%s ", __FILE__, __func__);fflush(stdout);printf
 #define Warn    printf("WARNING %s:%s ", __FILE__, __func__);fflush(stdout);printf
+
+static char *eincharset="UTF-8";
+
+int
+set_eincharset(char *nenc)
+{
+    eincharset = nenc;
+    return 0;
+}
+
+char *
+get_eincharset()
+{
+    return eincharset;
+}
+
+
+static char *innercharset="EUC-JP";
+
+int
+set_innercharset(char *nenc)
+{
+    innercharset = nenc;
+    return 0;
+}
+
+char *
+get_innercharset()
+{
+    return innercharset;
+}
 
 
 int
@@ -198,8 +230,12 @@ ins_kanji_shift(char *ds, int dlen, char *ss)
     }
     memset(ms, 0, mlen);
 
-
+#if 0
+    cq = iconv_open("CP932", "UTF-8");
     cq = iconv_open("EUC-JP", "UTF-8");
+#endif
+    cq = iconv_open(innercharset, eincharset);
+
     if(cq == (iconv_t)-1) {
         printf("fail iconv_open (%d)\n", errno);
         return -1;
@@ -329,7 +365,12 @@ txe_parse(varray_t *ar, char *fs)
     Echo("b fs '%s'\n", fs);
     Echo("b ts '%s'\n", ts);
 
+#if 1
     ik = ins_kanji_shift(ts, tl, fs);
+#endif
+#if 0
+    memcpy(ts, fs, il);
+#endif
 
     Echo("a fs '%s'\n", fs);
     Echo("a ts '%s'\n", ts);

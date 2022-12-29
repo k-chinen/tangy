@@ -100,7 +100,7 @@ int sdump(FILE *fp, char *msg, char *s);
 int dellastcr(char *bf);
 int trimdoublequote(char *s);
 int delfirstchars(char *bf, int w);
-int xatoi(char *src);
+int parsedimen(char *src);
 int gotlabel(char *lab, int lsize, char *line);
 char *skiplabel(char *lab, int lsize, char *line);
 char *parsetype(int *rot, char *line);

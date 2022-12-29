@@ -13,6 +13,33 @@
 static int qbb_serial=0;
 
 int
+qbb_sig(qbb_t *qb)
+{
+    int rv;
+    /* use prime number */
+    rv = 1234567;
+    rv += qb->rx * 3;
+    rv += qb->ty * 5;
+    rv += qb->lx * 7;
+    rv += qb->by * 11;
+    return rv;
+}
+
+int
+qbb_sigfull(qbb_t *qb)
+{
+    int rv;
+    /* use prime number */
+    rv = 841923;
+    rv += qb->rx * 3;
+    rv += qb->ty * 5;
+    rv += qb->lx * 7;
+    rv += qb->by * 11;
+    rv += qb->cc * 13;
+    return rv;
+}
+
+int
 qbb_isinit(qbb_t *qb)
 {
     int rv;
@@ -117,6 +144,18 @@ qbb_mark(qbb_t *qb, int tx, int ty)
     if(ty<qb->by) qb->by = ty;
     if(ty>qb->ty) qb->ty = ty;
     qb->cc++;
+
+    return 0;
+}
+
+int
+qbb_ow_or(qbb_t *qa, qbb_t *qb)
+{
+    if(!qa || !qb) {
+        return -1;
+    }
+    qbb_mark(qa, qb->lx, qb->by);
+    qbb_mark(qa, qb->rx, qb->ty);
 
     return 0;
 }
@@ -337,7 +376,7 @@ boxtest(qbb_t *qb, int sf, int lx, int by, int rx, int ty)
 
 
 int
-main()
+test1()
 {
     int ik, ik2;
     qbb_t qa, qb, qc;
@@ -405,6 +444,32 @@ main()
     if(ik>0) {
         qbb_fprint(stdout, &qo);
     }
+    return 0;
+}
 
+int
+test2()
+{
+    return 0;
+}
+
+int
+main(int argc, char *argv[])
+{
+    qbb_t a, b, c;
+
+    qbb_reset(&a);
+    qbb_setbb(&a, 0, 0, 10, 10);
+    qbb_fprint(stdout, &a);
+
+    qbb_reset(&b);
+    qbb_setbb(&b, 5, 5, 20, 20);
+    qbb_fprint(stdout, &b);
+
+    qbb_ow_or(&a, &b);
+    qbb_fprint(stdout, &a);
+
+    test2();
 }
 #endif /* QBB_TEST */
+

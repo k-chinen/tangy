@@ -82,6 +82,11 @@ confirm_attr(ob *xo)
         xo->floated = 1;
     }
 #endif
+#if 0
+    if(xoa->aat) {
+        xo->floated = 1;
+    }
+#endif
 
 #if 1
     if(xo->type==CMD_AUXLINE) {
@@ -370,7 +375,7 @@ _ob_dump(ob* s, int w)
         }
     }
     else {
-        printf("%p %d type %d\n", s, s->ignore, s->type);
+        printf("%p %d type %d\n", s, s->invisible, s->type);
     }
 
     fflush(stdout);

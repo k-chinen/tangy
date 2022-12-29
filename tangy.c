@@ -51,32 +51,55 @@ print_usage()
             objunit);
     printf("  -M num    set EPS outside margin by bp (current %d)\n",
             epsoutmargin);
+
+    printf("  -F fontconfig font configuration\n");
+    printf("         \"default=sanserif,large;kanji.all=IPAMincho\"\n");
+    printf("         \"kanji.all.encode=CP932\"\n");
+    {
+        char *u = NULL;
+        extern char *get_innercharset();
+        u = get_innercharset();
+        if(u==NULL) {
+            u = "*none*";
+        }
+    printf("              /* inner           charset (%s) */\n", u);
+    }
+    {
+        char *u = NULL;
+        extern char *get_eincharset();
+        u = get_eincharset();
+        if(u==NULL) {
+            u = "*none*";
+        }
+    printf("              /* external input  charset (%s) */\n", u);
+    }
+
+    printf("  -k ratio  set ascii/kanji size ratio (current %.3f)\n", akratio);
+    printf("  -q        quiet mode\n");
+
+    printf("--- debug ---\n");
+    printf("  -v        verbose mode (current %d)\n", _t_);
+    printf("  -b        draw boundingbox of objects\n");
+    printf("  -B        draw visible boundingbox of objects\n");
+    printf("  -U        draw object MOVE\n");
+    printf("  -i        draw object IDs\n");
+    printf("  -l        print object list\n");
+    printf("  -c        print color list\n");
+    printf("  -p        passing trace mode (current %d)\n", _p_);
     printf("  -g        draw grid\n");
     printf("  -G num    set grid pitch in bp (current %d)\n", 
             def_gridpitch);
     printf("  -R num    set grid range; how many times of pitch (current %d)\n",
         def_gridrange);
-    printf("  -b        draw boundingbox of objects\n");
-    printf("  -B        draw visible boundingbox of objects\n");
-    printf("  -U        draw invisible object MOVE\n");
-    printf("  -i        draw object IDs\n");
-    printf("  -l        print object list for debug\n");
-    printf("  -c        print color list for debug\n");
-    printf("  -F fontspec  set default font (current '%s')\n", def_fontname);
-    printf("                -F \"default=sanserif,large;sanserif=Courier\"\n");
-    printf("  -K fontspec  set kanji font\n");
-    printf("  -k ratio  set ascii/kanji size ratio (current %.3f)\n", akratio);
     printf("following itmes are reserved for future. do not use.\n");
-    printf("  -v        verbose mode (current %d)\n", _t_);
-    printf("  -q        quiet mode\n");
-    printf("  -p        passing trace mode (current %d)\n", _p_);
+    printf(" *-r        draw ruler\n");
     printf(" *-d        draft mode\n");
     printf(" *-L        draw labels\n");
-    printf(" *-D        debug mode\n");
-    printf(" *-r        draw ruler\n");
+    printf(" *-D        debug mode; equal -g -B -d -i -r -t\n");
     printf(" *-s num    set scale\n");
     printf(" *-n        no draw\n");
     printf(" *-N file   set notefile\n");
+
 
     return 0;
 }
@@ -141,6 +164,7 @@ print_hints()
     print_alistmemkeys("hatching type:", hatchtype_ial);
     print_alistmemkeys("font type:", ff_ial);
     print_alistmemkeys("font size:", fh_ial);
+    printf("charset:\n    EUC-JP, CP932, UTF-8\n");
 
     return 0;
 }
@@ -148,7 +172,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.095\n");
+    printf("tangy version 2.106\n");
     return 0;
 }
 
@@ -242,6 +266,9 @@ test0()
 
 extern int tx_trace;
 
+int set_eoutcharset(char *nenc);
+char *get_eoutcharset();
+
 int
 main(int argc, char *argv[])
 {
@@ -251,16 +278,19 @@ main(int argc, char *argv[])
     int   ik;
     int   do_colorlist, do_objlist;
     FILE *fp;
-    int x, y;
+    int   x, y;
     int   i;
+    int   touch_font=0;
 
     do_objlist = 0;
     do_colorlist = 0;
     
     pallet = new_default_pallet();
 
+    tgyfont_setup(-1);
+
     while((flag=getopt(argc, argv,
-            "0hmVPvqpngbBSUdiLrtDo:u:G:R:M:F:K:k:lcs:"))!=EOF) {
+            "0hmVPvqpngbBSUdiLrtDo:u:G:R:M:F:K:k:lcs:e:EQ"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -350,26 +380,16 @@ main(int argc, char *argv[])
             epsoutmargin = atoi(optarg);
             break;
 
-#if 0
         case 'F':
-            def_fontname = strdup(optarg);
-#if 0
-            ik = swap_font(FF_SERIF, def_fontname);
-            fprintf(stderr, "ik %d\n", ik);
-#endif
-            ik = swap_Xfont(ff_act_ial, FF_SERIF, def_fontname);
+            touch_font++;
+            tgyfont_edit(FM_ASCII, optarg);
             break;
-
+#if 0
         case 'K':
-            ik = swap_Xfont(ff_actk_ial, FF_SERIF, optarg);
+            touch_font++;
+            tgyfont_edit(FM_KANJI, optarg);
             break;
 #endif
-        case 'F':
-            font_edit(FM_ASCII, optarg);
-            break;
-        case 'K':
-            font_edit(FM_KANJI, optarg);
-            break;
 
         case 'k':
             akratio = atof(optarg);
@@ -393,7 +413,40 @@ main(int argc, char *argv[])
         case 's':
             canvassc *= atof(optarg);
             break;
+    
+#if 0
+        case 'e':
+            touch_font++;
+#if 0
+            encode_edit(FM_KANJI, optarg);
+#endif
+
+#if 1
+            tgyfont_wipe_encodeM(FM_KANJI, optarg);
+#endif
+
+            break;
+#endif
+        case 'E':
+#if 0
+            tgyfontset_fdump(stdout, "font parameters");
+#endif
+            tgyfontset_fprint(stdout, "font parameters");
+            fflush(stdout);
+            break;
+        case 'Q':
+            Echo("quit by explicit option\n");
+            exit(0);
+            break;
         }
+    }
+    if(_t_ && touch_font) {
+#if 0
+        fontset_fprint(stderr, "font parameters changed");
+#endif
+        tgyfontset_fprint(stderr, "font parameters changed");
+        fprintf(stderr, "def_fontspec |%s|\n", def_fontspec);
+        fprintf(stderr, "def_fontname |%s|\n", def_fontname);
     }
 
 #if 0
@@ -405,6 +458,7 @@ main(int argc, char *argv[])
         canvasrt = 90;
     }
 #endif
+
 
     notefile_setup();
 

@@ -2,6 +2,53 @@ CHANGES
 
 This file describe remarkable change in user's view.
 
+From 2.105:
+  - fix around text clipping (surface string)
+  - rearrange port/board string position
+  - rearrange around arrow head; clip ends when "NORMAL"-head
+
+From 2.104:
+  - rearrange color map
+      * it accepts named color.  naming by NAMEDCOLOR
+      * it accepts hex style color speicication (c.f. 333H, fedh)
+
+From 2.103:
+  - expand color map
+  - employ RMIKUZUSI (45 degree rotated MIKUZUSI) hatch pattern
+
+From 2.102:
+  - employ note NWI, NWO, NNWO, WNWO and simular
+  - employ MIKUZUSI hatch pattern
+
+From 2.101
+  - fix chop in chop_seg
+
+From 2.100
+  - support vertical SCATTER/GATHER
+  - improve default size of PLINE and SEP
+  - fix arround expand_sep
+
+From 2.099
+  - new object PIE with PIESTART and PIEEND
+
+From 2.098
+  - care simple CURVE (no FROM and TO)
+  - arrange fontset configuration
+        kanji.all=Osaka;kanji.all.encode=CP932
+
+From 2.097
+  - employ option -e for external ouput charset
+    however, it is change to attribute of font, maybe
+  - care external input/output and internal charset
+  - re-support 'chop' in LINE and related
+  - re-implementation CRANK/ELBOW
+  - employ CRANK/ELBOW
+
+From 2.096
+  - support 'rad' in DRUM and PIPE
+        can change the size of ellipse in tall height drum 
+        and long length pipe.
+
 From 2.060
   - support UTF-8 source, but care only Japanese
         using cheap trick, this version parses UTF-8 source.

@@ -35,7 +35,7 @@ mob_new()
     
     rv = (mob*)malloc(sizeof(mob));
     if(!rv) {
-        printf("no memory\n");
+        printf("ERROR no memory\n");
         return NULL;
     }
     memset(rv, 0, sizeof(mob));
@@ -856,11 +856,11 @@ fprintf(stderr, " comb neg\n");
     case LS_CURVE:
         if(focus) {
             if(dsdir>=0) {
-                mkpath_segarcseg2(qar, sx, sy, maxsx, sy,
+                mkpath_segarcseg2H(qar, sx, sy, maxsx, sy,
                    mx, eey, ex, eey);
             }
             else {
-                mkpath_segarcseg2(qar, ex, ey, mx, ey,
+                mkpath_segarcseg2H(qar, ex, ey, mx, ey,
                    maxsx, sy, sx, sy);
             }
 #if 0
@@ -869,11 +869,11 @@ fprintf(stderr, " comb neg\n");
         }
         else {
             if(dsdir>=0) {
-                mkpath_segarcseg2(qar, sx, ssy, maxsx, ssy, 
+                mkpath_segarcseg2H(qar, sx, ssy, maxsx, ssy, 
                    mx, eey, ex, eey);
             }
             else {
-                mkpath_segarcseg2(qar, ex, eey, mx, eey,
+                mkpath_segarcseg2H(qar, ex, eey, mx, eey,
                    maxsx, ssy, sx, ssy);
             }
         }
@@ -882,22 +882,22 @@ fprintf(stderr, " comb neg\n");
     case LS_ARC:
         if(focus) {
             if(dsdir>=0) {
-                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                mkpath_segarcsegH(qar, sx, sy, maxsx, sy, mx, sy,
                    mx, ey, ex, ey);
             }
             else {
-                mkpath_segarcseg(qar, ex, ey, mx, ey, mx, sy,
+                mkpath_segarcsegH(qar, ex, ey, mx, ey, mx, sy,
                    maxsx, sy, sx, sy);
             }
             if(join) { mkpath_addbwcir(qar, mx, my); }
         }
         else {
             if(dsdir>=0) {
-                mkpath_segarcseg(qar, sx, sy, maxsx, sy, mx, sy,
+                mkpath_segarcsegH(qar, sx, sy, maxsx, sy, mx, sy,
                    mx, eey, ex, eey);
             }
             else {
-                mkpath_segarcseg(qar, ex, eey, mx, eey, mx, sy,
+                mkpath_segarcsegH(qar, ex, eey, mx, eey, mx, sy,
                    maxsx, sy, sx, sy);
             }
         }

@@ -38,6 +38,7 @@ apair_t cmd_ial[] = {
 #endif
     {"circle",          CMD_CIRCLE},
     {"ellipse",         CMD_ELLIPSE},
+    {"pie",             CMD_PIE},
     {"polygon",         CMD_POLYGON},
     {"parallelogram",   CMD_PARALLELOGRAM},
 
@@ -92,6 +93,10 @@ apair_t cmd_ial[] = {
     {"gear",            CMD_GEAR},
 
     {"auxline",         CMD_AUXLINE},
+    {"hcrank",          CMD_HCRANK},
+    {"vcrank",          CMD_VCRANK},
+    {"helbow",          CMD_HELBOW},
+    {"velbow",          CMD_VELBOW},
 
     {"chunk",           CMD_CHUNK},
     {"[",               CMD_CHUNK},
@@ -173,6 +178,8 @@ apair_t hatchtype_ial[] = {
     {"concentric",          HT_CONCENTRIC},
 
     {"grid",                HT_GRID},
+    {"cgrid",               HT_CGRID},
+    {"ugrid",               HT_CGRID},
 
     {"ugrid",               HT_UGRID025},
     {"ugrid005",            HT_UGRID005},
@@ -219,6 +226,8 @@ apair_t hatchtype_ial[] = {
     {"kakutsunagi",         HT_SQRING7WRAP},
     {"fundo",               HT_FUNDO},
     {"yagasuri",            HT_YAGASURI},
+    {"mikuzusi",            HT_MIKUZUSI},
+    {"rmikuzusi",           HT_RMIKUZUSI},
     {"dummy",               HT_DUMMY},
     {NULL,                  -1},
 };
@@ -325,6 +334,29 @@ apair_t pos_ial[] = {
     {"CSO",                 PO_CSO},
     {"CNO",                 PO_CNO},
 
+    /* for note */
+    {"C",                   PO_CENTER},
+
+    {"NWI",                 PO_NWI},
+    {"NWO",                 PO_NWO},
+    {"NNWO",                PO_NNWO},
+    {"WNWO",                PO_WNWO},
+
+    {"NEI",                 PO_NEI},
+    {"NEO",                 PO_NEO},
+    {"NNEO",                PO_NNEO},
+    {"ENEO",                PO_ENEO},
+
+    {"SWI",                 PO_SWI},
+    {"SWO",                 PO_SWO},
+    {"SSWO",                PO_SSWO},
+    {"WSWO",                PO_WSWO},
+
+    {"SEI",                 PO_SEI},
+    {"SEO",                 PO_SEO},
+    {"SSEO",                PO_SSEO},
+    {"ESEO",                PO_ESEO},
+
     {NULL,                  -1},
 };
 
@@ -390,6 +422,8 @@ apair_t objattr_ial[] = {
 
     {"linkstyle",           OA_LINKSTYLE},
     {"linkmap",             OA_LINKMAP},
+
+    {"crankpos",            OA_CRANKPOS},
 
     {"auxlinetype",         OA_AUXLINETYPE},
     {"auxlineopt",          OA_AUXLINEOPT},
@@ -468,6 +502,8 @@ apair_t objattr_ial[] = {
     {"board",               OA_STARBOARD},
     {"portrotate",          OA_PORTROTATE},
     {"boardrotate",         OA_BOARDROTATE},
+    {"portoffset",          OA_PORTOFFSET},
+    {"boardoffset",         OA_BOARDOFFSET},
 
     {"bgshape",             OA_BGSHAPE},
 
@@ -482,6 +518,9 @@ apair_t objattr_ial[] = {
 
     {"hollow",              OA_HOLLOW},
     {"shadow",              OA_SHADOW},
+    {"piestart",            OA_PIESTART},
+    {"pieend",              OA_PIEEND},
+    {"outlineonly",         OA_OUTLINEONLY},
     
     {"laneorder",           OA_LANEORDER},
     {"lanenum",             OA_LANENUM},
@@ -574,7 +613,7 @@ double hatchpitchfactor     = 0.07;
 double marknoderadfactor    = 0.05;
 double markbbthickfactor    = 0.02;
 
-double noteosepfactor       = 0.20;
+double noteosepfactor       = 0.10;
 double noteisepfactor       = 0.10;
 
 double pbstrgapfactor       = 0.10;
@@ -597,7 +636,7 @@ int def_dir             =   0;
 int def_scale           =   1;
 int def_color           =   0;
 int def_fgcolor         =   0;
-int def_bgcolor         =   7;
+int def_bgcolor         =   999;
 int def_backhatch       =   HT_SOLID;
 
 int def_linethickmode   =   1;

@@ -37,6 +37,17 @@
 #define SSTR_SEPC   (',')
 */
 
+/* orientation */
+#define OR_H            (0) /* horizontal */
+#define OR_V            (1) /* vertical */
+
+/* quadrant */
+#define QU_NN           (0) /* none, none */
+#define QU_PP           (1) /* X plus,  Y plus  */
+#define QU_MP           (2) /* X minus, Y plus  */
+#define QU_MM           (3) /* X minus, Y minus */
+#define QU_PM           (4) /* X plus,  Y minus */
+
 
 #define CMD_UNKNOWN     (0)
 #define CMD_NOP         (1)
@@ -51,6 +62,7 @@
 #define CMD_DOTS        (21)
 #define CMD_CIRCLE      (31)
 #define CMD_ELLIPSE     (32)
+#define CMD_PIE         (33)
 #define CMD_POINT       (35)
 #define CMD_POLYGON     (43)
 #define CMD_ULINE       (44)
@@ -82,6 +94,11 @@
 #define CMD_BCURVESELF  (512)
 
 #define CMD_GEAR        (600)
+
+#define CMD_HCRANK      (701)
+#define CMD_VCRANK      (702)
+#define CMD_HELBOW      (711)
+#define CMD_VELBOW      (712)
 
 
 #define CMD_UNIT        (801)
@@ -148,12 +165,13 @@ extern apair_t cmd_ial[];
      (x)==CMD_WLINE||(x)==CMD_WARROW||\
      (x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
      (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||\
-     (x)==CMD_DMY1||(x)==CMD_DMY2|| \
+     (x)==CMD_HCRANK||(x)==CMD_VCRANK||\
+     (x)==CMD_HELBOW||(x)==CMD_VELBOW||\
      (x)==CMD_BARROW||(x)==CMD_PLINE \
     )
 #define ISATOM(x)   \
-    ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE||(x)==CMD_DRUM|| \
-     (x)==CMD_PIPE|| \
+    ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_ELLIPSE|| \
+     (x)==CMD_DRUM||(x)==CMD_PIPE|| \
      (x)==CMD_DOTS||(x)==CMD_ULINE||(x)==CMD_PAPER||(x)==CMD_CLOUD|| \
      (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
      (x)==CMD_POLYGON||(x)==CMD_POINT||(x)==CMD_GEAR|| \
@@ -176,7 +194,8 @@ extern apair_t cmd_ial[];
 
 #define EXVISIBLE(x) \
 ((x)==CMD_BOX||(x)==CMD_CIRCLE||(x)==CMD_POINT||(x)==CMD_ELLIPSE||\
- (x)==CMD_POLYGON||(x)==CMD_ULINE||(x)==CMD_DRUM||(x)==CMD_PAPER||\
+ (x)==CMD_POLYGON||(x)==CMD_ULINE||\
+ (x)==CMD_DRUM||(x)==CMD_PAPER||\
  (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||(x)==CMD_GEAR||\
  (x)==CMD_PARALLELOGRAM|| \
@@ -184,6 +203,7 @@ extern apair_t cmd_ial[];
  (x)==CMD_BARROW||(x)==CMD_PLINE||(x)==CMD_LINK||\
  (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
+ (x)==CMD_HCRANK||(x)==CMD_VCRANK||(x)==CMD_HELBOW||(x)==CMD_VELBOW||\
  (x)==CMD_OBJLOAD)
 
 #define VISIBLE(x) \
@@ -257,7 +277,29 @@ extern apair_t cmd_ial[];
 #define PO_CNO              (233)
 #define PO_CSO              (234)
 
-#define PO_MAX              (255)
+#define PO_C                (300)
+
+#define PO_NWI              (310)
+#define PO_NWO              (311)
+#define PO_NNWO             (312)
+#define PO_WNWO             (313)
+
+#define PO_NEI              (320)
+#define PO_NEO              (321)
+#define PO_NNEO             (322)
+#define PO_ENEO             (323)
+
+#define PO_SEI              (330)
+#define PO_SEO              (331)
+#define PO_SSEO             (332)
+#define PO_ESEO             (333)
+
+#define PO_SWI              (340)
+#define PO_SWO              (341)
+#define PO_SSWO             (342)
+#define PO_WSWO             (343)
+
+#define PO_MAX              (344)
 
 extern apair_t pos_ial[];
 
@@ -308,6 +350,8 @@ extern apair_t lo_ial[];
 #define OA_AUXLINEDISTANCE   (8)
 #define OA_AUXLINEOPT        (9)
 
+#define OA_CRANKPOS         (10)
+
 #define OA_FILLCOLOR        (11)
 #define OA_FILLHATCH        (12)
 #define OA_FILLTHICK        (13)
@@ -323,6 +367,10 @@ extern apair_t lo_ial[];
 
 #define OA_HOLLOW           (25)
 #define OA_SHADOW           (26)
+
+#define OA_PIESTART         (27)
+#define OA_PIEEND           (28)
+#define OA_OUTLINEONLY      (29)
 
 #define OA_TEXTCOLOR        (31)
 #define OA_TEXTBGCOLOR      (32)
@@ -389,8 +437,10 @@ extern apair_t lo_ial[];
 #define OA_LTURN            (314)
 #define OA_RTURN            (315)
 #define OA_DIR              (316)
-#define OA_ARC              (317)
+#define OA_ARC              (317)   /* (context depend) ARC */
 #define OA_ARCN             (318)
+#define OA_CIARC            (319)   /* context indepent ARC */
+#define OA_CIARCN           (320)
 #define OA_JOIN             (321)
 #define OA_SKIP             (322)
 
@@ -405,9 +455,12 @@ extern apair_t lo_ial[];
 
 
 #define OA_PORT             (402)
-#define OA_PORTROTATE       (403)
-#define OA_STARBOARD        (404)
+#define OA_STARBOARD        (403)
+#define OA_BOARD            (403)
+#define OA_PORTROTATE       (404)
 #define OA_BOARDROTATE      (405)
+#define OA_PORTOFFSET       (410)
+#define OA_BOARDOFFSET      (411)
 
 #define OA_BGSHAPE          (501)
 
@@ -522,62 +575,68 @@ typedef struct {
 } sstr;
 
 struct obattr {
-    int   outlinecolor;
-    int   outlinetype;
-    int   outlinethick;
-    int   outlinethickmode;
+    int    outlinecolor;
+    int    outlinetype;
+    int    outlinethick;
+    int    outlinethickmode;
 
     auxlineparams_t auxlineparams;
 
-    int   auxlinetype;
-    int   auxlinedistance;
-    char *auxlineopt;
+    int    auxlinetype;
+    int    auxlinedistance;
+    char  *auxlineopt;
 
-    int   wlinethick;
-    int   forechop;
-    int   backchop;
-    int   bulge;
+    int    wlinethick;
+    int    forechop;
+    int    backchop;
+    int    bulge;
 
-    int   arrowheadpart;
-    int   arrowforeheadtype;
-    int   arrowcentheadtype;
-    int   arrowbackheadtype;
+    int    piestart;
+    int    pieend;
+    int    outlineonly;
+
+    int    arrowheadpart;
+    int    arrowforeheadtype;
+    int    arrowcentheadtype;
+    int    arrowbackheadtype;
     double arrowcentheadpos;
 
-    int   fillcolor;
-    int   fillhatch;
-    int   fillpitch;
-    int   fillthick;
+    int    crankpos;
+
+    int    fillcolor;
+    int    fillhatch;
+    int    fillpitch;
+    int    fillthick;
 #if 0
-    int   filllevel;
+    int    filllevel;
 #endif
 
-    int   backcolor;
-    int   backhatch;
-    int   backpitch;
-    int   backthick;
+    int    backcolor;
+    int    backhatch;
+    int    backpitch;
+    int    backthick;
 
 #if 0
-    int   hatchthick;
-    int   hatchpitch;
+    int    hatchthick;
+    int    hatchpitch;
 #endif
 
-    int   slittype;
+    int    slittype;
 
-    int   imargin;      /* inside margin */
-    int   gimargin;     /* group inside margin */
+    int    imargin;      /* inside margin */
+    int    gimargin;     /* group inside margin */
 
-    int   polypeak;
-    int   polyrotate;
-    int   concave;
-    int   rotateval;
-    int   rad;
-    int   length;       /* for line family */
+    int    polypeak;
+    int    polyrotate;
+    int    concave;
+    int    rotateval;
+    int    rad;
+    int    length;       /* for line family */
 
-    int   sepcurdir;
-    int   sepx1, sepy1, sepx2, sepy2;
+    int    sepcurdir;
+    int    sepx1, sepy1, sepx2, sepy2;
 
-    int   gsepx1, gsepy1, gsepx2, gsepy2;
+    int    gsepx1, gsepy1, gsepx2, gsepy2;
 
     char  *aat;
     char  *awith;
@@ -587,22 +646,30 @@ struct obattr {
     int    hasfrom;
     int    hasto;
 
-    int   originalshape;
+    int    originalshape;
 
     varray_t *ssar;         /* surface string ; text */
-    int   textcolor;
-    int   textbgcolor;
-    int   textposition;
-    int   texthoffset;
-    int   textvoffset;
-    int   textrotate;
+    int    textcolor;
+    int    textbgcolor;
+    int    textposition;
+    int    texthoffset;
+    int    textvoffset;
+    int    textrotate;
 
     qbb_t  ssbb;
 
     char  *portstr;
     int    portrotate;
+    int    portoffset;
+    int    portzx, portzy;
+
     char  *boardstr;
     int    boardrotate;
+    int    boardoffset;
+    int    boardzx, boardzy;
+
+    qbb_t  ptbb;
+    qbb_t  bdbb;
 
     varray_t *segopar;      /* path segment operation */
     varray_t *segar;        /* path segment outline */
@@ -630,10 +697,12 @@ struct obattr {
     int    markbb;
     int    markpath;
     int    marknode;
+    int    markgrid;
     int    markpitch;
     int    markguide;
     int    hollow;
     int    shadow;
+
 
     int    laneorder;
     int    lanenum;
@@ -645,6 +714,8 @@ struct obattr {
     double filescaley;
 
     char  *note[PO_MAX];
+
+    int    _dbginfo;
 }; 
 
 typedef struct _ch {
@@ -672,7 +743,7 @@ typedef struct _ch {
 typedef struct _ob {
     int  oid;
     int  type;
-    int  ignore;
+    int  invisible;
     int  draft;
 
     int  pst;
