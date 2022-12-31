@@ -3863,8 +3863,8 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
 #if 0
                     afchop = def_arrowsize/2;
 #endif
-                    solve_dxy(((double)cdir)*rf+M_PI, afchop, &dx, &dy);
-#if 1
+                    solve_dxy(D2Rf(cdir)+M_PI, afchop, &dx, &dy);
+#if 0
                     fprintf(fp, "    %% afchop %d dx,dy %d,%d\n", afchop, dx, dy);
 #endif
                     x2a = x2 + dx;
@@ -3876,8 +3876,8 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
 #if 0
                     abchop = def_arrowsize/2;
 #endif
-                    solve_dxy(((double)cdir)*rf, abchop, &dx, &dy);
-#if 1
+                    solve_dxy(D2Rf(cdir), abchop, &dx, &dy);
+#if 0
                     fprintf(fp, "    %% abchop %d dx,dy %d,%d\n", abchop, dx, dy);
 #endif
                     x1a = x1 + dx;
@@ -4081,7 +4081,7 @@ P;
             if(AH_MUSTCHOP(xu->cob.arrowforeheadtype)) {
             //  fchop += def_arrowsize/2;
             }
-            solve_dxy(cdir+M_PI, fchop, &dx, &dy);
+            solve_dxy(D2Rf(cdir)+M_PI, fchop, &dx, &dy);
             x2i = x2 + dx;
             y2i = y2 + dy;
 
@@ -4109,13 +4109,18 @@ P;
 
         if(i==ahbpos && xu->cob.arrowbackheadtype) {
 Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
-#if 1
+#if 0
             fprintf(fp, "%% AH B\n");
 #endif
             bchop = xu->cob.backchop;
-            solve_dxy(cdir, bchop, &dx, &dy);
+            solve_dxy(D2Rf(cdir), bchop, &dx, &dy);
             x1i = x1 + dx;
             y1i = y1 + dy;
+
+#if 0
+            fprintf(fp, "%% x1,y1 %d,%d cdir %d bchop %d ; x1i,y1i %d,%d\n",
+                x1, y1, cdir, bchop, x1i, y1i);
+#endif
 
 P;
             epsdraw_arrowhead(fp,
@@ -4646,7 +4651,7 @@ P;
             }
         }
 
-#if 0
+#if 1
 Echo("oid %d %s %d ptype %d seg-arrow actbh %d actch %d achfh %d\n",
     xu->oid, __func__, __LINE__,  s->ptype, actbh, actch, actfh);
 #endif
@@ -5587,7 +5592,7 @@ _crank_any(FILE *fp, ob *xu, ns *xns, int orient, int cpos,
             if(!elbow) { cbx = cmx + r; } else { cbx = cmx; }
         }
         if(q==QU_PP) _AGS( 270,   0, 0, 180,  90, 1);
-        if(q==QU_MP) _AGS( 279, 180, 1,   0,  90, 0);
+        if(q==QU_MP) _AGS( 270, 180, 1,   0,  90, 0);
         if(q==QU_MM) _AGS(  90, 180, 0,   0, 270, 1);
         if(q==QU_PM) _AGS(  90,   0, 1, 180, 270, 0);
 

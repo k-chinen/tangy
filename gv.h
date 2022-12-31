@@ -86,9 +86,19 @@ extern int def_pbstrgap;
 extern pallet_t *pallet;
 
 
-extern double rf;
 extern int _t_;
 extern int _p_;
+
+/*
+ * radian to degree, degree to radian
+ */
+extern double rf;                   /* M_PI/180.0 */
+
+#define R2D(x)  ((x)/rf)
+#define D2R(x)  ((x)*rf)
+#define D2Rf(x) ((double)(x)*rf)
+#define D2Ri(x) (int)((double)(x)*rf)
+
 
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))
