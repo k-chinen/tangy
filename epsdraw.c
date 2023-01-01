@@ -12310,16 +12310,16 @@ _drawgslinkV(varray_t *qar, int xid, int style, int jr,
     default:
         if(focus) {
             if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, sx, maxsy, mx, ey, ex, ey);
+                mkpath_3seg(qar, sx, sy, sx, maxsy, mx, my, ex, ey);
             }
             else {
-                mkpath_3seg(qar, ex, ey, mx, ey, sx, maxsy, sx, sy);
+                mkpath_3seg(qar, ex, ey, mx, my, sx, maxsy, sx, sy);
             }
             if(join) { mkpath_addbwcir(qar, mx, my); }
         }
         else {
             if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, sx, maxsy, eex, ey, eex, ey);
+                mkpath_3seg(qar, sx, sy, sx, maxsy, eex, my, eex, ey);
             }
             else {
                 mkpath_3seg(qar, eex, ey, eex, my, sx, maxsy, sx, sy);

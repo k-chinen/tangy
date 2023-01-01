@@ -91,15 +91,15 @@ trimdoublequote(char *s)
 {
     char *os;
     os = s;
-#if 1
+#if 0
     sdumpNZ(stderr, "b", os, 16);
 #endif
     if(*s=='"') {
-#if 1
+#if 0
         sdumpNZ(stderr, "0s", s, 16);
 #endif
         memmove(s, s+1, strlen(s+1)+1);
-#if 1
+#if 0
         sdumpNZ(stderr, "1s", s, 16);
 #endif
         while(*s) {
@@ -111,7 +111,7 @@ trimdoublequote(char *s)
         }
     }
     *s = '\0';
-#if 1
+#if 0
     sdumpNZ(stderr, "a", os, 16);
 #endif
     return 0;
@@ -486,7 +486,7 @@ skiplabel(char *lab, int lsize, char *line)
 
     if(found) {
         strcpy(lab, tmp);
-#if 1
+#if 0
         Echo("  label '%s'\n", lab);
 #endif
         return p;
@@ -535,7 +535,7 @@ parse_segop(char *sin, int dt, ob *nob)
     int     sop;
     int     top;
 
-#if 1
+#if 0
     Echo("%s: sin '%s' dt %d nob %p\n", __func__, sin, dt, nob);
 #endif
     r = NULL;
@@ -1126,24 +1126,18 @@ skip_note:
 
 P;
     uc = 0;
-#if 0
-    ISET(OA_LINECOLOR,      outlinecolor);
-#endif
     AISETC(OA_LINECOLOR,    outlinecolor);
     ISET(OA_LINETHICK,      outlinethick);
     AISETN(OA_LINETYPE,     linetype_ial, outlinetype);
 
     ISET(OA_WLINETHICK,     wlinethick);
 
-#if 0
-    ISET(OA_FILLCOLOR,      fillcolor);
-#endif
     AISETC(OA_FILLCOLOR,    fillcolor);
     AISETX(OA_FILLHATCH,    hatchtype_ial, fillhatch, HT_XCROSSED);
     ISET(OA_FILLTHICK,      fillthick);
     ISET(OA_FILLPITCH,      fillpitch);
 
-    ISET(OA_BACKCOLOR,      backcolor);
+    AISETC(OA_BACKCOLOR,    backcolor);
     AISETX(OA_BACKHATCH, hatchtype_ial, backhatch, HT_XCROSSED);
     ISET(OA_BACKTHICK,      backthick);
     ISET(OA_BACKPITCH,      backpitch);
@@ -1154,8 +1148,8 @@ P;
     ISET2(OA_HATCHTHICK,    fillthick, backthick);
     ISET2(OA_HATCHPITCH,    fillpitch, backpitch);
 
-    ISET(OA_TEXTCOLOR,      textcolor);
-    ISET(OA_TEXTBGCOLOR,    textbgcolor);
+    AISETC(OA_TEXTCOLOR,    textcolor);
+    AISETC(OA_TEXTBGCOLOR,  textbgcolor);
     ISET(OA_TEXTROTATE,     textrotate);
     AISETXD(OA_TEXTPOSITION,  pos_ial, textposition, PO_CENTER);
     ISET(OA_TEXTHOFFSET,    texthoffset);
@@ -1186,7 +1180,7 @@ P;
     ONSET(OA_OUTLINEONLY,   outlineonly);
 
     LADD(OA_DECO,           deco);
-    ISET(OA_DECOCOLOR,      decocolor);
+    AISETC(OA_DECOCOLOR,    decocolor);
 
     AISET(OA_LANEORDER,     lo_ial, laneorder);
     ISET(OA_LANENUM,        lanenum);
@@ -1219,7 +1213,7 @@ P;
     ISET(OA_BULGE,          bulge);
     ONSET(OA_ARROWEVERY,    arrowevery);
 
-    SADD(OA_FILE,           filestr);
+    XSADD(OA_FILE,          filestr);
     RSET2(OA_FILESCALEXY,   filescalex, filescaley);
     RSET(OA_FILESCALEX,     filescalex);
     RSET(OA_FILESCALEY,     filescaley);
