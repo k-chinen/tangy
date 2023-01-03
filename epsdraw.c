@@ -11047,13 +11047,17 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     int h1, h2;
     int g;
     g = objunit/5;
-    h = objunit;
+    h = xu->ht;
     w = xu->wd;
-    h1= h*7/10;
-    h2= h*8/10;
+    h1= h*xu->cob.slitpos/100;
+    h2= h*(xu->cob.slitpos+xu->cob.slitthick)/100;
 
-    fprintf(fp, "%% hslit\n");
+    fprintf(fp, "%% hslit pos %d thick %d; h1 %d h2 %d\n",
+        xu->cob.slitpos, xu->cob.slitthick, h1, h2);
     fprintf(fp, "0 0 moveto\n");
+#if 0
+    fprintf(fp, "0 0 1 setrgbcolor\n");
+#endif
     fprintf(fp, "newpath\n");
     fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
     fprintf(fp, "%d 0 rlineto\n", w+g*2);
@@ -11064,8 +11068,11 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     fprintf(fp, "0  %d rlineto\n",  h+g*2);
     fprintf(fp, "%d 0 rlineto\n", -w-g*2);
     fprintf(fp, "0  %d rlineto\n", -(h-h2)-g);
-    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "%d 0 rlineto\n",  w+g*3);
     fprintf(fp, "clip\n");
+#if 0
+    fprintf(fp, "stroke\n");
+#endif
 
     }
 
@@ -11084,10 +11091,10 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     int w1, w2;
     int g;
     g = objunit/5;
-    h = objunit;
+    h = xu->ht;
     w = xu->wd;
-    w1= w*7/10;
-    w2= w*8/10;
+    w1= w*xu->cob.slitpos/100;
+    w2= w*(xu->cob.slitpos+xu->cob.slitthick)/100;
 
     fprintf(fp, "%% vslit\n");
     fprintf(fp, "0 0 moveto\n");
@@ -11105,13 +11112,109 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
 
     }
 
+    if(xu->cob.slittype==OA_HWSLIT) {
+    /*        
+     *       
+     * +------------+
+     * |            |
+     * \/\/\/\/\/\/\| h2 80%
+     *              :   
+     * \/\/\/\/\/\/\  h1 70%
+     * |            |
+     * |            |
+     * +===========-+
+     *
+     */
+
+    int w,h;
+    int h1, h2;
+    int g;
+    g = objunit/5;
+    h = xu->ht;
+    w = xu->wd;
+#if 0
+    h1= h*7/10;
+    h2= h*8/10;
+#endif
+    h1= h*xu->cob.slitpos/100;
+    h2= h*(xu->cob.slitpos+xu->cob.slitthick)/100;
+
+    fprintf(fp, "%% vwslit\n");
+    fprintf(fp, "0 0 moveto\n");
+#if 0
+    fprintf(fp, "1 0 0 setrgbcolor\n");
+#endif
+    fprintf(fp, "newpath\n");
+    fprintf(fp, "%d %d moveto\n", -w/2-g, -h/2-g);
+    fprintf(fp, "%d 0 rlineto\n", w+2*g);
+    fprintf(fp, "0  %d rlineto\n", h1+g);
+
+#if 0
+    /* 2.0T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, w/12,  w/12, 2*w/12, 0, 3*w/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -w/12, w/12, -w/12, 2*w/12, 0, 3*w/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, w/12,  w/12, 2*w/12, 0, 3*w/12);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+        -w/12, w/12, -w/12, 2*w/12, 0, 3*w/12);
+#endif
+
+    /* 2.0T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         -w/12, w/12,  -2*w/12, w/12, -3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         -w/12, -w/12, -2*w/12, -w/12, -3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         -w/12, w/12,  -2*w/12, w/12, -3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         -w/12, -w/12, -2*w/12, -w/12, -3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         -w/12, w/12,  -2*w/12, w/12, -3*w/12, 0);
+
+    fprintf(fp, "%d %d lineto\n", -w/2-g, h1-h/2);
+    fprintf(fp, "%d %d lineto\n", -w/2-g, -h/2-g);
+
+    fprintf(fp, "%d 0 rlineto\n", w+2*g);
+    fprintf(fp, "0  %d rlineto\n", h+2*g);
+    fprintf(fp, "%d 0 rlineto\n", -(w+2*g));
+    fprintf(fp, "0  %d rlineto\n", -(h+g-h2));
+#if 0
+    fprintf(fp, "%d 0 rlineto\n",  w+g*2);
+    fprintf(fp, "0  %d rlineto\n",  h+g*2);
+    fprintf(fp, "%d 0 rlineto\n", -(w-w2)-g);
+    fprintf(fp, "0  %d rlineto\n",  -g);
+#endif
+
+    /* 2.0T */
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, w/12,  2*w/12, w/12, 3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, -w/12, 2*w/12, -w/12, 3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, w/12,  2*w/12, w/12, 3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, -w/12, 2*w/12, -w/12, 3*w/12, 0);
+    fprintf(fp, "%d %d %d %d %d %d rcurveto\n",
+         w/12, w/12,  2*w/12, w/12, 3*w/12, 0);
+
+    fprintf(fp, "%d %d lineto\n", w/2+g, h2-h/2);
+#if 0
+    fprintf(fp, "stroke\n");
+#endif
+    fprintf(fp, "clip\n");
+
+    }
+
+
     if(xu->cob.slittype==OA_VWSLIT) {
     /*        w1  w2
      *       70%  80%
      * +-------+  +-+
-     * |       |  | |
-     * |     x |  | |
-     * |       |  | |
+     * |       /  / |
+     * |     x \  \ |
+     * |       /  / |
      * +=======+..+-+
      * 0%           100%
      *              w
@@ -11120,10 +11223,14 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
     int w1, w2;
     int g;
     g = objunit/5;
-    h = objunit;
+    h = xu->ht;
     w = xu->wd;
+#if 0
     w1= w*3/4-h/15;
     w2= w*3/4+h/15;
+#endif
+    w1= w*xu->cob.slitpos/100;
+    w2= w*(xu->cob.slitpos+xu->cob.slitthick)/100;
 
     fprintf(fp, "%% vwslit\n");
     fprintf(fp, "0 0 moveto\n");
@@ -11891,7 +11998,7 @@ _drawgslinkH(varray_t *qar, int xid, int style, int jr,
      * sx,sy ----+ t1x,t1y
      *           | v
      *   t2x,t2y +---- ex,ey
-     *            h2
+     *            h1
      */ 
     /*
      *
@@ -11927,7 +12034,7 @@ _drawgslinkH(varray_t *qar, int xid, int style, int jr,
 
     Echo("%s: s %7d,%7d e %7d,%7d ; maxsx %d eey %d\n",
         __func__, sx, sy, ex,ey, maxsx, eey);
-    Echo("%s: v1 %d v2 %d h %d\n", __func__, h1, h2, v);
+    Echo("%s: h1 %d h2 %d v %d\n", __func__, h1, h2, v);
 
     Echo(
         "%s: xid %d style %3d %3xH rstyle %3d %3xH focus %d join %d j/n %d/%d\n",
@@ -12238,6 +12345,8 @@ _drawgslinkV(varray_t *qar, int xid, int style, int jr,
     case LS_SQUARE:
         if(focus) {
             if(dsdir>=0) {
+Echo("oid %d dir %d j %d %d,%d %d,%d %d,%d %d,%d P\n",
+    xid, dsdir, j, sx, sy, sx, my, ex, my, ex, ey);
                 mkpath_3seg(qar, sx, sy, sx, my, ex, my, ex, ey);
             }
             else {
@@ -12245,15 +12354,19 @@ _drawgslinkV(varray_t *qar, int xid, int style, int jr,
             }
             if(join) { mkpath_addbwcir(qar, mx, my); }
             if(join) {  if(j==0 || j==n-1) {}
-                        else { mkpath_addbwcir(qar, mx, sy); }
+                        else { mkpath_addbwcir(qar, sx, my); }
             }
         }
         else {
             if(dsdir>=0) {
-                mkpath_3seg(qar, sx, sy, sx, my, eex, my, eex, ey);
+Echo("oid %d dir %d j %d %d,%d %d,%d %d,%d %d,%d P\n",
+    xid, dsdir, j, sx, sy, sx, maxsy-v1, eex, maxsy-v1, eex, ey);
+                mkpath_3seg(qar, sx, sy, sx, maxsy-v1, eex, maxsy-v1, eex, ey);
             }
             else {
-                mkpath_3seg(qar, eex, ey, eex, my, sx, my, sx, sy);
+Echo("oid %d dir %d j %d %d,%d %d,%d %d,%d %d,%d N\n",
+    xid, dsdir, j, eex, ey, eex, maxsy-v1, sx, maxsy-v1, sx, ey);
+                mkpath_3seg(qar, eex, ey, eex, maxsy-v1, sx, maxsy-v1, sx, sy);
             }
         }
         break;
@@ -12391,6 +12504,7 @@ P;
 
     /* array margin */
     am = 4*objunit/10;
+    am = 0;
 
     ex = xox + pf->cx - pf->cwd/2 * (dsdir);
     ey = xoy + pf->cy;
@@ -12528,6 +12642,10 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             j++;
         }
 
+        Echo("  cu %d usi %d uei %d\n", cu, usi, uei);
+        Echo("  ce %d esi %d eei %d\n", ce, esi, eei);
+        Echo("  cd %d dsi %d dei %d\n", cd, dsi, dei);
+
         mx = xox+xu->cx;
         my = xoy+xu->cy;
 
@@ -12537,11 +12655,11 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
             dmy = minsx;
             maxsx = minsx;
             minsx = dmy;
-
         }
         else {
         }
 
+#if 0
         if(dsdir==-1) {
             maxsx -= am;
             if(mx-ex>am) {
@@ -12554,13 +12672,9 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 mx += ex-mx-am;
             }
         }
+#endif
 
         Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
-
-        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
-        Echo("  usi %d uei %d\n", usi, uei);
-        Echo("  esi %d eei %d\n", esi, eei);
-        Echo("  dsi %d dei %d\n", dsi, dei);
 
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
@@ -12572,24 +12686,22 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 continue;
             }
 
+            g = 0;
             if(j>=usi && j<=uei) {
                 k = uei - j;
-                g = 1;
+                g += 1;
             }
             if(j>=esi && j<=eei) {
                 k = j - esi;
-#if 0
-                g = 2;
-#endif
-                g = 7;
+                g += 10;
             }
             if(j>=dsi && j<=dei) {
                 k = j - dsi;
-                g = 3;
+                g += 100;
             }
             else {
             }
-            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
+            Echo("i %d j %d: g %3d k %d\n", i, j, g, k);
 
             eex = ex;
             if(edir<0) {
@@ -12720,13 +12832,18 @@ _drawgsV(FILE *fp, int xdir, int xox, int xoy,
     int   j;
     int   k;
     int   exmax, exmin;
-    int   cu, ce, cd, call;
     int   eex, eey;
     int   xp;
     int   g;
     varray_t *tmpar;
 
-    int   usi, uei, esi, eei, dsi, dei;
+    /*
+     * left, equal and right then destination
+     *   lsi lei esi eei rsi rei
+     */
+    int   lsi, lei, esi, eei, rsi, rei;
+    int   cl, ce, cr, nbranch;
+    int   ndepth;
 
     int   v1, v2, h;
     int   t1x, t1y, t2x, t2y;
@@ -12742,12 +12859,17 @@ P;
     jr = xu->cob.outlinethick*2;
 
     /* array margin */
+    am = 0;
     am = 4*objunit/10;
 
     ex = xox + pf->cx;
     ey = xoy + pf->cy + pf->cht/2 * (dsdir);
     exmax = xox + pf->cx;
     exmin = xox + pf->cx;
+#if 0
+    exmin = xox + pf->cx - pf->cht/2;
+    exmax = xox + pf->cx + pf->cht/2;
+#endif
 
     minsy = INT_MAX;
     maxsy = -(INT_MAX-1);
@@ -12759,6 +12881,7 @@ P;
     maxi = -(INT_MAX-1);
 
     lastx = firstx = 0;
+
 
     fprintf(fp, "    gsave\n");
 
@@ -12773,13 +12896,14 @@ P;
         goto final;
     }
 
+    Echo("oid %d ex,ey %d,%d\n", xu->oid, ex, ey);
+
     {
         changethick(fp, xu->cob.outlinethick);
         changecolor(fp, xu->cob.outlinecolor);
-        cu = ce = cd = call = 0;
+        cl = ce = cr = nbranch = 0;
         for(i=0;i<pb->cch.nch;i++) {
             pe = (ob*)pb->cch.ch[i];
-
             if(i==0) {
                 firstx = pe->cx;
             }
@@ -12791,17 +12915,21 @@ P;
                 continue;
             }
 
-            call++;
+            nbranch++;
             if(i>maxi) maxi = i;
             if(i<mini) mini = i;
         }
-        xp = pf->wd / (call+1);
-        Echo("call %d xp %d\n", call, xp);
+        xp = pf->wd / (nbranch+1);
+        Echo("nbranch %d xp %d\n", nbranch, xp);
+#if 0
+        xp = pf->ht / (nbranch+1);
+        Echo("nbranch %d xp %d\n", nbranch, xp);
+#endif
 
         if(lastx>=firstx) { edir = 1; } else { edir = -1; }
         Echo("firstx %d lastx %d -> edir %d\n", firstx, lastx, edir);
 
-        usi = uei = esi = eei = dsi = dei = -1;
+        lsi = lei = esi = eei = rsi = rei = -1;
 
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
@@ -12820,7 +12948,7 @@ P;
             if(sx>maxx) maxx = sx;
             if(sx<minx) minx = sx;
 
-Echo(" sx i %d j %d sx %d minsy %d maxsy %d\n", i, j, sx, minsy, maxsy);
+Echo(" sy i %d j %d sy %d minsy %d maxsy %d\n", i, j, sy, minsy, maxsy);
 #if 0
             fprintf(fp, "   newpath %d %d %d 0 360 arc fill\n",
                 sx, sy, jr);
@@ -12829,20 +12957,25 @@ Echo(" sx i %d j %d sx %d minsy %d maxsy %d\n", i, j, sx, minsy, maxsy);
             fprintf(fp, "   newpath %d %d moveto (s %d) show\n",
                 sx, sy+objunit/6, j);
 #endif
+
 #if 0
-            fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
-                ex, ey, jr);
             fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
                 ex, ey, jr*2);
 #endif
 
-            if(edir>0) {
-                eex = ex+pf->wd/2-(call-j)*xp;
-            }
-            else {
+
+            eey = ey;
+            if(edir<0) {
                 eex = ex+pf->wd/2-(j+1)*xp;
             }
-            eey = ey;
+            else {
+                eex = ex+pf->wd/2-(nbranch-j)*xp;
+            }
+
+#if 0
+            fprintf(fp, "   newpath %d %d %d 0 360 arc stroke\n",
+                eex, ey, jr);
+#endif
 
 Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
 #if 0
@@ -12859,11 +12992,11 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 fprintf(fp, "   newpath %d %d moveto (u/r) show\n",
                     eex+objunit/8, eey);
 #endif
-                cu++;
-                if(usi<0) {
-                    usi = j;
+                cr++;
+                if(rsi<0) {
+                    rsi = j;
                 }
-                uei = j;
+                rei = j;
             }
             else
             if(sx<=exmax && sx>=exmin) {
@@ -12882,20 +13015,38 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 fprintf(fp, "   newpath %d %d moveto (d/l) show\n",
                     eex+objunit/8, eey);
 #endif
-                cd++;
-                if(dsi<0) {
-                    dsi = j;
+                cl++;
+                if(lsi<0) {
+                    lsi = j;
                 }
-                dei = j;
+                lei = j;
             }
     
             j++;
         }
 
+        Echo("  exmin %d exmax %d\n", exmin, exmax);
+        Echo("  cl %d lsi %d lei %d\n", cl, lsi, lei);
+        Echo("  ce %d esi %d eei %d\n", ce, esi, eei);
+        Echo("  cr %d rsi %d lei %d\n", cr, rsi, rei);
+    
+        ndepth = -1;
+        ndepth = MAX(ndepth, cl);
+        ndepth = MAX(ndepth, ce);
+        ndepth = MAX(ndepth, cr);
+        Echo("  ndepth %d junction-area-height %d\n",
+            ndepth, (ndepth+1)*xp);
+
+        am = (xu->ht - (ndepth+1)*xp)/2;
+        Echo("  ht %d - %d = am %d\n", xu->ht, (ndepth+1)*xp, am);
+        am = ((minsy-ey) - (ndepth+1)*xp)/2;
+        Echo("  (minsy %d - ey %d ) - %d = am %d\n", 
+            minsy, ey, (ndepth+1)*xp, am);
+
         mx = xox+xu->cx;
         my = xoy+xu->cy;
 
-        Echo("  sx dsdir %d minsy %d maxsy %d\n", dsdir, minsy, maxsy);
+        Echo("  sx dsdir %d minsy %d maxsy %d alpha\n", dsdir, minsy, maxsy);
         Echo("  my %d ey %d am %d\n", my, ey, am);
         if(dsdir==-1) {
             int dmy;
@@ -12908,7 +13059,8 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
         else {
         }
 
-        if(dsdir>0) {
+#if 0
+        if(dsdir==1) {
             maxsy -= am;
             if(my-ey>am) {
                 my -= my-ey-am;
@@ -12920,14 +13072,10 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 my += ey-my-am;
             }
         }
+#endif
 
-        Echo("  sx dsdir %d minsy %d maxsy %d\n", dsdir, minsy, maxsy);
+        Echo("  sx dsdir %d minsy %d maxsy %d beta\n", dsdir, minsy, maxsy);
         Echo("  my %d\n", my);
-
-        Echo("  cu %d ce %d cd %d\n", cu, ce, cd);
-        Echo("  usi %d uei %d\n", usi, uei);
-        Echo("  esi %d eei %d\n", esi, eei);
-        Echo("  dsi %d dei %d\n", dsi, dei);
 
         j = 0;
         for(i=0;i<pb->cch.nch;i++) {
@@ -12939,33 +13087,37 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 continue;
             }
 
-            if(j>=usi && j<=uei) {
-                k = uei - j;
-                g = 1;
+            g = 0;
+            if(j>=rsi && j<=rei) {
+#if 0
+                k = rei - j;
+#endif
+                k = j - rsi;
+                g += 1;
             }
             if(j>=esi && j<=eei) {
                 k = j - esi;
-#if 0
-                g = 2;
-#endif
-                g = 7;
+                g += 10;
             }
-            if(j>=dsi && j<=dei) {
-                k = j - dsi;
-                g = 3;
+            if(j>=lsi && j<=lei) {
+#if 0
+                k = j - lsi;
+#endif
+                k = lei - j;
+                g += 100;
             }
             else {
             }
-            Echo("i %d j %d: g %d k %d\n", i, j, g, k);
+            Echo("oid %d i %d j %d: g %3d depth k %d\n",
+                xu->oid, i, j, g, k);
 
+            eey = ey;
             if(edir>0) {
-                eex = ex+pf->wd/2-(call-j)*xp;
+                eex = ex+pf->wd/2-(nbranch-j)*xp;
             }
             else {
                 eex = ex+pf->wd/2-(j+1)*xp;
             }
-            eey = ey;
-
 
             /*
              *         v1
@@ -12979,7 +13131,9 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
              *                  +
              *                  |
              *                  + sx,maxsy 
+             *                  + sx,minsy 
              *                  |
+             *                  |           am
              *               h  | v1
              *      mx,my + .---+
              *            | | v2
@@ -13000,11 +13154,23 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                         );
             }
             else {
-                v1 = xp*(k+1) * dsdir;
-                v2 = (ey-maxsy) - v1;
+                Echo("  sy %d minsy %d xp %d k %d dsdir %d\n",
+                    sy, minsy, xp, k, dsdir);
+
+#if 0
+                v1 = (sy-minsy+am)+xp*(k+1) * dsdir;
+                v2 = (sy-ey) - v1;
+#endif
+                v2 = xp*(ndepth-k)*dsdir;
+                v1 = (minsy-ey) - v2;
                 h  = (eex-sx);
 
-                Echo("  v1 %7d h %7d v2 %7d\n", v1, h, v2);
+                Echo("  v1 %7d v2 %7d h %7d\n", v1, v2, h);
+Echo("gsV oid %d dir %d i %d k %d yfactor sy %d am %d maxsy %d ey %d; v1 %d v2 %d\n",
+    xu->oid, dsdir, i, k,
+    sy, am, maxsy, ey, v1, v2);
+                Echo("  sy %d - v1 %d - v2 %d = %d vs ey %d verify\n",
+                    sy, v1, v2, sy-v1-v2, ey);
 
                 tmpar = varray_new();
                 varray_entrysprintfunc(tmpar, seg_sprintf);
@@ -13017,19 +13183,14 @@ fprintf(fp,"%% sx,sy %d,%d maxsx %d mx,my %d,%d ex,ey %d,%d eey %d dsdir %d\n",
 #endif
 
 #if 0
-
-                _drawgslinkh(tmpar, xu->oid, xu->cob.linkstyle,
-                    xu->cob.outlinethick*2,
-                    j, call, v1, v2, h,
-                    sx, sy, maxsx,
-                    mx, my, ex, ey, eey, dsdir);
-
+MX(1, sx, minsy);
+MX(4, mx, my);
 #endif
 
                 _drawgslinkV(tmpar, xu->oid, xu->cob.linkstyle,
                     xu->cob.outlinethick*2,
-                    j, call, v1, v2, h,
-                    sx, sy, maxsy,
+                    j, nbranch, v1, v2, h,
+                    sx, sy, minsy,
                     mx, my, ex, ey, eex, dsdir);
 
 
@@ -15162,13 +15323,18 @@ epsdraw_portboard(FILE *fp, ns *xns, int xdir, ob *u)
         __func__, xdir, u, u->oid);
 #endif
 
-#if 1
+#if 0
         return _epsdraw_portboard_glue(fp, xns, xdir, u);
 #endif
 
+#if 0
     if(u->type==CMD_BCURVE||u->type==CMD_BCURVESELF||
         u->type==CMD_LINE||u->type==CMD_ARROW||
         u->type==CMD_WLINE||u->type==CMD_WARROW) {
+        return _epsdraw_portboard_glue(fp, xns, xdir, u);
+    }
+#endif
+    if(ISGLUE(u->type)) {
         return _epsdraw_portboard_glue(fp, xns, xdir, u);
     }
 

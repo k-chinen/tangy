@@ -32,6 +32,7 @@ jj(int zx, int zy, int degth, int ir, int iw,
     r = ir;
     w = iw;
     th = (M_PI*degth)/180.0;
+    th = D2Rf(degth);
 
     ph = th+M_PI/2;
     *ax = (int)(zx + r*cos(th) + w/2 *cos(ph));
@@ -481,8 +482,10 @@ its_glue:
 not_glue:
     tdir = gggtdir;
     ik = _X_pbpoint(gggtdir, 90, u, &ipx, &ipy);
+#if 0
     fflush(stdout);
     fprintf(stdout,"_X_pbpoint ik %d\n", ik);
+#endif
     px = ipx;
     py = ipy;
     if(xside==OA_PORT)  { u->cob.portzx = ipx;  u->cob.portzy = ipy;  }

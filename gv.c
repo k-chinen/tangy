@@ -449,6 +449,9 @@ apair_t objattr_ial[] = {
     {"vslit",               OA_VSLIT},
     {"hslit",               OA_HSLIT},
     {"vwslit",              OA_VWSLIT},
+    {"hwslit",              OA_HWSLIT},
+    {"slitpos",             OA_SLITPOS},
+    {"slitthick",           OA_SLITTHICK},
 
     {"at",                  OA_AT},
     {"with",                OA_WITH},

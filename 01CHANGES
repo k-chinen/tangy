@@ -6,6 +6,9 @@ From 2.105:
   - fix around text clipping (surface string)
   - rearrange port/board string position
   - rearrange around arrow head; clip ends when "NORMAL"-head
+  - fix around DIRECT and DIRECT1 style in vertical SCATTER/GATHER
+  - introduce HWSLIT and fix slits
+  - introduce slitpos and slitthick for slits
 
 From 2.104:
   - rearrange color map

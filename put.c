@@ -2300,7 +2300,9 @@ Echo("\toid %d u a wd %d ht %d solved? %d\n",
 
         ik = est_portboard4c(xns, tdir, u, OA_BOARD,
                 &ax, &ay, &bx, &by, &cx, &cy, &dx, &dy);
+#if 0
 fprintf(stderr, "%s:%d oid %d ik %d\n", __FILE__, __LINE__, u->oid, ik);
+#endif
 
         qbb_mark(&bdbb, ax, ay);
         qbb_mark(&bdbb, bx, by);
