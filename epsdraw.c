@@ -14904,7 +14904,7 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
         *ra =   90; *rj = SJ_RIGHT; *rx += u->wd/2;    *ry += u->ht/2+ogap;
         break;
     case PO_NEO:
-        *ra =   90; *rj = SJ_LEFT; *rx = u->wd/2+ogap;  *ry += u->ht/2+ogap;
+        *ra =   90; *rj = SJ_LEFT; *rx += u->wd/2+ogap;  *ry += u->ht/2+ogap;
         break;
 
 
@@ -14945,7 +14945,7 @@ solvenotepos(int *rx, int *ry, int *ra, int *rj, ob *u, int pn,
         *ra =   90; *rj = SJ_RIGHT; *rx += u->wd/2;    *ry -= u->ht/2+tht+ogap;
         break;
     case PO_SEO:
-        *ra =   90; *rj = SJ_LEFT; *rx = u->wd/2+ogap;      *ry -= u->ht/2+tht+ogap;
+        *ra =   90; *rj = SJ_LEFT; *rx += u->wd/2+ogap;      *ry -= u->ht/2+tht+ogap;
         break;
 
 
