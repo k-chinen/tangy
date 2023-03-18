@@ -771,6 +771,14 @@ Echo("  m %d\n", m);
 flush_que:
             if(c>0) {
                 MARK("f ", x, y);
+
+#if 0
+fprintf(stdout, "mark-f -----------\n");
+fprintf(stdout, "mark-f lx,ly %7d,%-7d\n", lx,ly);
+fprintf(stdout, "mark-f  x,y  %7d,%-7d\n", x,y);
+fprintf(stdout, "mark-f delta %7d,%-7d\n", x-lx,y-ly);
+#endif
+
 #if 0
                 FREG1(OA_FORWARD, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
 #endif
@@ -938,8 +946,15 @@ P;
 
         case OA_SKIP:
             jc += 1000;
+#if 0
+  fprintf(stdout, "x,y   %7d,%-7d\n", x, y);
+#endif
             x += m*cos(ldir*rf);
             y += m*sin(ldir*rf);
+#if 0
+  fprintf(stdout, "dx,dy %7f,%-7f\n", m*cos(ldir*rf), m*sin(ldir*rf));
+  fprintf(stdout, "x,y   %7d,%-7d\n", x, y);
+#endif
             c++;
             FREG1(OA_SKIP, 1000, REL_COORD, 0, x-lx, y-ly, 0, 0);
             MARK("S ", x, y);
