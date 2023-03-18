@@ -1985,6 +1985,7 @@ Echo("\tcrank/elbow original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %
     case CMD_XCURVESELF:
     case CMD_BCURVE:
     case CMD_BCURVESELF:
+    case CMD_THUNDER:
 #if 0
         if(u->cob.originalshape) {
         }

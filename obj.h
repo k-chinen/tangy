@@ -93,6 +93,8 @@
 #define CMD_BCURVE      (511)
 #define CMD_BCURVESELF  (512)
 
+#define CMD_THUNDER     (534)
+
 #define CMD_GEAR        (600)
 
 #define CMD_HCRANK      (701)

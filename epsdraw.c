@@ -6462,6 +6462,79 @@ P;
     return r;
 }
 
+int
+epsdraw_thunder(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+    int r;
+#if 0
+    int aw, ah;
+#endif
+    int sx, sy, ex, ey;
+    int br=10;
+
+P;
+#if 1
+fprintf(fp, "%% %s\n", __func__);
+Echo("%s: enter oid %d type %d\n", __func__, xu->oid, xu->type);
+#endif
+    /*
+     *              px,py
+     *             /+
+     *  csx,csy  +/ + /+ cex,cey
+     *              +/
+     *              px,py
+     */
+
+    if(!xu->cob.originalshape) {
+        sx = xu->csx;
+        sy = xu->csy;
+        ex = xu->cex;
+        ey = xu->cey;
+fprintf(fp, "%% guess %d,%d %d,%d\n", sx, sy, ex, ey);
+    }
+    else {
+        __solve_fandt(xns, xu, xu->cob.segopar, 1, &sx, &sy, &ex, &ey);
+fprintf(fp, "%% fandt %d,%d %d,%d\n", sx, sy, ex, ey);
+    }
+
+    {
+        int mx, my;
+        int px, py;
+        int qx, qy;
+        double th;
+        int dis, bb;
+P;
+        mx = (sx + ex)/2;
+        my = (sy + ey)/2;
+        dis = (int)SQRT_2DD_I2D(sx, sy, ex, ey);
+        bb = (dis*br)/100;
+        th = atan2((ey-sy), (ex-sx));
+        px = mx + bb*cos(th+M_PI/2);
+        py = my + bb*sin(th+M_PI/2);
+        qx = mx + bb*cos(th-M_PI/2);
+        qy = my + bb*sin(th-M_PI/2);
+
+        path_regsegmoveto(xu->cob.segar, sx, sy);
+        path_regseglineto(xu->cob.segar, px, py);
+        path_regseglineto(xu->cob.segar, qx, qy);
+        path_regseglineto(xu->cob.segar, ex, ey);
+    }
+
+    /* OUTLINE */
+P;
+    fprintf(fp, " %% outline color %d\n", xu->cob.outlinecolor);
+    if(xu->cob.outlinecolor>=0) {
+        fprintf(fp, " gsave\n");
+        changecolor(fp, xu->cob.outlinecolor);
+        r = drawpath_LT(fp, ydir, xox, xoy, xu, xns);
+        fprintf(fp, " grestore\n");
+    }
+
+P;
+    return r;
+}
+
 
 #define X_RLINE     (0)
 #define X_VLINE     (1)
@@ -15825,6 +15898,11 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     else
     if( u->type==CMD_AUXLINE ) {
         Xepsdraw_auxline(fp, ox, oy, u, 0);
+    }
+
+    else
+    if(u->type==CMD_THUNDER) {
+        epsdraw_thunder(fp, *xdir, ox, oy, u, xns);
     }
 
     else

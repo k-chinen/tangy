@@ -57,6 +57,7 @@ apair_t cmd_ial[] = {
     {"xcurveself",      CMD_XCURVESELF},
     {"curve",           CMD_BCURVE},
     {"curveself",       CMD_BCURVESELF},
+    {"thunder",         CMD_THUNDER},
     {"dir",             CMD_DIR},
     {"incdir",          CMD_INCDIR},
     {"decdir",          CMD_DECDIR},
