@@ -26,6 +26,8 @@
  * SUCH DAMAGE.
  */
 
+/* modified by k-chinen at 2022 Mar 18 */
+
 /*
  * Various data Dictionary 
  */
@@ -38,9 +40,6 @@
 #include <string.h>
 #include <time.h>
 
-/*
-#include "commonmacros.h"
-*/
 #define Error   printf
 #ifndef QS
 #define QS(x)   (((x)==NULL)?"*null*":(x[0]=='\0'?"*empty*":(x)))
@@ -267,6 +266,7 @@ int
 vdict_printtable(vdict_t *dict)
 {
     vdict_fprinttable(dict, stdout);
+    return 0;
 }
 
 int
@@ -314,7 +314,7 @@ vdict_fshow_head(vdict_t *dict, FILE *fp)
     if(!dict) return -1;
 
     fprintf(fp, "dict %p %d %d/%d %s 0x%08x; u %d,%d,%d %p\n",
-        dict, dict->ctime, dict->use, dict->len, 
+        dict, (int)dict->ctime, dict->use, dict->len, 
         rassoc(vdictmode_al, dict->mode), dict->opt,
         dict->userint1, dict->userint2, dict->userint3, dict->uservoid1);
     fflush(fp);
@@ -363,7 +363,7 @@ _vdict_fshow(vdict_t *dict, FILE *fp, char *xkey)
         strcat(line, tmp);
     
         if(dict->opt & VDICT_OPT_PRINTADDR) {
-            sprintf(tmp, "0x%08x ", &dict->slot[i]);
+            sprintf(tmp, "0x%p ", &dict->slot[i]);
             strcat(line, tmp);
         }
     
@@ -379,7 +379,7 @@ _vdict_fshow(vdict_t *dict, FILE *fp, char *xkey)
         }
     
         if(dict->opt & VDICT_OPT_PRINTADDR) {
-            sprintf(tmp, "0x%08x ", dict->slot[i].value);
+            sprintf(tmp, "0x%p ", dict->slot[i].value);
             strcat(line, tmp);
         }
 
@@ -462,7 +462,7 @@ Xvdict_fshow(vdict_t *dict, FILE *fp)
         strcat(line, tmp);
     
         if(dict->opt & VDICT_OPT_PRINTADDR) {
-            sprintf(tmp, "0x%08x ", &dict->slot[i]);
+            sprintf(tmp, "0x%p ", &dict->slot[i]);
             strcat(line, tmp);
         }
     
@@ -478,7 +478,7 @@ Xvdict_fshow(vdict_t *dict, FILE *fp)
         }
     
         if(dict->opt & VDICT_OPT_PRINTADDR) {
-            sprintf(tmp, "0x%08x ", dict->slot[i].value);
+            sprintf(tmp, "0x%p ", dict->slot[i].value);
             strcat(line, tmp);
         }
 
