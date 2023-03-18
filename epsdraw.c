@@ -6467,11 +6467,8 @@ epsdraw_thunder(FILE *fp,
     int ydir, int xox, int xoy, ob *xu, ns *xns)
 {
     int r;
-#if 0
-    int aw, ah;
-#endif
     int sx, sy, ex, ey;
-    int br=10;
+    int br = xu->cob.bulge;
 
 P;
 #if 1

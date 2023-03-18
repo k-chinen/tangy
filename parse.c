@@ -1589,6 +1589,10 @@ Echo("CHECK CHUNK attr\n");
         }
         break;
 
+    case CMD_THUNDER:
+        nob->cob.bulge              = 10;
+        break;
+
     case CMD_LINE:
         nob->cob.keepdir = 0;
         break;
