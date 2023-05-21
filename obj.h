@@ -198,7 +198,7 @@ extern apair_t cmd_ial[];
 ((x)==CMD_BOX||(x)==CMD_ELLIPSE||(x)==CMD_CIRCLE||(x)==CMD_POINT|| \
  (x)==CMD_PIE|| \
  (x)==CMD_POLYGON||(x)==CMD_ULINE||\
- (x)==CMD_DRUM||(x)==CMD_PAPER||\
+ (x)==CMD_DRUM||(x)==CMD_PIPE||(x)==CMD_PAPER||\
  (x)==CMD_CARD||(x)==CMD_HOUSE||(x)==CMD_DIAMOND|| \
  (x)==CMD_CLOUD||(x)==CMD_GEAR||\
  (x)==CMD_PARALLELOGRAM|| \
