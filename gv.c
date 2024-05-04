@@ -167,6 +167,15 @@ apair_t hatchtype_ial[] = {
     {"vlined",              HT_VLINED},
     {"crossed",             HT_CROSSED},
     {"xcrossed",            HT_XCROSSED},
+    {"dot9",                HT_DOT9},
+    {"dot8",                HT_DOT8},
+    {"dot7",                HT_DOT7},
+    {"dot6",                HT_DOT6},
+    {"dot5",                HT_DOT5},
+    {"dot4",                HT_DOT4},
+    {"dot3",                HT_DOT3},
+    {"dot2",                HT_DOT2},
+    {"dot1",                HT_DOT1},
     {"dotted",              HT_DOTTED},
     {"sparsedotted",        HT_SPARSEDOTTED},
     {"vzigzag",             HT_VZIGZAG},
@@ -180,7 +189,6 @@ apair_t hatchtype_ial[] = {
 
     {"grid",                HT_GRID},
     {"cgrid",               HT_CGRID},
-    {"ugrid",               HT_CGRID},
 
     {"ugrid",               HT_UGRID025},
     {"ugrid005",            HT_UGRID005},

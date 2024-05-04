@@ -551,6 +551,9 @@ parse_segop(char *sin, int dt, ob *nob)
 
     if(dt==OA_THEN) {
     }
+    else
+    if(dt==OA_CLOSE) {
+    }
     else {
         p = draw_wordW(p, tmp, BUFSIZ);
 
@@ -652,7 +655,7 @@ P;
     }
 #endif
 
-#if 1
+#if 0
     if(dt==OA_CLOSE) {
         segop *dmyop;
         dmyop = (segop*)malloc(sizeof(segop));
@@ -664,13 +667,20 @@ E;
         dmyop->cmd = OA_THEN;
         dmyop->val = strdup(vstr);
         varray_push(nob->cob.segopar, (void*)dmyop);
+#if 0
+Echo("  push dmy %d val '%s'\n", dmyop->cmd, dmyop->val);
+#endif
+#if 1
+Echo("  push dmy '%s'(%d) val '%s'\n",
+        rassoc(objattr_ial, dmyop->cmd), dmyop->cmd, dmyop->val);
+#endif
     }
 #endif
 
 #if 0
 Echo("  push cmd %d val '%s'\n", newop->cmd, newop->val);
 #endif
-#if 1
+#if 0
 Echo("  push cmd '%s'(%d) val '%s'\n",
         rassoc(objattr_ial, newop->cmd), newop->cmd, newop->val);
 #endif
@@ -2324,7 +2334,7 @@ skip_specialforms:
         }
     }
     
-#if 0
+#if 1
     ob_dump(ch0);
     ns_dump(ns0);
 #endif

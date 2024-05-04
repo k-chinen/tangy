@@ -131,25 +131,6 @@ Echo("%s: a rx,ry %d,%d\n", __func__, *rx, *ry);
 }
 
 
-#if 1
-
-#define MARK(m,x,y) \
-  { \
-    if(_t_){ \
-        printf("MARK oid %d line %d %s x %6d, y %6d\n", \
-        u->oid, __LINE__, m, x, y); } \
-    if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
-    if(y<_by)  _by = y; if(y>_ty)  _ty = y; \
-  }
-
-#else
-
-#define MARK(m,x,y) \
-    if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
-    if(y<_by)  _by = y; if(y>_ty)  _ty = y; 
-
-#endif
-
 
 /*
             hasfrom = find_from(u, &isx, &isy);
@@ -559,6 +540,34 @@ sstr_heightdepth(FILE *fp, int x, int y, int wd, int ht,
     return 0;   
 }
 
+#if 1 
+#define MARK(m,x,y) \
+  { \
+    if(_t_){ \
+        printf("MARK oid %d line %d %s x %6d, y %6d\n", \
+        u->oid, __LINE__, m, x, y); } \
+    qbb_mark(&sbb, x, y); \
+  }
+#endif
+
+#if 0
+#define MARK(m,x,y) \
+  { \
+    if(_t_){ \
+        printf("MARK oid %d line %d %s x %6d, y %6d\n", \
+        u->oid, __LINE__, m, x, y); } \
+    if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
+    if(y<_by)  _by = y; if(y>_ty)  _ty = y; \
+  }
+#endif
+
+#if 0
+#define MARK(m,x,y) \
+    if(x<_lx)  _lx = x; if(x>_rx)  _rx = x; \
+    if(y<_by)  _by = y; if(y>_ty)  _ty = y; 
+#endif
+
+
 int
 est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int kp, int *zdir, int *rlx, int *rby, int *rrx, int *rty,
@@ -566,7 +575,10 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int *risx, int *risy, int *riex, int *riey)
 {
     int     x, y;
+    qbb_t   sbb;
+#if 0
     int     _lx, _by, _rx, _ty;
+#endif
     int     i;
     segop  *e;
     seg    *r;
@@ -577,6 +589,8 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
     int     lx, ly;
     double  ldir;
     double  lldir;
+
+    int     cbm;    /* current beam width */
     
     int     mx, my;
     int     ik;
@@ -595,6 +609,7 @@ est_seg(ns* xns, ob *u, varray_t *opar, varray_t *segar,
 
     int     isx, isy, iex, iey; /* from and to */
 
+    qbb_reset(&sbb);
     rv = 0;
 
 Echo("%s: oid %d\n", __func__, (u? u->oid : -1) );
@@ -607,8 +622,10 @@ Echo("%s: oid %d\n", __func__, (u? u->oid : -1) );
     lldir = *zdir;
     ldir = *zdir;
 
+#if 0
     _rx = _ty = -(INT_MAX-1);
     _lx = _by = INT_MAX;
+#endif
 
         x = lx = 0;
         y = ly = 0;
@@ -654,6 +671,7 @@ P;
 
     c = 0; /* count of putted commands w/o then */
     jc = 0;
+    cbm = objunit/2;
     for(i=0;i<opar->use;i++) {
         mstr[0] = '\0';
         dm   = 0;
@@ -788,6 +806,7 @@ Echo("  ldir %.2f      :%d\n", ldir, __LINE__);
 Echo("  ldir %.2f new  :%d\n", ldir, __LINE__);
                 lx = x;
                 ly = y;
+                
             }
         }
 
@@ -1144,16 +1163,46 @@ Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
             /* nothing */
             break;
         }
-#if 0
+#if 1
 Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
         i, e->cmd, e->val, mstr, dm, m, x, y, ldir);
+Echo("    lx,ly %d,%d cbm %d lldir %.2f\n", lx, ly, cbm, lldir);
 #endif
         MARK("e ", x, y);
+      { 
+        int pbx, pby, pfx, pfy;
+        int bbx, bby, bfx, bfy;
+        int bmx, bmy;
+
+        bmx = (cbm/2)*cos((ldir+90)*rf);
+        bmy = (cbm/2)*sin((ldir+90)*rf);
+#if 1
+Echo("bmx,bmy %d,%d\n", bmx, bmy);
+#endif
+
+        pfx = x  + bmx;  pfy = y  + bmy;
+        pbx = lx + bmx;  pby = ly + bmy;
+        bfx = x  - bmx;  pfy = y  - bmy;
+        bbx = lx - bmx;  bby = ly - bmy;
+        
+#if 0
+        MARK("ePb ", pbx, pby);
+        MARK("ePf ", pfx, pfy);
+        MARK("eBb ", bbx, bby);
+        MARK("eBf ", bfx, bfy);
+#endif
+      }
     }
         MARK("z ", x, y);
 
+#if 0
     Echo("MARK oid %d (%d %d %d %d)\n",
         u->oid, _lx, _by, _rx, _ty);
+#endif
+    Echo("MARK oid %d ", u->oid);
+    if(_t_){
+        qbb_fprint(stdout, &sbb);
+    }
 
 
 #if 0
@@ -1171,11 +1220,20 @@ Echo("    %d: cmd %d val '%s' : mstr '%s' dm %.2f m %d : x,y %d,%d ldir %.2f\n",
     }
 #endif
 
+#if 0
     {
         *rlx = _lx;
         *rby = _by;
         *rrx = _rx;
         *rty = _ty;
+    }
+#endif
+
+    {
+        *rlx = sbb.lx;
+        *rby = sbb.by;
+        *rrx = sbb.rx;
+        *rty = sbb.ty;
     }
 
     Echo("MARK*oid %d (%d %d %d %d)\n",
@@ -1232,6 +1290,8 @@ Echo("%s: oid %d %d %d %d %d isx,y %d,%d iex,y %d,%d\n",
 #endif
     return rv;
 }
+
+#undef MARK
 
 /* XXX */
 int
@@ -1596,7 +1656,6 @@ Echo("%s: oid %d %d %d %d %d\n", __func__, u->oid, *rlx, *rby, *rrx, *rty);
 }
 
 
-#undef MARK
 
 /*
  *

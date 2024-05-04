@@ -3539,6 +3539,19 @@ PP;
             break;
 
         case OA_SKIP:
+        {
+            int srad;
+            
+            if(xu->cob.rad<0) {
+                srad = objunit/20;
+            }
+            else {
+                srad = xu->cob.rad;
+            }
+
+#if 0
+            fprintf(fp, "%% line-skip rad %d -> srad %d\n", xu->cob.rad, srad);
+#endif
 PP;
             x2 = x1+s->x1;
             y2 = y1+s->y1;
@@ -3546,11 +3559,24 @@ PP;
             qcx = (x1+x2)/2;
             qcy = (y1+y2)/2;
 
+#if 0
+MC(1, x1, y1);
+MQ(5, qcx, qcy);
+MX(4, x2, y2);
+#endif
+
             fprintf(fp, "      %d %d moveto ", x1, y1);
+#if 0
             fprintf(fp, "      %d %d %d %d %d arcn ",
                 qcx, qcy, xu->cob.outlinethick*2, ydir-180, ydir);
+#endif
+            fprintf(fp, "      %d %d %d %d %d arcn ",
+                qcx, qcy, srad, ydir-180, ydir);
             fprintf(fp, "      %d %d lineto", x2, y2);
+        }
 
+            x2 = x1;
+            y2 = y1;
             break;
 
         case OA_ARC:
@@ -3807,8 +3833,13 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             fprintf(fp, " %% x4,y4 %d,%d\n", x4, y4);
 #endif
             if(xu->cob.marknode) {
+#if 0
                 markxross(0, s->x1, s->y1);
                 markxross(0, s->x2, s->y2);
+#endif
+                markxross(0, x1, y1);
+                markxross(0, x2, y2);
+                markxross(0, x3, y3);
             }
 
             x2 = x4;
@@ -7618,6 +7649,42 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
         break;
 
+    case HT_DOT9:
+    case HT_DOT8:
+    case HT_DOT7:
+    case HT_DOT6:
+    case HT_DOT5:
+    case HT_DOT4:
+    case HT_DOT3:
+    case HT_DOT2:
+    case HT_DOT1:
+        {
+        double k = 1;
+        switch(hty) {
+            case HT_DOT9:   k = 3;  break;
+            case HT_DOT8:   k = 2.828;  break;
+            case HT_DOT7:   k = 2.645;  break;
+            case HT_DOT6:   k = 2.449;  break;
+            case HT_DOT5:   k = 2.236;  break;
+            case HT_DOT4:   k = 2;      break;
+            case HT_DOT3:   k = 1.732;  break;
+            case HT_DOT2:   k = 1.414;  break;
+            case HT_DOT1:   k = 1;      break;
+            
+        }
+        for(x1=-aw/2;x1<aw/2;x1+=hp) {
+            for(y1=-ah/2;y1<ah/2;y1+=hp) {
+                x2 = x1 + (int)(def_hatchthick*k);
+                y2 = y1 + (int)(def_hatchthick*k);
+                fprintf(fp,
+"      %d %d moveto %d %d lineto %d %d lineto %d %d lineto closepath fill\n",
+                    x1, y1, x1, y2, x2, y2, x2, y1);
+            }
+        }
+        }
+        break;
+
+
     case HT_DOTTED:
         for(x1=-aw/2;x1<aw/2;x1+=hp) {
             for(y1=-ah/2;y1<ah/2;y1+=hp) {
@@ -7817,8 +7884,6 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
 
         break;
 
-
-
     case HT_UGRID005:
     case HT_UGRID010:
     case HT_UGRID020:
@@ -7829,6 +7894,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
     {
         int up;
         int centerspace = 1;
+
+        fprintf(fp, "  %% ugrid %d\n", hty);
 
         switch(hty) {
         case HT_UGRID005: up = objunit/20;  break;

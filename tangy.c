@@ -28,6 +28,12 @@
 
 int linkchk(ob *xch, ns *xns);
 
+int set_eoutcharset(char *nenc);
+char *get_eoutcharset();
+extern char *get_innercharset();
+extern int   set_eincharset(char*);
+extern char *get_eincharset();
+
 int     nodraw   = 0;
 char   *outfile  = "out.eps";
 int     canvaswd = (int)( 8.27 * 72);
@@ -57,7 +63,6 @@ print_usage()
     printf("         \"kanji.all.encode=CP932\"\n");
     {
         char *u = NULL;
-        extern char *get_innercharset();
         u = get_innercharset();
         if(u==NULL) {
             u = "*none*";
@@ -66,7 +71,6 @@ print_usage()
     }
     {
         char *u = NULL;
-        extern char *get_eincharset();
         u = get_eincharset();
         if(u==NULL) {
             u = "*none*";
@@ -266,9 +270,6 @@ test0()
 
 extern int tx_trace;
 
-int set_eoutcharset(char *nenc);
-char *get_eoutcharset();
-
 int
 main(int argc, char *argv[])
 {
@@ -290,7 +291,7 @@ main(int argc, char *argv[])
     tgyfont_setup(-1);
 
     while((flag=getopt(argc, argv,
-            "0hmVPvqpngbBSUdiLrtDo:u:G:R:M:F:K:k:lcs:e:EQ"))!=EOF) {
+            "0hmVPvqpngbBSUdiLrtDo:u:G:R:M:I:F:K:k:lcs:e:EQ"))!=EOF) {
         switch(flag) {
         case '0':
             test0();
@@ -379,6 +380,10 @@ main(int argc, char *argv[])
         case 'M':
             epsoutmargin = atoi(optarg);
             break;
+
+		case 'I':
+			set_eincharset(optarg);
+			break;
 
         case 'F':
             touch_font++;

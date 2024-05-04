@@ -30,6 +30,16 @@
 #define HT_MIKUZUSI         (37)
 #define HT_RMIKUZUSI        (38)
 
+#define HT_DOT1             (41)
+#define HT_DOT2             (42)
+#define HT_DOT3             (43)
+#define HT_DOT4             (44)
+#define HT_DOT5             (45)
+#define HT_DOT6             (46)
+#define HT_DOT7             (47)
+#define HT_DOT8             (48)
+#define HT_DOT9             (49)
+
 #define HT_GRID             (50)
 
 #define HT_UGRID005         (51)
