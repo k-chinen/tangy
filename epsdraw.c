@@ -3256,6 +3256,11 @@ epsdraw_plinearrowR(FILE *fp,
     fprintf(fp, "      gsave"); changecolor(fp, c); \
     fprintf(fp, "      newpath %d %d %d 0 360 arc stroke grestore\n", x, y, def_marknoderad);
 
+#define markbox(c,x,y) \
+    fprintf(fp, "    %% markbox %d\n", __LINE__); \
+    fprintf(fp, "      gsave"); changecolor(fp, c); \
+    fprintf(fp, "      newpath %d %d translate %d %d moveto %d 0 rlineto 0 %d rlineto %d 0 rlineto closepath fill grestore\n", (int)x, (int)y, -def_marknoderad, -def_marknoderad, 2*def_marknoderad, 2*def_marknoderad, -2*def_marknoderad);
+
 #define markcross(c,x,y) \
     fprintf(fp, "    %% markcross %d\n", __LINE__); \
     fprintf(fp, "      gsave"); changecolor(fp, c); \
@@ -3524,6 +3529,33 @@ Echo("%s: oid %d seg i %d type %d; actbh %d actch %d actfh %d\n",
             x2 = x1;
             y2 = y1;
             break;
+
+        case OA_SEGMARKCIR:
+            markfdot(def_markcolor, x1, y1);
+            x2 = x1;
+            y2 = y1;
+            break;
+
+        case OA_SEGMARKBOX:
+            markbox(def_markcolor, x1, y1);
+            x2 = x1;
+            y2 = y1;
+            break;
+
+        case OA_SEGMARKXSS:
+            markxross(def_markcolor, x1, y1);
+            x2 = x1;
+            y2 = y1;
+            break;
+
+        case OA_SEGMARKPLS:
+            markcross(def_markcolor, x1, y1);
+            x2 = x1;
+            y2 = y1;
+            break;
+
+#if 0
+#endif
 
         case OA_JOIN:
 PP;
@@ -3928,6 +3960,7 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             break;
 
     /* BIWAY MARKS; do not change position(s) */
+#if 0
         case OA_BWCIR:
             {
             int nx, ny;
@@ -3977,6 +4010,7 @@ fprintf(fp, "%% xu cox,coy %d,%d\n", xu->cox, xu->coy);
             continue;
             break;
 
+#endif
 
 #if 0
         default:
@@ -4740,6 +4774,9 @@ P;
                 qcx, qcy, xu->cob.outlinethick*2, ydir-180, ydir);
             fprintf(fp, "    %d %d lineto", x2, y2);
 
+            x2 = x1;
+            y2 = y1;
+
             break;
 
 
@@ -5099,6 +5136,7 @@ skip_arcn:
             break;
 
     /* BIWAY MARKS; do not change position(s) */
+#if 0
         case OA_BWCIR:
             {
             int nx, ny;
@@ -5110,6 +5148,7 @@ skip_arcn:
             }
             goto next;
             break;
+#endif
 
         case OA_FORWARD:
 

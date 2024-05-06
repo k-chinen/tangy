@@ -956,6 +956,38 @@ P;
             break;
 #endif
 
+#if 1
+
+        case OA_SEGMARKCIR:
+            jc += 1;
+            c++;
+            FREG1(OA_SEGMARKCIR,  1000, REL_COORD, 0, x,    y,    0, 0);
+            MARK("BWCIR ", x, y);
+            break;
+
+        case OA_SEGMARKBOX:
+            jc += 1;
+            c++;
+            FREG1(OA_SEGMARKBOX,  1000, REL_COORD, 0, x,    y,    0, 0);
+            MARK("BWBOX ", x, y);
+            break;
+
+        case OA_SEGMARKXSS:
+            jc += 1;
+            c++;
+            FREG1(OA_SEGMARKXSS,  1000, REL_COORD, 0, x,    y,    0, 0);
+            MARK("BWXSS ", x, y);
+            break;
+
+        case OA_SEGMARKPLS:
+            jc += 1;
+            c++;
+            FREG1(OA_SEGMARKPLS,  1000, REL_COORD, 0, x,    y,    0, 0);
+            MARK("BWPLS ", x, y);
+            break;
+
+#endif
+
         case OA_JOIN:
             jc += 1;
             c++;

@@ -1388,6 +1388,14 @@ P;
             (strcasecmp(name, "curve")==0)  ||
             (strcasecmp(name, "join")==0)   ||
             (strcasecmp(name, "skip")==0)   ||
+#if 1
+            (strcasecmp(name, "markcir")==0)    ||
+            (strcasecmp(name, "markbox")==0)    ||
+            (strcasecmp(name, "markxss")==0)    ||
+            (strcasecmp(name, "markcross")==0)  ||
+            (strcasecmp(name, "markpls")==0)    ||
+            (strcasecmp(name, "markplus")==0)   ||
+#endif
 
             (strcasecmp(name, "close")==0)  ||
             (strcasecmp(name, "then")==0)   ) {

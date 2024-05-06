@@ -484,6 +484,13 @@ apair_t objattr_ial[] = {
     {"join",                OA_JOIN},
     {"skip",                OA_SKIP},
 
+    {"markcir",             OA_SEGMARKCIR},
+    {"markbox",             OA_SEGMARKBOX},
+    {"markpls",             OA_SEGMARKPLS},
+    {"markplus",            OA_SEGMARKPLS},
+    {"markxss",             OA_SEGMARKXSS},
+    {"markcross",           OA_SEGMARKXSS},
+
     {"line",                OA_LINE},
     {"moveto",              OA_MOVETO},
     {"rmoveto",             OA_RMOVETO},

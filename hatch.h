@@ -9,7 +9,6 @@
 #define HT_CROSSED          (5)
 #define HT_XCROSSED         (6)
 #define HT_SOLID            (10)
-#define HT_DOTTED           (13)
 #define HT_SPARSEDOTTED     (14)
 #define HT_VZIGZAG          (15)
 #define HT_HZIGZAG          (16)
@@ -30,6 +29,7 @@
 #define HT_MIKUZUSI         (37)
 #define HT_RMIKUZUSI        (38)
 
+#define HT_DOTTED           (40)
 #define HT_DOT1             (41)
 #define HT_DOT2             (42)
 #define HT_DOT3             (43)

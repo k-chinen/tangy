@@ -459,6 +459,11 @@ extern apair_t lo_ial[];
 #define OA_CLOSE            (359)
 #define OA_LINE             (360)
 
+#define OA_SEGMARKCIR       (371)
+#define OA_SEGMARKBOX       (372)
+#define OA_SEGMARKPLS       (373)
+#define OA_SEGMARKXSS       (374)
+
 
 #define OA_PORT             (402)
 #define OA_STARBOARD        (403)
