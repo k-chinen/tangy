@@ -26,11 +26,25 @@
 #define AH_REVNORMAL        (101)
 #define AH_REVWIRE          (102)
 
+#define AH_ERZ              (201)
+#define AH_ERO              (202)
+#define AH_ERM              (203)
+#define AH_ERZO             (212)
+#define AH_ERZM             (213)
+#define AH_EROZ             (221)
+#define AH_EROO             (222)
+#define AH_EROM             (223)
+
 extern apair_t arrowhead_ial[];
 
 /* some arrow head needs chopping */
 #define AH_MUSTCHOP(x) \
     ((x)==AH_NORMAL||(x)==AH_ARROW3||(x)==AH_ARROW5|| \
     (x)==AH_ARROW6||(x)==AH_SHIP)
+
+#define ER_NONE         (999)
+#define ER_ZERO         (0)
+#define ER_ONE          (1)
+#define ER_MANY         (2)
 
 #endif/*_TANGE_AHEAD_H_*/

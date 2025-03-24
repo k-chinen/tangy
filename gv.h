@@ -17,6 +17,7 @@ extern char *def_fontname;
 extern int   def_markcolor;
 
 
+extern double ersizefactor;
 extern double arrowsizefactor;
 extern double warrowsizefactor;
 extern double linethickfactor;
@@ -60,6 +61,7 @@ extern int def_fgcolor;
 extern int def_bgcolor;
 extern int def_linethickmode;
 extern int def_linethick;
+extern int def_ersize;
 extern int def_arrowangle;
 extern int def_arrowsize;
 extern int def_linedecothick;

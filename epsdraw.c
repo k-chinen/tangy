@@ -1148,6 +1148,134 @@ epsdraw_bbox_lbrtR(FILE *fp, int xox, int xoy, ob *xu)
 #define epsdraw_bbox    epsdraw_bbox_glbrtR
 
 
+/*          x1,y1
+ *  ------+---+----+
+ *      x2,y2     x,y
+ */
+
+/* fc (fillcolor) is solid only */
+
+double
+_erhead(FILE *fp, int atype, double xdir, int lc, int fc, double x, double y)
+{
+    double  r;
+    double  dx, dy;
+    int     s1, s2;
+    double  x1, y1, x2, y2;
+
+    s1 = ER_NONE;
+    s2 = ER_NONE;
+
+#if 0
+    fprintf(fp, "%% b s1 %d s2 %d\n", s1, s2);
+#endif
+
+    switch(atype) {
+    case AH_ERZ:        s1 = ER_NONE; s2 = ER_ZERO; break;
+    case AH_ERO:        s1 = ER_NONE; s2 = ER_ONE;  break;
+    case AH_ERM:        s1 = ER_NONE; s2 = ER_MANY; break;
+    case AH_ERZO:       s1 = ER_ZERO; s2 = ER_ONE;  break;
+    case AH_ERZM:       s1 = ER_ZERO; s2 = ER_MANY; break;
+    case AH_EROZ:       s1 = ER_ONE;  s2 = ER_ZERO; break;
+    case AH_EROO:       s1 = ER_ONE;  s2 = ER_ONE;  break;
+    case AH_EROM:       s1 = ER_ONE;  s2 = ER_MANY; break;
+    }
+
+#if 0
+    fprintf(fp, "%% a atype %d s1 %d s2 %d\n", atype, s1, s2);
+#endif
+
+    fprintf(fp, "   gsave %% erhead\n");
+
+    r = def_arrowsize;
+    dx =  (double)(r*cos((xdir)*rf));
+    dy =  (double)(r*sin((xdir)*rf));
+
+    x1 = x-dx/2;
+    y1 = y-dy/2;
+    x2 = x-dx*3/4;
+    y2 = y-dy*3/4;
+
+    dx =  (double)(def_ersize*cos((xdir+90)*rf));
+    dy =  (double)(def_ersize*sin((xdir+90)*rf));
+
+#if 0
+    fprintf(fp, " 0.7 0.3 0.6 setrgbcolor\n");
+#endif
+
+    /***
+     ***
+     ***/
+    if(s1==ER_ZERO) {
+
+#if 0
+        fprintf(fp, " 0.7 0.3 0.6 setrgbcolor\n");
+#endif
+        fprintf(fp, "    newpath\n");
+        if(fc>=0) {
+            fprintf(fp, "     gsave %% ERZERO RING FILL\n");
+            changecolor(fp, fc);
+            fprintf(fp, "      %.3f %.3f %.3f 0 360 arc closepath fill\n",
+                x2,  y2, (double)def_ersize);
+            fprintf(fp, "     grestore %% ERZERO RING FILL\n");
+        }
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %.3f %.3f %.3f 0 360 arc closepath stroke\n",
+            x2,  y2, (double)def_ersize);
+
+    }
+    if(s1==ER_ONE) {
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %.3f %.3f moveto\n",   x2,  y2);
+        fprintf(fp, "    %.3f %.3f rmoveto\n",  dx,  dy);
+        fprintf(fp, "    %.3f %.3f rlineto\n",  -2*dx,  -2*dy);
+        fprintf(fp, "    stroke\n");
+    }
+
+    /***
+     ***
+     ***/
+    if(s2==ER_ZERO) {
+
+#if 0
+        fprintf(fp, " 0.7 0.3 0.6 setrgbcolor\n");
+#endif
+        fprintf(fp, "    newpath\n");
+        if(fc>=0) {
+            fprintf(fp, "     gsave %% ERZERO RING FILL\n");
+            changecolor(fp, fc);
+            fprintf(fp, "      %.3f %.3f %.3f 0 360 arc closepath fill\n",
+                x1,  y1, (double)def_ersize);
+            fprintf(fp, "     grestore %% ERZERO RING FILL\n");
+        }
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %.3f %.3f %.3f 0 360 arc closepath stroke\n",
+            x1,  y1, (double)def_ersize);
+
+
+    }
+    if(s2==ER_ONE) {
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %.3f %.3f moveto\n",   x1,  y1);
+        fprintf(fp, "    %.3f %.3f rmoveto\n",  dx,  dy);
+        fprintf(fp, "    %.3f %.3f rlineto\n",  -2*dx,  -2*dy);
+        fprintf(fp, "    stroke\n");
+    }
+    if(s2==ER_MANY) {
+        fprintf(fp, "    newpath\n");
+        fprintf(fp, "    %.3f %.3f moveto\n",   x1,  y1);
+        fprintf(fp, "    %.3f %.3f lineto\n",  x+dx,  y+dy);
+        fprintf(fp, "    %.3f %.3f moveto\n",   x1,  y1);
+        fprintf(fp, "    %.3f %.3f lineto\n",   x, y);
+        fprintf(fp, "    %.3f %.3f moveto\n",   x1,  y1);
+        fprintf(fp, "    %.3f %.3f lineto\n",  x-dx,  y-dy);
+        fprintf(fp, "    stroke\n");
+    }
+
+    fprintf(fp, "   grestore %% erhead\n");
+
+    return 0;
+}
 
 double
 _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
@@ -1160,7 +1288,7 @@ _arrowheadD(FILE *fp, int atype, double xdir, int lc, double x, double y)
     fprintf(fp, "%% %s atype %d xdir %.2f lc %d x,y %.3f,%.3f\n",
         __func__, atype, xdir, lc, x, y);
 #endif
-    fprintf(fp, "gsave %% for AH\n");
+    fprintf(fp, "  gsave %% for AH\n");
 
     changecolor(fp, lc);
 
@@ -1491,10 +1619,21 @@ P;
 
         break;
 
+    case AH_ERZ:
+    case AH_ERO:
+    case AH_ERM:
+    case AH_ERZO:
+    case AH_ERZM:
+    case AH_EROZ:
+    case AH_EROO:
+    case AH_EROM:
+        _erhead(fp, atype, xdir, lc, 7, x, y);  /* FIXME */
+        break;
+
     case AH_NORMAL:
     default:
-        r = def_arrowsize;
 
+        r = def_arrowsize;
         dx =  (double)(r*cos((xdir+180+def_arrowangle/2)*rf));
         dy =  (double)(r*sin((xdir+180+def_arrowangle/2)*rf));
         fprintf(fp, "newpath\n");
@@ -1503,16 +1642,14 @@ P;
 #endif
         fprintf(fp, "%.3f %.3f moveto\n",   x,  y);
         fprintf(fp, "%.3f %.3f rlineto\n", dx, dy);
-
         dx =  (double)(r*cos((xdir+180-def_arrowangle/2)*rf));
         dy =  (double)(r*sin((xdir+180-def_arrowangle/2)*rf));
         fprintf(fp, "%.3f %.3f lineto\n", x+dx, y+dy);
         fprintf(fp, "closepath fill\n");
-
         break;
 
     }
-    fprintf(fp, "grestore %% for AH\n");
+    fprintf(fp, "  grestore %% for AH\n");
 
     return 0;
 }
@@ -4134,6 +4271,13 @@ Echo("    arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
         
 next:
 
+#if 0
+        fprintf(fp, "    stroke %% solid\n");
+#endif
+#if 1
+        fprintf(fp, "    %% dummy\n");
+#endif
+
         x1i = x1; y1i = y1; x2i = x2; y2i = y2;
 
         if(i==ahfpos && xu->cob.arrowforeheadtype) {
@@ -4174,7 +4318,7 @@ P;
 
         if(i==ahbpos && xu->cob.arrowbackheadtype) {
 Echo("AH B oid %d seg %d cdir %d\n", xu->oid, i, cdir);
-#if 0
+#if 1
             fprintf(fp, "%% AH B\n");
 #endif
             bchop = xu->cob.backchop;
@@ -4206,6 +4350,10 @@ P;
     if(xu->cob.marknode) {
         markfdot(xu->cob.outlinecolor, x1, y1);
     }
+
+#if 0
+        fprintf(fp, "    stroke %% solid\n");
+#endif
 
 P;
 
@@ -4609,7 +4757,9 @@ P;
     if(xu->cob.outlinetype==LT_SOLID) {
 P;
         _drawpathX(fp, ydir, xox, xoy, xu, xns, qar, 1, 1);
+#if 1
         fprintf(fp, "    stroke %% solid\n");
+#endif
 #if 0
         fprintf(fp, "%% %s:%d out2 oid %d ydir %d cdir %4d\n",
             __func__, __LINE__, xu->oid, ydir, cdir);
@@ -7998,14 +8148,13 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         fprintf(fp, "      grestore\n");
 
 #if 0
-        if(markgrid) {
+        if(markgrid*0+1) {
             goto skip_dots;
         }
 #endif
 
 
         up = -1;
-#if 1
         switch(hty) {
         case HT_UGRID005: 
         case HT_UGRID010:
@@ -8020,25 +8169,12 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
                 goto skip_dots;
                 break;
         }
-#endif
-
-#if 0
-        switch(hty) {
-        case HT_UGRID010: up = objunit/2;   break;
-        case HT_UGRID020: up = objunit;     break;
-        case HT_UGRID025: up = objunit/2;   break;
-        case HT_UGRID050: up = objunit;     break;
-        default:
-        case HT_UGRID005: goto skip_dots;   break;
-        case HT_UGRID100: goto skip_dots;   break;
-        case HT_UGRID200: goto skip_dots;   break;
-        }
-#endif
 
         if(up<0) {
             goto skip_dots;
         }
 
+#if 0
         fprintf(fp, "      gsave\n");
 
         if(centerspace) {
@@ -8073,6 +8209,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp)
         }
 
         fprintf(fp, "      grestore\n");
+#endif
+
 skip_dots:
         (void)0;
 

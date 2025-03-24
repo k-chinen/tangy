@@ -195,6 +195,7 @@ print_param()
 
     printf("  unit-base: multiply by unitsize %d\n", objunit);
 
+    QPV(ersize);
     QPV(arrowsize);
     QPV(warrowsize);
     QPV(linethick);
@@ -381,9 +382,9 @@ main(int argc, char *argv[])
             epsoutmargin = atoi(optarg);
             break;
 
-		case 'I':
-			set_eincharset(optarg);
-			break;
+        case 'I':
+            set_eincharset(optarg);
+            break;
 
         case 'F':
             touch_font++;

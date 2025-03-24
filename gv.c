@@ -259,6 +259,16 @@ apair_t arrowhead_ial[] = {
     {"wcircle",             AH_WCIRCLE},
     {"revnormal",           AH_REVNORMAL},
     {"revwire",             AH_REVWIRE},
+
+    {"erz",                 AH_ERZ},
+    {"ero",                 AH_ERO},
+    {"erm",                 AH_ERM},
+    {"erzo",                AH_ERZO},
+    {"erzm",                AH_ERZM},
+    {"eroz",                AH_EROZ},
+    {"eroo",                AH_EROO},
+    {"erom",                AH_EROM},
+
     {NULL,                  -1},
 };
 
@@ -610,6 +620,7 @@ apair_t ftcoord_isal[] = {
 
 int objunit = OBJUNIT;
 
+double ersizefactor         = 0.05;
 double arrowsizefactor      = 0.30;
 double warrowsizefactor     = 0.60;
 double linethickfactor      = 0.02;
@@ -660,6 +671,7 @@ int def_backhatch       =   HT_SOLID;
 
 int def_linethickmode   =   1;
 int def_linethick       =   1;
+int def_ersize          =   5; 
 int def_arrowangle      =  30;
 int def_arrowsize       =  20;
 int def_linedecothick   =   5;

@@ -1173,6 +1173,7 @@ recalcsizeparam()
 
 #define V(x)    printf("%-20s %8d\n", #x, x);
     
+    def_ersize          = ersizefactor          * objunit;
     def_arrowsize       = arrowsizefactor       * objunit;
     def_warrowsize      = warrowsizefactor      * objunit;
     def_barrowgap       = barrowgapfactor       * objunit;
