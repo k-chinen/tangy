@@ -1,5 +1,6 @@
 /*
  * tangy second trial since 2016 Aug 
+ *
  * K.Chinen
  *
  */
@@ -176,7 +177,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.106\n");
+    printf("tangy version 2.110\n");
     return 0;
 }
 

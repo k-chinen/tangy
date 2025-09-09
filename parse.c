@@ -1164,6 +1164,9 @@ P;
     AISETXD(OA_TEXTPOSITION,  pos_ial, textposition, PO_CENTER);
     ISET(OA_TEXTHOFFSET,    texthoffset);
     ISET(OA_TEXTVOFFSET,    textvoffset);
+#if 0
+    ISET(OA_TEXTBGMARGIN,   textbgmargin);
+#endif
 
     ONSET(OA_HOLLOW,        hollow);
     ONSET(OA_SHADOW,        shadow);
@@ -1224,6 +1227,7 @@ P;
     ISET(OA_FORECHOP,       forechop);
     ISET(OA_BACKCHOP,       backchop);
     ISET(OA_BULGE,          bulge);
+    ISET(OA_OVERHANG,       overhang);
     ONSET(OA_ARROWEVERY,    arrowevery);
 
     XSADD(OA_FILE,          filestr);
@@ -1240,6 +1244,8 @@ P;
     GFSET(OA_HATCHPITCHFACTOR,      hatchpitchfactor);
     GFSET(OA_NOTEOSEPFACTOR,        noteosepfactor);
     GFSET(OA_NOTEISEPFACTOR,        noteisepfactor);
+
+    GFSET(OA_TEXTBGMARGINFACTOR,    textbgmarginfactor);
 
 
 #if 0
@@ -1555,6 +1561,7 @@ parseobj(char *p)
     nob->cob.arrowevery     = 0;
 
     nob->cob.crankpos       = 50;
+    nob->cob.overhang       = objunit/2;
 
     nob->cob.wlinethick     = def_wlinethick;
     

@@ -105,6 +105,9 @@ extern double rf;                   /* M_PI/180.0 */
 #ifndef MAX
 #define MAX(a,b)    ((a)>(b) ? (a) : (b))
 #endif
+#ifndef MIN 
+#define MIN(a,b)    ((a)<(b) ? (a) : (b))
+#endif
 
 #define INTRACE (_t_>0)
 #define P   if(_p_){printf("PASS %s:%d;%s\n", __FILE__, __LINE__, __func__); fflush(stdout); }

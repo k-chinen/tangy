@@ -102,6 +102,8 @@
 #define CMD_HELBOW      (711)
 #define CMD_VELBOW      (712)
 
+#define CMD_HHOOK       (721)
+#define CMD_VHOOK       (722)
 
 #define CMD_UNIT        (801)
 #define CMD_COLOR       (802)
@@ -169,6 +171,7 @@ extern apair_t cmd_ial[];
      (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||\
      (x)==CMD_HCRANK||(x)==CMD_VCRANK||\
      (x)==CMD_HELBOW||(x)==CMD_VELBOW||\
+     (x)==CMD_HHOOK||(x)==CMD_VHOOK||\
      (x)==CMD_BARROW||(x)==CMD_PLINE \
     )
 #define ISATOM(x)   \
@@ -207,6 +210,7 @@ extern apair_t cmd_ial[];
  (x)==CMD_PING||(x)==CMD_PINGPONG||(x)==CMD_WLINE||(x)==CMD_WARROW||\
  (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||(x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
  (x)==CMD_HCRANK||(x)==CMD_VCRANK||(x)==CMD_HELBOW||(x)==CMD_VELBOW||\
+ (x)==CMD_HHOOK||(x)==CMD_VHOOK||\
  (x)==CMD_OBJLOAD)
 
 #define VISIBLE(x) \
@@ -430,6 +434,7 @@ extern apair_t lo_ial[];
 #define OA_FORECHOP         (222)
 #define OA_BACKCHOP         (223)
 #define OA_BULGE            (230)
+#define OA_OVERHANG         (240)
 
 #define OA_RIGHT            (301)
 #define OA_LEFT             (302)
@@ -601,6 +606,7 @@ struct obattr {
     int    forechop;
     int    backchop;
     int    bulge;
+    int    overhang;
 
     int    piestart;
     int    pieend;

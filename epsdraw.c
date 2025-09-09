@@ -5725,6 +5725,303 @@ solve_quadrant(int sx, int sy, int ex, int ey)
     return r;
 }
 
+/* circle center is x1,y2 */
+int
+cirline_cross(int x1, int y1, int x2, int y2, int r,
+    int *x12, int *y12, double *ang)
+{
+    int rv;
+    int cx, cy;
+    int mx, my;
+    double linedist;
+    double th;
+    double dx, dy;
+
+    cx = x2;
+    cy = y2;
+    linedist = sqrt((double)((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)));
+#if 0
+    fprintf(stderr, "%s: %d,%d -> %d,%d r %d; dist %.1f\n",
+        __func__, x1, y1, x2, y2, r, linedist);
+#endif
+    if(linedist<r) {
+        Error("too close\n");
+        return -1;
+    }
+    dy = (double)y1-y2;
+    dx = (double)x1-x2;
+
+    th = atan(dy/dx);
+
+#if 0
+    fprintf(stderr, "%s: dx,dy %.1f,%.1f th %.3f(%.1f)\n",
+        __func__, dx, dy, th, th/rf);
+#endif
+    
+    if(dy==0.0 && dx < 0.0) {
+#if 0
+fprintf(stderr, "%s: change direction\n", __func__);
+#endif
+        th = M_PI;
+    }
+
+    mx = r*cos(th) + x2;
+    my = r*sin(th) + y2;
+
+    *x12 = mx;
+    *y12 = my;  
+    *ang = th;
+
+#if 0
+    fprintf(stderr, "%s: %d,%d -> %d,%d r %d; dx,dy %.1f,%.1f th %.3f(%.1f), %d,%d\n",
+        __func__, x1, y1, x2, y2, r, dx, dy, th, th/rf, mx, my);
+#endif
+
+    return 0;
+}
+
+/*
+ * x1,y1    x2,y2
+ *  +---..+
+ *      \ .
+ *       \.
+ *        |
+ *        |
+ *        + x3,y3
+ *
+ */
+int
+_3p_addarc(int r, int x1, int y1, int x2, int y2,
+    int x3, int y3, int *x2a, int *y2a, int *x2b, int *y2b, double *th)
+{
+    int x12, y12;
+    int x23, y23;
+    double  a12, a23;
+    double  xqth, qth;
+
+#if 0
+    fprintf(stderr, "%s: r %d, %d,%d - %d,%d - %d,%d\n",
+        __func__, r, x1, y1, x2, y2, x3, y3);
+#endif
+
+    cirline_cross(x1, y1, x2, y2, r, &x12, &y12, &a12);
+    cirline_cross(x3, y3, x2, y2, r, &x23, &y23, &a23);
+
+    xqth = (a23 + M_PI*2) - (a12 + M_PI*2);
+    if(xqth > M_PI) {
+        qth = xqth - M_PI*2;
+    }
+    else
+    if(xqth < -M_PI) {
+        qth = xqth + M_PI*2;
+    }
+    else {
+        qth = xqth;
+    }
+#if 0
+    fprintf(stderr, "%s: a12 %.3f (%.1f) a23 %.3f (%.1f) xqth %.3f (%.1f) qth %.3f (%.1f)\n",
+        __func__, a12, a12/rf, a23, a23/rf,
+        xqth, xqth/rf, qth, qth/rf);
+#endif
+
+    *x2a = x12;
+    *y2a = y12; 
+    *x2b = x23;
+    *y2b = y23; 
+    *th  = qth;
+
+    return 0;
+}
+
+int
+_34p_addarc(FILE *fp, ob *xu, ns *xns,
+    int r, int np, int x1, int y1, int x2, int y2,
+    int x3, int y3, int x4, int y4)
+{
+    int x2a, y2a, x2b, y2b;
+    double th2;
+    int x3a, y3a, x3b, y3b;
+    double th3;
+    int v2, v3;
+
+#if 0
+    fprintf(stderr, "%s: r %d np %d ; %d,%d - %d,%d - %d,%d ( %d, %d)\n",
+        __func__, r, np, x1, y1, x2, y2, x3, y3, x4, y4);
+#endif
+
+    if(xu->cob.rad<=0) {
+        path_regsegmoveto(xu->cob.segar, x1, y1);
+        path_regseglineto(xu->cob.segar, x2, y2);
+        path_regseglineto(xu->cob.segar, x3, y3);
+        path_regseglineto(xu->cob.segar, x4, y4);
+    }
+    else {
+
+
+        v2 = _3p_addarc(r, x1, y1, x2, y2, x3, y3,
+                &x2a, &y2a, &x2b, &y2b, &th2);
+#if 0
+        fprintf(stderr, "%s: v2 %d; a %d,%d b %d,%d th2 %f\n",
+             __func__, v2, x2a, y2a, x2b, y2b, th2);
+#endif
+    if(np>3) {
+        v3 = _3p_addarc(r, x2, y2, x3, y3, x4, y4,
+                &x3a, &y3a, &x3b, &y3b, &th3);
+#if 0
+        fprintf(stderr, "%s: v3 %d; a %d,%d b %d,%d th3 %f\n",
+             __func__, v3, x3a, y3a, x3b, y3b, th3);
+#endif
+    }
+
+
+        path_regsegmoveto(xu->cob.segar, x1, y1);
+        path_regseglineto(xu->cob.segar, x2a, y2a);
+    #if 0
+        if(xu->cob.overhang>0) {
+            path_regsegarcn(xu->cob.segar, r, 90);
+        }
+        else {
+            path_regsegarc(xu->cob.segar, r, 90);
+        }
+    #endif
+        if(th2>0) {
+            path_regsegarcn(xu->cob.segar, r, 90);
+        }
+        else {
+            path_regsegarc(xu->cob.segar, r, 90);
+        }
+ #if 0
+        path_regseglineto(xu->cob.segar, x2b, y2b);
+ #endif
+        path_regseglineto(xu->cob.segar, x3a, y3a);
+    #if 0
+        if(xu->cob.overhang>0) {
+            path_regsegarcn(xu->cob.segar, r, 90);
+        }
+        else {
+            path_regsegarc(xu->cob.segar, r, 90);
+        }
+    #endif
+        if(th3>0) {
+            path_regsegarcn(xu->cob.segar, r, 90);
+        }
+        else {
+            path_regsegarc(xu->cob.segar, r, 90);
+        }
+ #if 0
+        path_regseglineto(xu->cob.segar, x3b, y3b);
+ #endif
+        path_regseglineto(xu->cob.segar, x4, y4);
+
+    }
+
+#if 0
+    varray_fprint(stderr, xu->cob.segar);
+#endif
+    int ddir = 360*rf;
+fprintf(fp, "%% before drawpath_LT\n");
+    drawpath_LT(fp, ddir, 0, 0, xu, xns);
+fprintf(fp, "%% after  drawpath_LT\n");
+
+    return 0;
+}
+
+int
+_hook_any(FILE *fp, ob *xu, ns *xns, int orient, int ohang,
+    int csx, int csy, int cex, int cey)
+{
+    int cpos;   /* dummy */
+    int elbow;
+    int q;
+    int r;
+    int cbx, cmx, cfx;
+    int cby, cmy, cfy;
+    int cbas, cbae, cbc;
+    int cfas, cfae, cfc;
+    int sdir, ddir; /* source direction, destination direction */
+    int ohv;
+
+    /*
+     * OR_H
+     *         cfx
+     *         cbx csx             cey
+     *  cey      /------------------+
+     *          /
+     *  cfy     +
+     *          |       
+     *  cby     +
+     *          \   
+     *  csy      \--+
+     *
+     */
+
+#if 0
+    fprintf(stderr, "hook 0 %d,%d -> %d, %d r %d or %d, ohang %d\n",
+        csx, csy, cex, cey, r, orient, ohang);
+#endif
+
+    r = xu->cob.rad;
+    if(r<0) {
+        r = 0;
+    }
+    q = solve_quadrant(csx, csy, cex, cey);
+    fprintf(fp, "%% r %d quadrant %2d %02xH\n", r, q, q);
+
+#if 0
+    fprintf(stderr, "hook 1 %d,%d -> %d, %d r %d or %d, ohang %d\n",
+        csx, csy, cex, cey, r, orient, ohang);
+#endif
+
+    if(orient==OR_H) {
+        int mx;
+        if(ohang>0) {
+#if 0
+            fprintf(stderr, "mx H 1\n");
+#endif
+            mx = MIN(csx,cex) - ohang;
+        }
+        else {
+#if 0
+            fprintf(stderr, "mx H 2\n");
+#endif
+            mx = MAX(csx,cex) - ohang;
+        }
+#if 0
+            fprintf(stderr, "call _34p_addarc HORI ; mx %d\n", mx);
+#endif
+        _34p_addarc(fp, xu, xns,
+            xu->cob.rad, 4, csx, csy, mx, csy, mx, cey, cex, cey);
+        return 0;
+    }
+    else
+    if(orient==OR_V) {
+        int my;
+        if(ohang>0) {
+#if 0
+            fprintf(stderr, "my V 1\n");
+#endif
+            my = MIN(csy,cey) - ohang;
+        }
+        else {
+#if 0
+            fprintf(stderr, "my V 2\n");
+#endif
+            my = MAX(csy,cey) - ohang;
+        }
+#if 0
+fprintf(stderr, "call _34p_addarc VERT ; my %d\n", my);
+#endif
+        _34p_addarc(fp, xu, xns,
+            xu->cob.rad, 4, csx, csy, csx, my, cex, my, cex, cey);
+        return 0;
+    }
+    else {
+        return -1;
+    }
+
+    return 0;
+}
+
 int
 _crank_any(FILE *fp, ob *xu, ns *xns, int orient, int cpos,
     int csx, int csy, int cex, int cey)
@@ -6400,6 +6697,189 @@ P;
     }
 
 #if 1
+    if(xu->cob.arrowheadpart & AR_CENT) {
+        double na, nx, ny;
+        double nt;
+        
+        if(xu->cob.arrowcentheadpos>0.0) {
+            nt = xu->cob.arrowcentheadpos;
+        }
+        else {
+            nt = 0.5;
+        }
+Echo("%s: nt %f arrowcentheadpos %f\n", __func__, nt, xu->cob.arrowcentheadpos);
+        _bez_posdir(&nx, &ny, &na, nt, ux, uy, tx, ty, tx, ty, vx, vy);
+
+P;
+        epsdraw_arrowhead(fp, xu->cob.arrowcentheadtype,
+            (int)(na/rf), xu->cob.outlinecolor, nx, ny);
+    }
+#endif
+
+    fprintf(fp, "grestore\n");
+
+    return 0;
+}
+
+int
+Zepsdraw_hookarrow(FILE *fp,
+    int ydir, int xox, int xoy, ob *xu, ns *xns)
+{
+
+    /*
+     *    mx,cey          cex,cey
+     *      +--------------->+  
+     *      |           
+     *      +--------+
+     *    mx,csy  csx,csy           
+     *                   
+     */
+
+    /*
+     * csx,csy             csx,csy
+     *    +----+              +
+     *         |  cex,cey     |
+     *         +---->+        |
+     *         cmx            +------+ cmy
+     *                               |
+     *                              \|/
+     *                               +
+     *                            cex,cey
+     */
+
+    int orient=OR_H;
+    int cpos=50;
+    int ohang=10*objunit;
+    int csx, csy, cmx, cmy, cex, cey;
+    int mx, my;
+
+
+    /* orient */
+    if(xu->type==CMD_HHOOK) {
+        orient = OR_H;
+    }
+    else
+    if(xu->type==CMD_VHOOK) {
+        orient = OR_V;
+    }
+
+    ohang = xu->cob.overhang;
+
+#if 1
+    if(!xu->cob.originalshape) {
+
+        csx = xu->gsx;
+        csy = xu->gsy;
+        cex = xu->gex;
+        cey = xu->gey;
+
+        fprintf(fp, "%% skip position solving\n");
+
+#if 0
+        fprintf(stderr, "%s: orig poss %d,%d -> %d,%d\n",
+            __func__, csx, csy, cex, cey);
+        goto pos_done;
+#endif
+
+    }
+#endif
+
+fprintf(fp, "%% position solving\n");
+
+    __solve_fandt(xns, xu, xu->cob.segopar, 1, &csx, &csy, &cex, &cey);
+
+#if 0
+        fprintf(stderr, "%s: solved poss %d,%d -> %d,%d\n",
+            __func__, csx, csy, cex, cey);
+#endif
+
+#if 0
+    /* test, don't use */
+    xu->gx = (csx+cex)/3;
+    xu->gy = (csy+cey)/3;
+#endif
+
+
+Echo("%s: 0 ? FROM %d,%d TO %d,%d\n", __func__,
+    csx, csy, cex, cey);
+
+pos_done:
+
+Echo("%s: 1 ? FROM %d,%d TO %d,%d\n", __func__,
+    csx, csy, cex, cey);
+
+    fprintf(fp, "%% oritent %d cpos %d\n", orient, cpos);
+    fprintf(fp, "%% oritent %d ohang %d\n", orient, ohang);
+
+    fprintf(fp, "gsave\n");
+
+    if(xu->cob.markguide) {
+        fprintf(fp, "%% guide\n");
+        fprintf(fp, "gsave\n");
+        changethick(fp, xu->cob.outlinethick);
+        SLW_12(fp);
+        changecolor(fp, def_guide1color);
+        markcross(def_guide1color, csx, csy);
+
+        changecolor(fp, def_guide2color);
+        markxross(def_guide2color, cex, cey);
+
+        fprintf(fp, "grestore\n");
+    }
+
+    /* main body */
+    changecolor(fp, xu->cob.outlinecolor);
+    changethick(fp, xu->cob.outlinethick);
+#if 0
+    /* make xu->cob.segar */
+#endif
+    _hook_any(fp, xu, xns, orient, ohang, csx, csy, cex, cey);
+
+body_done:
+
+#if 0
+
+    if(xu->cob.arrowheadpart & AR_BACK) {
+P;
+        if(orient==OR_H) {
+            if(cex>csx)
+                epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                    180, xu->cob.outlinecolor, csx, csy);
+            else
+                epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                      0, xu->cob.outlinecolor, csx, csy);
+        }
+        if(orient==OR_V) {
+            if(cey>csy)
+                epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                    -90, xu->cob.outlinecolor, csx, csy);
+            else
+                epsdraw_arrowhead(fp, xu->cob.arrowbackheadtype,
+                     90, xu->cob.outlinecolor, csx, csy);
+        }
+    }
+    if(xu->cob.arrowheadpart & AR_FORE) {
+P;
+        if(orient==OR_H) {
+            if(cex>csx) 
+                epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                      0, xu->cob.outlinecolor, cex, cey);
+            else
+                epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                    180, xu->cob.outlinecolor, cex, cey);
+        }
+        if(orient==OR_V) {
+            if(cey>csy) 
+                epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                     90, xu->cob.outlinecolor, cex, cey);
+            else
+                epsdraw_arrowhead(fp, xu->cob.arrowforeheadtype,
+                    -90, xu->cob.outlinecolor, cex, cey);
+        }
+    }
+#endif
+
+#if 0
     if(xu->cob.arrowheadpart & AR_CENT) {
         double na, nx, ny;
         double nt;
@@ -16135,6 +16615,10 @@ epsdrawobj(FILE *fp, ob *u, int *xdir, int ox, int oy, ns *xns)
     if(u->type==CMD_HCRANK||u->type==CMD_HELBOW||
        u->type==CMD_VCRANK||u->type==CMD_VELBOW) {
         Zepsdraw_crankarrow(fp, *xdir, ox, oy, u, xns);
+    }
+    else
+    if(u->type==CMD_HHOOK||u->type==CMD_VHOOK) {
+        Zepsdraw_hookarrow(fp, *xdir, ox, oy, u, xns);
     }
     else
     if( u->type==CMD_AUXLINE ) {

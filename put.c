@@ -1797,15 +1797,123 @@ insboxpath(varray_t *xar, int xwd, int xht)
 }
 
 
+int
+solve_hook_points(ob *xu, ns *xns,
+    int *p1x, int *p1y,
+    int *p2x, int *p2y,
+    int *p3x, int *p3y,
+    int *p4x, int *p4y)
+{
+    int     orient;
+    int     ohang;
+    int     x1, x2, y1, y2;
+    int     x3, y3, x4, y4;
+P;
+
+    /* orient */
+    if(xu->type==CMD_HHOOK) { orient = OR_H; }
+    else if(xu->type==CMD_VHOOK) { orient = OR_V; }
+
+    ohang = xu->cob.overhang;
+
+    __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
+
+#if 0
+    printf("hook oid %d x1,y1 %d,%d x2,y2 %d,%d -> gx,y %d,%d\n",
+        xu->oid, x1, y1, x2, y2, xu->gx, xu->gy);
+#endif
+
+Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
+    x1, y1, x2, y2);
+
+    if(orient==OR_H) {
+        int mx;
+        if(ohang>0) {
+            mx = MIN(x1,x2) - ohang;
+        }
+        else {
+            mx = MAX(x1,x2) - ohang;
+        }
+        x3 = mx;    y3 = y1;
+        x4 = mx;    y4 = y2;
+        goto done;
+    }
+    else
+    if(orient==OR_V) {
+        int my;
+        if(ohang>0) {
+            my = MIN(y1,y2) - ohang;
+        }
+        else {
+            my = MAX(y1,y2) - ohang;
+        }
+        x3 = x1;    y3 = my;
+        x4 = x2;    y4 = my;
+        goto done;
+    }
+    else {
+fprintf(stderr, "ignore orient %d\n", orient);
+        return -1;
+    }
+
+done:
+    *p1x = x1;
+    *p1y = y1;
+    *p2x = x2;
+    *p2y = y2;
+
+    *p3x = x3;
+    *p3y = y3;
+    *p4x = x4;
+    *p4y = y4;
+
+    return 0;
+}
+
+int
+MARK_hook(ob *xu, ns *xns,
+    int *_sx, int *_sy, int *_ex, int *_ey,
+    int *_lx, int *_by, int *_rx, int *_ty)
+{
+    int     ux, uy, vx, vy;
+    int     px, py, qx, qy;
+    int     ik;
+    qbb_t   bez_bb;
+
+    ik = solve_hook_points(xu, xns,
+            &ux, &uy, &vx, &vy, &px, &py, &qx, &qy);
+
+#if 0
+fprintf(stderr, "%s: u %d,%d v %d,%d p %d,%d q %d,%d\n",
+    __func__, ux, uy, vx, vy, px, py, qx, qy);
+#endif
+
+    qbb_reset(&bez_bb);
+    qbb_mark(&bez_bb, ux, uy);
+    qbb_mark(&bez_bb, vx, vy);
+    qbb_mark(&bez_bb, px, py);
+    qbb_mark(&bez_bb, qx, qy);
+    
+    *_sx = ux;
+    *_sy = uy;
+    *_ex = vx;
+    *_ey = vy;
+
+    *_lx = bez_bb.lx;
+    *_by = bez_bb.by;
+    *_rx = bez_bb.rx;
+    *_ty = bez_bb.ty;
+
+    return 0;
+}
+
 
 int
 solve_crank_points(ob *xu, ns *xns,
-    double *pmu, double *pmv,
     int *p1x, int *p1y,
     int *p2x, int *p2y)
 {
     int    x1, x2, y1, y2;
-    double mu, mv;
 P;
 
     __solve_fandt(xns, xu, xu->cob.segopar, 1, &x1, &y1, &x2, &y2);
@@ -1818,8 +1926,6 @@ P;
 Echo("%s: ? FROM %d,%d TO %d,%d\n", __func__,
     x1, y1, x2, y2);
 
-    *pmu = mu;
-    *pmv = mv;
     *p1x = x1;
     *p1y = y1;
     *p2x = x2;
@@ -1834,12 +1940,11 @@ MARK_crank(ob *xu, ns *xns,
     int *_lx, int *_by, int *_rx, int *_ty)
 {
     int     ux, uy, vx, vy;
-    double  mu, mv;
     int     ik;
     qbb_t   bez_bb;
 
     ik = solve_crank_points(xu, xns,
-        &mu, &mv, &ux, &uy, &vx, &vy);
+        &ux, &uy, &vx, &vy);
 
     qbb_reset(&bez_bb);
     qbb_mark(&bez_bb, ux, uy);
@@ -2038,23 +2143,48 @@ Echo("SEP oid %d dir %d\n", u->oid ,dir);
     case CMD_VELBOW:
     case CMD_HCRANK:
     case CMD_HELBOW:
-        if(u->cob.originalshape) {
-        }
-        else {
-            NO;     
-            break;
-        }
+    case CMD_HHOOK:
+    case CMD_VHOOK:
+            if(u->cob.originalshape) {
+            }
+            else {
+                NO;     
+                break;
+            }
+
             {
             int ik;
             int _sx, _sy, _ex, _ey;
             int _lx, _by, _rx, _ty, fx, fy;
-            ik = MARK_crank(u, xns,
-                    &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+
+#if 0
+                ik = MARK_crank(u, xns,
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+#else
+
+            if(u->type==CMD_HHOOK || u->type==CMD_VHOOK) {
+                ik = MARK_hook(u, xns,
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+
+P;
+#if 1
+Echo("\thook original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
+        u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
+#endif
+            }
+            else {
+                ik = MARK_crank(u, xns,
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
+
 P;
 #if 1
 Echo("\tcrank/elbow original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %d,%d\n",
         u->oid, _sx, _sy, _ex, _ey, _lx, _by, _rx, _ty, fx, fy);
 #endif
+            }
+
+#endif
+
             u->csx = _sx;
             u->csy = _sy;
             u->cex = _ex;

@@ -98,6 +98,8 @@ apair_t cmd_ial[] = {
     {"vcrank",          CMD_VCRANK},
     {"helbow",          CMD_HELBOW},
     {"velbow",          CMD_VELBOW},
+    {"hhook",           CMD_HHOOK},
+    {"vhook",           CMD_VHOOK},
 
     {"chunk",           CMD_CHUNK},
     {"[",               CMD_CHUNK},
@@ -524,6 +526,7 @@ apair_t objattr_ial[] = {
     {"backchop",            OA_BACKCHOP},
 
     {"bulge",               OA_BULGE},
+    {"overhang",            OA_OVERHANG},
 
     {"port",                OA_PORT},
     {"larboard",            OA_PORT},
