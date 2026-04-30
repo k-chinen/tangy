@@ -7,14 +7,16 @@ int xlink_trace = 0;
 #define XMAP_CHILDS (".")
 #define XMAP_RNGS   ("-")
 #define XMAP_SEQS   (",")
-#define XMAP_SEPS   (";")
 #define XMAP_SDS    (":")
+#define XMAP_SEPS   ("!")
+#define XMAP_GRPS   ("/")
 
 #define XMAP_CHILD  ('.')
 #define XMAP_RNG    ('-')
-#define XMAP_SEQ    (',')
-#define XMAP_SEP    (';')
 #define XMAP_SD     (':')
+#define XMAP_SEQ    (',')
+#define XMAP_SEP    ('!')
+#define XMAP_GRP    ('/')
 
 typedef struct _mob mob;
 
@@ -692,6 +694,7 @@ out:
 }
     
 
+
 int
 expand_sdpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
     char *xpatlist)
@@ -749,6 +752,28 @@ expand_sdpat(char *dst, int dlen, vdict_t *bdict, vdict_t *fdict,
     return 0;
 }
 
+  int expand_sdpat_group(char *dst, int dlen,                                 
+      vdict_t *bdict, vdict_t *fdict,                                           
+      char *xpatlist)                                                           
+  {                                                                             
+      char  group[BUFSIZ];                                                      
+      char *p;                                                                  
+                                                                                
+      p = xpatlist;                                                           
+      while(p) {                                                                
+          p = draw_word(p, group, BUFSIZ, XMAP_GRP);
+          if(!group[0]) break;                                                  
+                                                                              
+          /* グループ境界マーカーを挿入 */                                      
+          if(dst[0]) {
+              strcat(dst, XMAP_GRPS);   /* 新しい区切り文字 */                  
+          }                                                                   
+                                                                                
+          expand_sdpat(dst, dlen, bdict, fdict, group);                         
+      }                                                                         
+      return 0;                                                                 
+  }                         
+
 
 
 /*
@@ -792,6 +817,12 @@ _drawXlink(varray_t *qar, int xid, int style, int jr,
 
     Echo("%s: ar %p xid %d\n", __func__, qar, xid);
 
+/*
+    Echo("%s: sx %d sy %d ssy %d maxsx %d mx %x my %d minex %d ex %d ey %d eey %d dsdir %d\n", __func__, sx, sy, ssy, maxsx, mx, my, minex, ex, ey, eey, dsdir);
+*/
+    Echo("%s: sx sy ssy maxsx ; mx my minex ; ex ey eey ; dsdir\n", __func__);
+    Echo("%s: %d %d %d %d ; %d %d %d ; %d %d %d ; %d\n", __func__, sx, sy, ssy, maxsx, mx, my, minex, ex, ey, eey, dsdir);
+
     Echo(
         "%s: xid %d style %3d %3xH rstyle %3d %3xH focus %d join %d j/n %d/%d\n",
         __func__, xid, style, style, rstyle, rstyle, focus, join, j, n);
@@ -832,9 +863,16 @@ XEcho("h1 %d\n", h1);
     case LS_COMB:
         /* COMB do not care focus ; always concentrated */
         {
+fprintf(stderr, " comb dsdir %d\n", dsdir);
             if(dsdir>=0) {
+
 fprintf(stderr, " comb pos\n");
+fprintf(stderr, " 3seg %d,%d %d,%d %d,%d %d,%d\n",
+                    sx, sy, mx, sy, mx, eey, ex, eey);
+#if 0
                 mkpath_3seg(qar, sx, sy, mx, sy, mx, eey, ex, eey);
+#endif
+                mkpath_3seg(qar, sx, sy, mx, sy, mx, ey,  ex, ey);
 fprintf(stderr, "j/n %d/%d\n", j, n);
                 if(join && ( j>0 && j<n-1) ) {
 fprintf(stderr, "   draw\n");
@@ -946,6 +984,8 @@ epsdraw_xlink(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
     ob *pe;
     int ik;
     int i, j;
+    int is;
+    int id;
     int am;
     int cm;
 
@@ -958,13 +998,17 @@ epsdraw_xlink(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
     char rmap[BUFSIZ];
     char cmap[BUFSIZ];
 
+    char *g;
+    char  mgrp[BUFSIZ];
     char *p;
     char  mseg[BUFSIZ];
     char *u;
+    char  msrc[BUFSIZ];
     char  src[BUFSIZ];
+    char *s;
     char  mdst[BUFSIZ];
-    char *m;
     char  dst[BUFSIZ];
+    char *d;
     char  seg[BUFSIZ];
     vdict_cell *ce;
     mob  *pse;
@@ -980,9 +1024,11 @@ epsdraw_xlink(FILE *fp, int xdir, int xox, int xoy, ob *xu, ns *xns)
     int mx;
     int num_s;
     int num_d;
+    int num_g;
     int sd_gap;
     double sd_gappitch;
-    int is;
+    int ng;
+    int np;
 
     int dx, dy;
     int d0x, d0y, dix, diy, dcx, dcy;
@@ -1044,7 +1090,6 @@ P;
     fdict = vdict_newclear();
     if(!fdict) {
         Error("nomemory\n");
-        goto out;
     }
     vdict_entryprintfunc(fdict, mob_sprintf);
     
@@ -1073,16 +1118,43 @@ P;
         strcpy(rmap, "full");
     }
 
+fprintf(stderr, "%% xlink rmap <%s>\n", rmap);
+
     if(strcmp(rmap, "full")==0) {
+fprintf(stderr, "%% xlink full\n");
         int ik;
         ik = expand_full(cmap, BUFSIZ, btree, ftree);
     }
     else {
+fprintf(stderr, "%% xlink not-full\n");
+/*
+*/
         int ik;
+/*
         ik = expand_sdpat(cmap, BUFSIZ, bdict, fdict, rmap);
+*/
+        ik = expand_sdpat_group(cmap, BUFSIZ, bdict, fdict, rmap);
+/*
+        strcpy(cmap, rmap);
+*/
+/*
+        strcpy(cmap, "b1,b2:f1");
+*/
+/*
+        strcpy(cmap, "b1:f1!b2:f1/");
+*/
+/*
+        strcpy(cmap, "b1:f1!b2:f1!b3:f2!");
+        strcpy(cmap, "b3:f1");
+        strcpy(cmap, "b1:f2!");
+        strcpy(cmap, "b1:f2/b3:f1");
+        strcpy(cmap, "b1:f2!b3:f1");
+        strcpy(cmap, "b4:f1!b4:f2");
+        strcpy(cmap, "b1,b2:f1");
+*/
     }
 
-
+    fprintf(stderr, "%% xlink cmap <%s>\n", cmap);
 
 
     /* count the number of links per object */
@@ -1092,107 +1164,135 @@ P;
 
     num_s = 0;
     num_d = 0;
+    num_g = 0;
 
     bstyle = xu->cob.linkstyle;
-
     cstyle = bstyle;
-    p = cmap;
-    while(p) {
-        p = draw_word(p, mseg, BUFSIZ, XMAP_SEP);
-        if(!mseg[0]) {
+
+    g = cmap;
+    ng = 0;
+
+    while(g) {
+        g = draw_word(g, mgrp, BUFSIZ, XMAP_GRP);
+        XEcho("mgrp* |%s| p\n", mgrp);
+        if(!mgrp[0]) {
             break;
         }
-        XEcho("mseg* |%s|\n", mseg);
 
-        xls = assoc(ls_ial, mseg);
-        XEcho("  xls %d\n", xls);
-        if(xls>=0) {
-            xstyle = xls;
-            cstyle = xstyle;
-            continue;
-        }
-
-        u = mseg;
-        u = draw_word(u, src, BUFSIZ, XMAP_SD);
-        if(!src[0]) {
-            break;
-        }
-        u = draw_word(u, mdst, BUFSIZ, XMAP_SD);
-        if(!mdst[0]) {
-            break;
-        }
-        XEcho("mseg  |%s|\n", mseg);
-        XEcho(" src  |%s|\n", src);
-
-        ce = vdict_findpos(bdict, src);
-        if(!ce) {
-            ce = vdict_findpos(fdict, src);
-        }
-        if(!ce) {
-        XEcho("      UNKNOWN src 1\n");
-            continue;
-        }
-        pse = ce->value;
-        if(!pse) {
-        XEcho("      known but cannot find in dict\n");
-            continue;
-        }
-        se = pse->body;
-        if(!se) {
-        XEcho("      known but cannot find in dict\n");
-            continue;
-        }
-        XEcho("      oid %d\n", se->oid);
-
-        pse->sn++;
-
-
-        XEcho(" mdst |%s|\n", mdst);
-
-        m = mdst;
-        i = 0;
-        while(m) {
-            m = draw_word(m, dst, BUFSIZ, XMAP_SEQ);
-            if(!dst[0]) {
+        p = mgrp;
+        np = 0;
+        while(p) {
+            p = draw_word(p, mseg, BUFSIZ, XMAP_SEP);
+            XEcho("  mseg* |%s| p\n", mseg);
+            if(!mseg[0]) {
                 break;
             }
-            i++;
-            
-        XEcho("  %3d |%s|\n", i, dst);
 
-            ce = vdict_findpos(bdict, dst);
-            if(!ce) {
-                ce = vdict_findpos(fdict, dst);
-            }
-            if(!ce) {
-        XEcho("      UNKNOWN dst 1\n");
+            xls = assoc(ls_ial, mseg);
+            XEcho("  xls %d\n", xls);
+            if(xls>=0) {
+                xstyle = xls;
+                cstyle = xstyle;
                 continue;
             }
-            pde = ce->value;
-            if(!pde) {
-        XEcho("      known but cannot find in dict\n");
-                continue;
+
+            u = mseg;
+            u = draw_word(u, msrc, BUFSIZ, XMAP_SD);
+            XEcho("  msrc* |%s| p\n", msrc);
+            if(!msrc[0]) {
+                break;
             }
-            de = pde->body;
-            if(!de) {
-        XEcho("      known but cannot find in dict\n");
-                continue;
+            u = draw_word(u, mdst, BUFSIZ, XMAP_SD);
+            XEcho("  mdst* |%s| p\n", mdst);
+            if(!mdst[0]) {
+                break;
             }
-        XEcho("      oid %d\n", de->oid);
 
-            pse->sc++;
-            pde->dn++;
+            s = msrc;
+            is = 0;
+            while(s) {
+                s = draw_word(s, src, BUFSIZ, XMAP_SEQ);
+                XEcho(" src  |%s|\n", src);
+                if(!src[0]) {
+                    break;
+                }
+                is++;
+                
+                XEcho("  s %3d |%s|\n", is, src);
 
-            num_d++;
+                ce = vdict_findpos(bdict, src);
+                if(!ce) {
+                    ce = vdict_findpos(fdict, src);
+                }
+                if(!ce) {
+                XEcho("      UNKNOWN src 1\n");
+                    continue;
+                }
+                pse = ce->value;
+                if(!pse) {
+                XEcho("      known but cannot find in dict\n");
+                    continue;
+                }
+                se = pse->body;
+                if(!se) {
+                XEcho("      known but cannot find in dict\n");
+                    continue;
+                }
+                XEcho("      oid %d\n", se->oid);
 
-        XEcho("              |%s|--|%s|\n", src, dst);
+                pse->sn++;
+
+
+                XEcho(" mdst |%s|\n", mdst);
+
+                d = mdst;
+                id = 0;
+                while(d) {
+                    d = draw_word(d, dst, BUFSIZ, XMAP_SEQ);
+                    if(!dst[0]) {
+                        break;
+                    }
+                    id++;
+                    
+                    XEcho("  d %3d |%s|\n", id, dst);
+
+                    ce = vdict_findpos(bdict, dst);
+                    if(!ce) {
+                        ce = vdict_findpos(fdict, dst);
+                    }
+                    if(!ce) {
+                        XEcho("      UNKNOWN dst 1\n");
+                        continue;
+                    }
+                    pde = ce->value;
+                    if(!pde) {
+                        XEcho("      known but cannot find in dict\n");
+                        continue;
+                    }
+                    de = pde->body;
+                    if(!de) {
+                        XEcho("      known but cannot find in dict\n");
+                        continue;
+                    }
+                    XEcho("      oid %d\n", de->oid);
+
+                    pse->sc++;
+                    pde->dn++;
+
+                    num_d++;
+
+                    XEcho("            atom p |%s|--|%s| %d--%d\n",
+                        src, dst, se->oid, de->oid);
+                }
+                num_s++;
+            }
+            np++;
         }
-
-            num_s++;
+        ng++;
+        num_g++;
     }
-    
 
-    XEcho("draw links - - -\n");
+    XEcho("draw links - - - num_s %d num_d %d num_g %d\n", num_s, num_d, num_g);
 
     stage = qbb_new();
     if(!stage) {
@@ -1219,13 +1319,13 @@ P;
     maxsx = pb->grx;
     mindx = pf->glx;
     sd_gap = pf->glx - pb->grx ;
-    sd_gappitch = ((double)sd_gap)/(num_s+1);
+    sd_gappitch = ((double)sd_gap)/(num_g+1);
 #if 0
-    sd_gappitch = ((double)sd_gap)/(num_s+3);
+    sd_gappitch = ((double)sd_gap)/(num_s+1);
 #endif
 
-    XEcho("num_s %d pb grx %d pf glx %d; sd_gap %d sd_gappitch %f\n",
-        num_s, pb->grx, pf->glx,
+    XEcho("num_s %d num_g %d pb grx %d pf glx %d; sd_gap %d sd_gappitch %f\n",
+        num_s, num_g, pb->grx, pf->glx,
         sd_gap, sd_gappitch);
 
     if(XINTRACE) {
@@ -1248,271 +1348,318 @@ P;
 
 
     cstyle = bstyle;
-    p = cmap;
-    is = 0;
-    while(p) {
-        p = draw_word(p, mseg, BUFSIZ, XMAP_SEP);
-        if(!mseg[0]) {
+
+    g = cmap;
+    ng = 0;
+    while(g) {
+        g = draw_word(g, mgrp, BUFSIZ, XMAP_GRP);
+        XEcho("mgrp* |%s| d\n", mgrp);
+        if(!mgrp[0]) {
             break;
         }
 
-        xls = assoc(ls_ial, mseg);
-        XEcho("  xls %d\n", xls);
-        if(xls>=0) {
-            xstyle = xls;
-            cstyle = xstyle;
-            continue;
-        }
-
-        tmpar = varray_new();
-        varray_entrysprintfunc(tmpar, seg_sprintf);
-
-        u = mseg;
-        u = draw_word(u, src, BUFSIZ, XMAP_SD);
-        if(!src[0]) {
-            break;
-        }
-        u = draw_word(u, mdst, BUFSIZ, XMAP_SD);
-        if(!mdst[0]) {
-            break;
-        }
-        XEcho(" src  |%s|\n", src);
-
-        ce = vdict_findpos(bdict, src);
-        if(!ce) {
-            ce = vdict_findpos(fdict, src);
-        }
-        if(!ce) {
-        XEcho("      UNKNOWN src 2\n");
-            continue;
-        }
-        pse = ce->value;
-        if(!pse) {
-        XEcho("      known but cannot find in dict\n");
-            continue;
-        }
-        se = pse->body;
-        if(!se) {
-        XEcho("      known but cannot find in dict\n");
-            continue;
-        }
-        XEcho("      src oid %d\n", se->oid);
-
-#if 0
-XEcho("b si %d\n", pse->si);
-        if(pse->si<0) {
-            pse->si = 0;
-        }
-        else {
-            pse->si++;
-        }
-XEcho("a si %d\n", pse->si);
-#endif
-
-        mx = pb->grx + (int)((double)(is+1)*sd_gappitch);
-#if 0
-        mx = pb->grx + (int)((double)(is+2)*sd_gappitch);
-#endif
-    
-        sxp = (((double)se->ty-se->by))/(pse->sc+1);
-        s0x = se->grx;
-        s0y = se->gty;
-
-        scx = s0x;
-        scy = se->gy;
-
-        m = mdst;
-        i = 0;
-        while(m) {
-            m = draw_word(m, dst, BUFSIZ, XMAP_SEQ);
-            if(!dst[0]) {
+        p = mgrp;
+        np = 0;
+        while(p) {
+            p = draw_word(p, mseg, BUFSIZ, XMAP_SEP);
+            XEcho("  mseg* |%s| d\n", mseg);
+            if(!mseg[0]) {
                 break;
             }
-            i++;
-            
-            ce = vdict_findpos(bdict, dst);
-            if(!ce) {
-                ce = vdict_findpos(fdict, dst);
-            }
-            if(!ce) {
-            XEcho("      UNKNOWN dst 2\n");
-                continue;
-            }
-            pde = ce->value;
-            if(!pde) {
-            XEcho("      known but cannot find in dict\n");
-                continue;
-            }
-            de = pde->body;
-            if(!de) {
-            XEcho("      known but cannot find in dict\n");
-                continue;
-            }
-            XEcho("      dst oid %d\n", de->oid);
 
+            xls = assoc(ls_ial, mseg);
+            XEcho("  xls %d\n", xls);
+            if(xls>=0) {
+                xstyle = xls;
+                cstyle = xstyle;
+                continue;
+            }
 
-        XEcho("              |%s|--|%s|\n", src, dst);
-        XEcho("            n  %3d   %3d\n", pse->sn, pde->dn);
-        XEcho("            i  %3d   %3d\n", pse->si, pde->di);
-        XEcho("            c  %3d   %3d\n", pse->sc, pde->dc);
-            if(pde->di==-1) {
-                pde->di = 0;
+            tmpar = varray_new();
+            varray_entrysprintfunc(tmpar, seg_sprintf);
+
+#if 0
+            u = mseg;
+            u = draw_word(u, src, BUFSIZ, XMAP_SD);
+            if(!src[0]) {
+                break;
             }
-            else {
-                pde->di++;
-            }
-#if 1
-XEcho("b si %d\n", pse->si);
-            if(pse->si==-1) {
-                pse->si = 0;
-                pse->si = 1;
-            }
-            else {
-                pse->si++;
-            }
-XEcho("a si %d\n", pse->si);
 #endif
 
-            fprintf(fp, "%% thru part %d - %d\n", se->oid, de->oid);
-
-            if(XINTRACE) {
-                fprintf(fp, "gsave\n");
-                fprintf(fp, "  0.01 setlinewidth\n");
-                fprintf(fp, "  1 0 0 setrgbcolor\n");
-                fprintf(fp, "  newpath\n");
-                fprintf(fp, "  %d %d moveto\n", se->gx, se->gy);
-                fprintf(fp, "  %d %d lineto\n", de->gx, de->gy);
-                fprintf(fp, "  stroke\n");
-                fprintf(fp, "grestore\n");
+            u = mseg;
+            u = draw_word(u, msrc, BUFSIZ, XMAP_SD);
+            XEcho("  msrc* |%s| p\n", msrc);
+            if(!msrc[0]) {
+                break;
+            }
+            u = draw_word(u, mdst, BUFSIZ, XMAP_SD);
+            XEcho("  mdst* |%s| p\n", mdst);
+            if(!mdst[0]) {
+                break;
             }
 
-            {
+            XEcho("  msrc* |%s| d\n", msrc);
+            XEcho("  mdst* |%s| d\n", mdst);
 
-                dxp = (((double)de->ty-de->by))/(pde->dn+1);
-                d0x = de->glx;
-                d0y = de->gty;
+            s = msrc;
+            is = 0;
+            while(s) {  
+                s = draw_word(s, src, BUFSIZ, XMAP_SEQ);
+                XEcho("  src* |%s| d\n", src);
+                if(!src[0]) {
+                    break;
+                }
+                is++;
 
-                dcx = d0x;
-                dcy = de->gy;
+#if 0
+                u = draw_word(u, mdst, BUFSIZ, XMAP_SD);
+                XEcho("  mdst |%s|\n", mdst);
+                if(!mdst[0]) {
+                    break;
+                }
+#endif
 
-                fprintf(fp, "gsave\n");
+                ce = vdict_findpos(bdict, src);
+                if(!ce) {
+                    ce = vdict_findpos(fdict, src);
+                }
+                if(!ce) {
+                XEcho("      UNKNOWN src 2\n");
+                    continue;
+                }
+                pse = ce->value;
+                if(!pse) {
+                XEcho("      known but cannot find in dict\n");
+                    continue;
+                }
+                se = pse->body;
+                if(!se) {
+                XEcho("      known but cannot find in dict\n");
+                    continue;
+                }
+                XEcho("      src oid %d\n", se->oid);
+
+#if 0
+                XEcho("b si %d\n", pse->si);
+                if(pse->si<0) {
+                    pse->si = 0;
+                }
+                else {
+                    pse->si++;
+                }
+                XEcho("a si %d\n", pse->si);
+#endif
+
+                mx = pb->grx + (int)((double)(ng+1) * sd_gappitch);                           
+                sxp = (((double)se->ty-se->by))/(pse->sc+1);
+                s0x = se->grx;
+                s0y = se->gty;
+
+                scx = s0x;
+                scy = se->gy;
+
+#if 0
+                pde->di = 0;
+#endif
+
+                d = mdst;
+                id = 0;
+                while(d) {
+                    d = draw_word(d, dst, BUFSIZ, XMAP_SEQ);
+                    XEcho("  dst* |%s| d\n", dst);
+                    if(!dst[0]) {
+                        break;
+                    }
+                    id++;
+                    
+                    ce = vdict_findpos(bdict, dst);
+                    if(!ce) {
+                        ce = vdict_findpos(fdict, dst);
+                    }
+                    if(!ce) {
+                    XEcho("      UNKNOWN dst 2\n");
+                        continue;
+                    }
+                    pde = ce->value;
+                    if(!pde) {
+                    XEcho("      known but cannot find in dict\n");
+                        continue;
+                    }
+                    de = pde->body;
+                    if(!de) {
+                    XEcho("      known but cannot find in dict\n");
+                        continue;
+                    }
+                    XEcho("      dst oid %d\n", de->oid);
 
 
-                if(XINTRACE) {
-                    fprintf(fp, "  0.1 setlinewidth\n");
+                    XEcho("            atom d %d %d |%s|--|%s| %d--%d\n",
+                            ng, np, src, dst, se->oid, de->oid);
+                    XEcho("            n  %3d   %3d\n", pse->sn, pde->dn);
+                    XEcho("            id  %3d   %3d\n", pse->si, pde->di);
+                    XEcho("            c  %3d   %3d\n", pse->sc, pde->dc);
+                    if(pde->di==-1) {
+                        pde->di = 0;
+                    }
+                    else {
+                        pde->di++;
+                    }
+#if 1
+                    XEcho("b si %d\n", pse->si);
+                    if(pse->si==-1) {
+                        pse->si = 0;
+                        pse->si = 1;
+                    }
+                    else {
+                        pse->si++;
+                    }
+                    XEcho("a si %d\n", pse->si);
+#endif
 
-                    for(k=0;k<pse->sc;k++) {
+                    fprintf(fp, "%% xlink part %d - %d\n", se->oid, de->oid);
+
+                    if(XINTRACE) {
+                        fprintf(fp, "gsave\n");
+                        fprintf(fp, "  0.01 setlinewidth\n");
+                        fprintf(fp, "  1 0 0 setrgbcolor\n");
+                        fprintf(fp, "  newpath\n");
+                        fprintf(fp, "  %d %d moveto\n", se->gx, se->gy);
+                        fprintf(fp, "  %d %d lineto\n", de->gx, de->gy);
+                        fprintf(fp, "  stroke\n");
+                        fprintf(fp, "grestore\n");
+                    }
+
+                    {
+
+                        dxp = (((double)de->ty-de->by))/(pde->dn+1);
+                        d0x = de->glx;
+                        d0y = de->gty;
+
+                        dcx = d0x;
+                        dcy = de->gy;
+
+                        fprintf(fp, "gsave\n");
+
+
+                        if(XINTRACE) {
+                            fprintf(fp, "  0.1 setlinewidth\n");
+
+                            for(k=0;k<pse->sc;k++) {
+                                six = s0x;
+                                siy = s0y-sxp*(k+1);
+
+                                fprintf(fp, "%% six k %d\n", k);
+                                fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
+                                fprintf(fp, "  newpath\n");
+                                fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                    six-2*objunit/20, siy, objunit/20);
+                                fprintf(fp, "  fill\n");
+
+                            }
+
+                            for(k=0;k<pde->dn;k++) {
+                                dix = d0x;
+                                diy = d0y-dxp*(k+1);
+
+                                fprintf(fp, "%% dix k %d\n", k);
+                                fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
+                                fprintf(fp, "  newpath\n");
+                                fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                    dix+2*objunit/20, diy, objunit/20);
+                                fprintf(fp, "  fill\n");
+
+                            }
+
+                            fprintf(fp, "  50 setlinewidth\n");
+                            fprintf(fp, "  1 0 0 setrgbcolor\n");
+                            fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                scx-4*objunit/20, scy, objunit/20);
+                            fprintf(fp, "  fill\n");
+
+                            fprintf(fp, "  50 setlinewidth\n");
+                            fprintf(fp, "  1 0 0 setrgbcolor\n");
+                            fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                dcx+4*objunit/20, dcy, objunit/20);
+                            fprintf(fp, "  fill\n");
+
+                        }
+
+                        sx = scx;
+                        sy = scy;
+
+                        dx = d0x;
+                        dy = d0y-dxp*(pde->di+1);
+
+                        if(XINTRACE) {
+                            fprintf(fp, "  200 setlinewidth\n");
+                            fprintf(fp, "  0 1 0 setrgbcolor\n");
+                            fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                sx, sy, objunit/20);
+                            fprintf(fp, "  stroke\n");
+
+                            fprintf(fp, "  200 setlinewidth\n");
+                            fprintf(fp, "  0 1 0 setrgbcolor\n");
+                            fprintf(fp, "  %d %d %d 0 360 arc\n",
+                                dx, dy, objunit/15);
+                            fprintf(fp, "  stroke\n");
+
+                            fprintf(fp, "  50 setlinewidth\n");
+                            fprintf(fp, "  %d %d moveto\n", sx, sy);
+                            fprintf(fp, "  %d %d lineto\n", dx, dy);
+                            fprintf(fp, "  stroke\n");
+                        }
+
+
+                        XEcho("np %d si %d di %d\n", np, pse->si, pde->di);
                         six = s0x;
-                        siy = s0y-sxp*(k+1);
+                        siy = s0y-sxp*(pse->si);
 
-                        fprintf(fp, "%% six k %d\n", k);
-                        fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
-                        fprintf(fp, "  newpath\n");
-                        fprintf(fp, "  %d %d %d 0 360 arc\n",
-                            six-2*objunit/20, siy, objunit/20);
-                        fprintf(fp, "  fill\n");
-
-                    }
-
-                    for(k=0;k<pde->dn;k++) {
                         dix = d0x;
-                        diy = d0y-dxp*(k+1);
+                        diy = d0y-dxp*(pde->di+1);
 
-                        fprintf(fp, "%% dix k %d\n", k);
-                        fprintf(fp, "  0.5 0.5 0.5 setrgbcolor\n");
-                        fprintf(fp, "  newpath\n");
-                        fprintf(fp, "  %d %d %d 0 360 arc\n",
-                            dix+2*objunit/20, diy, objunit/20);
-                        fprintf(fp, "  fill\n");
+                        changecolor(fp, xu->cob.outlinecolor);
+                        changethick(fp, xu->cob.outlinethick);
 
+                        int grd;
+
+
+                        if(scx<dcx) {
+                            if(siy>scy) { grd = 1; } else { grd = -1; }
+                        }
+                        else {
+                            if(siy>scy) { grd = -1; } else { grd = 1; }
+                        }
+
+                        if(grd>0) {
+                            ind = (int)((sd_gappitch*pse->si)/pse->sc);
+                        }
+                        else {
+                            ind = (int)((sd_gappitch*(pse->sc-pse->si))/pse->sc);
+                        }
+                        XEcho("grd %d; ind %d\n", grd, ind);
+
+                        _drawXlink(tmpar, xu->oid, cstyle, xu->cob.outlinethick*2,
+                            pse->si-1, pse->sc, ind,
+                            scx, scy, siy, maxsx,
+                            mx, dcy,
+                            mindx, dcx, dcy, diy, dcx-scx);
+
+                        if(tmpar->use>0) {
+                            /* NOTE offset is cared already. do not apply twice */
+                            __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
+                        }
+
+                        fprintf(fp, "grestore\n");
+                    
                     }
-
-                    fprintf(fp, "  50 setlinewidth\n");
-                    fprintf(fp, "  1 0 0 setrgbcolor\n");
-                    fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        scx-4*objunit/20, scy, objunit/20);
-                    fprintf(fp, "  fill\n");
-
-                    fprintf(fp, "  50 setlinewidth\n");
-                    fprintf(fp, "  1 0 0 setrgbcolor\n");
-                    fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        dcx+4*objunit/20, dcy, objunit/20);
-                    fprintf(fp, "  fill\n");
-
                 }
-
-                sx = scx;
-                sy = scy;
-
-                dx = d0x;
-                dy = d0y-dxp*(pde->di+1);
-
-                if(XINTRACE) {
-                    fprintf(fp, "  200 setlinewidth\n");
-                    fprintf(fp, "  0 1 0 setrgbcolor\n");
-                    fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        sx, sy, objunit/20);
-                    fprintf(fp, "  stroke\n");
-
-                    fprintf(fp, "  200 setlinewidth\n");
-                    fprintf(fp, "  0 1 0 setrgbcolor\n");
-                    fprintf(fp, "  %d %d %d 0 360 arc\n",
-                        dx, dy, objunit/15);
-                    fprintf(fp, "  stroke\n");
-
-                    fprintf(fp, "  50 setlinewidth\n");
-                    fprintf(fp, "  %d %d moveto\n", sx, sy);
-                    fprintf(fp, "  %d %d lineto\n", dx, dy);
-                    fprintf(fp, "  stroke\n");
-                }
-
-
-XEcho("is %d si %d di %d\n", is, pse->si, pde->di);
-                six = s0x;
-                siy = s0y-sxp*(pse->si);
-
-                dix = d0x;
-                diy = d0y-dxp*(pde->di+1);
-
-                changecolor(fp, xu->cob.outlinecolor);
-                changethick(fp, xu->cob.outlinethick);
-
-                int grd;
-
-
-                if(scx<dcx) {
-                    if(siy>scy) { grd = 1; } else { grd = -1; }
-                }
-                else {
-                    if(siy>scy) { grd = -1; } else { grd = 1; }
-                }
-
-                if(grd>0) {
-                    ind = (int)((sd_gappitch*pse->si)/pse->sc);
-                }
-                else {
-                    ind = (int)((sd_gappitch*(pse->sc-pse->si))/pse->sc);
-                }
-XEcho("grd %d; ind %d\n", grd, ind);
-
-                _drawXlink(tmpar, xu->oid, cstyle, xu->cob.outlinethick*2,
-                    pse->si-1, pse->sc, ind,
-                    scx, scy, siy, maxsx,
-                    mx, dcy,
-                    mindx, dcx, dcy, diy, dcx-scx);
-
-                if(tmpar->use>0) {
-                    /* NOTE offset is cared already. do not apply twice */
-                    __drawpath_LT(fp, 0, 0, 0, xu, xns, tmpar);
-                }
-
-                fprintf(fp, "grestore\n");
-            
             }
+            XEcho("np inc\n");
+            np++;
         }
-        is++;
+        XEcho("ng inc\n");
+        ng++;
     }
-
 
 out:
     return 0;

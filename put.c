@@ -1798,6 +1798,69 @@ insboxpath(varray_t *xar, int xwd, int xht)
 
 
 int
+solve_thunder(ob *xu, ns *xns,
+    int *rsx, int *rsy, int *rpx, int *rpy,
+    int *rqx, int *rqy, int *rex, int *rey)
+{
+    int r;
+    int sx, sy, ex, ey;
+    int br = xu->cob.bulge;
+
+P;
+    /*
+     *              px,py
+     *             /+
+     *  csx,csy  +/ + /+ cex,cey
+     *              +/
+     *              qx,qy
+     */
+
+    if(!xu->cob.originalshape) {
+        sx = xu->csx;
+        sy = xu->csy;
+        ex = xu->cex;
+        ey = xu->cey;
+    }
+    else {
+        __solve_fandt(xns, xu, xu->cob.segopar, 1, &sx, &sy, &ex, &ey);
+    }
+
+    {
+        int mx, my;
+        int px, py;
+        int qx, qy;
+        double th;
+        int dis, bb;
+P;
+        mx = (sx + ex)/2;
+        my = (sy + ey)/2;
+        dis = (int)SQRT_2DD_I2D(sx, sy, ex, ey);
+        bb = (dis*br)/100;
+        th = atan2((ey-sy), (ex-sx));
+        px = mx + bb*cos(th+M_PI/2);
+        py = my + bb*sin(th+M_PI/2);
+        qx = mx + bb*cos(th-M_PI/2);
+        qy = my + bb*sin(th-M_PI/2);
+
+#if 0
+        path_regsegmoveto(xu->cob.segar, sx, sy);
+        path_regseglineto(xu->cob.segar, px, py);
+        path_regseglineto(xu->cob.segar, qx, qy);
+        path_regseglineto(xu->cob.segar, ex, ey);
+#endif
+
+        *rsx = sx; *rsy = sy;
+        *rpx = px; *rpy = py;
+        *rqx = qx; *rqy = qy;
+        *rex = ex; *rey = ey;
+
+    }
+
+P;
+    return r;
+}
+
+int
 solve_hook_points(ob *xu, ns *xns,
     int *p1x, int *p1y,
     int *p2x, int *p2y,
@@ -1949,6 +2012,38 @@ MARK_crank(ob *xu, ns *xns,
     qbb_reset(&bez_bb);
     qbb_mark(&bez_bb, ux, uy);
     qbb_mark(&bez_bb, vx, vy);
+    
+    *_sx = ux;
+    *_sy = uy;
+    *_ex = vx;
+    *_ey = vy;
+
+    *_lx = bez_bb.lx;
+    *_by = bez_bb.by;
+    *_rx = bez_bb.rx;
+    *_ty = bez_bb.ty;
+
+    return 0;
+}
+
+int
+MARK_thunder(ob *xu, ns *xns,
+    int *_sx, int *_sy, int *_ex, int *_ey,
+    int *_lx, int *_by, int *_rx, int *_ty)
+{
+    int     ux, uy, vx, vy;
+    int     px, py, qx, qy;
+    int     ik;
+    qbb_t   bez_bb;
+
+    ik = solve_thunder(xu, xns,
+        &ux, &uy, &px, &py, &qx, &qy, &vx, &vy);
+
+    qbb_reset(&bez_bb);
+    qbb_mark(&bez_bb, ux, uy);
+    qbb_mark(&bez_bb, vx, vy);
+    qbb_mark(&bez_bb, px, py);
+    qbb_mark(&bez_bb, qx, qy);
     
     *_sx = ux;
     *_sy = uy;
@@ -2234,6 +2329,11 @@ Echo("\tcrank/elbow original oid %d sx,y %d,%d ex,y %d,%d bb (%d %d %d %d) fxy %
                         &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
 #endif
                         &_lx, &_by, &_rx, &_ty);
+            }
+            else
+            if(u->type==CMD_THUNDER) {
+                ik = MARK_thunder(u, xns, 
+                        &_sx, &_sy, &_ex, &_ey, &_lx, &_by, &_rx, &_ty);
             }
             else {
                 printf("ERROR ignore type %d oid %d\n", u->type, u->oid);

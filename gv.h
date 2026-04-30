@@ -38,6 +38,8 @@ extern double markbbthickfactor;
 extern double noteosepfactor;
 extern double noteisepfactor;
 
+extern double hollowratiofactor;
+
 extern double pbstrgapfactor;
 
 extern int draft_mode;

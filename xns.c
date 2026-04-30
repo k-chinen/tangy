@@ -359,7 +359,7 @@ P;
 
     u = _ns_find_objP(xns, yname, &ux, &uy);
     if(u) {
-#if 0
+#if 1
         Echo("  u %p gx,gy = %d,%d solved? %d drawed? %d finalized? %d\n",
             u, u->gx, u->gy, u->sizesolved, u->drawed, u->finalized);
         Echo("  u %p ux,uy = %d, %d\n", u, ux, uy);
@@ -379,8 +379,8 @@ P;
 
         if(q && *q) {
             pos = assoc(pos_ial, q);
-#if 0
-            Echo("  pos %d q '%s'\n", pos, q);
+#if 1
+            Echo("  found pos %d q '%s'\n", pos, q);
 #endif
             if(pos<0) {
                 printf("ERROR ignore position '%s' of '%s'\n", q, yname);
@@ -390,15 +390,15 @@ P;
         else {
             pos = PO_CENTER;
         }
-#if 0
-        Echo("  pos %d\n", pos);
+#if 1
+        Echo("  normalized pos %d\n", pos);
 #endif
         int x, y;
 
         if(pmode==PPOS) { x = u->cgx;   y = u->cgy; }
         else            { x = u->cx;    y = u->cy; }
 
-#if 0
+#if 1
         Echo("  original x,y = %d,%d ; %s\n", x, y, __func__);
         Echo("     guess x,y = %d,%d\n", ux, uy);
 #endif
@@ -415,11 +415,15 @@ P;
         case PO_SOUTHWEST: *rx += -u->cwd/2;  *ry += -u->cht/2; break;
         case PO_WEST:      *rx += -u->cwd/2;  *ry += 0;         break;
         case PO_NORTHWEST: *rx += -u->cwd/2;  *ry += u->cht/2;  break;
+        case PO_START:     *rx = u->csx;      *ry = u->csy;     break;
+        case PO_END:       *rx = u->cex;      *ry = u->cey;     break;
         default:
             printf("ERROR ignore position '%s' of '%s' -\n", q, yname);
+            *rx = INT_MAX;
+            *ry = INT_MAX;
         }
 
-#if 0
+#if 1
         Echo("  cooked  rx,y = %d,%d\n", *rx, *ry);
 #endif
 
@@ -520,8 +524,12 @@ _ns_find_objpos(ns *xns, char *xname, int *rx, int *ry, int pmode)
         case PO_SOUTHWEST: *rx = x-u->cwd/2; *ry = y-u->cht/2;  break;
         case PO_WEST:      *rx = x-u->cwd/2; *ry = y;           break;
         case PO_NORTHWEST: *rx = x-u->cwd/2; *ry = y+u->cht/2;  break;
+        case PO_START:     *rx = u->csx;     *ry = u->csy;      break;
+        case PO_END:       *rx = u->cex;     *ry = u->cey;      break;
         default:
             printf("ERROR ignore position '%s' of '%s'\n", p, xname);
+            *rx = INT_MAX;
+            *ry = INT_MAX;
         }
 
 #if 1

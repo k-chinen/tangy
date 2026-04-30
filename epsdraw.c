@@ -12158,18 +12158,18 @@ Echo("%s: oid %d type %d\n", __func__, xu->oid, xu->type);
             ik = drawpathN_woclose(fp, 0, 0, 0, xu, xns);
 
 #if 0
-            fprintf(fp, "     0.8 0.8 scale\n");
+            fprintf(fp, " %% hollowratio %d\n", xu->cob.hollowratio);
 #endif
+
             fprintf(fp, "     %.3f %.3f scale\n", 
-                def_hollowratio, def_hollowratio);
+                ((double)xu->cob.hollowratio)/100.0,
+                ((double)xu->cob.hollowratio)/100.0);
             ik = drawpathR_wonew(fp, 0, 0, 0, xu, xns);
             fprintf(fp, "  clip\n");
 
-#if 0
-            fprintf(fp, "     1.25 1.25 scale\n");
-#endif
             fprintf(fp, "     %.3f %.3f scale\n", 
-                1.0/def_hollowratio, 1.0/def_hollowratio);
+                100.0/((double)xu->cob.hollowratio),
+                100.0/((double)xu->cob.hollowratio));
 
             epsdraw_hatch(fp, xu->wd, xu->ht,
               xu->cob.fillcolor, xu->cob.fillhatch, xu->cob.fillpitch);

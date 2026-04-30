@@ -548,6 +548,7 @@ apair_t objattr_ial[] = {
     {"markpitch",           OA_MARKPITCH},
     {"markguide",           OA_MARKGUIDE},
 
+    {"hollowratio",         OA_HOLLOWRATIO},
     {"hollow",              OA_HOLLOW},
     {"shadow",              OA_SHADOW},
     {"piestart",            OA_PIESTART},
@@ -573,6 +574,8 @@ apair_t objattr_ial[] = {
     {"hatchpitchfactor",    OA_HATCHPITCHFACTOR},
     {"noteosepfactor",      OA_NOTEOSEPFACTOR},
     {"noteisepfactor",      OA_NOTEISEPFACTOR},
+
+    {"hollowratiofactor",   OA_HOLLOWRATIOFACTOR},
 
     {"bwcir",               OA_BWCIR},
     {"bwhcir",              OA_BWHCIR},
@@ -651,6 +654,8 @@ double noteisepfactor       = 0.10;
 
 double pbstrgapfactor       = 0.10;
 
+double hollowratiofactor    = 0.8;
+
 int draft_mode      = 0;
 int skelton_mode    = 0;
 int movevisit_mode  = 0;
@@ -662,6 +667,7 @@ int namel_mode      = 0;
 int ruler_mode      = 0;
 int text_mode       = 0;
 
+double def_hollowratiofactor  = 0.8;
 double def_hollowratio  = 0.8;
 double def_shadowgray   = 0.5;
 

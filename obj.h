@@ -167,6 +167,7 @@ extern apair_t cmd_ial[];
 #define ISGLUE(x)   \
     ((x)==CMD_LINE||(x)==CMD_LINK||(x)==CMD_ARROW||\
      (x)==CMD_WLINE||(x)==CMD_WARROW||\
+     (x)==CMD_THUNDER||\
      (x)==CMD_BCURVE||(x)==CMD_BCURVESELF||\
      (x)==CMD_XCURVE||(x)==CMD_XCURVESELF||\
      (x)==CMD_HCRANK||(x)==CMD_VCRANK||\
@@ -372,7 +373,8 @@ extern apair_t lo_ial[];
 #define OA_HATCHTHICK       (21)
 #define OA_HATCHPITCH       (22)
 
-#define OA_HOLLOW           (25)
+#define OA_HOLLOWRATIO      (23)
+#define OA_HOLLOW           (24)
 #define OA_SHADOW           (26)
 
 #define OA_PIESTART         (27)
@@ -509,6 +511,8 @@ extern apair_t lo_ial[];
 #define OA_NOTEOSEPFACTOR           (941)
 #define OA_NOTEISEPFACTOR           (942)
 
+#define OA_HOLLOWRATIOFACTOR        (951)
+
 #define OA_BWCIR                    (1010)
 #define OA_BWHCIR                   (1011)
 #define OA_BWRCIR                   (1012)
@@ -637,6 +641,8 @@ struct obattr {
     int    hatchthick;
     int    hatchpitch;
 #endif
+
+    int     hollowratio;
 
     int    slittype;
     int    slitpos;

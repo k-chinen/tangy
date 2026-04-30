@@ -193,11 +193,17 @@ parsedimen(char *src)
     }
     else
     if(strcasecmp(p,"cm")==0) {
+#if 0
         dm *= 2834;
+#endif
+        dm *= 2834.64567;
     }
     else
     if(strcasecmp(p,"mm")==0) {
+#if 0
         dm *= 283.4;
+#endif
+        dm *= 283.464567;
     }
 
     m = (int)(dm);
@@ -945,7 +951,7 @@ skip_note:
         }
     }
 #if 0
-    Echo("oak %d\n", oak);
+    Echo("oak %d name %s\n", oak, name);
 #endif
 #if 1
     if(oak==OA_FROM||oak==OA_TO) {
@@ -979,6 +985,14 @@ skip_note:
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
         rob->cob.y1 = atof(value); \
+        uc++; \
+    }
+
+#define IISET(x,y1) \
+    if(oak==(x)) { \
+        p = draw_wordW(p, value, BUFSIZ); \
+printf("%% value %s\n", value); \
+        rob->cob.y1 = atoi(value); \
         uc++; \
     }
 
@@ -1136,6 +1150,7 @@ skip_note:
 
 P;
     uc = 0;
+
     AISETC(OA_LINECOLOR,    outlinecolor);
     ISET(OA_LINETHICK,      outlinethick);
     AISETN(OA_LINETYPE,     linetype_ial, outlinetype);
@@ -1169,6 +1184,7 @@ P;
 #endif
 
     ONSET(OA_HOLLOW,        hollow);
+    IISET(OA_HOLLOWRATIO,   hollowratio);
     ONSET(OA_SHADOW,        shadow);
 
     if(oak==OA_NOSLIT) {    rob->cob.slittype = OA_NOSLIT; };
@@ -1246,6 +1262,8 @@ P;
     GFSET(OA_NOTEISEPFACTOR,        noteisepfactor);
 
     GFSET(OA_TEXTBGMARGINFACTOR,    textbgmarginfactor);
+
+    GFSET(OA_HOLLOWRATIOFACTOR,     hollowratiofactor);
 
 
 #if 0
@@ -1545,6 +1563,8 @@ parseobj(char *p)
     nob->cob.hatchpitch     = def_hatchpitch;
     nob->cob.hatchthick     = def_hatchthick;
 #endif
+    nob->cob.hollow         = 0;
+    nob->cob.hollowratio    = 80;
 
     nob->cob.slittype       = OA_NOSLIT;
     nob->cob.slitpos        = 70;

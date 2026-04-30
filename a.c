@@ -1213,6 +1213,8 @@ recalcsizeparam()
 
     def_pbstrgap        = pbstrgapfactor        * objunit;
 
+    def_hollowratio     = hollowratiofactor;
+
 #if 0
     V(objunit);
     V(def_arrowsize);
