@@ -852,18 +852,8 @@ Echo("        y %d x %d -> ldir %.2f\n", y-ly, x-lx, ldir);
 #endif
 
 
-#if 0
-            ik = ns_find_objpos(xns, e->val, &mx, &my);
-            ik = ns_find_objposG(xns, e->val, &mx, &my);
-            ik = ns_find_objposXG(xns, e->val, &mx, &my);
-#endif
-#if 0
-            ik = ns_find_objposX(xns, e->val, &mx, &my);
-#endif
-#if 1
 P;
             ik = _ns_find_objposP(xns, u, e->val, 1, &mx, &my);
-#endif
             if(ik==0) {
 P;
 #if 1
@@ -3634,8 +3624,8 @@ P;
 
     Echo("goto AT '%s'\n", u->cob.aat);
 
-                r = ns_find_objpos(curns, u->cob.aat, &dx, &dy);
-    Echo("  ns_find_objpos  '%s' ret %d\n", u->cob.aat, r);
+                r = _ns_find_objposP(curns, u, u->cob.aat, 1 /*LPOS*/, &dx, &dy);
+    Echo("  ns_find_objposP '%s' ret %d\n", u->cob.aat, r);
                 if(r==0) {
                     nx = dx; ny = dy;
                 }

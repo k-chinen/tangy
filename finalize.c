@@ -22,7 +22,6 @@ finalizeobj(ob *u, int *xdir, int ox, int oy, ns *xns)
 {
     int wd, ht;
     int g;
-    ob* np;
     int nx, ny;
     int _lx, _rx, _ty, _by;
     int sig1, sig2;
@@ -37,25 +36,10 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     _rx = _ty = -(INT_MAX-1);
     _lx = _by = INT_MAX;
 
-#define XXPN(n) \
-    if(u->c##n) { \
-        np = ns_find_obj(xns, u->c##n); \
-        if(np) { \
-            if(!np->fixed) Echo("found but not fixed\n"); \
-            nx = np->gx; \
-            ny = np->gy; \
-            Echo("  found " #n " as (%d,%d)\n", nx, ny); \
-            MARK("objxy", nx, ny) \
-        } \
-        else { \
-            Echo("ERROR not found as '" #n "' '%s'\n", u->c##n); \
-        } \
-    }
-
 #define PN(n) \
     if(u->c##n) { \
         int ik;\
-        ik = ns_find_objpos(xns, u->c##n, &nx, &ny); \
+        ik = _ns_find_objposP(xns, u, u->c##n, 1, &nx, &ny); \
         if(ik==0) { \
             Echo("  found " #n " as (%d,%d)\n", nx, ny); \
             MARK("objxy", nx, ny) \
@@ -69,8 +53,6 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     PN(ato);
     PN(awith);
     PN(aat);
-#if 0
-#endif
 
     g = eval_dir(u, xdir);
     if(g>0) {
