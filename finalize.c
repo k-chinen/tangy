@@ -56,7 +56,7 @@ Echo("%s: oid %d hasrel %d ox,oy %d,%d\n", __func__, u->oid, u->hasrel, ox, oy);
     if(u->c##n) { \
         int ik;\
         ik = ns_find_objpos(xns, u->c##n, &nx, &ny); \
-        if(np) { \
+        if(ik==0) { \
             Echo("  found " #n " as (%d,%d)\n", nx, ny); \
             MARK("objxy", nx, ny) \
         } \
