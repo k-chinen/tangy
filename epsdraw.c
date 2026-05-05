@@ -13845,8 +13845,8 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
         if(dsdir==-1) {
             int dmy;
             dmy = minsy;
-            maxsy = minsy;
-            minsy = dmy;
+            minsy = maxsy;
+            maxsy = dmy;
 
         Echo("  swap dsdir %d minsy %d maxsy %d\n", dsdir, minsy, maxsy);
         }
