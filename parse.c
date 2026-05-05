@@ -981,6 +981,21 @@ skip_note:
         uc++; \
     }
 
+#define ISET2_DEF(x,y1,y2,def) \
+    if(oak==(x)) { \
+        char *p_saved = p; \
+        p = draw_wordW(p, value, BUFSIZ); \
+        if(value[0] && assoc(objattr_ial, value) < 0) { \
+            rob->cob.y1 = parsedimen(value); \
+            rob->cob.y2 = parsedimen(value); \
+        } else { \
+            rob->cob.y1 = (def); \
+            rob->cob.y2 = (def); \
+            p = p_saved; \
+        } \
+        uc++; \
+    }
+
 #define RSET(x,y1) \
     if(oak==(x)) { \
         p = draw_wordW(p, value, BUFSIZ); \
@@ -1239,7 +1254,10 @@ P;
     LADD(OA_AUXLINEOPT,     auxlineopt);
     
 
+/*
     ISET2(OA_CHOP,          forechop, backchop);
+*/
+    ISET2_DEF(OA_CHOP,      forechop, backchop, objunit/2);
     ISET(OA_FORECHOP,       forechop);
     ISET(OA_BACKCHOP,       backchop);
     ISET(OA_BULGE,          bulge);
