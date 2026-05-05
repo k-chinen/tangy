@@ -12,6 +12,7 @@
 #include "gv.h"
 
 #include "color.h"
+#include "kana_tbl.h"
 
 
 int
@@ -2081,8 +2082,236 @@ Xchs_verify()
     return 0;
 }
 
+/* --- pickets template expansion ----------------------------------------- */
+
+static void
+pk_to_roman(int n, char *buf, int buflen, int upper)
+{
+    static const int   vals[] = {1000,900,500,400,100,90,50,40,10,9,5,4,1};
+    static const char *lo[]   = {"m","cm","d","cd","c","xc","l","xl","x","ix","v","iv","i"};
+    static const char *up[]   = {"M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
+    int i;
+    buf[0] = '\0';
+    if(n < 1 || n > 3999) { strncpy(buf, "?", buflen-1); buf[buflen-1]='\0'; return; }
+    for(i = 0; i < 13 && n > 0; i++) {
+        while(n >= vals[i]) {
+            int cur = strlen(buf);
+            strncpy(buf+cur, upper ? up[i] : lo[i], buflen-cur-1);
+            buf[buflen-1] = '\0';
+            n -= vals[i];
+        }
+    }
+}
+
+/* Try to match FuncName(number) at *pp.
+ * On success: writes quoted result to out, advances *pp, returns 1. */
+static int
+pk_eval_one(const char **pp, char *out, int outlen)
+{
+    const char *p = *pp;
+    char  fname[64];
+    char  numstr[32];
+    char  val[128];
+    int   fi, ni, n;
+
+    fi = 0;
+    while((*p>='a'&&*p<='z')||(*p>='A'&&*p<='Z')) {
+        if(fi < 63) fname[fi++] = *p;
+        p++;
+    }
+    fname[fi] = '\0';
+    if(!fi || *p != '(') return 0;
+    p++;
+
+    ni = 0;
+    while(*p>='0' && *p<='9') {
+        if(ni < 31) numstr[ni++] = *p;
+        p++;
+    }
+    numstr[ni] = '\0';
+    if(!ni || *p != ')') return 0;
+    p++;
+
+    n = atoi(numstr);
+    val[0] = '\0';
+
+    if(strcmp(fname, "alph") == 0) {
+        if(n>=1 && n<=26) { val[0]='a'+n-1; val[1]='\0'; }
+        else              { val[0]='?';      val[1]='\0'; }
+    } else if(strcmp(fname, "Alph") == 0) {
+        if(n>=1 && n<=26) { val[0]='A'+n-1; val[1]='\0'; }
+        else              { val[0]='?';      val[1]='\0'; }
+    } else if(strcmp(fname, "roman") == 0) {
+        pk_to_roman(n, val, sizeof(val), 0);
+    } else if(strcmp(fname, "Roman") == 0) {
+        pk_to_roman(n, val, sizeof(val), 1);
+    } else if(strcmp(fname, "arabic") == 0) {
+        snprintf(val, sizeof(val), "%d", n);
+    } else if(strcmp(fname, "hiragana") == 0) {
+        if(n>=1 && n<=HIRAGANA_GOJUUON_NUM)
+            strncpy(val, hiragana_gojuuon_tbl[n-1], sizeof(val)-1);
+        else { val[0]='?'; val[1]='\0'; }
+    } else if(strcmp(fname, "katakana") == 0) {
+        if(n>=1 && n<=KATAKANA_GOJUUON_NUM)
+            strncpy(val, katakana_gojuuon_tbl[n-1], sizeof(val)-1);
+        else { val[0]='?'; val[1]='\0'; }
+    } else if(strcmp(fname, "irohahira") == 0) {
+        if(n>=1 && n<=HIRAGANA_IROHA_NUM)
+            strncpy(val, hiragana_iroha_tbl[n-1], sizeof(val)-1);
+        else { val[0]='?'; val[1]='\0'; }
+    } else if(strcmp(fname, "irohakata") == 0) {
+        if(n>=1 && n<=KATAKANA_IROHA_NUM)
+            strncpy(val, katakana_iroha_tbl[n-1], sizeof(val)-1);
+        else { val[0]='?'; val[1]='\0'; }
+    } else {
+        return 0;   /* unknown function name - do not substitute */
+    }
+
+    snprintf(out, outlen, "\"%s\"", val);
+    *pp = p;
+    return 1;
+}
+
+/* Expand template string: substitute $1 -> idx, then evaluate FuncName(n).
+ * Used per-picket so that e.g. "box Alph($1)" -> "box \"B\"" for idx=2. */
+static void
+pk_expand(const char *src, int idx, char *dst, int dstlen)
+{
+    char  tmp[BUFSIZ];
+    char  idxstr[32];
+    int   idxlen;
+    const char *p;
+    char *q;
+    int   remaining;
+
+    /* Step 1: $1 -> idx */
+    snprintf(idxstr, sizeof(idxstr), "%d", idx);
+    idxlen = (int)strlen(idxstr);
+    p = src; q = tmp; remaining = BUFSIZ - 1;
+    while(*p && remaining > 0) {
+        if(*p=='$' && *(p+1)=='1') {
+            int n = idxlen < remaining ? idxlen : remaining;
+            memcpy(q, idxstr, n);
+            q += n; remaining -= n; p += 2;
+        } else {
+            *q++ = *p++; remaining--;
+        }
+    }
+    *q = '\0';
+
+    /* Step 2: evaluate FuncName(number) -> "result" */
+    p = tmp; q = dst; remaining = dstlen - 1;
+    while(*p && remaining > 0) {
+        if((*p>='a'&&*p<='z')||(*p>='A'&&*p<='Z')) {
+            char        result[128];
+            const char *pp = p;
+            if(pk_eval_one(&pp, result, sizeof(result))) {
+                int n = (int)strlen(result);
+                if(n > remaining) n = remaining;
+                memcpy(q, result, n);
+                q += n; remaining -= n; p = pp;
+                continue;
+            }
+        }
+        *q++ = *p++; remaining--;
+    }
+    *q = '\0';
+}
+
+/* --- pickets_param ------------------------------------------------------- */
+
+typedef struct {
+    char picket[BUFSIZ];
+    char outer[BUFSIZ];
+    char inner[BUFSIZ];
+    char style[BUFSIZ];     /* replacement template for dots position */
+    int  num;
+    int  has_dir;
+    int  dir_val;
+    int  reverse;           /* 1: indices count down (num..1) */
+} pickets_param;
+
+/* Parse style value "dots,reverse" -> tmpl="dots", *rev=1.
+ * Tokens are comma-separated; "reverse" sets the flag, others form the template. */
+static void
+parse_style(const char *raw, char *tmpl, int tmpllen, int *rev)
+{
+    char  buf[BUFSIZ];
+    char *tok;
+
+    *rev = 0;
+    tmpl[0] = '\0';
+    strncpy(buf, raw, BUFSIZ-1);
+    buf[BUFSIZ-1] = '\0';
+
+    tok = strtok(buf, ",");
+    while(tok) {
+        while(*tok == ' ') tok++;
+        if(strcasecmp(tok, "reverse") == 0) {
+            *rev = 1;
+        } else if(*tok) {
+            strncpy(tmpl, tok, tmpllen-1);
+            tmpl[tmpllen-1] = '\0';
+        }
+        tok = strtok(NULL, ",");
+    }
+}
+
+static int
+try_pickets(char *p, pickets_param *pp)
+{
+    char  word[BUFSIZ];
+    char *q;
+    char *r;
+
+    pp->picket[0] = '\0';
+    pp->outer[0]  = '\0';
+    pp->inner[0]  = '\0';
+    pp->style[0]  = '\0';
+    pp->num     = 2;
+    pp->has_dir = 0;
+    pp->dir_val = 0;
+    pp->reverse = 0;
+
+    q = draw_wordW(p, word, BUFSIZ);
+    if(strcasecmp(word, "pickets") != 0) return 0;
+
+    while(*q) {
+        q = skipwhite(q);
+        if(!*q) break;
+        q = draw_wordW(q, word, BUFSIZ);
+        if(!word[0]) break;
+        if(strcasecmp(word, "picket") == 0) {
+            r = draw_wordDQ(q, pp->picket, BUFSIZ);
+            if(r) q = skipwhite(r); else q = draw_wordW(q, pp->picket, BUFSIZ);
+        } else if(strcasecmp(word, "outer") == 0) {
+            r = draw_wordDQ(q, pp->outer, BUFSIZ);
+            if(r) q = skipwhite(r); else q = draw_wordW(q, pp->outer, BUFSIZ);
+        } else if(strcasecmp(word, "inner") == 0) {
+            r = draw_wordDQ(q, pp->inner, BUFSIZ);
+            if(r) q = skipwhite(r); else q = draw_wordW(q, pp->inner, BUFSIZ);
+        } else if(strcasecmp(word, "num") == 0) {
+            char numstr[BUFSIZ];
+            q = draw_wordW(q, numstr, BUFSIZ);
+            pp->num = atoi(numstr);
+            if(pp->num < 1) pp->num = 1;
+        } else if(strcasecmp(word, "style") == 0) {
+            char raw_style[BUFSIZ];
+            r = draw_wordDQ(q, raw_style, BUFSIZ);
+            if(r) q = skipwhite(r); else q = draw_wordW(q, raw_style, BUFSIZ);
+            parse_style(raw_style, pp->style, BUFSIZ, &pp->reverse);
+        } else if(strcasecmp(word, "dir") == 0) {
+            char numstr[BUFSIZ];
+            q = draw_wordW(q, numstr, BUFSIZ);
+            pp->has_dir = 1;
+            pp->dir_val = atoi(numstr);
+        }
+    }
+    return 1;
+}
+
 int
-parse(FILE *fp, ob* ch0, ns *ns0) 
+parse(FILE *fp, ob* ch0, ns *ns0)
 {
     ob*   curch;
     ns*   curns;
@@ -2310,10 +2539,65 @@ sdump(stdout, "raw p ", p);
             }
         }
 #endif
+        else
+        if(strncasecmp(p, "pickets", 7)==0) {
+            pickets_param pp;
+            ob  *nch, *nob;
+            ns  *nns;
+            int  i;
+
+            try_pickets(p, &pp);
+
+            chs_push(curch);
+            nch = newchunk_child(curch);
+            chadd(curch, nch);
+            if(label[0]) nsaddobj(curns, nch, label);
+            curch = nch;
+
+            nss_push(curns);
+            nns = newnamespace_child(curns);
+            if(label[0]) nsaddnsobj(curns, nns, nch, label);
+            else         nsaddnsobj(curns, nns, nch, "nolabel");
+            curns = nns;
+            curch->cch.qns = nns;
+
+            if(pp.has_dir) {
+                char dir_str[64];
+                snprintf(dir_str, sizeof(dir_str), "dir %d", pp.dir_val);
+                nob = parseobj(dir_str);
+                if(nob) chadd(curch, nob);
+            }
+            #define PK_PARSEOBJ(s) \
+                (try_alias(al,(s),rep,BUFSIZ)==1 ? parseobj(rep) : parseobj(s))
+            if(pp.outer[0])  { nob = PK_PARSEOBJ(pp.outer);  if(nob) chadd(curch, nob); }
+            for(i = 0; i < pp.num - 1; i++) {
+                int idx = pp.reverse ? (pp.num - i) : (i + 1);
+                char *cur_tmpl = (pp.style[0] && i == pp.num - 2) ? pp.style : pp.picket;
+                if(cur_tmpl[0]) {
+                    char exp[BUFSIZ];
+                    pk_expand(cur_tmpl, idx, exp, BUFSIZ);
+                    nob = PK_PARSEOBJ(exp);
+                    if(nob) chadd(curch, nob);
+                }
+                if(pp.inner[0]) { nob = PK_PARSEOBJ(pp.inner); if(nob) chadd(curch, nob); }
+            }
+            if(pp.picket[0]) {
+                char exp[BUFSIZ];
+                int  last_idx = pp.reverse ? 1 : pp.num;
+                pk_expand(pp.picket, last_idx, exp, BUFSIZ);
+                nob = PK_PARSEOBJ(exp);
+                if(nob) chadd(curch, nob);
+            }
+            if(pp.outer[0])  { nob = PK_PARSEOBJ(pp.outer);  if(nob) chadd(curch, nob); }
+            #undef PK_PARSEOBJ
+
+            curns = nss_pop();
+            curch = chs_pop();
+        }
         else {
     /*****
      *****
-     ***** regular object parsing 
+     ***** regular object parsing
      *****
      *****/
             ob* nch;
