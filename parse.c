@@ -2199,21 +2199,59 @@ pk_expand(const char *src, int idx, char *dst, int dstlen)
     }
     *q = '\0';
 
-    /* Step 2: evaluate FuncName(number) -> "result" */
+    /* Step 2: evaluate FuncName(number) -> "result".
+     * Inside a tangy string "...", FuncName(n) outputs bare value,
+     * and {FuncName(n)} also outputs bare value. */
     p = tmp; q = dst; remaining = dstlen - 1;
-    while(*p && remaining > 0) {
-        if((*p>='a'&&*p<='z')||(*p>='A'&&*p<='Z')) {
-            char        result[128];
-            const char *pp = p;
-            if(pk_eval_one(&pp, result, sizeof(result))) {
-                int n = (int)strlen(result);
-                if(n > remaining) n = remaining;
-                memcpy(q, result, n);
-                q += n; remaining -= n; p = pp;
+    {
+        int in_string = 0;
+        while(*p && remaining > 0) {
+            if(*p == '"') {
+                in_string = !in_string;
+                *q++ = *p++; remaining--;
                 continue;
             }
+            if(in_string && *p == '{') {
+                const char *pp = p + 1;
+                char result[128];
+                if(pk_eval_one(&pp, result, sizeof(result)) && *pp == '}') {
+                    /* strip surrounding quotes from result ("val" -> val) */
+                    const char *val = result + 1;
+                    int vlen = (int)strlen(val);
+                    if(vlen > 0 && val[vlen-1] == '"') vlen--;
+                    int n = vlen < remaining ? vlen : remaining;
+                    memcpy(q, val, n);
+                    q += n; remaining -= n;
+                    p = pp + 1;
+                    continue;
+                }
+                *q++ = *p++; remaining--;
+                continue;
+            }
+            if((*p>='a'&&*p<='z')||(*p>='A'&&*p<='Z')) {
+                char        result[128];
+                const char *pp = p;
+                if(pk_eval_one(&pp, result, sizeof(result))) {
+                    if(in_string) {
+                        /* bare value inside string */
+                        const char *val = result + 1;
+                        int vlen = (int)strlen(val);
+                        if(vlen > 0 && val[vlen-1] == '"') vlen--;
+                        int n = vlen < remaining ? vlen : remaining;
+                        memcpy(q, val, n);
+                        q += n; remaining -= n;
+                    } else {
+                        int n = (int)strlen(result);
+                        if(n > remaining) n = remaining;
+                        memcpy(q, result, n);
+                        q += n; remaining -= n;
+                    }
+                    p = pp;
+                    continue;
+                }
+            }
+            *q++ = *p++; remaining--;
         }
-        *q++ = *p++; remaining--;
     }
     *q = '\0';
 }
@@ -2282,7 +2320,7 @@ try_pickets(char *p, pickets_param *pp)
         q = draw_wordW(q, word, BUFSIZ);
         if(!word[0]) break;
         if(strcasecmp(word, "picket") == 0) {
-            r = draw_wordDQ(q, pp->picket, BUFSIZ);
+            r = draw_picket_str(q, pp->picket, BUFSIZ);
             if(r) q = skipwhite(r); else q = draw_wordW(q, pp->picket, BUFSIZ);
         } else if(strcasecmp(word, "outer") == 0) {
             r = draw_wordDQ(q, pp->outer, BUFSIZ);

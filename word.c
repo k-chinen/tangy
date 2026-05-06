@@ -84,6 +84,32 @@ draw_wordDQ(char *src, char *dst, int wlen)
     return p;
 }
 
+/* Read picket template: starts with '"', closes at '"' followed by
+ * whitespace or end-of-string.  This allows inner "..." tangy strings
+ * to be written literally, e.g. "box "R{arabic($1)}"" -> box "R{arabic($1)}" */
+char*
+draw_picket_str(char *src, char *dst, int wlen)
+{
+    char *p = src;
+    char *q = dst;
+    int   c = 0;
+
+    if(*p != '"') return NULL;
+    p++;
+    while(*p && c < wlen-1) {
+        if(*p == '"') {
+            char next = *(p+1);
+            if(next == '\0' || next == ' ' || next == '\t' || next == '\n') {
+                p++;
+                break;
+            }
+        }
+        *q++ = *p++;
+        c++;
+    }
+    *q = '\0';
+    return p;
+}
 
 char*
 draw_wordW(char *src, char *dst, int wlen)
