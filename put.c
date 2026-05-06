@@ -780,7 +780,8 @@ Echo("  m %d\n", m);
 #endif
 
         if(e->cmd==OA_ARC||e->cmd==OA_ARCN||e->cmd==OA_RCURVETO||
-            e->cmd==OA_THEN||e->cmd==OA_JOIN||e->cmd==OA_SKIP) {
+            e->cmd==OA_THEN||e->cmd==OA_JOIN||e->cmd==OA_SKIP||
+            e->cmd==OA_CLOSE) {
             actf = 1;
         }
 
@@ -1214,6 +1215,12 @@ Echo("bmx,bmy %d,%d\n", bmx, bmy);
         MARK("eBf ", bfx, bfy);
 #endif
       }
+    }
+    /* flush any remaining accumulated movement after the last segment */
+    if(c > 0) {
+        FREG1(OA_RLINETO, jc, REL_COORD, 0, x-lx, y-ly, 0, 0);
+        lx = x;
+        ly = y;
     }
         MARK("z ", x, y);
 
