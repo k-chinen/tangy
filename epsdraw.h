@@ -48,7 +48,7 @@ int lineparam(double *k, double *u, double x1, double y1, double x2, double y2);
 int linecrosspoint(double *rcx, double *rcy, int L1x1, int L1y1, int L1x2, int L1y2, int L2x1, int L2y1, int L2x2, int L2y2);
 int Zepsdraw_wlinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
 int epsdraw_blinearrow(FILE *fp, int ydir, int xox, int xoy, ob *xu, ns *xns);
-int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp);
+int epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp, int hth, int hof);
 int _epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmd);
 int epsdraw_deco(FILE *fp, int xw, int xh, int xlc, int xfc, char *xcmdlist);
 int ss_strip(char *dst, int dlen, varray_t *ssar);

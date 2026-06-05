@@ -364,17 +364,20 @@ extern apair_t lo_ial[];
 #define OA_FILLHATCH        (12)
 #define OA_FILLTHICK        (13)
 #define OA_FILLPITCH        (14)
+#define OA_FILLOFFSET       (15)
 
-#define OA_BACKCOLOR        (15)
-#define OA_BACKHATCH        (16)
-#define OA_BACKTHICK        (17)
-#define OA_BACKPITCH        (18)
+#define OA_BACKCOLOR        (16)
+#define OA_BACKHATCH        (17)
+#define OA_BACKTHICK        (18)
+#define OA_BACKPITCH        (19)
+#define OA_BACKOFFSET       (20)
 
 #define OA_HATCHTHICK       (21)
 #define OA_HATCHPITCH       (22)
+#define OA_HATCHOFFSET      (23)
 
-#define OA_HOLLOWRATIO      (23)
-#define OA_HOLLOW           (24)
+#define OA_HOLLOWRATIO      (24)
+#define OA_HOLLOW           (25)
 #define OA_SHADOW           (26)
 
 #define OA_PIESTART         (27)
@@ -385,9 +388,6 @@ extern apair_t lo_ial[];
 #define OA_TEXTBGCOLOR      (32)
 #define OA_TEXTROTATE       (33)
 #define OA_TEXTPOSITION     (35)
-#if 0
-#define OA_TEXTOFFSET       (36)
-#endif
 #define OA_TEXTHOFFSET      (37)
 #define OA_TEXTVOFFSET      (38)
 
@@ -628,6 +628,7 @@ struct obattr {
     int    fillhatch;
     int    fillpitch;
     int    fillthick;
+    int    filloffset;
 #if 0
     int    filllevel;
 #endif
@@ -636,6 +637,7 @@ struct obattr {
     int    backhatch;
     int    backpitch;
     int    backthick;
+    int    backoffset;
 
 #if 0
     int    hatchthick;

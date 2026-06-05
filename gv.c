@@ -211,6 +211,18 @@ apair_t hatchtype_ial[] = {
     {"hvstripe",            HT_HVSTRIPE},
     {"plusstripe",          HT_PLUSSTRIPE},
 
+    {"wavline",             HT_WAVLINE},
+    {"eavline",             HT_EAVLINE},
+    {"nahline",             HT_NAHLINE},
+    {"sahline",             HT_SAHLINE},
+
+/*
+    {"wavbar",              HT_WAVBAR},
+    {"eavbar",              HT_EAVBAR},
+    {"nahbar",              HT_NAHBAR},
+    {"sahbar",              HT_SAHBAR},
+*/
+
     {"hishi",               HT_HISHI},
     {"higaki",              HT_HIGAKI},
     {"raimon",              HT_RAIMON},
@@ -427,12 +439,15 @@ apair_t objattr_ial[] = {
     {"fillhatch",           OA_FILLHATCH},
     {"fillthick",           OA_FILLTHICK},
     {"fillpitch",           OA_FILLPITCH},
+    {"filloffset",          OA_FILLOFFSET},
     {"backcolor",           OA_BACKCOLOR},
     {"backhatch",           OA_BACKHATCH},
     {"backthick",           OA_BACKTHICK},
     {"backpitch",           OA_BACKPITCH},
+    {"backoffset",          OA_BACKOFFSET},
     {"hatchthick",          OA_HATCHTHICK},
     {"hatchpitch",          OA_HATCHPITCH},
+    {"hatchoffset",         OA_HATCHOFFSET},
     {"textcolor",           OA_TEXTCOLOR},
     {"textbgcolor",         OA_TEXTBGCOLOR},
     {"textalign",           OA_TEXTPOSITION},   /* backword compatible */

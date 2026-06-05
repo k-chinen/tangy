@@ -1177,17 +1177,20 @@ P;
     AISETX(OA_FILLHATCH,    hatchtype_ial, fillhatch, HT_XCROSSED);
     ISET(OA_FILLTHICK,      fillthick);
     ISET(OA_FILLPITCH,      fillpitch);
+    ISET(OA_FILLOFFSET,     filloffset);
 
     AISETC(OA_BACKCOLOR,    backcolor);
     AISETX(OA_BACKHATCH, hatchtype_ial, backhatch, HT_XCROSSED);
     ISET(OA_BACKTHICK,      backthick);
     ISET(OA_BACKPITCH,      backpitch);
+    ISET(OA_BACKOFFSET,     backoffset);
 #if 0
     ISET(OA_HATCHTHICK,     hatchthick);
     ISET(OA_HATCHPITCH,     hatchpitch);
 #endif
     ISET2(OA_HATCHTHICK,    fillthick, backthick);
     ISET2(OA_HATCHPITCH,    fillpitch, backpitch);
+    ISET2(OA_HATCHOFFSET,   filloffset, backoffset);
 
     AISETC(OA_TEXTCOLOR,    textcolor);
     AISETC(OA_TEXTBGCOLOR,  textbgcolor);
@@ -1574,10 +1577,12 @@ parseobj(char *p)
     nob->cob.fillhatch      = HT_NONE;
     nob->cob.fillpitch      = def_hatchpitch;
     nob->cob.fillthick      = def_hatchthick;
+    nob->cob.filloffset     = 0;
     nob->cob.backcolor      = def_bgcolor;
     nob->cob.backhatch      = HT_NONE;
     nob->cob.backpitch      = def_hatchpitch;
     nob->cob.backthick      = def_hatchthick;
+    nob->cob.backoffset     = 0;
 #if 0
     nob->cob.hatchpitch     = def_hatchpitch;
     nob->cob.hatchthick     = def_hatchthick;
