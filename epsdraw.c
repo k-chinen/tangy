@@ -9313,12 +9313,12 @@ skip_dots:
         }
         break;
 
-    case HT_WAVLINE:
+    case HT_AVLINEW:
         {
             y1 = -ah/2;
             y2 =  ah/2;
             int y0 = 0;
-            for(x1=-aw/2;x1<aw/2;x1+=hp) {
+            for(x1=-aw/2;x1<=aw/2;x1+=hp) {
                 x2=x1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                     x1+hth/2+hof, y1, x2+hth/2+hof, y2);
@@ -9327,12 +9327,12 @@ skip_dots:
 
         break;
 
-    case HT_EAVLINE:
+    case HT_AVLINEE:
         {
             y1 = -ah/2;
             y2 =  ah/2;
             int y0 = 0;
-            for(x1=-aw/2;x1<=aw/2;x1+=hp) {
+            for(x1=aw/2;x1>=-aw/2;x1-=hp) {
                 x2=x1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                     x1-hth/2-hof, y1, x2-hth/2-hof, y2);
@@ -9342,7 +9342,7 @@ skip_dots:
         break;
 
 
-    case HT_NAHLINE:
+    case HT_AHLINES:
         {
             x1 = -aw/2;
             x2 =  aw/2;
@@ -9354,11 +9354,11 @@ skip_dots:
         }
         break;
 
-    case HT_SAHLINE:
+    case HT_AHLINEN:
         {
             x1 = -aw/2;
             x2 =  aw/2;
-            for(y1=-ah/2;y1<=ah/2;y1+=hp) {
+            for(y1=ah/2;y1>=-ah/2;y1-=hp) {
                 y2 = y1;
                 fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
                 x1, y1-hth/2-hof, x2, y2-hth/2-hof);
@@ -9366,6 +9366,192 @@ skip_dots:
         }
         break;
 
+    /***    
+     *** MOUNTAINS
+     ***/
+
+    case HT_MTW:
+    case HT_MTFW:
+    case HT_MT1W:
+        {
+            int x3, y3;
+            int xrad=objunit/5;
+            int d;
+            int q=MAX(aw/2,ah/2);
+            int u=MIN(aw/2,ah/2);
+            int start = -2*q;
+            int end   = q;
+            if(hty==HT_MTFW) {
+                start=-aw/2;
+                end=q-u;
+            }
+            else
+            if(hty==HT_MT1W) {
+                start=-ah/4;
+                end=-ah/4;
+            }
+            d = (int)(((double)xrad)/sqrt(2));
+#if 0
+fprintf(stderr, "MTxW %d; start %d -> end %d\n", hty, start, end);
+#endif
+            y1 = -ah/2;
+            y2 =  ah/2;
+
+            y3 = d;
+
+            for(x1=start;x1<=end;x1+=hp) {
+                x2 = x1+ah/2;
+                x3 = x1+ah/4;
+                x3 = x1+d;
+#if 0
+fprintf(stderr, "MTxW %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
+#endif
+#if 1
+                /* pure mountain */
+                fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x2, y1, x1, 0, x2, y2);
+#endif 
+
+#if 0
+                /* round mountain */
+                fprintf(fp, "gsave\n");
+                fprintf(fp, "0 1 1 setrgbcolor\n");
+            fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x2, y1, x1, 0, x2, y2);
+                fprintf(fp, "grestore\n");
+                fprintf(fp, "gsave\n");
+                fprintf(fp, "1 0 1 setrgbcolor\n");
+        fprintf(fp, "      %d %d moveto %d %d lineto %d %d %d %d %d arcn %d %d lineto stroke\n",
+                    x2, y1, 
+                    x3, -y3,
+                    x3+d, 0, xrad, 225, 135,
+                    x2, y2);
+                fprintf(fp, "grestore\n");
+#endif
+
+#if 0
+                /* round mountain */
+                fprintf(fp, "gsave\n");
+                fprintf(fp, "0 1 0 setrgbcolor\n");
+            fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x2, y1, x1, 0, x2, y2);
+                fprintf(fp, "grestore\n");
+                fprintf(fp, "gsave\n");
+                fprintf(fp, "0 0 1 setrgbcolor\n");
+        fprintf(fp, "      %d %d moveto %d %d %d %d %d arct %d %d lineto stroke\n",
+                    x2, y1, 
+                    x1, 0, x2, y2, xrad,
+                    x2, y2);
+                fprintf(fp, "grestore\n");
+#endif
+
+            }
+        }
+        break;
+
+
+    case HT_MTE:
+    case HT_MTFE:
+    case HT_MT1E:
+        {
+            int q=MAX(aw/2,ah/2);
+            int u=MIN(aw/2,ah/2);
+            int start   = 2*q;
+            int end = -q;
+            if(hty==HT_MTFE) {
+                start=aw/2;
+                end=-q+u;
+            }
+            else
+            if(hty==HT_MT1E) {
+                start=ah/4;
+                end=ah/4;
+            }
+#if 0
+fprintf(stderr, "MTxE %d; start %d -> end %d\n", hty, start, end);
+#endif
+            y1 = -ah/2;
+            y2 =  ah/2;
+            for(x1=start;x1>=end;x1-=hp) {
+                x2 = x1-ah/2;
+#if 0
+fprintf(stderr, "MTxE %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
+#endif
+                fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x2, y1, x1, 0, x2, y2);
+            }
+        }
+        break;
+
+
+    case HT_MTN:
+    case HT_MTFN:
+    case HT_MT1N:
+        {
+            int q=MAX(aw/2,ah/2);
+            int u=MIN(aw/2,ah/2);
+            int start   = 2*q;
+            int end = -q;
+            if(hty==HT_MTFN) {
+                start=ah/2;
+                end=-q+u;
+            }
+            else
+            if(hty==HT_MT1N) {
+                start=aw/4;
+                end=aw/4;
+            }
+#if 0
+fprintf(stderr, "MTxN %d; start %d -> end %d\n", hty, start, end);
+#endif
+            x1 = -aw/2;
+            x2 =  aw/2;
+            for(y1=start;y1>=end;y1-=hp) {
+                y2 = y1-aw/2;
+#if 0
+fprintf(stderr, "MTxN %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
+#endif
+                fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x1, y2, 0, y1, x2, y2);
+            }
+        }
+        break;
+
+
+    case HT_MTS:
+    case HT_MTFS:
+    case HT_MT1S:
+        {
+            int q=MAX(aw/2,ah/2);
+            int u=MIN(aw/2,ah/2);
+            int start   = -2*q;
+            int end = q;
+            if(hty==HT_MTFS) {
+                start=-ah/2;
+                end=q-u;
+            }
+            else
+            if(hty==HT_MT1S) {
+                start=-aw/4;
+                end=-aw/4;
+            }
+#if 0
+fprintf(stderr, "MTxS %d; start %d -> end %d\n", hty, start, end);
+#endif
+            x1 = -aw/2;
+            x2 =  aw/2;
+            for(y1=start;y1<=end;y1+=hp) {
+                y2 = y1+aw/2;
+#if 0
+fprintf(stderr, "MTxS %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
+#endif
+                fprintf(fp, "      %d %d moveto %d %d lineto %d %d lineto stroke\n",
+                    x1, y2, 0, y1, x2, y2);
+            }
+        }
+        break;
+
+    
     default:
     case HT_NONE:
         break;

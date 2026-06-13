@@ -211,17 +211,23 @@ apair_t hatchtype_ial[] = {
     {"hvstripe",            HT_HVSTRIPE},
     {"plusstripe",          HT_PLUSSTRIPE},
 
-    {"wavline",             HT_WAVLINE},
-    {"eavline",             HT_EAVLINE},
-    {"nahline",             HT_NAHLINE},
-    {"sahline",             HT_SAHLINE},
+    {"avlinew",             HT_AVLINEW},
+    {"avlinee",             HT_AVLINEE},
+    {"ahlinen",             HT_AHLINEN},
+    {"ahlines",             HT_AHLINES},
 
-/*
-    {"wavbar",              HT_WAVBAR},
-    {"eavbar",              HT_EAVBAR},
-    {"nahbar",              HT_NAHBAR},
-    {"sahbar",              HT_SAHBAR},
-*/
+    {"mtn",                 HT_MTN},
+    {"mtfn",                HT_MTFN},
+    {"mt1n",                HT_MT1N},
+    {"mts",                 HT_MTS},
+    {"mtfs",                HT_MTFS},
+    {"mt1s",                HT_MT1S},
+    {"mte",                 HT_MTE},
+    {"mtfe",                HT_MTFE},
+    {"mt1e",                HT_MT1E},
+    {"mtw",                 HT_MTW},
+    {"mtfw",                HT_MTFW},
+    {"mt1w",                HT_MT1W},
 
     {"hishi",               HT_HISHI},
     {"higaki",              HT_HIGAKI},

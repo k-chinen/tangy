@@ -52,22 +52,31 @@
 
 #define HT_CGRID            (59)
 
-#define HT_HSTRIPE          (71)
-#define HT_VSTRIPE          (72)
-#define HT_HVSTRIPE         (73)
-#define HT_PLUSSTRIPE       (74)
+#define HT_HSTRIPE          (61)
+#define HT_VSTRIPE          (62)
+#define HT_HVSTRIPE         (63)
+#define HT_PLUSSTRIPE       (64)
 
-/*
-#define HT_WAVBAR           (75)
-#define HT_EAVBAR           (76)
-#define HT_NAHBAR           (77)
-#define HT_SAHBAR           (78)
-*/
+#define HT_AVLINEE          (66)
+#define HT_AVLINEW          (67)
+#define HT_AHLINEN          (68)
+#define HT_AHLINES          (69)
 
-#define HT_WAVLINE          (81)
-#define HT_EAVLINE          (82)
-#define HT_NAHLINE          (83)
-#define HT_SAHLINE          (84)
+#define HT_MTN              (71)
+#define HT_MTFN             (72)
+#define HT_MT1N             (73)
+
+#define HT_MTS              (76)
+#define HT_MTFS             (77)
+#define HT_MT1S             (78)
+
+#define HT_MTE              (81)
+#define HT_MTFE             (82)
+#define HT_MT1E             (83)
+
+#define HT_MTW              (86)
+#define HT_MTFW             (87)
+#define HT_MT1W             (88)
 
 #define HT_HISHI            (101)
 #define HT_HIGAKI           (102)
