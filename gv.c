@@ -257,6 +257,12 @@ apair_t hatchtype_ial[] = {
     {"yagasuri",            HT_YAGASURI},
     {"mikuzusi",            HT_MIKUZUSI},
     {"rmikuzusi",           HT_RMIKUZUSI},
+
+    {"tatewaku",            HT_TATEWAKU},
+    {"ftatewaku",           HT_FTATEWAKU},
+    {"yokowaku",            HT_YOKOWAKU},
+    {"fyokowaku",           HT_FYOKOWAKU},
+
     {"dummy",               HT_DUMMY},
     {NULL,                  -1},
 };

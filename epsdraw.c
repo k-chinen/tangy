@@ -9551,6 +9551,131 @@ fprintf(stderr, "MTxS %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
         }
         break;
 
+    case HT_FTATEWAKU:
+        {
+#if 0
+fprintf(fp, "gsave\n");
+fprintf(fp, "0 1 1 setrgbcolor\n");
+
+            y1 = -ah/2;
+            y2 =  ah/2;
+            for(x1=-aw/2;x1<aw/2;x1+=hp) {
+                x2=x1;
+                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y2);
+            }
+fprintf(fp, "grestore\n");
+#endif
+
+fprintf(fp, "gsave\n");
+            int cnt=0;
+            int bx;
+            double th;
+            double asc = 0.0015;
+            int yp=objunit/50;
+            for(bx=-aw/2;bx<=aw/2+hp*2;bx+=hp*4) {
+                cnt++;
+
+                y1 = -ah/2;
+                y2 =  ah/2;
+                x1=bx;
+                x2=x1;
+
+                x2 = bx;
+                y2 = -ah/2;
+                    fprintf(fp, "      %d %d moveto\n", x2, y2);
+
+                for(y1=-ah/2;y1<=ah/2;y1+=yp) {
+                    th = ((double)y1) * asc;
+                    x1=bx-(int)(sin(th)*hp/2);
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+
+                x2 = bx+hp*2;
+                y2 = ah/2;
+                    fprintf(fp, "      %% moveto\n");
+
+                for(y1=ah/2;y1>=-ah/2;y1-=yp) {
+                    th = ((double)y1) * asc;
+                    x1=bx+hp*2+(int)(sin(th)*hp/2);
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+
+                    fprintf(fp, "      fill\n");
+
+            }
+
+fprintf(fp, "grestore\n");
+        }
+        break;
+
+    case HT_TATEWAKU:
+        {
+#if 0
+fprintf(fp, "gsave\n");
+fprintf(fp, "0 1 1 setrgbcolor\n");
+
+            y1 = -ah/2;
+            y2 =  ah/2;
+            for(x1=-aw/2;x1<aw/2;x1+=hp) {
+                x2=x1;
+                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y2);
+            }
+fprintf(fp, "grestore\n");
+#endif
+
+fprintf(fp, "gsave\n");
+            int cnt=0;
+            int bx;
+            double th;
+            double asc = 0.0015;
+            int yp=objunit/50;
+            for(bx=-aw/2;bx<=aw/2+hp*2;bx+=hp*2) {
+                cnt++;
+
+                y1 = -ah/2;
+                y2 =  ah/2;
+                x1=bx;
+                x2=x1;
+
+                x2 = bx;
+                y2 = -ah/2;
+                fprintf(fp, "      %d %d moveto\n", x2, y2);
+                for(y1=-ah/2;y1<=ah/2;y1+=yp) {
+                    th = ((double)y1) * asc;
+                    if(cnt%2==0) {
+                        x1=bx+(int)(sin(th)*hp/2);
+                    }
+                    else {
+                        x1=bx-(int)(sin(th)*hp/2);
+                    }
+#if 0
+fprintf(fp, " %% q y1 %d th %f x1 %d\n", y1, th, x1);
+#endif
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+                fprintf(fp, "      stroke\n");
+
+#if 0
+                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x2, y2);
+#endif
+            }
+
+fprintf(fp, "grestore\n");
+        }
+        break;
+
     
     default:
     case HT_NONE:

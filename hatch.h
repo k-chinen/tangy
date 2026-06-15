@@ -78,6 +78,7 @@
 #define HT_MTFW             (87)
 #define HT_MT1W             (88)
 
+
 #define HT_HISHI            (101)
 #define HT_HIGAKI           (102)
 #define HT_RAIMON           (103)
@@ -91,6 +92,11 @@
 #define HT_KANOKOSHIBORI    (111)
 #define HT_FUNDO            (120)
 #define HT_YAGASURI         (121)
+
+#define HT_TATEWAKU         (131)
+#define HT_FTATEWAKU        (132)
+#define HT_YOKOWAKU         (136)
+#define HT_FYOKOWAKU        (137)
 
 #define HT_DUMMY            (999)
 
