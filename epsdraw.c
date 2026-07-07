@@ -4263,7 +4263,7 @@ Echo("    arrow f %d c %d b %d; cdir %d\n", actfh, actch, actbh, cdir);
             break;
 
         default:
-            Error("unsupported segment part <%d>\n", s->ptype);
+            Error("unsupported segment part <%d> %s\n", s->ptype, __func__);
             break;
 #if 0
 #endif
@@ -4274,7 +4274,7 @@ next:
 #if 0
         fprintf(fp, "    stroke %% solid\n");
 #endif
-#if 1
+#if 0
         fprintf(fp, "    %% dummy\n");
 #endif
 
@@ -5531,7 +5531,7 @@ P;
             break;
 
         default:
-            Error("unsupported segment part <%d>\n", s->ptype);
+            Error("unsupported segment part <%d> %s\n", s->ptype, __func__);
             break;
         }
         
@@ -8131,6 +8131,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp, int hth, int ho
     fprintf(fp, "%% %s start aw %d ah %d hc %d hty %d\n",
         __func__, aw, ah, hc, hty);
 #endif
+    fprintf(fp, "%% hatch hty %d\n", hty);
 
     changecolor(fp, hc);
 
@@ -8515,8 +8516,8 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp, int hth, int ho
 
         break;
 
-    case HT_CGRID:
-        fprintf(fp, "  %% cgrid\n");
+    case HT_NCGRID:
+        fprintf(fp, "  %% ncgrid\n");
 
         x1 = -aw/2;
         x2 =  aw/2;
@@ -8567,7 +8568,7 @@ epsdraw_hatch(FILE *fp, int aw, int ah, int hc, int hty, int hp, int hth, int ho
     case HT_UGRID200:
     {
         int up;
-        int centerspace = 1;
+        int centerspace = 0;
 
         fprintf(fp, "  %% ugrid %d\n", hty);
 
@@ -9154,34 +9155,6 @@ skip_dots:
         }
         break;
 
-    case HT_DUMMY:
-        {
-        int r;
-        int u;
-        r = hp;
-        y1 = -ah/2;
-        y2 =  ah/2;
-        u = 0;
-        fprintf(fp, "gsave\n");
-        fprintf(fp, "  %d setlinewidth\n", r);
-        for(x1=-aw/2;x1<=aw/2;x1+=r) {
-            switch(u%11) {
-            case 0:
-            case 2:
-            case 6:
-            case 7:
-                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
-                    x1, y1, x1, y2);
-                break;
-            default:
-                break;
-            }
-            u++;
-        }
-        fprintf(fp, "grestore\n");
-        }
-        break;
-
     case HT_VSTRIPE:
         {
         int r;
@@ -9551,131 +9524,219 @@ fprintf(stderr, "MTxS %d; %d,%d -> %d,%d\n", hty, x1, 0, x2, y1);
         }
         break;
 
+
+    /***    
+     *** TATEWAKU
+     ***/
+
     case HT_FTATEWAKU:
         {
-#if 0
-fprintf(fp, "gsave\n");
-fprintf(fp, "0 1 1 setrgbcolor\n");
-
-            y1 = -ah/2;
-            y2 =  ah/2;
-            for(x1=-aw/2;x1<aw/2;x1+=hp) {
-                x2=x1;
-                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
-                    x1, y1, x2, y2);
-            }
-fprintf(fp, "grestore\n");
-#endif
-
-fprintf(fp, "gsave\n");
             int cnt=0;
             int bx;
             double th;
-            double asc = 0.0015;
             int yp=objunit/50;
+            fprintf(fp, "%% ftatewaku\n");
             for(bx=-aw/2;bx<=aw/2+hp*2;bx+=hp*4) {
                 cnt++;
-
                 y1 = -ah/2;
                 y2 =  ah/2;
                 x1=bx;
                 x2=x1;
-
                 x2 = bx;
                 y2 = -ah/2;
-                    fprintf(fp, "      %d %d moveto\n", x2, y2);
-
+                fprintf(fp, "      %d %d moveto\n", x2, y2);
                 for(y1=-ah/2;y1<=ah/2;y1+=yp) {
-                    th = ((double)y1) * asc;
+                    th = M_PI * 4.0 *((double)y1+objunit/2) / objunit;
                     x1=bx-(int)(sin(th)*hp/2);
                     fprintf(fp, "      %d %d lineto %% q\n",
                         x1, y1);
                     x2 = x1;
                     y2 = y1;
                 }
-
                 x2 = bx+hp*2;
                 y2 = ah/2;
-                    fprintf(fp, "      %% moveto\n");
-
+                fprintf(fp, "      %% moveto\n");
                 for(y1=ah/2;y1>=-ah/2;y1-=yp) {
-                    th = ((double)y1) * asc;
+                    th = M_PI * 4.0 *((double)y1+objunit/2) / objunit;
                     x1=bx+hp*2+(int)(sin(th)*hp/2);
                     fprintf(fp, "      %d %d lineto %% q\n",
                         x1, y1);
                     x2 = x1;
                     y2 = y1;
                 }
-
-                    fprintf(fp, "      fill\n");
-
+                fprintf(fp, "      fill\n");
             }
-
-fprintf(fp, "grestore\n");
         }
         break;
 
     case HT_TATEWAKU:
         {
-#if 0
-fprintf(fp, "gsave\n");
-fprintf(fp, "0 1 1 setrgbcolor\n");
-
-            y1 = -ah/2;
-            y2 =  ah/2;
-            for(x1=-aw/2;x1<aw/2;x1+=hp) {
-                x2=x1;
-                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
-                    x1, y1, x2, y2);
-            }
-fprintf(fp, "grestore\n");
-#endif
-
-fprintf(fp, "gsave\n");
             int cnt=0;
             int bx;
             double th;
-            double asc = 0.0015;
             int yp=objunit/50;
+            fprintf(fp, "%% tatewaku\n");
             for(bx=-aw/2;bx<=aw/2+hp*2;bx+=hp*2) {
                 cnt++;
-
                 y1 = -ah/2;
                 y2 =  ah/2;
                 x1=bx;
                 x2=x1;
-
                 x2 = bx;
                 y2 = -ah/2;
                 fprintf(fp, "      %d %d moveto\n", x2, y2);
                 for(y1=-ah/2;y1<=ah/2;y1+=yp) {
-                    th = ((double)y1) * asc;
+                    th = M_PI * 4.0 *((double)y1+objunit/2) / objunit;
                     if(cnt%2==0) {
                         x1=bx+(int)(sin(th)*hp/2);
                     }
                     else {
                         x1=bx-(int)(sin(th)*hp/2);
                     }
-#if 0
-fprintf(fp, " %% q y1 %d th %f x1 %d\n", y1, th, x1);
-#endif
                     fprintf(fp, "      %d %d lineto %% q\n",
                         x1, y1);
                     x2 = x1;
                     y2 = y1;
                 }
                 fprintf(fp, "      stroke\n");
-
-#if 0
-                fprintf(fp, "      %d %d moveto %d %d lineto stroke\n",
-                    x1, y1, x2, y2);
-#endif
             }
-
-fprintf(fp, "grestore\n");
         }
         break;
 
+    case HT_FYOKOWAKU:
+        {
+            int cnt=0;
+            int by;
+            double th;
+            int xp=objunit/50;
+            for(by=-ah/2;by<=ah/2+hp*2;by+=hp*4) {
+
+                x2 = -aw/2;
+                y2 = by;
+                fprintf(fp, "      %d %d moveto\n", x2, y2);
+
+                for(x1=-aw/2;x1<=aw/2;x1+=xp) {
+                    th = M_PI * 4.0 *((double)x1+objunit/2) / objunit;
+                    y1=by-(int)(sin(th)*hp/2);
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+
+                fprintf(fp, "      %% moveto\n");
+
+                for(x1=aw/2;x1>=-aw/2;x1-=xp) {
+                    th = M_PI * 4.0 *((double)x1+objunit/2) / objunit;
+                    y1=by+hp*2+(int)(sin(th)*hp/2);
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+
+                fprintf(fp, "      fill\n");
+            }
+        }
+        break;
+
+    case HT_YOKOWAKU:
+        {
+            int cnt=0;
+            int by;
+            double th;
+            int xp=objunit/50;
+            for(by=-ah/2;by<=ah/2+hp*2;by+=hp*2) {
+                cnt++;
+
+                x2 = -aw/2;
+                y2 = by;
+                fprintf(fp, "      %d %d moveto\n", x2, y2);
+                for(x1=-aw/2;x1<=aw/2;x1+=xp) {
+                    th = M_PI * 4.0 *((double)x1+objunit/2) / objunit;
+                    if(cnt%2==0) {
+                        y1=by+(int)(sin(th)*hp/2);
+                    }
+                    else {
+                        y1=by-(int)(sin(th)*hp/2);
+                    }
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+                fprintf(fp, "      stroke\n");
+            }
+        }
+        break;
+
+    case HT_DUMMY:
+        {
+            int cnt=0;
+            int turn=0;
+            int drift;
+            int bx;
+            double th;
+            int yp=objunit/50;
+            for(bx=-aw/2;bx<=aw/2+hp*2;bx+=hp*2) {
+                cnt++;
+                turn = cnt/2;
+                drift = turn*M_PI/4;
+                y1 = -ah/2;
+                y2 =  ah/2;
+                x1=bx;
+                x2=x1;
+                x2 = bx;
+                y2 = -ah/2;
+                fprintf(fp, "      %d %d moveto\n", x2, y2);
+                for(y1=-ah/2;y1<=ah/2;y1+=yp) {
+                    th = M_PI * 4.0 *((double)y1+objunit/2) / objunit;
+//                  th += drift;
+                    if(cnt%2==0) {
+                        x1=bx+(int)(sin(th)*hp*6/5);
+                    }
+                    else {
+                        x1=bx-(int)(sin(th)*hp*6/5);
+                    }
+                    fprintf(fp, "      %d %d lineto %% q\n",
+                        x1, y1);
+                    x2 = x1;
+                    y2 = y1;
+                }
+                fprintf(fp, "      stroke\n");
+            }
+        }
+        break;
+
+#if 0
+    case HT_DUMMY:
+        {
+        int r;
+        int u;
+        r = hp;
+        y1 = -ah/2;
+        y2 =  ah/2;
+        u = 0;
+        fprintf(fp, "gsave\n");
+        fprintf(fp, "  %d setlinewidth\n", r);
+        for(x1=-aw/2;x1<=aw/2;x1+=r) {
+            switch(u%11) {
+            case 0:
+            case 2:
+            case 6:
+            case 7:
+                fprintf(fp, " %d %d moveto %d %d lineto stroke\n",
+                    x1, y1, x1, y2);
+                break;
+            default:
+                break;
+            }
+            u++;
+        }
+        fprintf(fp, "grestore\n");
+        }
+        break;
+#endif
     
     default:
     case HT_NONE:
@@ -13038,6 +13099,29 @@ mkpath_1seg(varray_t *sar,
     return 0;
 }
 
+/* 2segments : 3 points */
+/*                3
+ *                +
+ *               / 
+ *  1         2 /
+ *  +---------+/
+ */
+static
+int
+mkpath_2seg(varray_t *sar,
+    int x1, int y1, int x2, int y2, int x3, int y3)
+{
+#if 0
+    fprintf(stderr, "%s: %d %d; %d %d %d %d\n",
+        __func__, x1, x2, x2, y2, x3, y3);
+#endif
+    path_regsegmoveto(sar, x1, y1);
+    path_regseglineto(sar, x2, y2);
+    path_regseglineto(sar, x3, y3);
+
+    return 0;
+}
+
 /* seg+arc+seg : 5 points */
 
 /* 3segments : 4 points */
@@ -13295,6 +13379,26 @@ _drawgslinkH(varray_t *qar, int xid, int style, int jr,
         break;
 
     case LS_DIRECT:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_2seg(qar, sx, sy, mx, ey, ex, ey);
+            }
+            else {
+                mkpath_2seg(qar, ex, ey, mx, ey, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            if(dsdir>=0) {
+                mkpath_1seg(qar, sx, sy, ex, eey);
+            }
+            else {
+                mkpath_1seg(qar, ex, eey, sx, sy);
+            }
+        }
+        break;
+
+    case LS_NORMAL:
     default:
         if(focus) {
             if(dsdir>=0) {
@@ -13306,7 +13410,9 @@ _drawgslinkH(varray_t *qar, int xid, int style, int jr,
             if(join) { mkpath_addbwcir(qar, mx, my); }
         }
         else {
+#if 0
             mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
+#endif
             if(dsdir>=0) {
                 mkpath_3seg(qar, sx, sy, maxsx, sy, mx, eey, ex, eey);
             }
@@ -13585,6 +13691,26 @@ Echo("oid %d dir %d j %d %d,%d %d,%d %d,%d %d,%d N\n",
         break;
 
     case LS_DIRECT:
+        if(focus) {
+            if(dsdir>=0) {
+                mkpath_2seg(qar, sx, sy, mx, my, ex, ey);
+            }
+            else {
+                mkpath_2seg(qar, ex, ey, mx, my, sx, sy);
+            }
+            if(join) { mkpath_addbwcir(qar, mx, my); }
+        }
+        else {
+            if(dsdir>=0) {
+                mkpath_1seg(qar, sx, sy, eex, ey);
+            }
+            else {
+                mkpath_1seg(qar, eex, ey, sx, sy);
+            }
+        }
+        break;
+
+    case LS_NORMAL:
     default:
         if(focus) {
             if(dsdir>=0) {

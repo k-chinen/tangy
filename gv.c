@@ -190,9 +190,9 @@ apair_t hatchtype_ial[] = {
     {"concentric",          HT_CONCENTRIC},
 
     {"grid",                HT_GRID},
-    {"cgrid",               HT_CGRID},
+    {"ncgrid",              HT_NCGRID},
 
-    {"ugrid",               HT_UGRID025},
+    {"ugrid",               HT_UGRID100},
     {"ugrid005",            HT_UGRID005},
     {"ugrid010",            HT_UGRID010},
     {"ugrid020",            HT_UGRID020},
@@ -415,8 +415,8 @@ apair_t sj_ial[] = {
 
 apair_t ls_ial[] = {
     {"none",        LS_NONE },
-    {"direct",      LS_DIRECT },
-    {"direct1",     LS_DIRECT | LS_FOCUS},
+    {"normal",      LS_NORMAL },
+    {"normal1",     LS_NORMAL | LS_FOCUS},
     {"square",      LS_SQUARE },
     {"square1",     LS_SQUARE | LS_FOCUS},
     {"arc",         LS_ARC },
@@ -425,6 +425,9 @@ apair_t ls_ial[] = {
     {"curve1",      LS_CURVE    | LS_FOCUS},
     {"straight",    LS_STRAIGHT },
     {"straight1",   LS_STRAIGHT | LS_FOCUS},
+    {"direct",      LS_DIRECT },
+    {"direct1",     LS_DIRECT | LS_FOCUS},
+    {"dummy",       LS_DUMMY },
     {"comb",        LS_COMB },
     {"comb1",       LS_COMB | LS_FOCUS},
     {"man",         LS_MAN},

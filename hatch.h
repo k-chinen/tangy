@@ -18,16 +18,9 @@
 #define HT_BRICK            (21)
 #define HT_DIAMONDPLATE     (26)
 #define HT_NFDIAMONDPLATE   (27)
+
 #define HT_CONCENTRATION    (28)
 #define HT_CONCENTRIC       (29)
-#define HT_SQRING11         (31)
-#define HT_SQRING11WRAP     (32)
-#define HT_SQRING9          (33)
-#define HT_SQRING9WRAP      (34)
-#define HT_SQRING7          (35)
-#define HT_SQRING7WRAP      (36)
-#define HT_MIKUZUSI         (37)
-#define HT_RMIKUZUSI        (38)
 
 #define HT_DOTTED           (40)
 #define HT_DOT1             (41)
@@ -47,10 +40,10 @@
 #define HT_UGRID020         (53)
 #define HT_UGRID025         (54)
 #define HT_UGRID050         (55)
-#define HT_UGRID100         (56)
+#define HT_UGRID100         (56)    /* unit pitch grid */
 #define HT_UGRID200         (57)
 
-#define HT_CGRID            (59)
+#define HT_NCGRID           (59)    /* non-centered grid */
 
 #define HT_HSTRIPE          (61)
 #define HT_VSTRIPE          (62)
@@ -93,10 +86,19 @@
 #define HT_FUNDO            (120)
 #define HT_YAGASURI         (121)
 
-#define HT_TATEWAKU         (131)
-#define HT_FTATEWAKU        (132)
-#define HT_YOKOWAKU         (136)
-#define HT_FYOKOWAKU        (137)
+#define HT_SQRING11         (131)
+#define HT_SQRING11WRAP     (132)
+#define HT_SQRING9          (133)
+#define HT_SQRING9WRAP      (134)
+#define HT_SQRING7          (135)
+#define HT_SQRING7WRAP      (136)
+#define HT_MIKUZUSI         (137)
+#define HT_RMIKUZUSI        (138)
+
+#define HT_TATEWAKU         (231)
+#define HT_FTATEWAKU        (232)
+#define HT_YOKOWAKU         (236)
+#define HT_FYOKOWAKU        (237)
 
 #define HT_DUMMY            (999)
 

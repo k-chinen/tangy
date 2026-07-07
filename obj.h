@@ -320,12 +320,14 @@ extern apair_t pos_ial[];
 extern apair_t sj_ial[];
 
 #define LS_NONE             (0x0000)
-#define LS_DIRECT           (0x0001)
+#define LS_NORMAL           (0x0001)
 #define LS_SQUARE           (0x0002)
 #define LS_ARC              (0x0004)
-#define LS_CURVE            (0x0007)
+#define LS_CURVE            (0x0008)
 #define LS_STRAIGHT         (0x0010)
-#define LS_COMB             (0x0020)
+#define LS_DIRECT           (0x0020)
+#define LS_COMB             (0x0040)
+#define LS_DUMMY            (0x0080)
 #define LS_M_TYPE           (0x00ff)
 #define LS_JOIN             (0x0100)
 #define LS_FOCUS            (0x0200)
