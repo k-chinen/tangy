@@ -13750,7 +13750,13 @@ out:
  *        pe |  |---+
  *           +--+
  *
+ *            sx         ex
+ *
  *        pe is one of pb's object
+ *
+ *      this routine expects many sxs and one ex.
+ *      in GATHER, as is.
+ *      in SCATTER, swap sx-side and ex-side.
  */
 
 static
@@ -13784,7 +13790,30 @@ _drawgsH(FILE *fp, int xdir, int xox, int xoy,
     int   h1, h2, v;
     int   t1x, t1y, t2x, t2y;
 
+    int dorev = 0;
+
+    xdir = (xdir+360)%360; /* normalized; c.f. -180 -> 180 */
+
     Echo("%s: xu %p oid %d, style\n", __func__, xu, xu->oid);
+
+#if 0
+    {
+        char xdirmsg[BUFSIZ]  = "*none*";
+        char dsdirmsg[BUFSIZ] = "*none*";
+        if(xdir==0) {
+            strcpy(xdirmsg, "W->E");
+        } else {
+            strcpy(xdirmsg, "E->W");
+        }
+        if(dsdir==1) {
+            strcpy(dsdirmsg, "gather");
+        } else {
+            strcpy(dsdirmsg, "scatter");
+        }
+        fprintf(stderr, "%s:%d oid %d xdir %s(%d) dsdir %s(%d)\n",
+            __func__, __LINE__, xu->oid, xdirmsg, xdir, dsdirmsg, dsdir);
+    }
+#endif
 
 P;
     if(!pf || !pb) {
@@ -13797,7 +13826,12 @@ P;
     am = 4*objunit/10;
     am = 0;
 
-    ex = xox + pf->cx - pf->cwd/2 * (dsdir);
+    if(xdir==0) {
+        ex = xox + pf->cx - pf->cwd/2 * (dsdir);
+    } else {
+        ex = xox + pf->cx - pf->cwd/2 * (-dsdir);
+    }
+
     ey = xoy + pf->cy;
     eymax = xoy + pf->cy;
     eymin = xoy + pf->cy;
@@ -13811,11 +13845,14 @@ P;
     mini = INT_MAX;
     maxi = -(INT_MAX-1);
 
-
     fprintf(fp, "    gsave\n");
 
     if(!ISCHUNK(pb->type)) {
-        sx = xox + pb->cx + pb->cwd/2 *dsdir;
+        if(xdir==0) {
+            sx = xox + pb->cx + pb->cwd/2 *dsdir;
+        } else {
+            sx = xox + pb->cx + pb->cwd/2 *(-dsdir);
+        }
         sy = xoy + pb->cy;
 
         if(sy==ey) {
@@ -13863,7 +13900,14 @@ P;
                 continue;
             }
 
-            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
+            if(xdir==0) {   
+               sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *dsdir;
+            }
+            else {
+               sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 *(-dsdir);
+            }
+
+
             sy = xoy + pb->cy + pb->oy + pe->cy;
 #if 0
             fprintf(fp, "   newpath %d %d moveto (s %d) show\n",
@@ -13941,17 +13985,20 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
         my = xoy+xu->cy;
 
         Echo("  sx dsdir %d minsx %d maxsx %d\n", dsdir, minsx, maxsx);
-        if(dsdir==-1) {
+
+        dorev = 0;
+        if(xdir==0   && dsdir==-1) { dorev = 1; }
+        if(xdir==180 && dsdir==1) { dorev = 1; }
+
+        if(dorev) {
             int dmy;
             dmy = minsx;
             maxsx = minsx;
             minsx = dmy;
         }
-        else {
-        }
 
 #if 0
-        if(dsdir==-1) {
+        if(dsdir==-2) {
             maxsx -= am;
             if(mx-ex>am) {
                 mx -= mx-ex-am;
@@ -14010,7 +14057,12 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
              *   t2x,t2y +---- ex,ey
              *            h2
              */ 
-            sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
+            if(xdir==0) {
+                sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * dsdir;
+            }
+            else {
+                sx = xox + pb->cx + pb->ox + pe->cx + pe->cwd/2 * -dsdir;
+            }
             sy = xoy + pb->cy + pb->oy + pe->cy;
 
 #if 0
@@ -14023,7 +14075,12 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                         );
             }
             else {
-                h1 = yp*(k+1) * dsdir;
+                if(xdir==0) {
+                    h1 = yp*(k+1) * dsdir;
+                }
+                else {
+                    h1 = yp*(k+1) * -dsdir;
+                }
                 h2 = (ex-maxsx) - h1;
                 v  = (eey-sy);
 
@@ -14139,8 +14196,30 @@ _drawgsV(FILE *fp, int xdir, int xox, int xoy,
     int   v1, v2, h;
     int   t1x, t1y, t2x, t2y;
 
+    int dorev = 0;
+
+    xdir = (xdir+360)%360; /* normalized; c.f. -180 -> 180 */
+
     Echo("%s: xu %p oid %d, style\n", __func__, xu, xu->oid);
 
+#if 0
+    {
+        char xdirmsg[BUFSIZ]  = "*none*";
+        char dsdirmsg[BUFSIZ] = "*none*";
+        if(xdir==90) {
+            strcpy(xdirmsg, "S->N");
+        } else {
+            strcpy(xdirmsg, "N->S");
+        }
+        if(dsdir==1) {
+            strcpy(dsdirmsg, "gather");
+        } else {
+            strcpy(dsdirmsg, "scatter");
+        }
+        fprintf(stderr, "%s:%d oid %d xdir %s(%d) dsdir %s(%d)\n",
+            __func__, __LINE__, xu->oid, xdirmsg, xdir, dsdirmsg, dsdir);
+    }
+#endif
 
 P;
     if(!pf || !pb) {
@@ -14154,7 +14233,12 @@ P;
     am = 4*objunit/10;
 
     ex = xox + pf->cx;
-    ey = xoy + pf->cy + pf->cht/2 * (dsdir);
+    if(xdir==270) {
+        ey = xoy + pf->cy + pf->cht/2 * (dsdir);
+    } else {
+        ey = xoy + pf->cy + pf->cht/2 * (-dsdir);
+    }
+
     exmax = xox + pf->cx;
     exmin = xox + pf->cx;
 #if 0
@@ -14178,7 +14262,11 @@ P;
 
     if(!ISCHUNK(pb->type)) {
         sx = xox + pb->cx;
-        sy = xoy + pb->cy - pb->cht/2 *dsdir;
+        if(xdir==270) {
+            sy = xoy + pb->cy - pb->cht/2 *dsdir;
+        } else {
+            sy = xoy + pb->cy - pb->cht/2 *-dsdir;
+        }
 
         if(sy==ey) {
         }
@@ -14232,7 +14320,12 @@ P;
             }
 
             sx = xox + pb->cx + pb->ox + pe->cx;
-            sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 *dsdir;
+            if(xdir==270) {
+                sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 *dsdir;
+            }
+            else {
+                sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 *-dsdir;
+            }
 
             if(sy>maxsy) maxsy = sy;
             if(sy<minsy) minsy = sy;
@@ -14339,15 +14432,16 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
 
         Echo("  sx dsdir %d minsy %d maxsy %d alpha\n", dsdir, minsy, maxsy);
         Echo("  my %d ey %d am %d\n", my, ey, am);
-        if(dsdir==-1) {
+
+        dorev = 0;
+        if(xdir==270 && dsdir==-1) { dorev = 1; }
+        if(xdir==90 && dsdir==1) { dorev = 1; }
+
+        if(dorev) {
             int dmy;
             dmy = minsy;
             minsy = maxsy;
             maxsy = dmy;
-
-        Echo("  swap dsdir %d minsy %d maxsy %d\n", dsdir, minsy, maxsy);
-        }
-        else {
         }
 
 #if 0
@@ -14433,7 +14527,12 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
              *       ex,ey  eex,ey
              */
             sx = xox + pb->cx + pb->ox + pe->cx;
-            sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 * dsdir;
+            if(xdir==270) {
+                sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 * dsdir;
+            }
+            else {
+                sy = xoy + pb->cy + pb->oy + pe->cy - pe->cht/2 * -dsdir;
+            }
 
 #if 0
             if(j>=esi && j<=eei)
@@ -14452,7 +14551,13 @@ Echo(" ag  j %d ; sx,sy %d,%d vs eey %d\n", j, sx, sy, eey);
                 v1 = (sy-minsy+am)+xp*(k+1) * dsdir;
                 v2 = (sy-ey) - v1;
 #endif
-                v2 = xp*(ndepth-k)*dsdir;
+
+                if(xdir==270) {
+                    v2 = xp*(ndepth-k)*dsdir;
+                } else {
+                    v2 = xp*(ndepth-k)*-dsdir;
+                }
+
                 v1 = (minsy-ey) - v2;
                 h  = (eex-sx);
 
