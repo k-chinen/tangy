@@ -404,6 +404,7 @@ tgyfont_wipe_fontnameMF(int xmode, int xface, char *xval)
     int i;
     int c;
 
+    c = 0;
     for(i=0;i<tgyfontset_use;i++) {
         ctf = &tgyfontset[i];
         if(ctf->fmode==xmode) {
@@ -424,6 +425,7 @@ tgyfont_wipe_encodeMF(int xmode, int xface, char *xval)
     int i;
     int c;
 
+    c = 0;
     for(i=0;i<tgyfontset_use;i++) {
         ctf = &tgyfontset[i];
         if(ctf->fmode==xmode) {
@@ -444,6 +446,7 @@ tgyfont_wipe_scaleMF(int xmode, int xface, double xval)
     int i;
     int c;
 
+    c = 0;
     for(i=0;i<tgyfontset_use;i++) {
         ctf = &tgyfontset[i];
         if(ctf->fmode==xmode) {
@@ -800,10 +803,10 @@ printf("sz %d\n", sz);
     tgyfontset_add(FM_ASCII, FF_ITALIC,     "Times-Italic", "ASCII");
     tgyfontset_add(FM_ASCII, FF_TYPE,       "Courier",      "ASCII");
 
-    tgyfontset_add(FM_KANJI, FF_SERIF,      "IPAMincho-H",  "EUC-JP");
-    tgyfontset_add(FM_KANJI, FF_SANSERIF,   "IPAGothic-H",  "EUC-JP");
-    tgyfontset_add(FM_KANJI, FF_ITALIC,     "IPAMincho-H",  "EUC-JP");
-    tgyfontset_add(FM_KANJI, FF_TYPE,       "IPAGothic-H",  "EUC-JP");
+    tgyfontset_add(FM_KANJI, FF_SERIF,      "IPAMincho-EUC-H", "EUC-JP");
+    tgyfontset_add(FM_KANJI, FF_SANSERIF,   "IPAGothic-EUC-H", "EUC-JP");
+    tgyfontset_add(FM_KANJI, FF_ITALIC,     "IPAMincho-EUC-H", "EUC-JP");
+    tgyfontset_add(FM_KANJI, FF_TYPE,       "IPAGothic-EUC-H", "EUC-JP");
 
 #if 0
     fflush(stdout);

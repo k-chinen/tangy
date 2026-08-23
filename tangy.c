@@ -177,7 +177,7 @@ print_hints()
 int
 print_version()
 {
-    printf("tangy version 2.141\n");
+    printf("tangy version 2.142\n");
     return 0;
 }
 
