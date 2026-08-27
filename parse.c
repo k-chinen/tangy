@@ -2714,7 +2714,7 @@ skip_specialforms:
         }
     }
     
-#if 1
+#if 0
     ob_dump(ch0);
     ns_dump(ns0);
 #endif
@@ -2723,7 +2723,7 @@ skip_specialforms:
     printf("nss_n %d\n", nss_n);
     printf("chs_n %d\n", chs_n);
 #endif
-#if 1
+#if 0
     int vk;
     vk = nss_verify();
     vk = chs_verify();
